@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Primeiro Site</title>
+    <style>
+
+	/*Configurações Gerais do site é o BODY*/	
+
+        body {
+            font-family: Arial, sans-serif, Tahoma, Geneva, Verdana, 'Segoe UI';
+            display: flex;
+	        flex-direction: column; /* Alinha os itens um abaixo do outro */
+            align-items: left;
+            margin: 0 auto;
+            background-color: #f0f2f5;
+            padding: 0;
+            
+        }
+
+	
+	/* BARRA DO TOPO (HEADER) */
+        header {
+            width: 100%;
+            height: 80px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center; /* Centraliza verticalmente */
+	        padding: 0 5%;  /* Padding em % para ser flexível */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed; /* Fixa no topo ao rolar a página */
+            top: 0;
+            z-index: 9999; /* Garante que a logo fique sempre por cima de tudo */
+            box-sizing: border-box; /* Garante que o padding não quebre a largura */
+            overflow: visible !important;
+           
+        }
+
+        /* Garante que a logo e o botão tenham o mesmo peso visual para o centro ser real */
+.header-left, .header-right {
+    flex: 1; 
+    display: flex;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    justify-content: flex-end; /* Empurra o botão de login para o fim da direita */
+}
+
+/* Estilo do Menu Central */
+.header-center {
+    display: flex;
+    justify-content: space-between;
+    gap: 25px; /* Espaço entre os links */
+    overflow: visible !important;
+
+}
+
+.header-center a {
+    text-decoration: none;
+    color: #b11515;
+    font-size: 0.95rem;
+    font-weight: 500;
+    position: relative;
+    padding: 5px 0;
+}
+
+/* Efeito da linha embaixo que você queria */
+.header-center a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #1a73e8;
+    transition: width 0.3s ease;
+}
+
+.header-center a:hover::after {
+    width: 100%;
+}
+
+/* Botão de Login (Lateral Direita) */
+.btn-login {
+    background-color: #f0f2f5;
+    color: #1a73e8;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.btn-login:hover {
+    background-color: #1a73e8;
+    color: white;
+    box-shadow: 0 4px 10px rgba(26, 115, 232, 0.2);
+}
+
+.btn-menu {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.btn-menu:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Dropdown Extra */
+.menu-hamburguer-container { position: relative; }
+
+.extra-menu-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 200px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    padding: 10px 0;
+    z-index: 1001;
+}
+
+.extra-menu-dropdown a {
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #444;
+    font-size: 0.9rem;
+}
+
+.extra-menu-dropdown a:hover {
+    background: #f7f7f7;
+}
+
+nav {
+    /* Isso faz o menu ocupar o espaço central */
+    flex-grow: 1;
+    display: flex;
+    justify-content: center; /* Centraliza os links dentro do NAV */
+}
+
+nav a {
+    margin: 0 15px; /* Espaçamento entre os links */
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    padding-bottom: 5px; /* Espaço entre o texto e a linha */
+    border-bottom: 2px solid transparent; /* Linha invisível por padrão */
+    transition: all 0.3s ease; /* Faz a transição ser suave */
+}
+
+nav a:hover {
+    color: #1a73e8; /* Muda de cor ao passar o mouse */
+    border-bottom: 2px solid #1a73e8; /* A linha aparece com cor */
+}
+
+/* Espaçador invisível para equilibrar a logo e manter o menu no centro real */
+.spacer {
+    width: 150px; /* Deve ter o mesmo tamanho aproximado da sua logo */
+}
+
+	.logo {
+            height: 100px; /* Ajusta a altura da logo */
+            width: auto;
+            cursor: pointer;
+        }
+
+	/* CONTEÚDO PRINCIPAL */
+        main {
+            margin-top: 100px; /* Espaço para não ficar escondido atrás do header fixo */
+            text-align: left;
+	        padding: 20px;
+        }
+
+  
+	/* Estilizando o Link para parecer um Botão */
+        .botao {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #1a73e8; /* Azul do Google */
+            color: white;
+            text-decoration: none; /* Remove o sublinhado padrão do link */
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 15px;
+        }
+
+        .botao:hover {
+            background-color: #1557b0; /* Azul mais escuro ao passar o mouse */
+            transform: translateY(-2px); /* Efeito de "levantar" levemente */
+        }
+
+        /* Container da Busca */
+.search-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    background: transparent;
+    z-index: 10000 !important; /* Um número maior que o do header */
+}
+
+.search-bar {
+    background: rgb(255, 255, 255);
+    display: flex;
+    align-items: center;
+    padding: 10px 15px 10px 30px;
+    border-radius: 50px; /* Bordas bem arredondadas estilo Airbnb */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #ddd;
+    max-width:850px;
+    width: 100%;
+    overflow: visible;
+}
+
+.search-item {
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    padding: 10px 20px;
+    position: relative;
+    cursor: pointer;
+}
+
+.search-item label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #222;
+    pointer-events: none; /* O clique passa pelo texto e vai para a div */
+    z-index: 1;
+}
+
+/* Faz o input de data ocupar todo o espaço interno da div */
+.search-item input[type="date"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* Esconde o input padrão, mas ele continua lá */
+    cursor: pointer;
+    z-index: 2; /* Fica por cima de tudo para capturar o clique */
+}
+
+/* Criamos um "espelho" visual para mostrar a data selecionada, 
+   já que o input real está invisível (opacity: 0) */
+.date-display {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 4px;
+    pointer-events: none; /* Deixa o clique passar direto para o input */
+
+}
+
+.date-text {
+    font-size: 0.9rem;
+    color: #717171;
+    margin-top: 2px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.search-item input, .search-item select {
+    border: none;
+    outline: none;
+    font-size: 0.9rem;
+    color: #666;
+    background: transparent;
+}
+
+/* Divisória vertical entre os itens */
+.divider {
+    width: 1px;
+    height: 35px;
+    background-color: #eee;
+}
+
+/* Botão Vermelho com Lupa */
+.btn-search {
+    background-color: #ff385c; /* Vermelho vibrante */
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s, background 0.3s;
+    margin-left: 10px;
+}
+
+.btn-search:hover {
+    background-color: #e31c5f;
+    transform: scale(1.05);
+}
+
+#location-container {
+    position: relative; /* Necessário para posicionar o dropdown */
+}
+
+.suggestions-dropdown {
+    position: absolute;
+    top: 100%; /* Aparece logo abaixo da barra */
+    left: 0;
+    width: 250px;
+    background: white;
+    border-radius: 16px;
+    margin-top: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    display: none; /* Escondido por padrão */
+    overflow: hidden;
+    z-index: 1001;
+    border: 1px solid #eee;
+}
+
+.suggestion-item {
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.suggestion-item:hover {
+    background-color: #f7f7f7;
+}
+
+.suggestion-item span {
+    font-size: 1.1rem;
+}
+ 
+.input-erro {
+    color: #ff385c !important; /* Vermelho do seu botão */
+    font-weight: bold;
+}
+
+.guest-direct-selector {
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.stepper-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 5px;
+    background: #f7f7f7;
+    border-radius: 25px;
+    padding: 2px 8px;
+    border: 1px solid #eee;
+}
+
+.btn-step {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #444;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 0;
+}
+
+.btn-step:hover {
+    border-color: #ff385c;
+    color: #ff385c;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.qtd-display {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #222;
+    min-width: 30px;
+    text-align: center;
+}
+
+.qtd-input {
+    width: 45px;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #222;
+    outline: none;
+    appearance: textfield; /* Remove setas no Firefox */
+}
+
+/* Remove setas no Chrome/Safari */
+.qtd-input::-webkit-outer-spin-button,
+.qtd-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.stepper-control {
+    display: flex;
+    align-items: center;
+    background: #f7f7f7;
+    border-radius: 25px;
+    padding: 3px 10px;
+    border: 1px solid #eee;
+    margin-top: 5px;
+}
+
+.destinos-container {
+    padding: 20px 5%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.titulo-sessao {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 20px;
+}
+
+.carrossel-locais {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto; /* Permite scroll horizontal se a tela for pequena */
+    padding-bottom: 20px;
+    scrollbar-width: none; /* Esconde barra no Firefox */
+}
+
+.carrossel-locais::-webkit-scrollbar {
+    display: none; /* Esconde barra no Chrome/Safari */
+}
+
+.card-local {
+    min-width: 70px; /* Largura de cada card */
+    flex: 0 0 auto;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.card-local:hover {
+    transform: translateY(-5px);
+}
+
+.foto-container {
+    position: relative;
+    width: 165px;
+    height: 165px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.foto-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Faz a foto preencher o espaço sem distorcer */
+}
+
+.btn-favorito {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Quando o usuário clica e ativa o favorito */
+.btn-favorito.favoritado {
+    color: #ff385c !important; /* Vermelho vibrante */
+    transform: scale(1.2);
+    text-shadow: none;
+}
+
+/* Animação de clique (opcional, dá um toque premium) */
+.btn-favorito:active {
+    transform: scale(0.8);
+}
+
+.info-local {
+    padding: 20px 0;
+}
+
+.nome-local {
+    font-size: 12px;
+    font-weight: 600;
+    color: #222;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Corta o texto com "..." se for muito longo */
+}
+
+.detalhes-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 400;
+}
+
+.preco {
+    font-size: 9px;
+    color: #444;
+}
+
+.avaliacao {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #222;
+}
+
+.main-footer {
+    background-color: #f7f7f7;
+    border-top: 1px solid #dddddd;
+    padding: 60px 0 30px 0;
+    margin-top: 50px;
+    width: 100%; /* Força a largura total */
+    font-family: sans-serif;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    padding: 0 5%;     /* Dá um respiro nas laterais apenas para o texto */
+    gap: 150px; /* Espaço entre as colunas */
+}
+
+.footer-column h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #222;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+.footer-column ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-column ul li {
+    margin-bottom: 12px;
+}
+
+.footer-column ul li a {
+    text-decoration: none;
+    color: #484848;
+    font-size: 0.95rem;
+    transition: text-decoration 0.2s;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.footer-column ul li a:hover {
+    text-decoration: underline;
+    color: #000;
+}
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+    padding-top: 25px 5% 0 5%;
+    border-top: 1px solid #ebebeb;
+    text-align: left;
+    color: #717171;
+    font-size: 0.85rem;
+}
+
+/* Responsividade para Celular */
+@media (max-width: 768px) {
+    .footer-container {
+        flex-direction: column;
+        gap: 40px;
+    }
+}
+
+/* Espaçamento entre as grandes seções de categorias */
+.categoria-sessao {
+    padding: 5px 5%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Garante que o título de cada categoria seja claro */
+.titulo-categoria {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 15px;
+    margin-top: 0px;
+    text-align: left; /* Garante o alinhamento à esquerda */
+    width: 100%;      /* Força o título a ocupar a largura total do container */
+}
+
+/* Estilo do carrossel (reutilizando a lógica anterior) */
+.carrossel-horizontal {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 15px;
+    scrollbar-width: none; /* Firefox */
+}
+
+.carrossel-horizontal::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+    </style>
+
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_red.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
+
+
+</head>
+<body>
+
+	<header>
+	   <div class="header-left">
+        <a href="https://www.vents.com">
+            <img src="logovents.png" alt="Logo" class="logo">
+        </a>
+    </div>
+
+    <nav class="header-center">
+        <section class="search-container">
+    <div class="search-bar">
+        <div class="search-item" id="location-container">
+            <label>Localização</label>
+            <input type="text" id="location-input" placeholder="Onde você vai?" autocomplete="off">
+            <div id="location-suggestions" class="suggestions-dropdown"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="search-item" id="range-container">
+            <label>Quando</label>
+            <span class="date-text" id="display-quando">Adicionar datas</span>
+            <input type="text" id="input-periodo" style="position: absolute; visibility: hidden;">
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="search-item">
+            <label>Tipo de Espaço</label>
+            <select id="tipo-espaco">
+                <option value="">Selecione...</option>
+                <option value="coworking">Coworking</option>
+                <option value="eventos">Eventos</option>
+            </select>
+        </div>
+
+        <div class="divider"></div>
+
+<div class="search-item guest-direct-selector">
+    <label>Convidados</label>
+    <div class="stepper-control">
+        <button type="button" class="btn-step" onclick="alterarQtd(-1)">–</button>
+        
+        <input type="number" 
+               id="qtd-total" 
+               class="qtd-input" 
+               value="1" 
+               min="1" 
+               onchange="validarInput(this)">
+        
+        <button type="button" class="btn-step" onclick="alterarQtd(1)">+</button>
+    </div>
+</div>
+
+        <button class="btn-search" id="main-search-btn" style="opacity: 0.3; pointer-events: none;">
+            <span>&#128269;</span>
+        </button>
+    </div>
+</section>
+    </nav>
+
+    <div class="header-right">
+        <a href="#" class="btn-login">ENTRAR</a>
+    </div>
+                
+            <div class="menu-hamburguer-container">
+                <button class="btn-menu" onclick="toggleMenuExtra()">
+                    <span class="icon-menu">☰</span>
+                </button>
+                
+                <div id="extra-menu" class="extra-menu-dropdown">
+                    <a href="#">Anunciar</a>
+                    <a href="#">Planos</a>
+                    <a href="#">Como Funciona</a>
+                    <a href="#">Fale Conosco</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    	</header>
+
+    <main>
+
+
+<section class="categoria-sessao">
+    <h2 class="titulo-categoria">Casas de Festas</h2>
+    <div class="carrossel-horizontal">
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        </div>
+</section>
+
+<section class="categoria-sessao">
+    <h2 class="titulo-categoria">Sítios, Chácaras e Fazendas</h2>
+    <div class="carrossel-horizontal">
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        </div>
+</section>
+
+<section class="categoria-sessao">
+    <h2 class="titulo-categoria">Acampamentos</h2>
+    <div class="carrossel-horizontal">
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        </div>
+</section>
+
+<section class="categoria-sessao">
+    <h2 class="titulo-categoria">Bares e Restaurantes</h2>
+    <div class="carrossel-horizontal">
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        </div>
+</section>
+
+<section class="categoria-sessao">
+    <h2 class="titulo-categoria">Beach Clubs</h2>
+    <div class="carrossel-horizontal">
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        </div>
+</section>
+
+<section class="categoria-sessao">
+    <h2 class="titulo-categoria">Centros de Convenções e Galpões</h2>
+    <div class="carrossel-horizontal">
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        </div>
+</section>
+
+<section class="categoria-sessao">
+    <h2 class="titulo-categoria">Clubes</h2>
+    <div class="carrossel-horizontal">
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        </div>
+</section>
+
+<section class="categoria-sessao">
+    <h2 class="titulo-categoria">Hotéis, Pousadas e Resorts</h2>
+    <div class="carrossel-horizontal">
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        </div>
+</section>
+
+<section class="categoria-sessao">
+    <h2 class="titulo-categoria">Rooftops</h2>
+    <div class="carrossel-horizontal">
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        </div>
+</section>
+
+<section class="categoria-sessao">
+    <h2 class="titulo-categoria">Teatros</h2>
+    <div class="carrossel-horizontal">
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        <div class="card-local">
+            <div class="foto-container">
+                <img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=400" alt="Local">
+                <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
+            </div>
+            <div class="nome-local">Mansão das Palmeiras</div>
+            <div class="detalhes-footer">
+                <span>A partir de <b>R$ 500/h</b></span>
+                <span>⭐ 4.9</span>
+            </div>
+        </div>
+        </div>
+</section>
+
+    </main>
+
+<script>  
+
+flatpickr("#input-periodo", {
+        mode: "range",           // Ativa seleção de intervalo
+        minDate: "today",        // Impede datas passadas
+        showMonths: 2,           // Mostra 2 calendários lado a lado
+        dateFormat: "d/m/Y",
+        locale: "pt",            // Tradução para PT-BR
+        
+        // Quando o usuário selecionar as datas:
+        onChange: function(selectedDates, dateStr, instance) {
+            const display = document.getElementById("display-quando");
+            
+            if (selectedDates.length === 2) {
+                // Se selecionou Início e Fim
+                const inicio = instance.formatDate(selectedDates[0], "d/m");
+                const fim = instance.formatDate(selectedDates[1], "d/m");
+                display.innerText = `${inicio} - ${fim}`;
+                display.style.color = "#222";
+            } else {
+                display.innerText = "Adicionar datas";
+            }
+        },
+        
+        // Faz o calendário abrir ao clicar em qualquer lugar da div "Quando"
+        static: true,
+        appendTo: document.getElementById('range-container')
+    });
+
+    // Gatilho para abrir o calendário ao clicar na div pai
+    document.getElementById('range-container').addEventListener('click', () => {
+        document.getElementById('input-periodo')._flatpickr.open();
+    });
+    
+// 1. Lista Única
+    const listaLocais = [
+        "Rio de Janeiro, RJ", "Recife, PE", "Ribeirão Preto, SP", "Resende, RJ", "Rio Branco, AC",
+        "São Paulo, SP", "Salvador, BA", "Santos, SP", "Santa Catarina, SC", "Sorocaba, SP",
+        "Belo Horizonte, MG", "Brasília, DF", "Belém, PA", "Blumenau, SC",
+        "Curitiba, PR", "Cuiabá, MT", "Campinas, SP", "Caxias do Sul, RS"
+    ];
+
+    const inputLocal = document.getElementById('location-input');
+    const dropdown = document.getElementById('location-suggestions');
+    const btnBusca = document.getElementById('main-search-btn');
+
+    // 2. Função de renderizar sugestões
+    function renderLista(listaFiltrada) {
+        dropdown.innerHTML = "";
+        const top5 = listaFiltrada.slice(0, 5);
+
+        if (top5.length > 0) {
+            top5.forEach(local => {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+                item.innerHTML = `<span>📍</span> ${local}`;
+                
+                item.addEventListener('click', () => {
+                    inputLocal.value = local;
+                    dropdown.style.display = 'none';
+                    validarTudo(); // Valida assim que clica
+                });
+                dropdown.appendChild(item);
+            });
+            dropdown.style.display = 'block';
+        } else {
+            dropdown.style.display = 'none';
+        }
+    }
+
+    // 3. Função Única de Validação (A "Capa Preta")
+    function validarTudo() {
+        const valorInput = inputLocal.value.trim();
+        const encontrado = listaLocais.find(l => l.toLowerCase() === valorInput.toLowerCase());
+
+        if (encontrado) {
+            inputLocal.value = encontrado; // Autocorreção (ex: sao paulo -> São Paulo, SP)
+            inputLocal.style.color = "#222";
+            btnBusca.style.opacity = "1";
+            btnBusca.style.pointerEvents = "auto";
+            btnBusca.style.cursor = "pointer";
+            return true;
+        } else {
+            if (valorInput !== "") {
+                inputLocal.style.color = "red";
+            }
+            btnBusca.style.opacity = "0.3";
+            btnBusca.style.pointerEvents = "none";
+            btnBusca.style.cursor = "not-allowed";
+            return false;
+        }
+    }
+
+    // 4. Eventos de Digitação
+    inputLocal.addEventListener('input', (e) => {
+        const busca = e.target.value.toLowerCase();
+        if (busca === "") {
+            renderLista(listaLocais);
+        } else {
+            const filtrados = listaLocais.filter(l => l.toLowerCase().startsWith(busca));
+            renderLista(filtrados);
+        }
+        validarTudo();
+    });
+
+    inputLocal.addEventListener('focus', () => renderLista(listaLocais));
+
+    // 5. O Fechamento e Limpeza (Blur)
+    document.addEventListener('click', (e) => {
+        if (!document.getElementById('location-container').contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    inputLocal.addEventListener('blur', () => {
+        setTimeout(() => {
+            if (!validarTudo()) {
+                inputLocal.value = ""; 
+                inputLocal.placeholder = "⚠️ Selecione da lista!";
+                validarTudo();
+            }
+        }, 250);
+    });
+
+    // 6. Enter e Clique no Botão
+    inputLocal.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') validarTudo();
+    });
+
+    btnBusca.addEventListener('click', (e) => {
+        if (!validarTudo()) {
+            e.preventDefault();
+            alert("Selecione um local válido!");
+        }
+    });
+
+    const inputQtd = document.getElementById('qtd-total');
+
+    // Função para os botões + e -
+    function alterarQtd(valor) {
+        let atual = parseInt(inputQtd.value) || 0;
+        let novoValor = atual + valor;
+        
+        if (novoValor >= 1) {
+            inputQtd.value = novoValor;
+        }
+    }
+
+    // Função para validar quando o usuário digita manualmente
+    function validarInput(el) {
+        let valor = parseInt(el.value);
+        
+        if (isNaN(valor) || valor < 1) {
+            el.value = 1; // Reseta para 1 se digitarem algo inválido
+        }
+    }
+
+function toggleFavorito(elemento) {
+        // Alterna a classe 'favoritado' no botão clicado
+        elemento.classList.toggle('favoritado');
+        
+        // Lógica extra: salvar no navegador (opcional)
+        if (elemento.classList.contains('favoritado')) {
+            console.log("Local adicionado aos favoritos!");
+        } else {
+            console.log("Local removido dos favoritos.");
+        }
+    }
+
+function toggleMenuExtra() {
+        const menu = document.getElementById('extra-menu');
+        const isVisible = menu.style.display === 'flex';
+        menu.style.display = isVisible ? 'none' : 'flex';
+    }
+
+    // Fecha o menu se clicar fora dele
+    window.onclick = function(event) {
+        if (!event.target.closest('.menu-hamburguer-container')) {
+            document.getElementById('extra-menu').style.display = 'none';
+        }
+    }
+
+</script>
+
+<footer class="main-footer">
+    <div class="footer-container">
+        <div class="footer-column">
+            <h3>Atendimento</h3>
+            <ul>
+                <li><a href="#">Central de Ajuda</a></li>
+                <li><a href="#">Fale Conosco</a></li>
+                <li><a href="#">Política de Privacidade</a></li>
+                <li><a href="#">Termos de Uso</a></li>
+                <li><a href="#">Sobre Nós</a></li>
+                <li><a href="#">Como Funciona</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-column">
+            <h3>Anunciar</h3>
+            <ul>
+                <li><a href="#">Cadastre sua propriedade</a></li>
+                <li><a href="#">Planos Disponíveis</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2026 VENTS. Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+</body>
+</html>
