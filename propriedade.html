@@ -58,6 +58,27 @@
         }
         .btn-entrar:hover { background: #e0304f; }
 
+        .menu-hamburguer-container { position: relative; }
+        .btn-menu {
+            background: #fff; border: 1px solid #ddd;
+            border-radius: 20px; padding: 8px 14px;
+            cursor: pointer; transition: box-shadow .2s;
+            font-size: .95rem; display: flex; align-items: center; gap: 6px;
+        }
+        .btn-menu:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+        .extra-menu-dropdown {
+            position: absolute; top: 50px; right: 0;
+            width: 210px; background: #fff;
+            border-radius: 14px; box-shadow: 0 6px 24px rgba(0,0,0,.13);
+            display: none; flex-direction: column;
+            padding: 8px 0; z-index: 1001; border: 1px solid #f0f0f0;
+        }
+        .extra-menu-dropdown a {
+            padding: 12px 20px; text-decoration: none;
+            color: #444; font-size: .88rem; display: block; transition: background .15s;
+        }
+        .extra-menu-dropdown a:hover { background: #f7f7f7; }
+
         /* ── PAGE ── */
         .page { max-width: 1240px; margin: 0 auto; padding: 32px 24px 80px; }
 
@@ -405,6 +426,15 @@
     </div>
     <div class="header-right">
         <a href="login.html" class="btn-entrar">Entrar</a>
+        <div class="menu-hamburguer-container">
+            <button class="btn-menu" onclick="toggleMenuExtra()">☰ Menu</button>
+            <div id="extra-menu" class="extra-menu-dropdown">
+                <a href="cadastro.html">✏️ Cadastre seu espaço</a>
+                <a href="planos.html">💳 Planos</a>
+                <a href="como-funciona.html">💡 Como Funciona</a>
+                <a href="fale-conosco.html">💬 Fale Conosco</a>
+            </div>
+        </div>
     </div>
 </header>
 
@@ -1243,6 +1273,17 @@ document.addEventListener('keydown', e => {
 
 /* ── Arranca ── */
 init();
+
+function toggleMenuExtra() {
+    const menu = document.getElementById('extra-menu');
+    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.menu-hamburguer-container')) {
+        const m = document.getElementById('extra-menu');
+        if (m) m.style.display = 'none';
+    }
+});
 
 </script>
 </body>
