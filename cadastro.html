@@ -522,7 +522,15 @@ function ocultarAlerta() {
 }
 
 // ── Submit principal ──
+let _enviando = false;
 async function submeterCadastro() {
+    if (_enviando) return;
+    _enviando = true;
+
+    const btn = document.getElementById('btn-cadastrar');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Verificando...';
+
     ocultarAlerta();
 
     // Validações locais
@@ -558,6 +566,10 @@ async function submeterCadastro() {
         if (primeiro) destacarCampo(primeiro);
         if (document.getElementById('alerta').className === 'alerta')
             mostrarAlerta('erro', 'Corrija os campos em destaque antes de continuar.');
+        // Libera o botão se validação falhou
+        _enviando = false;
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-icons">arrow_forward</span> Criar minha conta';
         return;
     }
 
@@ -569,9 +581,6 @@ async function submeterCadastro() {
     const nascimento= document.getElementById('nascimento').value;
     const documento = document.getElementById('documento').value.replace(/\D/g, '');
 
-    // Botão loading
-    const btn = document.getElementById('btn-cadastrar');
-    btn.disabled = true;
     btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Criando conta...';
 
     try {
@@ -630,6 +639,7 @@ async function submeterCadastro() {
             msg = err.message;
 
         mostrarAlerta('erro', msg);
+        _enviando = false;
         btn.disabled = false;
         btn.innerHTML = '<span class="material-icons">arrow_forward</span> Criar minha conta';
     }
