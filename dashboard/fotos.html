@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fotos da Propriedade — VENTSY</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex; flex-direction: column;
+            background-color: #f0f2f5;
+        }
+
+        /* ── LOADING ── */
+        #loading-screen {
+            position: fixed; inset: 0; background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 99999; flex-direction: column; gap: 16px;
+        }
+        .loading-logo { font-size: 2rem; font-weight: 900; color: #0d0d0d; }
+        .loading-logo em { font-style: normal; color: #ff385c; }
+        .loading-dots { display: flex; gap: 6px; }
+        .loading-dots span { width: 8px; height: 8px; background: #ff385c; border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:.4} 40%{transform:scale(1);opacity:1} }
+
+        /* ── HEADER ── */
+        header.topbar {
+            width: 100%; height: 80px; background: #fff;
+            display: flex; align-items: center; padding: 0 5%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed; top: 0; z-index: 9999; box-sizing: border-box;
+        }
+        .header-left, .header-right { flex: 1; display: flex; }
+        .header-right { align-items: center; gap: 15px; justify-content: flex-end; }
+        .logo { height: 100px; width: auto; cursor: pointer; }
+
+        /* Avatar */
+        .avatar-container { position: relative; }
+        .avatar-btn {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: #ff385c; color: #fff; border: none;
+            font-size: 1.05rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 10px rgba(255,56,92,0.35); transition: transform 0.2s;
+        }
+        .avatar-btn:hover { transform: scale(1.08); }
+        .avatar-dropdown {
+            position: absolute; top: 54px; right: 0; width: 210px;
+            background: white; border-radius: 14px;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.13);
+            display: none; flex-direction: column;
+            padding: 8px 0; z-index: 1001; border: 1px solid #f0f0f0;
+        }
+        .drop-header { padding: 12px 18px 10px; border-bottom: 1px solid #f0f0f0; margin-bottom: 4px; }
+        .drop-header strong { display: block; font-size: 0.92rem; color: #0d0d0d; margin-bottom: 2px; }
+        .drop-header span { font-size: 0.78rem; color: #999; }
+        .avatar-dropdown a, .avatar-dropdown button {
+            padding: 11px 18px; text-decoration: none; color: #444;
+            font-size: 0.88rem; display: flex; align-items: center; gap: 10px;
+            background: none; border: none; font-family: inherit;
+            cursor: pointer; width: 100%; text-align: left; transition: background 0.15s;
+        }
+        .avatar-dropdown a:hover, .avatar-dropdown button:hover { background: #f7f7f7; }
+        .drop-sair { color: #ff385c !important; border-top: 1px solid #f0f0f0; margin-top: 4px; }
+
+        /* ── LAYOUT ── */
+        .dashboard-container {
+            display: flex; min-height: 100vh;
+            background: #f0f2f5; margin-top: 80px;
+        }
+
+        /* ── SIDEBAR ── */
+        .dash-sidebar {
+            width: 260px; background: #fff; padding: 30px 20px;
+            border-right: 1px solid #eee; display: flex; flex-direction: column;
+            position: sticky; top: 80px; height: calc(100vh - 80px); overflow-y: auto;
+        }
+        .perfil-resumo { text-align: center; margin-bottom: 32px; }
+        .sidebar-avatar {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: #ff385c; color: #fff; font-size: 1.9rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
+        }
+        .perfil-resumo h3 { font-size: 1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 4px; }
+        .perfil-resumo .handle { font-size: 0.78rem; color: #717171; }
+        .plano-chip {
+            display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
+            background: rgba(255,56,92,0.08); border: 1px solid rgba(255,56,92,0.2);
+            border-radius: 20px; padding: 3px 12px; font-size: 0.72rem; font-weight: 700; color: #ff385c;
+        }
+        .dash-menu { display: flex; flex-direction: column; width: 100%; }
+        .menu-section-label {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #bbb; padding: 14px 14px 4px; margin-top: 4px;
+        }
+        .dash-menu a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 14px; color: #666; text-decoration: none;
+            border-radius: 8px; margin-bottom: 4px; font-size: 0.9rem; transition: all 0.2s;
+        }
+        .dash-menu a:hover { background: #f7f7f7; color: #0d0d0d; }
+        .dash-menu a.active { background: rgba(255,56,92,0.08); color: #ff385c; font-weight: 600; }
+
+        /* ── CONTEÚDO ── */
+        .dash-content { padding: 0 40px 60px 40px; width: 100%; }
+
+        .dash-header-fixo {
+            position: sticky; top: 0; z-index: 100; background: #f0f2f5;
+            display: flex; padding: 24px 0 20px;
+            justify-content: space-between; align-items: center;
+            margin-bottom: 8px;
+        }
+        .dash-header-fixo h2 { font-size: 1.6rem; font-weight: 700; color: #222; margin: 0; }
+        .dash-header-fixo p { font-size: 0.82rem; color: #999; margin-top: 3px; }
+
+        .header-acoes { display: flex; gap: 10px; align-items: center; }
+
+        .btn-nova-secao {
+            background: #ff385c; color: #fff; border: none;
+            padding: 11px 20px; border-radius: 10px; font-family: inherit;
+            font-size: 0.88rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 14px rgba(255,56,92,0.25); transition: all 0.2s;
+        }
+        .btn-nova-secao:hover { background: #e0304f; transform: scale(1.02); }
+
+        .btn-salvar-tudo {
+            background: #0d0d0d; color: #fff; border: none;
+            padding: 11px 20px; border-radius: 10px; font-family: inherit;
+            font-size: 0.88rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .btn-salvar-tudo:hover { background: #333; }
+
+        /* ── AVISO INTRODUTÓRIO ── */
+        .aviso-intro {
+            background: #0d0d0d; border-radius: 14px; padding: 20px 24px;
+            display: flex; align-items: center; gap: 16px;
+            margin-bottom: 24px;
+        }
+        .aviso-intro-icon { font-size: 1.8rem; flex-shrink: 0; }
+        .aviso-intro-texto h4 { font-size: 0.92rem; font-weight: 700; color: #fff; margin-bottom: 3px; }
+        .aviso-intro-texto p { font-size: 0.8rem; color: #aaa; line-height: 1.5; }
+
+        /* ── LISTA DE SEÇÕES ── */
+        #lista-secoes { display: flex; flex-direction: column; gap: 20px; }
+
+        /* ── CARD DE SEÇÃO ── */
+        .secao-fotos {
+            background: #fff; border-radius: 16px;
+            border: 1px solid #eee;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .secao-fotos:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+
+        /* Cabeçalho da seção */
+        .secao-header {
+            display: flex; align-items: center; gap: 14px;
+            padding: 18px 22px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .secao-drag-handle {
+            color: #ccc; cursor: grab; font-size: 1.2rem;
+            flex-shrink: 0; user-select: none;
+        }
+        .secao-drag-handle:active { cursor: grabbing; }
+
+        .secao-titulo-wrap { flex: 1; position: relative; }
+        .secao-titulo-input {
+            width: 100%; font-size: 1rem; font-weight: 700;
+            color: #0d0d0d; border: none; outline: none;
+            background: transparent; font-family: inherit;
+            padding: 4px 0; border-bottom: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .secao-titulo-input:focus { border-bottom-color: #ff385c; }
+        .secao-titulo-input::placeholder { color: #bbb; font-weight: 400; }
+
+        .secao-contador {
+            font-size: 0.75rem; color: #aaa; margin-top: 2px;
+        }
+
+        .secao-acoes { display: flex; gap: 6px; flex-shrink: 0; }
+        .btn-icon {
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 1px solid #eee; background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 1rem; transition: all 0.2s;
+        }
+        .btn-icon:hover { background: #f5f5f5; }
+        .btn-icon.danger:hover { background: #fff0f0; border-color: #ffcdd2; }
+        .btn-icon.collapse-btn { font-size: 0.75rem; color: #999; }
+
+        /* Corpo da seção */
+        .secao-body { padding: 20px 22px; }
+        .secao-body.collapsed { display: none; }
+
+        /* Grid de fotos */
+        .fotos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+            min-height: 10px;
+        }
+
+        /* Card de foto */
+        .foto-card {
+            position: relative; border-radius: 10px;
+            overflow: hidden; aspect-ratio: 4/3;
+            border: 1px solid #eee;
+            background: #f8f8f8;
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .foto-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+        .foto-card:active { cursor: grabbing; }
+        .foto-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        /* Badge "Capa" na primeira foto */
+        .badge-capa {
+            position: absolute; top: 8px; left: 8px;
+            background: #0d0d0d; color: #fff;
+            font-size: 0.65rem; font-weight: 700;
+            padding: 3px 8px; border-radius: 6px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+
+        .btn-remover-foto {
+            position: absolute; top: 6px; right: 6px;
+            width: 26px; height: 26px; border-radius: 50%;
+            background: rgba(0,0,0,0.55); color: #fff;
+            border: none; cursor: pointer; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .foto-card:hover .btn-remover-foto { opacity: 1; }
+
+        /* Zona de upload dentro da seção */
+        .drop-zone {
+            border: 2px dashed #e0e0e0; border-radius: 12px;
+            padding: 24px 20px; text-align: center;
+            cursor: pointer; transition: all 0.25s;
+            background: #fdfdfd;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #ff385c;
+            background: rgba(255,56,92,0.03);
+        }
+        .drop-zone.dragover { transform: scale(1.01); }
+        .drop-zone-icon { font-size: 2rem; margin-bottom: 6px; display: block; }
+        .drop-zone p { font-size: 0.82rem; color: #888; margin-bottom: 10px; }
+        .btn-selecionar-fotos {
+            background: #0d0d0d; color: #fff; border: none;
+            padding: 8px 18px; border-radius: 8px; font-family: inherit;
+            font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-selecionar-fotos:hover { background: #333; }
+
+        /* ── PLACEHOLDER quando não há seções ── */
+        .placeholder-vazio {
+            text-align: center; padding: 60px 20px;
+            color: #bbb;
+        }
+        .placeholder-vazio span { font-size: 3rem; display: block; margin-bottom: 14px; }
+        .placeholder-vazio h3 { font-size: 1.1rem; font-weight: 700; color: #999; margin-bottom: 6px; }
+        .placeholder-vazio p { font-size: 0.85rem; line-height: 1.6; }
+
+        /* ── RODAPÉ AÇÕES ── */
+        .footer-acoes {
+            position: sticky; bottom: 0; z-index: 50;
+            padding: 16px 0;
+            background: linear-gradient(to top, #f0f2f5 70%, transparent);
+            display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;
+        }
+        .btn-salvar {
+            background: #ff385c; color: #fff; border: none;
+            padding: 13px 28px; border-radius: 10px; font-family: inherit;
+            font-size: 0.95rem; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 16px rgba(255,56,92,0.25); transition: all 0.2s;
+        }
+        .btn-salvar:hover { background: #e0304f; transform: scale(1.02); }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #0d0d0d; color: #fff; padding: 14px 26px;
+            border-radius: 12px; font-size: 0.88rem; font-weight: 500;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.2); z-index: 9999;
+            display: flex; align-items: center; gap: 10px;
+            transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+            opacity: 0;
+        }
+        .toast.visivel { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* ── FOOTER ── */
+        .main-footer { background: #f7f7f7; border-top: 1px solid #ddd; padding: 60px 0 30px; margin-top: 50px; }
+        .footer-container { max-width: 1200px; margin: 0 auto; display: flex; padding: 0 5%; gap: 150px; }
+        .footer-column h3 { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: #222; margin-bottom: 20px; }
+        .footer-column ul { list-style: none; padding: 0; }
+        .footer-column ul li { margin-bottom: 12px; }
+        .footer-column ul li a { text-decoration: none; color: #484848; font-size: 0.95rem; }
+        .footer-column ul li a:hover { text-decoration: underline; }
+        .footer-bottom { max-width: 1200px; margin: 40px auto 0; padding: 25px 5% 0; border-top: 1px solid #ebebeb; color: #717171; font-size: 0.85rem; }
+
+        @media (max-width: 768px) {
+            .dash-sidebar { display: none; }
+            .dash-content { padding: 0 16px 40px; }
+            .fotos-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+            .footer-container { flex-direction: column; gap: 40px; }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .secao-fotos { animation: slideDown 0.3s ease; }
+
+    </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+    <div class="loading-logo"><em>VENTSY</em></div>
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- HEADER -->
+<header class="topbar">
+    <div class="header-left">
+        <a href="../index.html"><img src="../logovents.png" alt="Logo VENTSY" class="logo"></a>
+    </div>
+    <div class="header-right">
+        <div class="avatar-container">
+            <button class="avatar-btn" onclick="toggleAvatar()">
+                <span id="avatar-inicial">?</span>
+            </button>
+            <div class="avatar-dropdown" id="avatar-menu">
+                <div class="drop-header">
+                    <strong id="drop-nome">Carregando...</strong>
+                    <span id="drop-email"></span>
+                </div>
+                <a href="index.html">🏠 Dashboard</a>
+                <a href="minhapropriedade.html">🏡 Minha Propriedade</a>
+                <a href="configuracoes.html">⚙️ Configurações</a>
+                <a href="../planos.html">⭐ Planos Ventsy</a>
+                <a href="../fale-conosco.html">❓ Ajuda</a>
+                <button class="drop-sair" onclick="sair()">🚪 Sair da conta</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- LAYOUT -->
+<main class="dashboard-container" id="main-content" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="dash-sidebar">
+        <div class="perfil-resumo">
+            <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+            <h3 id="sidebar-nome">Carregando...</h3>
+            <span class="handle" id="sidebar-handle"></span>
+            <div class="plano-chip">⭐ Ultra — 30 dias grátis</div>
+        </div>
+        <nav class="dash-menu">
+            <a href="index.html">🏠 Dashboard</a>
+
+            <span class="menu-section-label">Minha Propriedade</span>
+            <a href="minhapropriedade.html">🏡 Dados do Espaço</a>
+            <a href="fotos.html" class="active">📸 Fotos</a>
+
+            <span class="menu-section-label">Gestão</span>
+            <a href="leads.html">💬 Contatos / Leads</a>
+            <a href="calendario.html">📅 Disponibilidade</a>
+            <a href="relatorio.html">📊 Relatório</a>
+
+            <span class="menu-section-label">Conta</span>
+            <a href="indique.html">🎁 Programa de Indicação</a>
+            <a href="../planos.html">💳 Planos Ventsy</a>
+            <a href="configuracoes.html">⚙️ Configurações</a>
+        </nav>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <section class="dash-content">
+
+        <header class="dash-header-fixo">
+            <div>
+                <h2>📸 Fotos do Espaço</h2>
+                <p>Organize as fotos por ambiente. A primeira foto de cada seção será o destaque daquele espaço.</p>
+            </div>
+            <div class="header-acoes">
+                <button class="btn-salvar-tudo" onclick="salvarTudo()">💾 Salvar</button>
+                <button class="btn-nova-secao" onclick="criarSecao()">+ Nova seção</button>
+            </div>
+        </header>
+
+        <!-- AVISO -->
+        <div class="aviso-intro">
+            <span class="aviso-intro-icon">💡</span>
+            <div class="aviso-intro-texto">
+                <h4>Como organizar suas fotos</h4>
+                <p>Crie uma seção para cada ambiente do seu espaço — ex: <strong>Área Externa</strong>, <strong>Salão Principal</strong>, <strong>Lareira</strong>, <strong>Campo de Futebol</strong>. Arraste para reordenar. A primeira foto de cada seção aparecerá como capa daquele ambiente na galeria pública.</p>
+            </div>
+        </div>
+
+        <!-- LISTA DE SEÇÕES -->
+        <div id="lista-secoes">
+
+            <!-- Placeholder inicial (some quando há seções) -->
+            <div class="placeholder-vazio" id="placeholder-vazio">
+                <span>🏗️</span>
+                <h3>Nenhuma seção criada ainda</h3>
+                <p>Clique em <strong>"+ Nova seção"</strong> para começar a organizar<br>as fotos do seu espaço por ambiente.</p>
+            </div>
+
+        </div>
+
+        <div class="footer-acoes">
+            <button class="btn-salvar" onclick="salvarTudo()">💾 Salvar todas as alterações</button>
+        </div>
+
+    </section>
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <span id="toast-icone">✅</span>
+    <span id="toast-msg">Alterações salvas!</span>
+</div>
+
+<!-- FOOTER -->
+<footer class="main-footer">
+    <div class="footer-container">
+        <div class="footer-column">
+            <h3>Atendimento</h3>
+            <ul>
+                <li><a href="#">Central de Ajuda</a></li>
+                <li><a href="../fale-conosco.html">Fale Conosco</a></li>
+                <li><a href="#">Política de Privacidade</a></li>
+                <li><a href="#">Termos de Uso</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h3>Anunciar</h3>
+            <ul>
+                <li><a href="minhapropriedade.html">Minha Propriedade</a></li>
+                <li><a href="../planos.html">Planos Disponíveis</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 VENTSY. Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+<script>
+/* ─────────────────────────────────────────
+   SUPABASE
+───────────────────────────────────────── */
+const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
+async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+
+    const user = session.user;
+    const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
+
+    const nome  = perfil?.nome || user.email;
+    const usu   = perfil?.usuario || '';
+    const ini   = nome.split(' ')[0][0]?.toUpperCase() || '?';
+
+    document.getElementById('avatar-inicial').textContent = ini;
+    document.getElementById('drop-nome').textContent      = nome;
+    document.getElementById('drop-email').textContent     = user.email;
+    document.getElementById('sidebar-avatar').textContent = ini;
+    document.getElementById('sidebar-nome').textContent   = nome;
+    document.getElementById('sidebar-handle').textContent = usu ? '@' + usu : '';
+
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('main-content').style.display   = 'flex';
+}
+
+/* ─────────────────────────────────────────
+   AVATAR DROPDOWN
+───────────────────────────────────────── */
+function toggleAvatar() {
+    const m = document.getElementById('avatar-menu');
+    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+}
+document.addEventListener('click', e => {
+    const c = document.querySelector('.avatar-container');
+    if (c && !c.contains(e.target)) document.getElementById('avatar-menu').style.display = 'none';
+});
+async function sair() {
+    await sb.auth.signOut();
+    window.location.href = '../login.html';
+}
+
+/* ─────────────────────────────────────────
+   GERENCIAMENTO DE SEÇÕES
+───────────────────────────────────────── */
+let contadorSecao = 0;
+
+function criarSecao(titulo = '') {
+    contadorSecao++;
+    const id = 'secao-' + contadorSecao;
+
+    // Esconde placeholder
+    document.getElementById('placeholder-vazio').style.display = 'none';
+
+    const lista = document.getElementById('lista-secoes');
+
+    const card = document.createElement('div');
+    card.className = 'secao-fotos';
+    card.id = id;
+    card.dataset.id = id;
+
+    card.innerHTML = `
+        <div class="secao-header">
+            <span class="secao-drag-handle" title="Arrastar para reordenar">⠿</span>
+            <div class="secao-titulo-wrap">
+                <input
+                    type="text"
+                    class="secao-titulo-input"
+                    placeholder="Ex: Área Externa, Lareira, Salão Principal..."
+                    value="${titulo}"
+                    oninput="atualizarContador('${id}')"
+                >
+                <div class="secao-contador" id="contador-${id}">0 foto(s)</div>
+            </div>
+            <div class="secao-acoes">
+                <button class="btn-icon collapse-btn" title="Recolher / Expandir" onclick="toggleSecao('${id}')">▼</button>
+                <button class="btn-icon danger" title="Excluir seção" onclick="excluirSecao('${id}')">🗑️</button>
+            </div>
+        </div>
+        <div class="secao-body" id="body-${id}">
+            <div class="fotos-grid" id="grid-${id}">
+                <!-- Fotos aparecem aqui -->
+            </div>
+            <div class="drop-zone" id="drop-${id}"
+                ondragover="onDragOver(event, '${id}')"
+                ondragleave="onDragLeave('${id}')"
+                ondrop="onDrop(event, '${id}')">
+                <span class="drop-zone-icon">📷</span>
+                <p>Arraste as fotos aqui ou clique para selecionar</p>
+                <button class="btn-selecionar-fotos"
+                    onclick="document.getElementById('file-${id}').click()">
+                    Selecionar fotos
+                </button>
+                <input type="file" id="file-${id}" multiple accept="image/*" hidden
+                    onchange="handleFiles(this.files, '${id}')">
+            </div>
+        </div>
+    `;
+
+    lista.appendChild(card);
+
+    // Foca no título se estiver vazio
+    if (!titulo) {
+        setTimeout(() => card.querySelector('.secao-titulo-input').focus(), 100);
+    }
+
+    atualizarContador(id);
+    return id;
+}
+
+function excluirSecao(id) {
+    const card = document.getElementById(id);
+    if (!card) return;
+
+    // Confirmação rápida visual
+    card.style.opacity = '0.4';
+    card.style.transform = 'scale(0.97)';
+    card.style.transition = 'all 0.25s';
+
+    setTimeout(() => {
+        card.remove();
+        // Mostra placeholder se não há mais seções
+        const lista = document.getElementById('lista-secoes');
+        const secoes = lista.querySelectorAll('.secao-fotos');
+        if (secoes.length === 0) {
+            document.getElementById('placeholder-vazio').style.display = 'block';
+        }
+        mostrarToast('🗑️', 'Seção removida.');
+    }, 250);
+}
+
+function toggleSecao(id) {
+    const body = document.getElementById('body-' + id);
+    const btn  = document.querySelector(`#${id} .collapse-btn`);
+    const collapsed = body.classList.toggle('collapsed');
+    btn.textContent = collapsed ? '▶' : '▼';
+}
+
+function atualizarContador(id) {
+    const grid  = document.getElementById('grid-' + id);
+    const count = grid ? grid.querySelectorAll('.foto-card').length : 0;
+    const el    = document.getElementById('contador-' + id);
+    if (el) el.textContent = count + (count === 1 ? ' foto' : ' fotos');
+    atualizarBadgeCapa(id);
+}
+
+function atualizarBadgeCapa(id) {
+    const grid = document.getElementById('grid-' + id);
+    if (!grid) return;
+    const cards = grid.querySelectorAll('.foto-card');
+    cards.forEach((c, i) => {
+        const badge = c.querySelector('.badge-capa');
+        if (i === 0) {
+            if (!badge) {
+                const b = document.createElement('span');
+                b.className = 'badge-capa';
+                b.textContent = 'Capa';
+                c.appendChild(b);
+            }
+        } else {
+            if (badge) badge.remove();
+        }
+    });
+}
+
+/* ─────────────────────────────────────────
+   UPLOAD DE FOTOS
+───────────────────────────────────────── */
+function handleFiles(files, secaoId) {
+    Array.from(files).forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = e => adicionarFotoNaSecao(e.target.result, secaoId, file.name);
+        reader.readAsDataURL(file);
+    });
+}
+
+function adicionarFotoNaSecao(src, secaoId, nome) {
+    const grid = document.getElementById('grid-' + secaoId);
+    if (!grid) return;
+
+    const card = document.createElement('div');
+    card.className = 'foto-card';
+    card.draggable = true;
+    card.dataset.src = src;
+
+    card.innerHTML = `
+        <img src="${src}" alt="${nome || 'foto'}">
+        <button class="btn-remover-foto" title="Remover foto" onclick="removerFoto(this, '${secaoId}')">✕</button>
+    `;
+
+    // Drag entre fotos (reordenação dentro da seção)
+    card.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('foto-src', src);
+        e.dataTransfer.setData('foto-secao', secaoId);
+        card.style.opacity = '0.4';
+    });
+    card.addEventListener('dragend', () => { card.style.opacity = '1'; });
+
+    grid.appendChild(card);
+    atualizarContador(secaoId);
+}
+
+function removerFoto(btn, secaoId) {
+    const card = btn.parentElement;
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.85)';
+    card.style.transition = 'all 0.2s';
+    setTimeout(() => {
+        card.remove();
+        atualizarContador(secaoId);
+    }, 200);
+}
+
+/* ─────────────────────────────────────────
+   DRAG & DROP NA ZONA DE UPLOAD
+───────────────────────────────────────── */
+function onDragOver(e, id) {
+    e.preventDefault();
+    document.getElementById('drop-' + id)?.classList.add('dragover');
+}
+function onDragLeave(id) {
+    document.getElementById('drop-' + id)?.classList.remove('dragover');
+}
+function onDrop(e, id) {
+    e.preventDefault();
+    document.getElementById('drop-' + id)?.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+        handleFiles(files, id);
+    }
+}
+
+/* ─────────────────────────────────────────
+   SALVAR
+───────────────────────────────────────── */
+function salvarTudo() {
+    // Coleta estado atual para persistência futura (Supabase Storage)
+    const secoes = [];
+    document.querySelectorAll('.secao-fotos').forEach(card => {
+        const titulo = card.querySelector('.secao-titulo-input').value.trim() || 'Sem título';
+        const fotos  = Array.from(card.querySelectorAll('.foto-card')).map(f => f.dataset.src);
+        secoes.push({ titulo, fotos });
+    });
+
+    // Por enquanto salva no localStorage como rascunho
+    localStorage.setItem('ventsy_fotos_secoes', JSON.stringify(
+        secoes.map(s => ({ titulo: s.titulo, total: s.fotos.length }))
+    ));
+
+    console.log('Seções para salvar no Supabase:', secoes.map(s => ({ titulo: s.titulo, fotos: s.fotos.length })));
+    mostrarToast('✅', 'Alterações salvas com sucesso!');
+}
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+function mostrarToast(icone, msg) {
+    document.getElementById('toast-icone').textContent = icone;
+    document.getElementById('toast-msg').textContent   = msg;
+    const t = document.getElementById('toast');
+    t.classList.add('visivel');
+    setTimeout(() => t.classList.remove('visivel'), 3500);
+}
+
+/* ─────────────────────────────────────────
+   SEÇÕES DE EXEMPLO (pré-carregadas)
+───────────────────────────────────────── */
+function carregarExemplos() {
+    // Cria seções de exemplo para o proprietário entender o conceito
+    const exemplos = [
+        'Área Externa',
+        'Salão Principal',
+    ];
+    exemplos.forEach(t => criarSecao(t));
+}
+
+/* Arranca */
+init();
+// Carrega exemplos apenas na primeira vez (sem fotos ainda)
+carregarExemplos();
+</script>
+
+</body>
+</html>
