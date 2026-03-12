@@ -397,19 +397,21 @@
                 </div>
                 <div class="divider"></div>
                 <div class="search-item" id="tipo-container">
-                    <label>Tipo</label>
+                    <label>Evento</label>
                     <select id="tipo-espaco">
-                        <option value="">Todos</option>
-                        <option value="Casas de Festas">🏠 Casas de Festas</option>
-                        <option value="Sítios, Chácaras e Fazendas">🌳 Sítios e Chácaras</option>
-                        <option value="Acampamentos">⛺ Acampamentos</option>
-                        <option value="Bares e Restaurantes">🍽️ Bares e Restaurantes</option>
-                        <option value="Beach Clubs">🏖️ Beach Clubs</option>
-                        <option value="Centros de Convenções e Galpões">🏭 Galpões</option>
-                        <option value="Clubes">🏊 Clubes</option>
-                        <option value="Hotéis, Pousadas e Resorts">🏨 Hotéis e Resorts</option>
-                        <option value="Rooftops">🌆 Rooftops</option>
-                        <option value="Teatros">🎭 Teatros</option>
+                        <option value="">Todos os eventos</option>
+                        <option value="Casamento">💍 Casamento</option>
+                        <option value="Festa de Aniversário">🎂 Aniversário</option>
+                        <option value="Festa Infantil">🎈 Festa Infantil</option>
+                        <option value="Formatura">🎓 Formatura</option>
+                        <option value="Confraternização">🥂 Confraternização</option>
+                        <option value="Festa Corporativa">💼 Corporativo</option>
+                        <option value="Chá de Bebê">👶 Chá de Bebê</option>
+                        <option value="Chá Revelação">🎀 Chá Revelação</option>
+                        <option value="Debutante">👑 Debutante</option>
+                        <option value="Show e Festival">🎵 Show / Festival</option>
+                        <option value="Retiro">🌿 Retiro</option>
+                        <option value="Acampamento">⛺ Acampamento</option>
                     </select>
                 </div>
                 <div class="divider"></div>
@@ -768,7 +770,7 @@ btnBusca.addEventListener('click', () => {
     const data  = dQuando.textContent.trim();
     const url   = new URL('buscapropriedade.html', window.location.href);
     url.searchParams.set('estado', estado);
-    if (tipo)              url.searchParams.set('tipo', tipo);
+    if (tipo)              url.searchParams.set('evento', tipo);
     if (conv && conv!=='0') url.searchParams.set('convidados', conv);
     if (data && data!=='Adicionar datas') url.searchParams.set('data', data);
     window.location.href = url.toString();
@@ -793,4 +795,3 @@ document.addEventListener('DOMContentLoaded', render);
 </script>
 </body>
 </html>
-
