@@ -681,30 +681,47 @@ let _diaSelecionado = null; // objeto Date sendo editado no modal
 
 /* ── INIT ── */
 async function init() {
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) { window.location.href = '../login.html'; return; }
+    try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
 
-    const user = session.user;
-    const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
-    const nome    = perfil?.nome    || user.email;
-    const usuario = perfil?.usuario || '';
-    const ini     = (nome.trim().split(' ')[0][0] || '?').toUpperCase();
+        const user = session.user;
+        let nome = user.email;
+        let usuario = '';
 
-    document.getElementById('avatar-inicial').textContent  = ini;
-    document.getElementById('drop-nome').textContent       = nome;
-    document.getElementById('drop-email').textContent      = user.email;
-    document.getElementById('sidebar-avatar').textContent  = ini;
-    document.getElementById('sidebar-nome').textContent    = nome;
-    document.getElementById('sidebar-handle').textContent  = usuario ? '@' + usuario : '';
+        try {
+            const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
+            if (perfil) {
+                nome    = perfil.nome    || user.email;
+                usuario = perfil.usuario || '';
+            }
+        } catch (_) {}
 
-    const { data: ass } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', user.id).single();
-    const planosLabel = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
-    document.getElementById('sidebar-plano-chip').textContent = planosLabel[ass?.plano_ativo] || '🏷️ Básico';
+        const ini = (nome.trim().split(' ')[0][0] || '?').toUpperCase();
 
-    renderizarCalendario();
+        document.getElementById('avatar-inicial').textContent  = ini;
+        document.getElementById('drop-nome').textContent       = nome;
+        document.getElementById('drop-email').textContent      = user.email;
+        document.getElementById('sidebar-avatar').textContent  = ini;
+        document.getElementById('sidebar-nome').textContent    = nome;
+        document.getElementById('sidebar-handle').textContent  = usuario ? '@' + usuario : '';
 
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('main-content').style.display   = 'flex';
+        try {
+            const { data: ass } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', user.id).single();
+            const planosLabel = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
+            document.getElementById('sidebar-plano-chip').textContent = planosLabel[ass?.plano_ativo] || '🏷️ Básico';
+        } catch (_) {
+            document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
+        }
+
+        renderizarCalendario();
+
+    } catch (err) {
+        console.error('Erro no init:', err);
+    } finally {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('main-content').style.display   = 'flex';
+    }
 }
 
 /* ── CHAVE DE DATA ── */
