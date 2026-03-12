@@ -408,6 +408,10 @@
         </a>
     </div>
     <div class="header-right">
+        <!-- Botão hamburguer mobile -->
+        <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
         <div class="avatar-container">
             <button class="avatar-btn" onclick="toggleAvatar()">
                 <span id="avatar-inicial">?</span>
@@ -427,6 +431,9 @@
         </div>
     </div>
 </header>
+
+<!-- ── OVERLAY SIDEBAR MOBILE ── -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- LAYOUT -->
 <main class="dashboard-container" id="main-content" style="display:none;">
@@ -721,7 +728,15 @@ function enviarEmail() {
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-/* ── AVATAR DROPDOWN ── */
+/* ── Toggle sidebar mobile ── */
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.dash-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.toggle('aberta');
+        overlay.classList.toggle('ativo');
+    }
+
+    /* ── AVATAR DROPDOWN ── */
 function toggleAvatar() {
     const m = document.getElementById('avatar-menu');
     m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
