@@ -2203,7 +2203,9 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             : categoria ? `<span class="card-badge">${categoria}</span>` : '';
 
         return `
-            <div class="card-espaco-vertical${isPremium ? ' card-premium' : ''}">
+            <div class="card-espaco-vertical${isPremium ? ' card-premium' : ''}"
+                 style="cursor:pointer"
+                 onclick="window.location.href='propriedade.html?id=${prop.id}'">
                 <div class="foto-card-v">
                     <img src="${imagem}" alt="${nome}" loading="lazy">
                     ${badgeHTML}
