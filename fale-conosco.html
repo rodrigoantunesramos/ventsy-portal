@@ -534,6 +534,20 @@
             .redes-grid { grid-template-columns: 1fr 1fr; }
             .form-card { padding: 28px 20px; }
         }
+
+        /* ── RESPONSIVO ADICIONAL ── */
+        @media (max-width: 900px) {
+            .logo { height: 44px; }
+            .btn-login { padding: 8px 14px; font-size: 0.82rem; }
+        }
+        @media (max-width: 600px) {
+            .footer-container { flex-wrap: wrap; gap: 32px; }
+            .form-row { grid-template-columns: 1fr !important; }
+            .main-content { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 480px) {
+            main { padding: 100px 4% 48px; }
+        }
     </style>
 </head>
 <body>

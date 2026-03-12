@@ -409,6 +409,95 @@
             .form-duplo { grid-template-columns: 1fr; }
         }
 
+        /* ── RESPONSIVO MOBILE ADICIONAL ── */
+        @media (max-width: 768px) {
+            /* Header: stack if content overflows */
+            header {
+                height: auto;
+                min-height: 64px;
+                flex-wrap: wrap;
+                padding: 10px 4%;
+                gap: 8px;
+            }
+            .header-left {
+                flex: 0 0 auto;
+            }
+            .logo {
+                height: 44px;
+            }
+            .header-right {
+                flex: 0 0 auto;
+                margin-left: auto;
+                gap: 8px;
+            }
+            /* Page padding tightened */
+            .page {
+                padding: 20px 16px 60px;
+            }
+            /* Booking card: remove sticky on mobile (already done at 900px but reinforce) */
+            .card-lateral {
+                padding: 20px;
+            }
+            /* Gallery action buttons */
+            .btn-galeria-acoes {
+                flex-direction: column;
+                gap: 6px;
+                bottom: 10px;
+                right: 10px;
+            }
+            .btn-galeria {
+                font-size: 0.78rem;
+                padding: 7px 12px;
+            }
+            /* Footer */
+            .footer-container {
+                flex-wrap: wrap;
+                gap: 36px;
+            }
+            /* Reviews grid already 1-col at 900px, reinforce */
+            .aval-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo { height: 38px; }
+            .btn-entrar {
+                padding: 7px 14px;
+                font-size: 0.82rem;
+            }
+            .btn-menu {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+            /* Title */
+            .prop-titulo h1 {
+                font-size: 1.4rem;
+            }
+            /* Details quick-view: 2 per row */
+            .detalhes-rapidos {
+                gap: 12px;
+            }
+            /* Amenities single column */
+            .comodidades-grid {
+                grid-template-columns: 1fr;
+            }
+            /* Map iframe height */
+            .mapa-container iframe {
+                height: 280px;
+            }
+            /* Card lateral padding */
+            .card-lateral {
+                padding: 16px;
+                border-radius: 14px;
+            }
+            /* Booking form price */
+            .preco-lateral {
+                font-size: 1.2rem;
+            }
+        }
+
     </style>
 </head>
 <body>

@@ -2023,6 +2023,117 @@ input:checked + .slider-round:before { transform: translateX(20px); }
     white-space: nowrap;
 }
 
+        /* ── RESPONSIVO MOBILE ── */
+        @media (max-width: 768px) {
+            /* Header: stack search bar below logo/buttons */
+            header {
+                height: auto;
+                min-height: 64px;
+                flex-wrap: wrap;
+                padding: 10px 4%;
+                gap: 8px;
+                align-items: center;
+            }
+            .header-left {
+                flex: 0 0 auto;
+            }
+            .logo {
+                height: 40px;
+            }
+            /* Move the right section to sit next to the logo */
+            .header-right {
+                flex: 0 0 auto;
+                margin-left: auto;
+                gap: 8px;
+            }
+            /* The nav (search container) drops to full-width second row */
+            nav.header-center {
+                order: 3;
+                width: 100%;
+                flex: 0 0 100%;
+                justify-content: center;
+            }
+            .search-container {
+                padding: 8px 0;
+            }
+            /* Search bar becomes a vertical stack */
+            .search-bar {
+                flex-direction: column;
+                border-radius: 16px;
+                padding: 12px 16px;
+                gap: 8px;
+                max-width: 100%;
+                align-items: stretch;
+            }
+            .search-item {
+                min-width: 0;
+                width: 100%;
+                padding: 8px 4px;
+            }
+            .divider {
+                display: none;
+            }
+            .btn-search {
+                width: 100%;
+                border-radius: 12px;
+                height: 46px;
+                margin-left: 0;
+            }
+            /* Main content: account for taller header */
+            .listagem-split {
+                margin-top: 0;
+                height: auto;
+                overflow: visible;
+            }
+            /* Cards: single column on small screens */
+            .grid-resultados-split {
+                grid-template-columns: 1fr;
+            }
+            /* Filter button: full-width */
+            .btn-abrir-filtro {
+                margin: 12px 16px 0;
+                width: calc(100% - 32px);
+                justify-content: center;
+                border-radius: 12px;
+            }
+            /* Cards column padding */
+            .coluna-cards {
+                padding: 12px 16px;
+            }
+            /* Footer */
+            .footer-container {
+                flex-wrap: wrap;
+                gap: 36px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                height: 34px;
+            }
+            .btn-login {
+                padding: 8px 12px;
+                font-size: 0.82rem;
+            }
+            .btn-menu {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+            /* Tighter card layout on very small screens */
+            .foto-card-v {
+                border-radius: 12px;
+            }
+            .info-card-v {
+                padding: 10px 2px 4px;
+            }
+            .card-nome {
+                font-size: 0.88rem;
+            }
+            /* Guest stepper fits on one line */
+            .guest-direct-selector {
+                min-width: 0;
+            }
+        }
     </style>
 
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
