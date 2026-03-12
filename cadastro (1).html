@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta — VENTSY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --preto: #0d0d0d;
+            --vermelho: #ff385c;
+            --cinza-claro: #f5f5f5;
+            --cinza-borda: #e8e8e8;
+            --texto: #3a3a3a;
+            --texto-suave: #888;
+            --verde: #22c55e;
+        }
+        body { font-family: 'DM Sans', Arial, sans-serif; background: #fafafa; color: var(--texto); min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* HEADER */
+        header { width: 100%; height: 80px; background: #fff; display: flex; align-items: center; padding: 0 5%; box-shadow: 0 2px 5px rgba(0,0,0,0.08); position: fixed; top: 0; z-index: 9999; }
+        .header-left, .header-right { flex: 1; display: flex; }
+        .header-right { align-items: center; gap: 15px; justify-content: flex-end; }
+        .logo { height: 56px; width: auto; cursor: pointer; }
+        .btn-login { background: #f0f2f5; color: #1a73e8; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; border: 1px solid transparent; font-family: inherit; }
+        .btn-login:hover { background: #1a73e8; color: white; }
+        .btn-menu { background: white; border: 1px solid #ddd; border-radius: 20px; padding: 8px 12px; cursor: pointer; font-size: 1rem; transition: box-shadow 0.2s; }
+        .btn-menu:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .menu-hamburguer-container { position: relative; }
+        .extra-menu-dropdown { position: absolute; top: 50px; right: 0; width: 200px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.15); display: none; flex-direction: column; padding: 10px 0; z-index: 1001; }
+        .extra-menu-dropdown a { padding: 12px 20px; text-decoration: none; color: #444; font-size: 0.9rem; }
+        .extra-menu-dropdown a:hover { background: #f7f7f7; }
+
+        /* MAIN */
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 120px 5% 64px; }
+        .cadastro-wrap { width: 100%; max-width: 480px; }
+        .cadastro-topo { text-align: center; margin-bottom: 36px; }
+        .cadastro-tag { display: inline-block; background: rgba(255,56,92,0.1); color: var(--vermelho); border: 1px solid rgba(255,56,92,0.25); padding: 4px 14px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 14px; }
+        .cadastro-topo h1 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 900; color: var(--preto); letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+        .cadastro-topo h1 em { font-style: normal; color: var(--vermelho); }
+        .cadastro-topo p { font-size: 0.88rem; color: var(--texto-suave); line-height: 1.55; }
+
+        /* CARD */
+        .cadastro-card { background: #fff; border-radius: 24px; border: 1px solid var(--cinza-borda); padding: 40px 36px; box-shadow: 0 4px 32px rgba(0,0,0,0.06); }
+
+        /* TIPO DOC */
+        .tipo-doc { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+        .tipo-btn { padding: 12px; border-radius: 12px; border: 1.5px solid var(--cinza-borda); background: none; font-family: inherit; font-size: 0.88rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 7px; }
+        .tipo-btn:hover { border-color: var(--vermelho); color: var(--vermelho); }
+        .tipo-btn.ativo { border-color: var(--vermelho); background: rgba(255,56,92,0.06); color: var(--vermelho); }
+        .tipo-btn .material-icons { font-size: 1rem; }
+
+        /* DIVIDER */
+        .divider { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--cinza-borda); }
+        .divider span { font-size: 0.75rem; font-weight: 600; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+
+        /* CAMPOS */
+        .form-group { margin-bottom: 18px; position: relative; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--preto); margin-bottom: 6px; letter-spacing: 0.02em; }
+        .input-wrap { position: relative; }
+        .input-wrap > .material-icons.icon-left { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: #bbb; pointer-events: none; transition: color 0.2s; }
+        .input-wrap input { width: 100%; padding: 12px 40px 12px 40px; border: 1.5px solid var(--cinza-borda); border-radius: 11px; font-family: inherit; font-size: 0.9rem; color: var(--texto); background: #fafafa; transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
+        .input-wrap input:focus { border-color: var(--vermelho); box-shadow: 0 0 0 3px rgba(255,56,92,0.1); background: #fff; }
+        .input-wrap .toggle-senha { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; color: #bbb; display: flex; align-items: center; transition: color 0.2s; }
+        .input-wrap .toggle-senha:hover { color: var(--vermelho); }
+        .input-wrap .toggle-senha .material-icons { font-size: 1.1rem; pointer-events: none; }
+        .campo-status { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 1rem; display: none; }
+        .campo-status.ok { color: var(--verde); display: block; }
+        .campo-status.erro { color: var(--vermelho); display: block; }
+        .campo-hint { font-size: 0.75rem; color: var(--texto-suave); margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+        .campo-hint.erro { color: var(--vermelho); }
+        .campo-hint .material-icons { font-size: 0.85rem; }
+
+        /* FORÇA SENHA */
+        .senha-forca { display: flex; gap: 5px; margin-top: 8px; }
+        .forca-barra { flex: 1; height: 3px; border-radius: 4px; background: var(--cinza-borda); transition: background 0.3s; }
+        .forca-label { font-size: 0.72rem; font-weight: 600; margin-top: 4px; color: var(--texto-suave); text-align: right; }
+
+        /* CAMPO EMAIL */
+        .input-wrap input.com-toggle { padding-right: 40px; }
+
+        /* TERMOS */
+        .termos-linha { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 24px; }
+        .termos-linha input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--vermelho); cursor: pointer; margin-top: 2px; flex-shrink: 0; }
+        .termos-linha p { font-size: 0.8rem; color: var(--texto-suave); line-height: 1.55; }
+        .termos-linha a { color: var(--vermelho); text-decoration: none; font-weight: 600; }
+
+        /* BOTÃO */
+        .btn-cadastrar { width: 100%; padding: 15px; background: var(--vermelho); color: #fff; border: none; border-radius: 12px; font-family: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.15s, opacity 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-cadastrar:hover:not(:disabled) { background: #e0304f; transform: scale(1.01); }
+        .btn-cadastrar:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+        .btn-cadastrar .material-icons { font-size: 1.1rem; }
+
+        /* ALERTA GLOBAL */
+        .alerta { display: none; border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; font-weight: 500; margin-bottom: 20px; align-items: center; gap: 10px; }
+        .alerta.erro { background: #fff0f3; color: #c0152b; border: 1px solid #ffc5d0; display: flex; }
+        .alerta.sucesso { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: flex; }
+        .alerta .material-icons { font-size: 1.1rem; flex-shrink: 0; }
+
+        /* SUCESSO SCREEN */
+        .sucesso-screen { display: none; text-align: center; padding: 20px 0; }
+        .sucesso-icone-grande { width: 72px; height: 72px; background: rgba(34,197,94,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .sucesso-icone-grande .material-icons { font-size: 2.2rem; color: var(--verde); }
+        .sucesso-screen h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.6rem; font-weight: 900; color: var(--preto); margin-bottom: 10px; letter-spacing: -0.02em; }
+        .sucesso-screen p { font-size: 0.88rem; color: var(--texto-suave); line-height: 1.6; margin-bottom: 28px; }
+        .btn-ir-plataforma { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: var(--vermelho); color: #fff; border-radius: 12px; font-family: inherit; font-size: 0.95rem; font-weight: 700; text-decoration: none; transition: background 0.2s, transform 0.15s; }
+        .btn-ir-plataforma:hover { background: #e0304f; transform: scale(1.02); }
+
+        /* LINK LOGIN */
+        .link-login { text-align: center; margin-top: 22px; font-size: 0.85rem; color: var(--texto-suave); }
+        .link-login a { color: var(--vermelho); font-weight: 600; text-decoration: none; }
+        .link-login a:hover { text-decoration: underline; }
+
+        /* FOOTER */
+        .main-footer { background: #fff; border-top: 1px solid #e5e5e5; padding: 40px 5% 20px; }
+        .footer-container { display: flex; gap: 60px; margin-bottom: 30px; }
+        .footer-column h3 { font-size: 0.85rem; font-weight: 700; color: #222; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .footer-column ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .footer-column ul li a { text-decoration: none; color: #666; font-size: 0.88rem; transition: color 0.2s; }
+        .footer-column ul li a:hover { color: #222; }
+        .footer-bottom { border-top: 1px solid #f0f0f0; padding-top: 20px; font-size: 0.82rem; color: #aaa; }
+
+        @media (max-width: 540px) {
+            .cadastro-card { padding: 28px 20px; }
+            .footer-container { flex-direction: column; gap: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="header-left">
+        <a href="index.html"><img src="logovents.png" alt="VENTSY" class="logo"></a>
+    </div>
+    <div class="header-right">
+        <a href="login.html" class="btn-login">ENTRAR</a>
+        <div class="menu-hamburguer-container">
+            <button class="btn-menu" onclick="toggleMenuExtra()">☰</button>
+            <div id="extra-menu" class="extra-menu-dropdown">
+                <a href="login.html">Anunciar</a>
+                <a href="planos.html">Planos</a>
+                <a href="como-funciona.html">Como Funciona</a>
+                <a href="fale-conosco.html">Fale Conosco</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="cadastro-wrap">
+
+        <div class="cadastro-topo">
+            <span class="cadastro-tag">Novo cadastro</span>
+            <h1>Crie sua conta na <em>VENTSY</em></h1>
+            <p>Preencha as informações abaixo para começar.<br>Os demais detalhes serão completados dentro da plataforma.</p>
+        </div>
+
+        <div class="cadastro-card">
+
+            <!-- FORMULÁRIO -->
+            <div id="form-cadastro">
+
+                <!-- Alerta de erro/sucesso -->
+                <div class="alerta" id="alerta">
+                    <span class="material-icons" id="alerta-icone"></span>
+                    <span id="alerta-msg"></span>
+                </div>
+
+                <!-- Tipo de documento -->
+                <div class="tipo-doc">
+                    <button class="tipo-btn ativo" id="btn-cpf" onclick="selecionarDoc('cpf')">
+                        <span class="material-icons">person</span> CPF (Pessoa Física)
+                    </button>
+                    <button class="tipo-btn" id="btn-cnpj" onclick="selecionarDoc('cnpj')">
+                        <span class="material-icons">business</span> CNPJ (Empresa)
+                    </button>
+                </div>
+
+                <!-- Documento -->
+                <div class="form-group">
+                    <label id="label-doc" for="documento">CPF</label>
+                    <div class="input-wrap">
+                        <span class="material-icons icon-left">badge</span>
+                        <input type="text" id="documento" placeholder="000.000.000-00" maxlength="18" oninput="mascaraDoc(this)" onblur="validarDoc()">
+                        <span class="campo-status material-icons" id="status-doc"></span>
+                    </div>
+                    <p class="campo-hint" id="hint-doc"></p>
+                </div>
+
+                <div class="divider"><span>Dados pessoais</span></div>
+
+                <!-- Nome -->
+                <div class="form-group">
+                    <label for="nome">Nome completo</label>
+                    <div class="input-wrap">
+                        <span class="material-icons icon-left">person_outline</span>
+                        <input type="text" id="nome" placeholder="Seu nome completo" onblur="validarNome()">
+                        <span class="campo-status material-icons" id="status-nome"></span>
+                    </div>
+                    <p class="campo-hint" id="hint-nome"></p>
+                </div>
+
+                <!-- Nascimento -->
+                <div class="form-group">
+                    <label for="nascimento">Data de nascimento</label>
+                    <div class="input-wrap">
+                        <span class="material-icons icon-left">cake</span>
+                        <input type="date" id="nascimento" onchange="validarIdade()" max="">
+                        <span class="campo-status material-icons" id="status-nasc"></span>
+                    </div>
+                    <p class="campo-hint" id="hint-nasc">Apenas maiores de 18 anos podem se cadastrar.</p>
+                </div>
+
+                <div class="divider"><span>Acesso à plataforma</span></div>
+
+                <!-- E-mail -->
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <div class="input-wrap">
+                        <span class="material-icons icon-left">email</span>
+                        <input type="email" id="email" placeholder="seu@email.com" onblur="validarEmail()">
+                        <span class="campo-status material-icons" id="status-email"></span>
+                    </div>
+                    <p class="campo-hint" id="hint-email">Usado para fazer login na plataforma.</p>
+                </div>
+
+                <!-- Usuário -->
+                <div class="form-group">
+                    <label for="usuario">Nome de usuário</label>
+                    <div class="input-wrap">
+                        <span class="material-icons icon-left">alternate_email</span>
+                        <input type="text" id="usuario" placeholder="seu_usuario" oninput="formatarUsuario(this)" onblur="validarUsuario()">
+                        <span class="campo-status material-icons" id="status-usuario"></span>
+                    </div>
+                    <p class="campo-hint" id="hint-usuario">Letras minúsculas, números e _ (sem espaços).</p>
+                </div>
+
+                <!-- Senha -->
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <div class="input-wrap">
+                        <span class="material-icons icon-left">lock_outline</span>
+                        <input type="password" id="senha" class="com-toggle" placeholder="Mínimo 8 caracteres" oninput="avaliarSenha()">
+                        <button type="button" class="toggle-senha" onclick="toggleSenha('senha', 'olho-senha')" tabindex="-1">
+                            <span class="material-icons" id="olho-senha">visibility_off</span>
+                        </button>
+                    </div>
+                    <div class="senha-forca">
+                        <div class="forca-barra" id="fb1"></div>
+                        <div class="forca-barra" id="fb2"></div>
+                        <div class="forca-barra" id="fb3"></div>
+                        <div class="forca-barra" id="fb4"></div>
+                    </div>
+                    <p class="forca-label" id="forca-label"></p>
+                </div>
+
+                <!-- Confirmar senha -->
+                <div class="form-group">
+                    <label for="senha2">Confirmar senha</label>
+                    <div class="input-wrap">
+                        <span class="material-icons icon-left">lock_outline</span>
+                        <input type="password" id="senha2" class="com-toggle" placeholder="Repita a senha" onblur="validarSenha2()">
+                        <button type="button" class="toggle-senha" onclick="toggleSenha('senha2', 'olho-senha2')" tabindex="-1">
+                            <span class="material-icons" id="olho-senha2">visibility_off</span>
+                        </button>
+                    </div>
+                    <p class="campo-hint" id="hint-senha2"></p>
+                </div>
+
+                <!-- Termos -->
+                <div class="termos-linha">
+                    <input type="checkbox" id="termos">
+                    <p>Li e concordo com os <a href="#">Termos de Uso</a> e a <a href="#">Política de Privacidade</a> da VENTSY.</p>
+                </div>
+
+                <!-- Botão -->
+                <button class="btn-cadastrar" id="btn-cadastrar" onclick="submeterCadastro()">
+                    <span class="material-icons">arrow_forward</span>
+                    Criar minha conta
+                </button>
+
+            </div>
+
+            <!-- SUCESSO -->
+            <div class="sucesso-screen" id="sucesso">
+                <div class="sucesso-icone-grande">
+                    <span class="material-icons">check</span>
+                </div>
+                <h2>Conta criada!</h2>
+                <p>Seu cadastro foi realizado com sucesso.<br>Acesse a plataforma para completar seu perfil<br>e começar a usar a VENTSY.</p>
+                <a href="dashboard/index.html" class="btn-ir-plataforma">
+                    <span class="material-icons">login</span>
+                    Entrar na plataforma
+                </a>
+            </div>
+
+        </div>
+
+        <p class="link-login">Já tem uma conta? <a href="login.html">Entrar</a></p>
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="main-footer">
+    <div class="footer-container">
+        <div class="footer-column">
+            <h3>Atendimento</h3>
+            <ul>
+                <li><a href="#">Central de Ajuda</a></li>
+                <li><a href="fale-conosco.html">Fale Conosco</a></li>
+                <li><a href="#">Política de Privacidade</a></li>
+                <li><a href="#">Termos de Uso</a></li>
+                <li><a href="#">Sobre Nós</a></li>
+                <li><a href="como-funciona.html">Como Funciona</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h3>Anunciar</h3>
+            <ul>
+                <li><a href="cadastro.html">Cadastre sua propriedade</a></li>
+                <li><a href="planos.html">Planos Disponíveis</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 VENTSY. Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+<script>
+// ── Supabase ──
+const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+// ── Menu ──
+function toggleMenuExtra() {
+    const m = document.getElementById('extra-menu');
+    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+}
+document.addEventListener('click', e => {
+    const c = document.querySelector('.menu-hamburguer-container');
+    if (c && !c.contains(e.target)) document.getElementById('extra-menu').style.display = 'none';
+});
+
+// ── Tipo de documento ──
+let tipoDoc = 'cpf';
+function selecionarDoc(tipo) {
+    tipoDoc = tipo;
+    document.getElementById('btn-cpf').classList.toggle('ativo', tipo === 'cpf');
+    document.getElementById('btn-cnpj').classList.toggle('ativo', tipo === 'cnpj');
+    const campo = document.getElementById('documento');
+    campo.value = '';
+    campo.maxLength = tipo === 'cpf' ? 14 : 18;
+    campo.placeholder = tipo === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00';
+    document.getElementById('label-doc').textContent = tipo === 'cpf' ? 'CPF' : 'CNPJ';
+    limparStatus('doc');
+}
+
+// ── Máscara ──
+function mascaraDoc(el) {
+    let v = el.value.replace(/\D/g, '');
+    if (tipoDoc === 'cpf') {
+        v = v.substring(0, 11);
+        if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+        else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+        else if (v.length > 3) v = v.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+    } else {
+        v = v.substring(0, 14);
+        if (v.length > 12) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5');
+        else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{0,4})/, '$1.$2.$3/$4');
+        else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{0,3})/, '$1.$2.$3');
+        else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,3})/, '$1.$2');
+    }
+    el.value = v;
+}
+
+function validarDoc() {
+    const v = document.getElementById('documento').value.replace(/\D/g, '');
+    const ok = tipoDoc === 'cpf' ? v.length === 11 : v.length === 14;
+    setStatus('doc', ok, ok ? '' : `${tipoDoc.toUpperCase()} inválido ou incompleto.`);
+    return ok;
+}
+
+function validarNome() {
+    const v = document.getElementById('nome').value.trim();
+    const ok = v.length >= 3 && v.includes(' ');
+    setStatus('nome', ok, ok ? '' : 'Informe nome e sobrenome.');
+    return ok;
+}
+
+// ── Idade ──
+(function() {
+    const hoje = new Date();
+    hoje.setFullYear(hoje.getFullYear() - 18);
+    document.getElementById('nascimento').max = hoje.toISOString().split('T')[0];
+})();
+
+function validarIdade() {
+    const val = document.getElementById('nascimento').value;
+    if (!val) { limparStatus('nasc'); return false; }
+    const nasc = new Date(val);
+    const hoje = new Date();
+    let idade = hoje.getFullYear() - nasc.getFullYear();
+    const m = hoje.getMonth() - nasc.getMonth();
+    if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
+    const ok = idade >= 18;
+    setStatus('nasc', ok, '');
+    const hint = document.getElementById('hint-nasc');
+    hint.className = ok ? 'campo-hint' : 'campo-hint erro';
+    hint.innerHTML = ok
+        ? '<span class="material-icons" style="color:var(--verde);font-size:.9rem">check_circle</span> Idade confirmada.'
+        : '<span class="material-icons" style="font-size:.9rem">error_outline</span> Você precisa ter 18 anos ou mais.';
+    return ok;
+}
+
+// ── E-mail ──
+function validarEmail() {
+    const v = document.getElementById('email').value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    setStatus('email', ok, ok ? '' : 'Informe um e-mail válido.');
+    if (ok) {
+        const hint = document.getElementById('hint-email');
+        hint.textContent = 'Usado para fazer login na plataforma.';
+        hint.className = 'campo-hint';
+    }
+    return ok;
+}
+
+// ── Usuário ──
+function formatarUsuario(el) {
+    el.value = el.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+}
+function validarUsuario() {
+    const v = document.getElementById('usuario').value;
+    const ok = /^[a-z0-9_]{3,20}$/.test(v);
+    const hint = document.getElementById('hint-usuario');
+    if (!v) { limparStatus('usuario'); hint.textContent = 'Letras minúsculas, números e _ (sem espaços).'; hint.className = 'campo-hint'; return false; }
+    setStatus('usuario', ok, '');
+    hint.textContent = ok ? '' : 'Entre 3 e 20 caracteres. Apenas letras, números e _.';
+    hint.className = ok ? 'campo-hint' : 'campo-hint erro';
+    return ok;
+}
+
+// ── Senha ──
+function avaliarSenha() {
+    const v = document.getElementById('senha').value;
+    let f = 0;
+    if (v.length >= 8) f++;
+    if (/[A-Z]/.test(v)) f++;
+    if (/[0-9]/.test(v)) f++;
+    if (/[^A-Za-z0-9]/.test(v)) f++;
+    const cores = ['', '#ff385c', '#ff8c00', '#f0c040', '#22c55e'];
+    const labels = ['', 'Muito fraca', 'Fraca', 'Boa', 'Forte'];
+    for (let i = 1; i <= 4; i++) document.getElementById('fb' + i).style.background = i <= f ? cores[f] : 'var(--cinza-borda)';
+    document.getElementById('forca-label').textContent = v.length ? labels[f] : '';
+    document.getElementById('forca-label').style.color = cores[f];
+}
+
+function toggleSenha(id, olhoId) {
+    const inp = document.getElementById(id);
+    const olho = document.getElementById(olhoId);
+    if (inp.type === 'password') { inp.type = 'text'; olho.textContent = 'visibility'; }
+    else { inp.type = 'password'; olho.textContent = 'visibility_off'; }
+}
+
+function validarSenha2() {
+    const s1 = document.getElementById('senha').value;
+    const s2 = document.getElementById('senha2').value;
+    const hint = document.getElementById('hint-senha2');
+    if (!s2) { hint.textContent = ''; return false; }
+    const ok = s1 === s2;
+    hint.innerHTML = ok
+        ? '<span class="material-icons" style="color:var(--verde);font-size:.9rem">check_circle</span> Senhas conferem.'
+        : '<span class="material-icons" style="font-size:.9rem">error_outline</span> As senhas não coincidem.';
+    hint.className = ok ? 'campo-hint' : 'campo-hint erro';
+    return ok;
+}
+
+// ── Helpers ──
+function setStatus(id, ok, msg) {
+    const el = document.getElementById('status-' + id);
+    el.textContent = ok ? 'check_circle' : 'error_outline';
+    el.className = 'campo-status material-icons ' + (ok ? 'ok' : 'erro');
+    const hint = document.getElementById('hint-' + id);
+    if (hint && msg !== undefined) { hint.textContent = msg; hint.className = 'campo-hint' + (ok ? '' : ' erro'); }
+}
+
+function limparStatus(id) {
+    const el = document.getElementById('status-' + id);
+    if (el) { el.className = 'campo-status'; el.textContent = ''; }
+    const hint = document.getElementById('hint-' + id);
+    if (hint) { hint.textContent = ''; hint.className = 'campo-hint'; }
+}
+
+function destacarCampo(id) {
+    const inp = document.getElementById(id);
+    if (!inp) return;
+    inp.style.borderColor = 'var(--vermelho)';
+    inp.style.boxShadow = '0 0 0 3px rgba(255,56,92,0.15)';
+    inp.focus();
+    setTimeout(() => { inp.style.borderColor = ''; inp.style.boxShadow = ''; }, 2500);
+}
+
+function mostrarAlerta(tipo, msg) {
+    const el = document.getElementById('alerta');
+    const icone = document.getElementById('alerta-icone');
+    document.getElementById('alerta-msg').textContent = msg;
+    el.className = 'alerta ' + tipo;
+    icone.textContent = tipo === 'erro' ? 'error_outline' : 'check_circle';
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function ocultarAlerta() {
+    document.getElementById('alerta').className = 'alerta';
+}
+
+// ── Submit principal ──
+async function submeterCadastro() {
+    ocultarAlerta();
+
+    // Validações locais
+    const checks = [
+        { fn: validarDoc, campo: 'documento' },
+        { fn: validarNome, campo: 'nome' },
+        { fn: validarIdade, campo: 'nascimento' },
+        { fn: validarEmail, campo: 'email' },
+        { fn: validarUsuario, campo: 'usuario' },
+    ];
+
+    let ok = true;
+    let primeiro = null;
+    checks.forEach(c => { if (!c.fn()) { if (!primeiro) primeiro = c.campo; ok = false; } });
+
+    if (document.getElementById('senha').value.length < 8) {
+        if (!primeiro) primeiro = 'senha';
+        destacarCampo('senha');
+        ok = false;
+    }
+
+    if (!validarSenha2()) {
+        if (!primeiro) primeiro = 'senha2';
+        ok = false;
+    }
+
+    if (!document.getElementById('termos').checked) {
+        mostrarAlerta('erro', 'Você precisa aceitar os Termos de Uso para continuar.');
+        ok = false;
+    }
+
+    if (!ok) {
+        if (primeiro) destacarCampo(primeiro);
+        if (document.getElementById('alerta').className === 'alerta')
+            mostrarAlerta('erro', 'Corrija os campos em destaque antes de continuar.');
+        return;
+    }
+
+    // Dados coletados
+    const email     = document.getElementById('email').value.trim();
+    const senha     = document.getElementById('senha').value;
+    const nome      = document.getElementById('nome').value.trim();
+    const usuario   = document.getElementById('usuario').value.trim();
+    const nascimento= document.getElementById('nascimento').value;
+    const documento = document.getElementById('documento').value.replace(/\D/g, '');
+
+    // Botão loading
+    const btn = document.getElementById('btn-cadastrar');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Criando conta...';
+
+    try {
+        // 1. Criar usuário no Supabase Auth
+        const { data: authData, error: authError } = await sb.auth.signUp({
+            email,
+            password: senha,
+            options: {
+                data: { nome, usuario } // metadata no auth
+            }
+        });
+
+        if (authError) throw authError;
+
+        const userId = authData.user?.id;
+        if (!userId) throw new Error('Erro ao obter ID do usuário.');
+
+        // 2. Salvar perfil na tabela usuarios
+        const { error: dbError } = await sb
+            .from('usuarios')
+            .insert({
+                id:         userId,
+                nome:       nome,
+                documento:  documento,
+                tipo_doc:   tipoDoc,
+                nascimento: nascimento,
+                usuario:    usuario
+            });
+
+        if (dbError) {
+            // Trata erros específicos de duplicidade
+            if (dbError.code === '23505') {
+                if (dbError.message.includes('documento')) throw new Error('Este CPF/CNPJ já está cadastrado.');
+                if (dbError.message.includes('usuario'))   throw new Error('Este nome de usuário já está em uso. Escolha outro.');
+            }
+            throw dbError;
+        }
+
+        // ✅ Sucesso
+        document.getElementById('form-cadastro').style.opacity = '0';
+        document.getElementById('form-cadastro').style.transition = 'opacity 0.3s';
+        setTimeout(() => {
+            document.getElementById('form-cadastro').style.display = 'none';
+            const s = document.getElementById('sucesso');
+            s.style.display = 'block';
+            s.style.opacity = '0';
+            setTimeout(() => { s.style.transition = 'opacity 0.4s'; s.style.opacity = '1'; }, 20);
+        }, 300);
+
+    } catch (err) {
+        console.error(err);
+        let msg = 'Ocorreu um erro. Tente novamente.';
+        if (err.message?.includes('already registered') || err.message?.includes('already been registered'))
+            msg = 'Este e-mail já está cadastrado. Tente fazer login.';
+        else if (err.message)
+            msg = err.message;
+
+        mostrarAlerta('erro', msg);
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-icons">arrow_forward</span> Criar minha conta';
+    }
+}
+
+// Animação de loading
+const style = document.createElement('style');
+style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+</script>
+</body>
+</html>
