@@ -248,7 +248,13 @@
         .passos-titulo {
             font-size: 1.15rem; font-weight: 700; color: #222;
             margin-bottom: 14px;
+            display: flex; align-items: center; gap: 12px;
         }
+        .passos-progresso {
+            font-size: 0.78rem; font-weight: 600; color: #999;
+            background: #f0f0f0; border-radius: 20px; padding: 3px 10px;
+        }
+        .passos-progresso.completo-total { background: rgba(12,166,120,0.12); color: #0ca678; }
         .passo-lista { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
 
         .passo-item {
@@ -283,6 +289,28 @@
         .passo-acao.vermelho { background: #ff385c; color: #fff; }
         .passo-acao.vermelho:hover { background: #e0304f; }
         .passo-acao.verde { background: rgba(12,166,120,0.12); color: #0ca678; cursor: default; }
+
+        /* Grupo de ações do passo */
+        .passo-acoes-grupo {
+            display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;
+        }
+
+        /* Botão "Marcar ✓" */
+        .btn-marcar {
+            padding: 5px 12px; border-radius: 6px; font-family: inherit;
+            font-size: 0.75rem; font-weight: 600; cursor: pointer;
+            border: 1px solid #ddd; background: #fff; color: #666;
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .btn-marcar:hover { border-color: #0ca678; color: #0ca678; background: rgba(12,166,120,0.06); }
+
+        /* Aviso de passos incompletos */
+        .solicitar-aviso {
+            background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px;
+            padding: 12px 18px; font-size: 0.82rem; color: #7a6200;
+            margin-bottom: 16px; display: block;
+        }
+        .solicitar-aviso.oculto { display: none; }
 
         /* ─────────────────────────────────────────
            CARD SOLICITAÇÃO
@@ -505,10 +533,11 @@
         </div>
 
         <!-- ── PASSO A PASSO ── -->
-        <p class="passos-titulo">📋 Complete seu perfil</p>
+        <p class="passos-titulo">📋 Complete seu perfil <span class="passos-progresso" id="passos-progresso">0 de 4 concluídos</span></p>
         <div class="passo-lista">
 
-            <div class="passo-item completo">
+            <!-- Passo 1: sempre completo (conta criada) -->
+            <div class="passo-item completo" id="passo-1">
                 <div class="passo-num">✓</div>
                 <div class="passo-info">
                     <h4>Conta criada com sucesso</h4>
@@ -517,40 +546,56 @@
                 <span class="passo-acao verde">✓ Concluído</span>
             </div>
 
-            <div class="passo-item">
-                <div class="passo-num">2</div>
+            <!-- Passo 2 -->
+            <div class="passo-item" id="passo-2">
+                <div class="passo-num passo-num-check">2</div>
                 <div class="passo-info">
                     <h4>Adicione as fotos da sua propriedade</h4>
                     <p>Fotos de qualidade aumentam em até 3× as chances de receber contatos de clientes.</p>
                 </div>
-                <a href="minhapropriedade.html" class="passo-acao vermelho">Adicionar fotos</a>
+                <div class="passo-acoes-grupo">
+                    <a href="minhapropriedade.html" class="passo-acao vermelho">Adicionar fotos</a>
+                    <button class="btn-marcar" data-passo="2" onclick="marcarConcluido(2)" title="Marcar como concluído">Marcar ✓</button>
+                </div>
             </div>
 
-            <div class="passo-item">
-                <div class="passo-num">3</div>
+            <!-- Passo 3 -->
+            <div class="passo-item" id="passo-3">
+                <div class="passo-num passo-num-check">3</div>
                 <div class="passo-info">
                     <h4>Descreva seu espaço</h4>
                     <p>Preencha capacidade, tipo de evento, diferenciais e valor de referência do aluguel.</p>
                 </div>
-                <a href="minhapropriedade.html" class="passo-acao vermelho">Preencher dados</a>
+                <div class="passo-acoes-grupo">
+                    <a href="minhapropriedade.html" class="passo-acao vermelho">Preencher dados</a>
+                    <button class="btn-marcar" data-passo="3" onclick="marcarConcluido(3)" title="Marcar como concluído">Marcar ✓</button>
+                </div>
             </div>
 
-            <div class="passo-item">
-                <div class="passo-num">4</div>
+            <!-- Passo 4 -->
+            <div class="passo-item" id="passo-4">
+                <div class="passo-num passo-num-check">4</div>
                 <div class="passo-info">
                     <h4>Informe o endereço completo</h4>
                     <p>Necessário para que sua propriedade apareça nas buscas por localização dos clientes.</p>
                 </div>
-                <a href="minhapropriedade.html" class="passo-acao vermelho">Adicionar endereço</a>
+                <div class="passo-acoes-grupo">
+                    <a href="minhapropriedade.html" class="passo-acao vermelho">Adicionar endereço</a>
+                    <button class="btn-marcar" data-passo="4" onclick="marcarConcluido(4)" title="Marcar como concluído">Marcar ✓</button>
+                </div>
             </div>
 
-            <div class="passo-item">
-                <div class="passo-num">5</div>
+            <!-- Passo 5 -->
+            <div class="passo-item" id="passo-5">
+                <div class="passo-num passo-num-check">5</div>
                 <div class="passo-info">
                     <h4>Adicione WhatsApp e contato</h4>
                     <p>Os clientes entram em contato diretamente com você. Mantenha o número atualizado.</p>
                 </div>
-                <a href="configuracoes.html" class="passo-acao vermelho">Adicionar contato</a>
+                <div class="passo-acoes-grupo">
+                    <a href="configuracoes.html" class="passo-acao vermelho">Adicionar contato</a>
+                    <button class="btn-marcar" data-passo="5" onclick="marcarConcluido(5)" title="Marcar como concluído">Marcar ✓</button>
+                </div>
             </div>
 
         </div>
@@ -564,7 +609,13 @@
                 a publicação da sua propriedade na plataforma. Nossa equipe fará a revisão
                 em até <strong>48 horas úteis</strong> e você receberá um e-mail com o resultado.
             </p>
-            <button class="btn-solicitar" id="btn-solicitar" onclick="solicitarLiberacao()">
+
+            <!-- Aviso quando incompleto -->
+            <div class="solicitar-aviso" id="solicitar-aviso">
+                ⚠️ Complete todos os <strong>4 passos</strong> acima para liberar o botão.
+            </div>
+
+            <button class="btn-solicitar" id="btn-solicitar" onclick="solicitarLiberacao()" disabled>
                 🚀 Solicitar liberação de propriedade na plataforma VENTSY
             </button>
             <p class="solicitar-hint" id="solicitar-hint">
@@ -675,6 +726,7 @@
     /* ── Solicitar liberação ── */
     function solicitarLiberacao() {
         const btn  = document.getElementById('btn-solicitar');
+        if (btn.disabled) return;
         const hint = document.getElementById('solicitar-hint');
 
         btn.disabled = true;
@@ -688,6 +740,48 @@
             mostrarToast('Solicitação enviada! Aguarde a revisão da equipe VENTSY.');
         }, 1800);
     }
+
+    /* ── Marcar passo como concluído ── */
+    const passosConcluidos = new Set(); // passos 2,3,4,5 precisam ser marcados
+
+    function marcarConcluido(num) {
+        if (passosConcluidos.has(num)) return; // já marcado, ignora
+
+        passosConcluidos.add(num);
+
+        const item = document.getElementById('passo-' + num);
+        item.classList.add('completo');
+
+        // Atualiza número → check
+        item.querySelector('.passo-num').textContent = '✓';
+
+        // Remove botão "Marcar" e link, coloca badge verde
+        const grupo = item.querySelector('.passo-acoes-grupo');
+        grupo.innerHTML = '<span class="passo-acao verde">✓ Concluído</span>';
+
+        atualizarProgresso();
+    }
+
+    function atualizarProgresso() {
+        const total     = 4; // passos 2,3,4,5
+        const concluidos = passosConcluidos.size;
+
+        const prog = document.getElementById('passos-progresso');
+        prog.textContent = concluidos + ' de ' + total + ' concluídos';
+        prog.classList.toggle('completo-total', concluidos === total);
+
+        const btn    = document.getElementById('btn-solicitar');
+        const aviso  = document.getElementById('solicitar-aviso');
+        const tudo   = concluidos === total;
+
+        btn.disabled = !tudo;
+        aviso.classList.toggle('oculto', tudo);
+    }
+
+    // Inicializa botão como desabilitado
+    document.addEventListener('DOMContentLoaded', () => {
+        atualizarProgresso();
+    });
 
     /* ── Toast ── */
     function mostrarToast(msg) {
