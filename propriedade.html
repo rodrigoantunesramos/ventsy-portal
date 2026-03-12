@@ -686,9 +686,10 @@ async function init() {
 
         // Busca avaliações verificadas
         try {
-            const { data: avals } = await sb.from('avaliacoes_publicas')
+            const { data: avals } = await sb.from('avaliacoes')
                 .select('*')
                 .eq('propriedade_id', propId)
+                .eq('verificada', true)
                 .order('criado_em', { ascending: false });
             TODAS_AVAL = avals || [];
         } catch (_) {}
@@ -869,7 +870,7 @@ function renderCardLateral() {
         return;
     }
 
-    // PRO e ULTRA: exibe preço + dois botões + formulário
+    // PRO e ULTRA: exibe preço + botão WhatsApp + formulário sempre visível
     const precoHtml = `<div class="preco-lateral">A partir de <strong>R$ ${VALOR_BASE.toLocaleString('pt-BR')}</strong> <span>/ dia</span></div>`;
 
     const botoesHtml = `
@@ -877,13 +878,16 @@ function renderCardLateral() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.09.544 4.05 1.493 5.754L0 24l6.39-1.648A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.847 0-3.579-.5-5.076-1.373l-.364-.213-3.791.977.993-3.682-.236-.38A9.971 9.971 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
             Falar pelo WhatsApp
         </button>
-        <button class="btn-reserva" id="btn-abrir-reserva" onclick="toggleFormReserva()" disabled>
-            📋 Solicitar Reserva
-        </button>
+
+        <div style="display:flex;align-items:center;gap:10px;margin:16px 0 12px">
+            <div style="flex:1;height:1px;background:var(--cinza-borda)"></div>
+            <span style="font-size:.76rem;font-weight:700;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">ou solicite uma reserva</span>
+            <div style="flex:1;height:1px;background:var(--cinza-borda)"></div>
+        </div>
     `;
 
     const formHtml = `
-        <form class="form-reserva" id="form-reserva" onsubmit="return false">
+        <form class="form-reserva aberto" id="form-reserva" onsubmit="return false">
 
             <div class="form-grupo">
                 <label>Nome completo *</label>
@@ -982,27 +986,19 @@ function renderCardLateral() {
 /* ────────────────────────────────────────────────────────
    FORM: TOGGLE, VALIDAÇÃO, CÁLCULO
 ──────────────────────────────────────────────────────── */
-function toggleFormReserva() {
-    const form = document.getElementById('form-reserva');
-    const btn  = document.getElementById('btn-abrir-reserva');
-    if (!form) return;
-    const aberto = form.classList.toggle('aberto');
-    btn.textContent = aberto ? '▲ Fechar formulário' : '📋 Solicitar Reserva';
-}
+function toggleFormReserva() {} // mantido por compatibilidade
 
 function validarForm() {
-    const nome  = (document.getElementById('f-nome')?.value || '').trim();
-    const tel   = (document.getElementById('f-tel')?.value || '').trim();
-    const tipo  = document.getElementById('f-tipo-evento')?.value || '';
-    const msg   = (document.getElementById('f-msg')?.value || '').trim();
+    const nome   = (document.getElementById('f-nome')?.value || '').trim();
+    const tel    = (document.getElementById('f-tel')?.value || '').trim();
+    const tipo   = document.getElementById('f-tipo-evento')?.value || '';
+    const msg    = (document.getElementById('f-msg')?.value || '').trim();
     const pessoa = parseInt(document.getElementById('f-pessoas')?.value || 0);
 
     const ok = nome.length >= 3 && tel.length >= 10 && tipo && msg.length >= 10 && pessoa >= 20;
 
-    const btnReserva = document.getElementById('btn-abrir-reserva');
-    const btnEnviar  = document.getElementById('btn-enviar-wpp');
-    if (btnReserva) btnReserva.disabled = !ok;
-    if (btnEnviar)  btnEnviar.disabled  = !ok;
+    const btnEnviar = document.getElementById('btn-enviar-wpp');
+    if (btnEnviar) btnEnviar.disabled = !ok;
 }
 
 function calcularOrcamento() {
@@ -1251,4 +1247,3 @@ init();
 </script>
 </body>
 </html>
-
