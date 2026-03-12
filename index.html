@@ -137,82 +137,8 @@
         .qtd-input::-webkit-outer-spin-button,
         .qtd-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* ──────────── HERO ──────────── */
-        .hero {
-            margin-top: 80px;
-            background: var(--preto);
-            padding: 76px 5% 64px;
-            position: relative; overflow: hidden;
-            text-align: center;
-        }
-        /* blob vermelho animado fundo */
-        .hero-blob {
-            position: absolute; border-radius: 50%;
-            pointer-events: none; filter: blur(60px); opacity: .5;
-        }
-        .hero-blob-1 {
-            width: 500px; height: 500px;
-            background: var(--vermelho);
-            top: -200px; right: -120px;
-            animation: blob-move 10s ease-in-out infinite alternate;
-        }
-        .hero-blob-2 {
-            width: 350px; height: 350px;
-            background: #7b1fa2;
-            bottom: -150px; left: -80px;
-            animation: blob-move 14s ease-in-out infinite alternate-reverse;
-        }
-        @keyframes blob-move {
-            0%   { transform: translate(0,0) scale(1); }
-            100% { transform: translate(40px, 30px) scale(1.12); }
-        }
-
-        .hero-inner {
-            position: relative; z-index: 1;
-            max-width: 680px; margin: 0 auto;
-        }
-        .hero-eyebrow {
-            display: inline-flex; align-items: center; gap: 10px;
-            font-size: .7rem; font-weight: 800; color: var(--vermelho);
-            text-transform: uppercase; letter-spacing: .16em; margin-bottom: 18px;
-        }
-        .hero-eyebrow::before, .hero-eyebrow::after {
-            content: ''; display: block; width: 30px; height: 1px;
-            background: var(--vermelho); opacity: .5;
-        }
-        .hero h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2rem, 4.5vw, 3.4rem);
-            font-weight: 900; color: #fff;
-            letter-spacing: -.03em; line-height: 1.08;
-            margin-bottom: 18px;
-        }
-        .hero h1 em { font-style: italic; color: var(--vermelho); }
-        .hero p {
-            font-size: clamp(.86rem, 1.5vw, 1rem);
-            color: #999; line-height: 1.7;
-            max-width: 480px; margin: 0 auto 36px;
-        }
-
-        /* Stats */
-        .hero-stats {
-            display: flex; justify-content: center;
-            gap: 40px; flex-wrap: wrap; margin-top: 36px;
-        }
-        .stat-item { text-align: center; }
-        .stat-item strong {
-            display: block; font-family: 'Playfair Display', serif;
-            font-size: 1.9rem; font-weight: 900; color: #fff;
-            line-height: 1;
-        }
-        .stat-item span {
-            font-size: .7rem; color: #555; text-transform: uppercase;
-            letter-spacing: .08em; margin-top: 4px; display: block;
-        }
-        .stat-divider { width: 1px; background: #333; align-self: stretch; }
-
         /* ──────────── CORPO ──────────── */
-        main { width: 100%; }
+        main { width: 100%; margin-top: 100px; }
 
         /* ──────────── SEÇÃO CATEGORIA ──────────── */
         .secao {
@@ -521,33 +447,6 @@
     </div>
 </header>
 
-<!-- ──────────── HERO ──────────── -->
-<section class="hero">
-    <div class="hero-blob hero-blob-1"></div>
-    <div class="hero-blob hero-blob-2"></div>
-    <div class="hero-inner">
-        <div class="hero-eyebrow">O espaço certo para cada memória</div>
-        <h1>Encontre o lugar <em>perfeito</em><br>para o seu evento</h1>
-        <p>Sítios, chácaras, salões, rooftops e muito mais. Espaços verificados, prontos para o seu momento especial.</p>
-        <div class="hero-stats">
-            <div class="stat-item">
-                <strong id="stat-total">—</strong>
-                <span>espaços</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <strong>27</strong>
-                <span>estados</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <strong>4.9 ★</strong>
-                <span>avaliação média</span>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- ──────────── MAIN ──────────── -->
 <main id="main-content">
     <div id="container-cats"></div>
@@ -715,8 +614,6 @@ async function render() {
             p._nota  = parseFloat(p.nota_media || p.avaliacao || 0);
         });
     }
-
-    document.getElementById('stat-total').textContent = lista.length + '+';
 
     /* Agrupa por categoria */
     const grupos = {};
