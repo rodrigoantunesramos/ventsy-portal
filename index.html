@@ -3,1142 +3,909 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VENTSY</title>
-    <style>
-
-	/*Configurações Gerais do site é o BODY*/	
-
-        body {
-            font-family: Arial, sans-serif, Tahoma, Geneva, Verdana, 'Segoe UI';
-            display: flex;
-	        flex-direction: column; /* Alinha os itens um abaixo do outro */
-            align-items: flex-start;
-            margin: 0 auto;
-            background-color: #f0f2f5;
-            padding: 0;
-            
-        }
-
-	
-	/* BARRA DO TOPO (HEADER) */
-        header {
-            width: 100%;
-            height: 80px;
-            background-color: #ffffff;
-            display: flex;
-            align-items: center; /* Centraliza verticalmente */
-	        padding: 0 5%;  /* Padding em % para ser flexível */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: fixed; /* Fixa no topo ao rolar a página */
-            top: 0;
-            z-index: 9999; /* Garante que a logo fique sempre por cima de tudo */
-            box-sizing: border-box; /* Garante que o padding não quebre a largura */
-            overflow: visible !important;
-           
-        }
-
-        /* Garante que a logo e o botão tenham o mesmo peso visual para o centro ser real */
-.header-left, .header-right {
-    flex: 1; 
-    display: flex;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    justify-content: flex-end; /* Empurra o botão de login para o fim da direita */
-}
-
-/* Estilo do Menu Central */
-.header-center {
-    display: flex;
-    justify-content: space-between;
-    gap: 25px; /* Espaço entre os links */
-    overflow: visible !important;
-
-}
-
-.header-center a {
-    text-decoration: none;
-    color: #b11515;
-    font-size: 0.95rem;
-    font-weight: 500;
-    position: relative;
-    padding: 5px 0;
-}
-
-/* Efeito da linha embaixo que você queria */
-.header-center a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: 0;
-    left: 0;
-    background-color: #1a73e8;
-    transition: width 0.3s ease;
-}
-
-.header-center a:hover::after {
-    width: 100%;
-}
-
-/* Botão de Login (Lateral Direita) */
-.btn-login {
-    background-color: #f0f2f5;
-    color: #1a73e8;
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
-}
-
-.btn-login:hover {
-    background-color: #1a73e8;
-    color: white;
-    box-shadow: 0 4px 10px rgba(26, 115, 232, 0.2);
-}
-
-.btn-menu {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-}
-
-.btn-menu:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* Dropdown Extra */
-.menu-hamburguer-container { position: relative; }
-
-.extra-menu-dropdown {
-    position: absolute;
-    top: 50px;
-    right: 0;
-    width: 200px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-    display: none;
-    flex-direction: column;
-    padding: 10px 0;
-    z-index: 1001;
-}
-
-.extra-menu-dropdown a {
-    padding: 12px 20px;
-    text-decoration: none;
-    color: #444;
-    font-size: 0.9rem;
-}
-
-.extra-menu-dropdown a:hover {
-    background: #f7f7f7;
-}
-
-nav {
-    /* Isso faz o menu ocupar o espaço central */
-    flex-grow: 1;
-    display: flex;
-    justify-content: center; /* Centraliza os links dentro do NAV */
-}
-
-nav a {
-    margin: 0 15px; /* Espaçamento entre os links */
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    padding-bottom: 5px; /* Espaço entre o texto e a linha */
-    border-bottom: 2px solid transparent; /* Linha invisível por padrão */
-    transition: all 0.3s ease; /* Faz a transição ser suave */
-}
-
-nav a:hover {
-    color: #1a73e8; /* Muda de cor ao passar o mouse */
-    border-bottom: 2px solid #1a73e8; /* A linha aparece com cor */
-}
-
-/* Espaçador invisível para equilibrar a logo e manter o menu no centro real */
-.spacer {
-    width: 150px; /* Deve ter o mesmo tamanho aproximado da sua logo */
-}
-
-	.logo {
-            height: 56px; /* Cabe dentro do header de 80px com respiro vertical */
-            width: auto;
-            cursor: pointer;
-        }
-
-	/* CONTEÚDO PRINCIPAL */
-        main {
-            margin-top: 100px; /* Espaço para não ficar escondido atrás do header fixo */
-            text-align: left;
-	        padding: 20px;
-            width: 100%;
-        }
-
-  
-	/* Estilizando o Link para parecer um Botão */
-        .botao {
-            display: inline-block;
-            padding: 15px 30px;
-            background-color: #1a73e8; /* Azul do Google */
-            color: white;
-            text-decoration: none; /* Remove o sublinhado padrão do link */
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background 0.3s, transform 0.2s;
-            margin-top: 15px;
-        }
-
-        .botao:hover {
-            background-color: #1557b0; /* Azul mais escuro ao passar o mouse */
-            transform: translateY(-2px); /* Efeito de "levantar" levemente */
-        }
-
-        /* Container da Busca */
-.search-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-    background: transparent;
-    z-index: 10000 !important; /* Um número maior que o do header */
-}
-
-.search-bar {
-    background: rgb(255, 255, 255);
-    display: flex;
-    align-items: center;
-    padding: 10px 15px 10px 30px;
-    border-radius: 50px; /* Bordas bem arredondadas estilo Airbnb */
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border: 1px solid #ddd;
-    max-width:850px;
-    width: 100%;
-    overflow: visible;
-}
-
-.search-item {
-    display: flex;
-    flex-direction: column;
-    min-width: 120px;
-    padding: 10px 20px;
-    position: relative;
-    cursor: pointer;
-}
-
-.search-item label {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: #222;
-    pointer-events: none; /* O clique passa pelo texto e vai para a div */
-    z-index: 1;
-}
-
-/* Faz o input de data ocupar todo o espaço interno da div */
-.search-item input[type="date"] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0; /* Esconde o input padrão, mas ele continua lá */
-    cursor: pointer;
-    z-index: 2; /* Fica por cima de tudo para capturar o clique */
-}
-
-/* Criamos um "espelho" visual para mostrar a data selecionada, 
-   já que o input real está invisível (opacity: 0) */
-.date-display {
-    font-size: 0.9rem;
-    color: #666;
-    margin-top: 4px;
-    pointer-events: none; /* Deixa o clique passar direto para o input */
-
-}
-
-.date-text {
-    font-size: 0.9rem;
-    color: #717171;
-    margin-top: 2px;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.search-item input, .search-item select {
-    border: none;
-    outline: none;
-    font-size: 0.9rem;
-    color: #666;
-    background: transparent;
-}
-
-/* Divisória vertical entre os itens */
-.divider {
-    width: 1px;
-    height: 35px;
-    background-color: #eee;
-}
-
-/* Botão Vermelho com Lupa */
-.btn-search {
-    background-color: #ff385c; /* Vermelho vibrante */
-    border: none;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.2s, background 0.3s;
-    margin-left: 10px;
-}
-
-.btn-search:hover {
-    background-color: #e31c5f;
-    transform: scale(1.05);
-}
-
-#location-container {
-    position: relative; /* Necessário para posicionar o dropdown */
-}
-
-.suggestions-dropdown {
-    position: absolute;
-    top: 100%; /* Aparece logo abaixo da barra */
-    left: 0;
-    width: 250px;
-    background: white;
-    border-radius: 16px;
-    margin-top: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    display: none; /* Escondido por padrão */
-    overflow: hidden;
-    z-index: 1001;
-    border: 1px solid #eee;
-}
-
-.suggestion-item {
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-    font-size: 0.9rem;
-    color: #333;
-}
-
-.suggestion-item:hover {
-    background-color: #f7f7f7;
-}
-
-.suggestion-item span {
-    font-size: 1.1rem;
-}
- 
-.input-erro {
-    color: #ff385c !important; /* Vermelho do seu botão */
-    font-weight: bold;
-}
-
-.guest-direct-selector {
-    min-width: 140px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.btn-step {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 1px solid #ddd;
-    background: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    color: #444;
-    transition: all 0.2s ease;
-    padding: 0;
-    line-height: 0;
-}
-
-.btn-step:hover {
-    border-color: #ff385c;
-    color: #ff385c;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.qtd-display {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #222;
-    min-width: 30px;
-    text-align: center;
-}
-
-.qtd-input {
-    width: 45px;
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #222;
-    outline: none;
-    appearance: textfield; /* Remove setas no Firefox */
-}
-
-/* Remove setas no Chrome/Safari */
-.qtd-input::-webkit-outer-spin-button,
-.qtd-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.stepper-control {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* mantém botões e número espaçados */
-    background: #f7f7f7;
-    border-radius: 25px;
-    padding: 3px 10px;
-    border: 1px solid #eee;
-    margin-top: 5px;
-}
-
-.destinos-container {
-    padding: 20px 5%;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.titulo-sessao {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #222;
-    margin-bottom: 20px;
-}
-
-.carrossel-locais {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto; /* Permite scroll horizontal se a tela for pequena */
-    padding-bottom: 20px;
-    scrollbar-width: none; /* Esconde barra no Firefox */
-}
-
-.carrossel-locais::-webkit-scrollbar {
-    display: none; /* Esconde barra no Chrome/Safari */
-}
-
-.card-local {
-    min-width: 185px; /* Largura de cada card — maior que a imagem interna (165px) */
-    flex: 0 0 auto;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.card-local:hover {
-    transform: translateY(-5px);
-}
-
-.foto-container {
-    position: relative;
-    width: 165px;
-    height: 165px;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.foto-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Faz a foto preencher o espaço sem distorcer */
-}
-
-.btn-favorito {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    text-shadow: 0 0 5px rgba(0,0,0,0.5);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Quando o usuário clica e ativa o favorito */
-.btn-favorito.favoritado {
-    color: #ff385c !important; /* Vermelho vibrante */
-    transform: scale(1.2);
-    text-shadow: none;
-}
-
-/* Animação de clique (opcional, dá um toque premium) */
-.btn-favorito:active {
-    transform: scale(0.8);
-}
-
-.info-local {
-    padding: 20px 0;
-}
-
-.nome-local {
-    font-size: 12px;
-    font-weight: 600;
-    color: #222;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Corta o texto com "..." se for muito longo */
-}
-
-.detalhes-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 10px;
-    font-weight: 400;
-}
-
-.preco {
-    font-size: 9px;
-    color: #444;
-}
-
-.avaliacao {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #222;
-}
-
-.main-footer {
-    background-color: #f7f7f7;
-    border-top: 1px solid #dddddd;
-    padding: 60px 0 30px 0;
-    margin-top: 50px;
-    width: 100%; /* Força a largura total */
-    font-family: sans-serif;
-}
-
-.footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    padding: 0 5%;     /* Dá um respiro nas laterais apenas para o texto */
-    gap: 150px; /* Espaço entre as colunas */
-}
-
-.footer-column h3 {
-    font-size: 0.9rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #222;
-    margin-bottom: 20px;
-    letter-spacing: 0.5px;
-}
-
-.footer-column ul {
-    list-style: none;
-    padding: 0;
-}
-
-.footer-column ul li {
-    margin-bottom: 12px;
-}
-
-.footer-column ul li a {
-    text-decoration: none;
-    color: #484848;
-    font-size: 0.95rem;
-    transition: text-decoration 0.2s;
-    display: inline-block;
-    margin-bottom: 12px;
-}
-
-.footer-column ul li a:hover {
-    text-decoration: underline;
-    color: #000;
-}
-
-.footer-bottom {
-    max-width: 1200px;
-    margin: 40px auto 0 auto;
-    padding: 25px 5% 0 5%;
-    border-top: 1px solid #ebebeb;
-    text-align: left;
-    color: #717171;
-    font-size: 0.85rem;
-}
-
-/* Responsividade para Celular */
-@media (max-width: 768px) {
-    .footer-container {
-        flex-direction: column;
-        gap: 40px;
-    }
-}
-
-/* Espaçamento entre as grandes seções de categorias */
-.categoria-sessao {
-    padding: 5px 5%;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-/* Garante que o título de cada categoria seja claro */
-.titulo-categoria {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #222;
-    margin-bottom: 15px;
-    margin-top: 0px;
-    text-align: left; /* Garante o alinhamento à esquerda */
-    width: 100%;      /* Força o título a ocupar a largura total do container */
-}
-
-/* Estilo do carrossel (reutilizando a lógica anterior) */
-.carrossel-horizontal {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 15px;
-    scrollbar-width: none; /* Firefox */
-}
-
-.carrossel-horizontal::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-}
-
-    </style>
-
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_red.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-    
+    <title>VENTSY — Encontre o espaço perfeito para seu evento</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        :root {
+            --preto:       #0d0d0d;
+            --vermelho:    #ff385c;
+            --cinza:       #f5f5f5;
+            --borda:       #e8e8e8;
+            --texto:       #3a3a3a;
+            --suave:       #888;
+            --ouro:        #f59e0b;
+        }
 
+        body {
+            font-family: 'DM Sans', Arial, sans-serif;
+            background: #fafafa;
+            color: var(--texto);
+            min-height: 100vh;
+        }
+
+        /* ──────────── HEADER ──────────── */
+        header {
+            width: 100%; height: 80px; background: #fff;
+            display: flex; align-items: center; padding: 0 5%;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
+            position: fixed; top: 0; z-index: 9999;
+            box-sizing: border-box; overflow: visible;
+        }
+        .header-left { flex: 1; display: flex; align-items: center; }
+        .logo { height: 100px; width: auto; cursor: pointer; }
+        .header-center { flex: 2; display: flex; justify-content: center; overflow: visible; }
+        .header-right  { flex: 1; display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+
+        .btn-login {
+            background: var(--vermelho); color: #fff;
+            padding: 9px 20px; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: .88rem;
+            transition: background .2s; white-space: nowrap;
+        }
+        .btn-login:hover { background: #e0304f; }
+
+        .menu-hamburguer-container { position: relative; }
+        .btn-menu {
+            background: #fff; border: 1px solid #ddd;
+            border-radius: 20px; padding: 8px 14px;
+            cursor: pointer; font-size: .88rem;
+            display: flex; align-items: center; gap: 6px;
+            transition: box-shadow .2s;
+        }
+        .btn-menu:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+        .extra-menu-dropdown {
+            position: absolute; top: 50px; right: 0; width: 215px;
+            background: #fff; border-radius: 14px;
+            box-shadow: 0 8px 28px rgba(0,0,0,.13);
+            display: none; flex-direction: column;
+            padding: 8px 0; z-index: 2000;
+            border: 1px solid #f0f0f0;
+        }
+        .extra-menu-dropdown a {
+            padding: 12px 20px; text-decoration: none;
+            color: #444; font-size: .88rem; display: block;
+            transition: background .15s;
+        }
+        .extra-menu-dropdown a:hover { background: #f7f7f7; }
+
+        /* ──────────── SEARCH BAR ──────────── */
+        .search-container { width: 100%; display: flex; justify-content: center; }
+        .search-bar {
+            background: #fff; display: flex; align-items: center;
+            padding: 8px 10px 8px 22px; border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            border: 1px solid #ddd; max-width: 800px; width: 100%;
+        }
+        .search-item {
+            display: flex; flex-direction: column;
+            min-width: 100px; padding: 7px 14px; position: relative; cursor: pointer;
+        }
+        .search-item label {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            color: #222; pointer-events: none; letter-spacing: .05em;
+        }
+        .date-text { font-size: .83rem; color: #717171; margin-top: 2px; pointer-events: none; }
+        .search-item input, .search-item select {
+            border: none; outline: none; font-size: .83rem;
+            color: #555; background: transparent; font-family: inherit;
+        }
+        .divider { width: 1px; height: 30px; background: #eee; flex-shrink: 0; }
+        .btn-search {
+            background: var(--vermelho); border: none;
+            width: 42px; height: 42px; border-radius: 50%; color: #fff;
+            font-size: 1rem; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            transition: transform .2s, background .2s; margin-left: 8px; flex-shrink: 0;
+        }
+        .btn-search:hover { background: #e31c5f; transform: scale(1.07); }
+        #location-container { position: relative; }
+        .suggestions-dropdown {
+            position: absolute; top: 100%; left: 0; width: 240px;
+            background: #fff; border-radius: 14px; margin-top: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.12);
+            display: none; overflow: hidden; z-index: 3000; border: 1px solid #eee;
+        }
+        .suggestion-item {
+            padding: 12px 18px; display: flex; align-items: center; gap: 10px;
+            cursor: pointer; transition: background .15s; font-size: .86rem; color: #333;
+        }
+        .suggestion-item:hover { background: #f7f7f7; }
+        .guest-direct-selector { min-width: 110px; }
+        .stepper-control {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f7f7f7; border-radius: 25px; padding: 3px 8px;
+            border: 1px solid #eee; margin-top: 4px;
+        }
+        .btn-step {
+            width: 24px; height: 24px; border-radius: 50%; border: 1px solid #ddd;
+            background: #fff; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            font-size: .95rem; color: #444; transition: all .2s; padding: 0;
+        }
+        .btn-step:hover { border-color: var(--vermelho); color: var(--vermelho); }
+        .qtd-input {
+            width: 34px; border: none; background: transparent; text-align: center;
+            font-size: .9rem; font-weight: 700; color: #222; outline: none;
+            -webkit-appearance: none; appearance: textfield;
+        }
+        .qtd-input::-webkit-outer-spin-button,
+        .qtd-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* ──────────── HERO ──────────── */
+        .hero {
+            margin-top: 80px;
+            background: var(--preto);
+            padding: 76px 5% 64px;
+            position: relative; overflow: hidden;
+            text-align: center;
+        }
+        /* blob vermelho animado fundo */
+        .hero-blob {
+            position: absolute; border-radius: 50%;
+            pointer-events: none; filter: blur(60px); opacity: .5;
+        }
+        .hero-blob-1 {
+            width: 500px; height: 500px;
+            background: var(--vermelho);
+            top: -200px; right: -120px;
+            animation: blob-move 10s ease-in-out infinite alternate;
+        }
+        .hero-blob-2 {
+            width: 350px; height: 350px;
+            background: #7b1fa2;
+            bottom: -150px; left: -80px;
+            animation: blob-move 14s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes blob-move {
+            0%   { transform: translate(0,0) scale(1); }
+            100% { transform: translate(40px, 30px) scale(1.12); }
+        }
+
+        .hero-inner {
+            position: relative; z-index: 1;
+            max-width: 680px; margin: 0 auto;
+        }
+        .hero-eyebrow {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: .7rem; font-weight: 800; color: var(--vermelho);
+            text-transform: uppercase; letter-spacing: .16em; margin-bottom: 18px;
+        }
+        .hero-eyebrow::before, .hero-eyebrow::after {
+            content: ''; display: block; width: 30px; height: 1px;
+            background: var(--vermelho); opacity: .5;
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4.5vw, 3.4rem);
+            font-weight: 900; color: #fff;
+            letter-spacing: -.03em; line-height: 1.08;
+            margin-bottom: 18px;
+        }
+        .hero h1 em { font-style: italic; color: var(--vermelho); }
+        .hero p {
+            font-size: clamp(.86rem, 1.5vw, 1rem);
+            color: #999; line-height: 1.7;
+            max-width: 480px; margin: 0 auto 36px;
+        }
+
+        /* Stats */
+        .hero-stats {
+            display: flex; justify-content: center;
+            gap: 40px; flex-wrap: wrap; margin-top: 36px;
+        }
+        .stat-item { text-align: center; }
+        .stat-item strong {
+            display: block; font-family: 'Playfair Display', serif;
+            font-size: 1.9rem; font-weight: 900; color: #fff;
+            line-height: 1;
+        }
+        .stat-item span {
+            font-size: .7rem; color: #555; text-transform: uppercase;
+            letter-spacing: .08em; margin-top: 4px; display: block;
+        }
+        .stat-divider { width: 1px; background: #333; align-self: stretch; }
+
+        /* ──────────── CORPO ──────────── */
+        main { width: 100%; }
+
+        /* ──────────── SEÇÃO CATEGORIA ──────────── */
+        .secao {
+            max-width: 1440px; margin: 0 auto;
+            padding: 40px 5% 0;
+        }
+        .secao-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 22px;
+        }
+        .secao-emoji { font-size: 1.6rem; line-height: 1; }
+        .secao-titulo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.45rem; font-weight: 900;
+            color: var(--preto); letter-spacing: -.025em;
+        }
+        .btn-ver-todos {
+            margin-left: auto;
+            background: var(--preto); color: #fff; border: none;
+            border-radius: 20px; padding: 8px 20px;
+            font-family: inherit; font-size: .8rem; font-weight: 700;
+            cursor: pointer; white-space: nowrap;
+            display: flex; align-items: center; gap: 6px;
+            transition: background .2s, transform .15s;
+        }
+        .btn-ver-todos:hover { background: var(--vermelho); transform: scale(1.03); }
+        .btn-ver-todos svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+
+        /* ──────────── CARROSSEL ──────────── */
+        .carrossel {
+            display: flex; gap: 14px;
+            overflow-x: auto; padding-bottom: 18px;
+            scrollbar-width: none;
+        }
+        .carrossel::-webkit-scrollbar { display: none; }
+
+        /* ──────────── CARDS ──────────── */
+
+        /* --- BÁSICO --- */
+        .card {
+            flex: 0 0 auto; width: 188px;
+            border-radius: 14px; overflow: hidden;
+            background: #fff; border: 1px solid var(--borda);
+            cursor: pointer; position: relative;
+            transition: transform .25s, box-shadow .25s;
+            animation: fadeUp .35s ease both;
+        }
+        .card:hover { transform: translateY(-6px); box-shadow: 0 14px 32px rgba(0,0,0,.11); }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-foto {
+            width: 100%; height: 156px; overflow: hidden; position: relative;
+        }
+        .card-foto img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform .4s ease; display: block;
+        }
+        .card:hover .card-foto img { transform: scale(1.07); }
+
+        .card-fav {
+            position: absolute; top: 9px; right: 9px;
+            background: rgba(255,255,255,.82); backdrop-filter: blur(4px);
+            border: none; width: 28px; height: 28px; border-radius: 50%;
+            font-size: .95rem; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            color: #aaa; transition: all .2s; z-index: 2;
+        }
+        .card-fav:hover { color: var(--vermelho); transform: scale(1.18); background: #fff; }
+        .card-fav.fav-on { color: var(--vermelho); }
+
+        .card-body { padding: 11px 12px 13px; }
+        .card-nome {
+            font-size: .86rem; font-weight: 700; color: var(--preto);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 3px;
+        }
+        .card-cidade { font-size: .73rem; color: var(--suave); margin-bottom: 8px; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .card-preco { font-size: .76rem; color: var(--texto); }
+        .card-preco strong { font-weight: 700; color: var(--preto); }
+        .card-nota {
+            font-size: .75rem; font-weight: 700; color: var(--preto);
+            display: flex; align-items: center; gap: 2px;
+        }
+        .card-nota svg { width: 10px; height: 10px; fill: var(--ouro); }
+
+        /* Badge no canto superior esquerdo da foto */
+        .card-badge {
+            position: absolute; top: 9px; left: 9px; z-index: 2;
+            border-radius: 20px; padding: 3px 9px;
+            font-size: .64rem; font-weight: 800;
+            letter-spacing: .05em; text-transform: uppercase;
+            backdrop-filter: blur(4px);
+        }
+        .badge-pro {
+            background: rgba(13,13,13,.78); color: #fff;
+            border: 1px solid rgba(255,255,255,.2);
+        }
+
+        /* --- PRO: borda sutil + sombra azulada --- */
+        .card-pro {
+            border: 1.5px solid #0d0d0d22;
+            box-shadow: 0 2px 12px rgba(13,13,13,.06);
+        }
+        .card-pro:hover {
+            box-shadow: 0 14px 36px rgba(13,13,13,.14);
+        }
+
+        /* --- ULTRA / PREMIUM --- */
+        .card-ultra {
+            width: 208px;
+            /* Borda gradiente dourada */
+            border: 2px solid transparent;
+            background:
+                linear-gradient(#fff, #fff) padding-box,
+                linear-gradient(135deg, #f0c040 0%, #ff385c 50%, #f0c040 100%) border-box;
+            box-shadow: 0 4px 18px rgba(240,192,64,.2);
+        }
+        .card-ultra:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 18px 44px rgba(240,192,64,.3);
+        }
+        .card-ultra .card-foto { height: 170px; }
+
+        /* Faixa dourada topo */
+        .card-ultra::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #f0c040, #ff385c, #f0c040);
+            z-index: 3;
+        }
+        /* Ribbon "PREMIUM" diagonal */
+        .ribbon {
+            position: absolute; top: 16px; right: -24px;
+            background: linear-gradient(135deg, #f0c040, #d4a000);
+            color: #1a1a1a; font-size: .58rem; font-weight: 900;
+            padding: 3px 30px; transform: rotate(35deg);
+            letter-spacing: .1em; text-transform: uppercase;
+            box-shadow: 0 2px 6px rgba(0,0,0,.25); z-index: 4;
+            pointer-events: none;
+        }
+        /* Badge ultra dourado */
+        .badge-ultra {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: #f0c040;
+            border: 1px solid rgba(240,192,64,.35);
+            font-size: .62rem;
+        }
+
+        /* ──────────── DIVISOR ENTRE SEÇÕES ──────────── */
+        .divisor {
+            max-width: 1440px; margin: 44px auto 0;
+            padding: 0 5%; display: flex; align-items: center; gap: 14px;
+        }
+        .divisor .linha { flex: 1; height: 1px; background: var(--borda); }
+        .divisor .icone { font-size: 1rem; opacity: .3; user-select: none; }
+
+        /* ──────────── BANNER ANUNCIE ──────────── */
+        .banner-anuncie {
+            max-width: 1440px; margin: 48px auto;
+            padding: 0 5%;
+        }
+        .banner-inner {
+            background: var(--preto);
+            border-radius: 24px; padding: 44px 52px;
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 32px;
+            position: relative; overflow: hidden;
+        }
+        .banner-inner::after {
+            content: '';
+            position: absolute; right: -100px; top: -100px;
+            width: 380px; height: 380px;
+            background: radial-gradient(circle, rgba(255,56,92,.28) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        .banner-txt { position: relative; z-index: 1; }
+        .banner-txt p {
+            font-size: .72rem; font-weight: 800; color: var(--vermelho);
+            text-transform: uppercase; letter-spacing: .12em; margin-bottom: 8px;
+        }
+        .banner-txt h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem; font-weight: 900; color: #fff;
+            letter-spacing: -.02em; margin-bottom: 6px;
+        }
+        .banner-txt span { font-size: .86rem; color: #666; }
+        .btn-banner {
+            background: var(--vermelho); color: #fff; border: none;
+            padding: 15px 30px; border-radius: 12px; font-family: inherit;
+            font-size: .92rem; font-weight: 700; cursor: pointer;
+            white-space: nowrap; position: relative; z-index: 1;
+            text-decoration: none; display: inline-block;
+            transition: background .2s, transform .15s;
+        }
+        .btn-banner:hover { background: #e0304f; transform: scale(1.02); }
+
+        /* ──────────── FOOTER ──────────── */
+        .main-footer {
+            background: #f7f7f7; border-top: 1px solid #ddd;
+            padding: 54px 0 28px; margin-top: 20px;
+        }
+        .footer-container {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; padding: 0 5%; gap: 120px;
+        }
+        .footer-column h3 {
+            font-size: .86rem; font-weight: 700; text-transform: uppercase;
+            color: #222; margin-bottom: 18px; letter-spacing: .04em;
+        }
+        .footer-column ul { list-style: none; }
+        .footer-column ul li { margin-bottom: 11px; }
+        .footer-column ul li a {
+            text-decoration: none; color: #555; font-size: .88rem;
+            transition: color .2s;
+        }
+        .footer-column ul li a:hover { color: var(--preto); text-decoration: underline; }
+        .footer-bottom {
+            max-width: 1200px; margin: 32px auto 0;
+            padding: 20px 5% 0; border-top: 1px solid #ebebeb;
+            color: #aaa; font-size: .8rem;
+        }
+
+        @media (max-width: 900px) {
+            .banner-inner { flex-direction: column; text-align: center; }
+            .footer-container { flex-direction: column; gap: 36px; }
+            .hero h1 { font-size: 1.9rem; }
+        }
+        @media (max-width: 620px) {
+            .search-bar { border-radius: 18px; padding: 10px; flex-wrap: wrap; gap: 6px; }
+            .divider { display: none; }
+            .search-item { min-width: calc(50% - 8px); }
+        }
+    </style>
 </head>
 <body>
 
-	<header>
-	   <div class="header-left">
+<!-- ──────────── HEADER ──────────── -->
+<header>
+    <div class="header-left">
         <a href="index.html">
-            <img src="logovents.png" alt="Logo" class="logo">
+            <img src="logovents.png" alt="VENTSY" class="logo">
         </a>
     </div>
 
     <nav class="header-center">
-        <section class="search-container">
-    <div class="search-bar">
-        <div class="search-item" id="location-container">
-            <label>Localização</label>
-            <input type="text" id="location-input" placeholder="Onde você vai?" autocomplete="off">
-            <span id="location-erro" style="display:none; font-size:0.72rem; color:#ff385c; font-weight:600; margin-top:2px;">Selecione um local válido</span>
-            <div id="location-suggestions" class="suggestions-dropdown"></div>
+        <div class="search-container">
+            <div class="search-bar">
+                <div class="search-item" id="location-container">
+                    <label>Localização</label>
+                    <input type="text" id="location-input" placeholder="Estado..." autocomplete="off">
+                    <span id="location-erro" style="display:none;font-size:.68rem;color:var(--vermelho);font-weight:700;margin-top:2px">Selecione da lista</span>
+                    <div id="location-suggestions" class="suggestions-dropdown"></div>
+                </div>
+                <div class="divider"></div>
+                <div class="search-item" id="range-container">
+                    <label>Quando</label>
+                    <span class="date-text" id="display-quando">Adicionar datas</span>
+                    <input type="text" id="input-periodo" style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;">
+                </div>
+                <div class="divider"></div>
+                <div class="search-item" id="tipo-container">
+                    <label>Tipo</label>
+                    <select id="tipo-espaco">
+                        <option value="">Todos</option>
+                        <option value="Casas de Festas">🏠 Casas de Festas</option>
+                        <option value="Sítios, Chácaras e Fazendas">🌳 Sítios e Chácaras</option>
+                        <option value="Acampamentos">⛺ Acampamentos</option>
+                        <option value="Bares e Restaurantes">🍽️ Bares e Restaurantes</option>
+                        <option value="Beach Clubs">🏖️ Beach Clubs</option>
+                        <option value="Centros de Convenções e Galpões">🏭 Galpões</option>
+                        <option value="Clubes">🏊 Clubes</option>
+                        <option value="Hotéis, Pousadas e Resorts">🏨 Hotéis e Resorts</option>
+                        <option value="Rooftops">🌆 Rooftops</option>
+                        <option value="Teatros">🎭 Teatros</option>
+                    </select>
+                </div>
+                <div class="divider"></div>
+                <div class="search-item guest-direct-selector">
+                    <label>Convidados</label>
+                    <div class="stepper-control">
+                        <button type="button" class="btn-step" onclick="alterarQtd(-1)">–</button>
+                        <input type="number" id="qtd-total" class="qtd-input" value="1" min="1" onchange="validarInput(this)">
+                        <button type="button" class="btn-step" onclick="alterarQtd(1)">+</button>
+                    </div>
+                </div>
+                <button class="btn-search" id="main-search-btn" style="opacity:.3;pointer-events:none;">&#128269;</button>
+            </div>
         </div>
-
-        <div class="divider"></div>
-
-        <div class="search-item" id="range-container">
-            <label>Quando</label>
-            <span class="date-text" id="display-quando">Adicionar datas</span>
-            <input type="text" id="input-periodo" style="position:absolute; width:0; height:0; opacity:0; pointer-events:none;">
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="search-item" id="tipo-container">
-            <label>Tipo de Evento</label>
-            <select id="tipo-espaco">
-                <option value="">Todos os tipos</option>
-                <option value="Casas de Festas">🏠 Casas de Festas</option>
-                <option value="Sítios, Chácaras e Fazendas">🌳 Sítios, Chácaras e Fazendas</option>
-                <option value="Acampamentos">⛺ Acampamentos</option>
-                <option value="Bares e Restaurantes">🍽️ Bares e Restaurantes</option>
-                <option value="Beach Clubs">🏖️ Beach Clubs</option>
-                <option value="Centros de Convenções e Galpões">🏭 Centros de Convenções e Galpões</option>
-                <option value="Clubes">🏊 Clubes</option>
-                <option value="Hotéis, Pousadas e Resorts">🏨 Hotéis, Pousadas e Resorts</option>
-                <option value="Rooftops">🌆 Rooftops</option>
-                <option value="Teatros">🎭 Teatros</option>
-            </select>
-        </div>
-
-        <div class="divider"></div>
-
-<div class="search-item guest-direct-selector">
-    <label>Convidados</label>
-    <div class="stepper-control">
-        <button type="button" class="btn-step" onclick="alterarQtd(-1)">–</button>
-        
-        <input type="number" 
-               id="qtd-total" 
-               class="qtd-input" 
-               value="1" 
-               min="1" 
-               onchange="validarInput(this)">
-        
-        <button type="button" class="btn-step" onclick="alterarQtd(1)">+</button>
-    </div>
-</div>
-
-        <button class="btn-search" id="main-search-btn" style="opacity: 0.3; pointer-events: none;">
-            <span>&#128269;</span>
-        </button>
-    </div>
-</section>
     </nav>
 
     <div class="header-right">
-        <a href="login.html" class="btn-login">ENTRAR</a>
-    </div>
-                
-            <div class="menu-hamburguer-container">
-                <button class="btn-menu" onclick="toggleMenuExtra()">
-                    <span class="icon-menu">☰</span>
-                </button>
-                
-                <div id="extra-menu" class="extra-menu-dropdown">
-                    <a href="login.html">Anunciar</a>
-                    <a href="#">Planos</a>
-                    <a href="#">Como Funciona</a>
-                    <a href="#">Fale Conosco</a>
-                </div>
+        <a href="login.html" class="btn-login">Entrar</a>
+        <div class="menu-hamburguer-container">
+            <button class="btn-menu" onclick="toggleMenuExtra()">☰ Menu</button>
+            <div id="extra-menu" class="extra-menu-dropdown">
+                <a href="cadastro.html">✏️ Cadastre seu espaço</a>
+                <a href="planos.html">💳 Planos</a>
+                <a href="como-funciona.html">💡 Como Funciona</a>
+                <a href="fale-conosco.html">💬 Fale Conosco</a>
             </div>
         </div>
-
     </div>
-    	</header>
+</header>
 
-    <main>
-
-
-<section class="categoria-sessao">
-    <h2 class="titulo-categoria">Casas de Festas</h2>
-    <div class="carrossel-horizontal" id="wrapper-casas-de-festas"></div>
-</section>
-
-<section class="categoria-sessao">
-    <h2 class="titulo-categoria">Sítios, Chácaras e Fazendas</h2>
-    <div class="carrossel-horizontal" id="wrapper-sitios-chacaras-e-fazendas"></div>
-</section>
-
-<section class="categoria-sessao">
-    <h2 class="titulo-categoria">Acampamentos</h2>
-    <div class="carrossel-horizontal" id="wrapper-acampamentos"></div>
-</section>
-
-<section class="categoria-sessao">
-    <h2 class="titulo-categoria">Bares e Restaurantes</h2>
-    <div class="carrossel-horizontal" id="wrapper-bares-e-restaurantes"></div>
-</section>
-
-<section class="categoria-sessao">
-    <h2 class="titulo-categoria">Beach Clubs</h2>
-    <div class="carrossel-horizontal" id="wrapper-beach-clubs"></div>
-</section>
-
-<section class="categoria-sessao">
-    <h2 class="titulo-categoria">Centros de Convenções e Galpões</h2>
-    <div class="carrossel-horizontal" id="wrapper-centros-de-convencoes-e-galpoes"></div>
-</section>
-
-<section class="categoria-sessao">
-    <h2 class="titulo-categoria">Clubes</h2>
-    <div class="carrossel-horizontal" id="wrapper-clubes"></div>
-</section>
-
-<section class="categoria-sessao">
-    <h2 class="titulo-categoria">Hotéis, Pousadas e Resorts</h2>
-    <div class="carrossel-horizontal" id="wrapper-hoteis-pousadas-e-resorts"></div>
-</section>
-
-<section class="categoria-sessao">
-    <h2 class="titulo-categoria">Rooftops</h2>
-    <div class="carrossel-horizontal" id="wrapper-rooftops"></div>
-</section>
-
-<section class="categoria-sessao">
-    <h2 class="titulo-categoria">Teatros</h2>
-    <div class="carrossel-horizontal" id="wrapper-teatros"></div>
-</section>
-
-    </main>
-
-<script>
-
-    // ==========================================================
-    // CONFIGURAÇÃO — troque pelas suas credenciais reais
-    // ==========================================================
-    const supabaseUrl = 'https://hxvlfalgrduitevbhqvq.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
-    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-    // ==========================================================
-    // MAPEAMENTO: categoria do banco → id do wrapper no HTML
-    // Para adicionar uma nova categoria, basta incluir uma linha aqui.
-    // ==========================================================
-    const CATEGORIAS = [
-        { banco: 'Casas de Festas',                  wrapperId: 'wrapper-casas-de-festas' },
-        { banco: 'Sítios, Chácaras e Fazendas',      wrapperId: 'wrapper-sitios-chacaras-e-fazendas' },
-        { banco: 'Acampamentos',                     wrapperId: 'wrapper-acampamentos' },
-        { banco: 'Bares e Restaurantes',             wrapperId: 'wrapper-bares-e-restaurantes' },
-        { banco: 'Beach Clubs',                      wrapperId: 'wrapper-beach-clubs' },
-        { banco: 'Centros de Convenções e Galpões',  wrapperId: 'wrapper-centros-de-convencoes-e-galpoes' },
-        { banco: 'Clubes',                           wrapperId: 'wrapper-clubes' },
-        { banco: 'Hotéis, Pousadas e Resorts',       wrapperId: 'wrapper-hoteis-pousadas-e-resorts' },
-        { banco: 'Rooftops',                         wrapperId: 'wrapper-rooftops' },
-        { banco: 'Teatros',                          wrapperId: 'wrapper-teatros' },
-    ];
-
-    // ==========================================================
-    // Gera o HTML de um card a partir de um objeto propriedade
-    // ==========================================================
-    function criarCardHTML(prop) {
-        const imagem = prop.imagem_url || 'https://via.placeholder.com/165x165?text=Sem+foto';
-        const nome   = prop.nome || 'Sem nome';
-        const preco  = prop.preco ?? '—';
-        const nota   = prop.avaliacao || '5.0';
-
-        return `
-            <div class="card-local">
-                <div class="foto-container">
-                    <img src="${imagem}" alt="${nome}" loading="lazy">
-                    <button class="btn-favorito" onclick="toggleFavorito(this)">❤</button>
-                </div>
-                <div class="nome-local">${nome}</div>
-                <div class="detalhes-footer">
-                    <span>A partir de <b>R$ ${preco}/h</b></span>
-                    <span>⭐ ${nota}</span>
-                </div>
+<!-- ──────────── HERO ──────────── -->
+<section class="hero">
+    <div class="hero-blob hero-blob-1"></div>
+    <div class="hero-blob hero-blob-2"></div>
+    <div class="hero-inner">
+        <div class="hero-eyebrow">O espaço certo para cada memória</div>
+        <h1>Encontre o lugar <em>perfeito</em><br>para o seu evento</h1>
+        <p>Sítios, chácaras, salões, rooftops e muito mais. Espaços verificados, prontos para o seu momento especial.</p>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <strong id="stat-total">—</strong>
+                <span>espaços</span>
             </div>
-        `;
-    }
-
-    // ==========================================================
-    // Busca todas as propriedades e distribui nos wrappers
-    // ==========================================================
-    async function renderizarVitrinas() {
-        console.log("Buscando propriedades no Supabase...");
-
-        const { data: propriedades, error } = await _supabase
-            .from('propriedades')
-            .select('*');
-
-        if (error) {
-            console.error('Erro ao buscar dados:', error.message);
-            return;
-        }
-
-        // Limpa todos os wrappers antes de preencher
-        CATEGORIAS.forEach(({ wrapperId }) => {
-            const el = document.getElementById(wrapperId);
-            if (el) el.innerHTML = '';
-        });
-
-        // Distribui cada propriedade no wrapper correto
-        propriedades.forEach(prop => {
-            const cat = CATEGORIAS.find(c => c.banco === prop.categoria);
-            if (!cat) return; // categoria não mapeada, ignora
-
-            const wrapper = document.getElementById(cat.wrapperId);
-            if (wrapper) {
-                wrapper.innerHTML += criarCardHTML(prop);
-            }
-        });
-
-        console.log(`${propriedades.length} propriedades carregadas.`);
-    }
-
-    // ==========================================================
-    // BUSCA POR ESTADO — todos os estados + DF
-    // ==========================================================
-    const ESTADOS = [
-        { nome: 'Acre',                   sigla: 'AC' },
-        { nome: 'Alagoas',                sigla: 'AL' },
-        { nome: 'Amapá',                  sigla: 'AP' },
-        { nome: 'Amazonas',               sigla: 'AM' },
-        { nome: 'Bahia',                  sigla: 'BA' },
-        { nome: 'Ceará',                  sigla: 'CE' },
-        { nome: 'Distrito Federal',       sigla: 'DF' },
-        { nome: 'Espírito Santo',         sigla: 'ES' },
-        { nome: 'Goiás',                  sigla: 'GO' },
-        { nome: 'Maranhão',               sigla: 'MA' },
-        { nome: 'Mato Grosso',            sigla: 'MT' },
-        { nome: 'Mato Grosso do Sul',     sigla: 'MS' },
-        { nome: 'Minas Gerais',           sigla: 'MG' },
-        { nome: 'Pará',                   sigla: 'PA' },
-        { nome: 'Paraíba',                sigla: 'PB' },
-        { nome: 'Paraná',                 sigla: 'PR' },
-        { nome: 'Pernambuco',             sigla: 'PE' },
-        { nome: 'Piauí',                  sigla: 'PI' },
-        { nome: 'Rio de Janeiro',         sigla: 'RJ' },
-        { nome: 'Rio Grande do Norte',    sigla: 'RN' },
-        { nome: 'Rio Grande do Sul',      sigla: 'RS' },
-        { nome: 'Rondônia',               sigla: 'RO' },
-        { nome: 'Roraima',                sigla: 'RR' },
-        { nome: 'Santa Catarina',         sigla: 'SC' },
-        { nome: 'São Paulo',              sigla: 'SP' },
-        { nome: 'Sergipe',                sigla: 'SE' },
-        { nome: 'Tocantins',              sigla: 'TO' },
-    ];
-
-    const locationInput       = document.getElementById('location-input');
-    const suggestionsDropdown = document.getElementById('location-suggestions');
-    const btnBusca            = document.getElementById('main-search-btn');
-    let localSelecionado = false;
-
-    // Remove acentos para comparação tolerante (ex: "Para" encontra "Pará")
-    function removerAcentos(str) {
-        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    }
-
-    function renderizarSugestoes(lista) {
-        suggestionsDropdown.innerHTML = lista.map(e => `
-            <div class="suggestion-item" data-nome="${e.nome}">
-                <span>📍</span> ${e.nome} <small style="color:#aaa;margin-left:6px">${e.sigla}</small>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <strong>27</strong>
+                <span>estados</span>
             </div>
-        `).join('');
-        suggestionsDropdown.style.display = lista.length ? 'block' : 'none';
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <strong>4.9 ★</strong>
+                <span>avaliação média</span>
+            </div>
+        </div>
+    </div>
+</section>
 
-        suggestionsDropdown.querySelectorAll('.suggestion-item').forEach(item => {
-            item.addEventListener('click', () => {
-                locationInput.value = item.dataset.nome;
-                localSelecionado = true;
-                suggestionsDropdown.style.display = 'none';
-                verificarBotaoBusca();
-            });
-        });
-    }
+<!-- ──────────── MAIN ──────────── -->
+<main id="main-content">
+    <div id="container-cats"></div>
 
-    // Ao focar no campo vazio → mostra os 5 primeiros estados
-    locationInput.addEventListener('focus', () => {
-        if (locationInput.value.trim() === '') {
-            renderizarSugestoes(ESTADOS.slice(0, 5));
-        }
-    });
+    <!-- Banner anuncie -->
+    <div class="banner-anuncie" id="banner-anuncie" style="display:none">
+        <div class="banner-inner">
+            <div class="banner-txt">
+                <p>Para proprietários</p>
+                <h3>Anuncie seu espaço na VENTSY</h3>
+                <span>Alcance milhares de pessoas que buscam o espaço ideal para seu evento.</span>
+            </div>
+            <a href="cadastro.html" class="btn-banner">Começar agora →</a>
+        </div>
+    </div>
+</main>
 
-    // Ao digitar → filtra por nome ou sigla, mostra até 5 resultados
-    locationInput.addEventListener('input', () => {
-        localSelecionado = false;
-        const termo = removerAcentos(locationInput.value.trim());
-
-        if (termo === '') {
-            renderizarSugestoes(ESTADOS.slice(0, 5));
-            verificarBotaoBusca();
-            return;
-        }
-
-        const filtrados = ESTADOS.filter(e =>
-            removerAcentos(e.nome).startsWith(termo) ||
-            e.sigla.toLowerCase().startsWith(termo)
-        ).slice(0, 5);
-
-        renderizarSugestoes(filtrados);
-        verificarBotaoBusca();
-    });
-
-    const locationErro = document.getElementById('location-erro');
-
-    // Ao perder o foco: valida — se inválido, limpa e mostra erro
-    locationInput.addEventListener('blur', () => {
-        // Pequeno delay para deixar o clique na sugestão ser processado antes
-        setTimeout(() => {
-            const valorAtual = locationInput.value.trim();
-            const ehValido   = localSelecionado ||
-                               ESTADOS.some(e => e.nome.toLowerCase() === valorAtual.toLowerCase());
-
-            if (valorAtual !== '' && !ehValido) {
-                locationInput.value = '';
-                localSelecionado = false;
-                locationErro.style.display = 'block';
-                verificarBotaoBusca();
-            } else {
-                locationErro.style.display = 'none';
-            }
-
-            suggestionsDropdown.style.display = 'none';
-        }, 150);
-    });
-
-    // Esconde o erro ao começar a digitar de novo
-    locationInput.addEventListener('focus', () => {
-        locationErro.style.display = 'none';
-    });
-
-    // Fecha o dropdown ao clicar fora
-    document.addEventListener('click', (e) => {
-        if (!document.getElementById('location-container').contains(e.target)) {
-            suggestionsDropdown.style.display = 'none';
-        }
-    });
-
-    // Habilita o botão de busca só se um estado válido foi selecionado
-    function verificarBotaoBusca() {
-        const valorAtual = locationInput.value.trim();
-        const ehValido   = localSelecionado ||
-                           ESTADOS.some(e => e.nome.toLowerCase() === valorAtual.toLowerCase());
-
-        btnBusca.style.opacity       = ehValido ? '1'    : '0.3';
-        btnBusca.style.pointerEvents = ehValido ? 'auto' : 'none';
-    }
-
-    // ==========================================================
-    // CALENDÁRIO — seleção de período (início e fim)
-    // ==========================================================
-    const displayQuando = document.getElementById('display-quando');
-
-    const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-
-    function formatarData(date) {
-        return `${date.getDate()} ${meses[date.getMonth()]}`;
-    }
-
-    flatpickr('#input-periodo', {
-        mode: 'range',           // seleciona intervalo início → fim
-        minDate: 'today',        // não permite datas no passado
-        dateFormat: 'Y-m-d',
-        locale: 'pt',
-        showMonths: 2,           // dois calendários lado a lado
-        disableMobile: true,     // usa o flatpickr também no celular
-        onChange(selectedDates) {
-            if (selectedDates.length === 0) {
-                displayQuando.textContent = 'Adicionar datas';
-                displayQuando.style.color = '';
-            } else if (selectedDates.length === 1) {
-                // Só início selecionado — aguarda o fim
-                displayQuando.textContent = `${formatarData(selectedDates[0])} → ...`;
-                displayQuando.style.color = '#222';
-            } else {
-                // Início e fim selecionados
-                const inicio = formatarData(selectedDates[0]);
-                const fim    = formatarData(selectedDates[1]);
-                displayQuando.textContent = inicio === fim
-                    ? inicio                  // mesmo dia
-                    : `${inicio} → ${fim}`;
-                displayQuando.style.color = '#222';
-            }
-        }
-    });
-
-    // Abre o calendário ao clicar no container "Quando"
-    document.getElementById('range-container').addEventListener('click', () => {
-        document.getElementById('input-periodo')._flatpickr.open();
-    });
-
-    btnBusca.addEventListener('click', () => {
-        const estado     = locationInput.value.trim();
-        if (!estado) return;
-
-        const tipo       = document.getElementById('tipo-espaco')?.value || '';
-        const convidados = document.getElementById('qtd-total')?.value   || '0';
-        const data       = document.getElementById('display-quando')?.textContent?.trim();
-        const dataVal    = (data && data !== 'Adicionar datas') ? data : '';
-
-        const url = new URL('buscapropriedade.html', window.location.href);
-        url.searchParams.set('estado', estado);
-        if (tipo)       url.searchParams.set('tipo',       tipo);
-        if (convidados && convidados !== '0') url.searchParams.set('convidados', convidados);
-        if (dataVal)    url.searchParams.set('data',       dataVal);
-
-        window.location.href = url.toString();
-    });
-
-    // ==========================================================
-    // MENU HAMBÚRGUER — abre e fecha
-    // ==========================================================
-    function toggleMenuExtra() {
-        const menu = document.getElementById('extra-menu');
-        const aberto = menu.style.display === 'flex';
-        menu.style.display = aberto ? 'none' : 'flex';
-    }
-
-    // Fecha o menu ao clicar fora dele
-    document.addEventListener('click', (e) => {
-        const container = document.querySelector('.menu-hamburguer-container');
-        if (container && !container.contains(e.target)) {
-            document.getElementById('extra-menu').style.display = 'none';
-        }
-    });
-
-    function alterarQtd(delta) {
-        const input = document.getElementById('qtd-total');
-        const novoValor = Math.max(0, parseInt(input.value || 0) + delta);
-        input.value = novoValor;
-    }
-
-    function validarInput(input) {
-        const valor = parseInt(input.value);
-        if (isNaN(valor) || valor < 0) input.value = 0;
-        else input.value = valor;
-    }
-
-    // Dispara quando a página terminar de carregar
-    document.addEventListener('DOMContentLoaded', renderizarVitrinas);
-
-</script>
-
-
-
-
-
-
-
+<!-- ──────────── FOOTER ──────────── -->
 <footer class="main-footer">
     <div class="footer-container">
         <div class="footer-column">
             <h3>Atendimento</h3>
             <ul>
                 <li><a href="#">Central de Ajuda</a></li>
-                <li><a href="#">Fale Conosco</a></li>
+                <li><a href="fale-conosco.html">Fale Conosco</a></li>
                 <li><a href="#">Política de Privacidade</a></li>
                 <li><a href="#">Termos de Uso</a></li>
                 <li><a href="#">Sobre Nós</a></li>
-                <li><a href="#">Como Funciona</a></li>
+                <li><a href="como-funciona.html">Como Funciona</a></li>
             </ul>
         </div>
-
         <div class="footer-column">
             <h3>Anunciar</h3>
             <ul>
-                <li><a href="#">Cadastre sua propriedade</a></li>
-                <li><a href="#">Planos Disponíveis</a></li>
+                <li><a href="cadastro.html">Cadastre sua propriedade</a></li>
+                <li><a href="planos.html">Planos Disponíveis</a></li>
             </ul>
         </div>
     </div>
-
-    <div class="footer-bottom">
-        <p>&copy; 2026 VENTSY. Todos os direitos reservados.</p>
-    </div>
+    <div class="footer-bottom"><p>&copy; 2026 VENTSY. Todos os direitos reservados.</p></div>
 </footer>
 
+<script>
+/* ── Supabase ── */
+const _sb = supabase.createClient(
+    'https://hxvlfalgrduitevbhqvq.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ'
+);
+
+/* ── Categorias ── */
+const CATS = [
+    { nome: 'Casas de Festas',                 emoji: '🏠' },
+    { nome: 'Sítios, Chácaras e Fazendas',     emoji: '🌳' },
+    { nome: 'Acampamentos',                    emoji: '⛺' },
+    { nome: 'Bares e Restaurantes',            emoji: '🍽️' },
+    { nome: 'Beach Clubs',                     emoji: '🏖️' },
+    { nome: 'Centros de Convenções e Galpões', emoji: '🏭' },
+    { nome: 'Clubes',                          emoji: '🏊' },
+    { nome: 'Hotéis, Pousadas e Resorts',      emoji: '🏨' },
+    { nome: 'Rooftops',                        emoji: '🌆' },
+    { nome: 'Teatros',                         emoji: '🎭' },
+];
+
+/* ── Ordenação: 1º plano (ultra>pro>basico), 2º nota desc, 3º alfabético ── */
+function pesoPlano(p) { return p === 'ultra' ? 0 : p === 'pro' ? 1 : 2; }
+
+function ordenar(lista) {
+    return [...lista].sort((a, b) => {
+        const dp = pesoPlano(a._plano) - pesoPlano(b._plano);
+        if (dp !== 0) return dp;
+        const dn = parseFloat(b._nota) - parseFloat(a._nota);
+        if (dn !== 0) return dn;
+        return (a.nome || '').localeCompare(b.nome || '', 'pt-BR');
+    });
+}
+
+/* ── HTML de um card ── */
+function cardHTML(prop, delay) {
+    const plano  = prop._plano;
+    const isUltra = plano === 'ultra';
+    const isPro   = plano === 'pro';
+
+    const img   = prop.imagem_url || prop.foto_capa
+                  || `https://picsum.photos/seed/${prop.id}/420/320`;
+    const nome  = prop.nome || 'Sem nome';
+    const cid   = prop.cidade ? `📍 ${prop.cidade}` : (prop.estado || '');
+    const preco = prop.preco ?? prop.valor_base;
+    const nota  = prop._nota;
+    const id    = prop.id || '';
+
+    const badgeHtml = isUltra
+        ? `<div class="card-badge badge-ultra">✦ Premium</div>`
+        : isPro
+        ? `<div class="card-badge badge-pro">Pro</div>`
+        : '';
+
+    const ribbonHtml = isUltra ? `<div class="ribbon">Premium</div>` : '';
+
+    const notaHtml = nota
+        ? `<span class="card-nota">
+               <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+               ${parseFloat(nota).toFixed(1)}
+           </span>`
+        : '';
+
+    const precoHtml = preco != null
+        ? `<span class="card-preco">A partir de <strong>R$ ${Number(preco).toLocaleString('pt-BR')}</strong></span>`
+        : `<span class="card-preco" style="color:#ccc">Sob consulta</span>`;
+
+    const cls = `card${isUltra ? ' card-ultra' : isPro ? ' card-pro' : ''}`;
+
+    return `
+        <div class="${cls}"
+             style="animation-delay:${delay}s"
+             onclick="window.location.href='propriedade.html?id=${id}'"
+             title="${nome}">
+            ${ribbonHtml}
+            <div class="card-foto">
+                <img src="${img}" alt="${nome}" loading="lazy"
+                     onerror="this.src='https://picsum.photos/seed/err${id}/420/320'">
+                ${badgeHtml}
+                <button class="card-fav" onclick="event.stopPropagation();toggleFav(this)">♡</button>
+            </div>
+            <div class="card-body">
+                <div class="card-nome">${nome}</div>
+                ${cid ? `<div class="card-cidade">${cid}</div>` : ''}
+                <div class="card-footer">${precoHtml}${notaHtml}</div>
+            </div>
+        </div>
+    `;
+}
+
+/* ── Busca plano de cada proprietário ── */
+async function planosMap() {
+    try {
+        const { data } = await _sb.from('assinaturas')
+            .select('usuario_id, plano_ativo, status');
+        const m = {};
+        (data || []).forEach(a => {
+            if (a.status === 'ativa' || a.status === 'trial')
+                m[a.usuario_id] = a.plano_ativo;
+        });
+        return m;
+    } catch { return {}; }
+}
+
+/* ── Render principal ── */
+async function render() {
+    const container = document.getElementById('container-cats');
+
+    const [{ data: props, error }, planos] = await Promise.all([
+        _sb.from('propriedades').select('*'),
+        planosMap()
+    ]);
+
+    let lista = props || [];
+
+    /* Se banco vazio → demo */
+    if (!lista.length || error) {
+        lista = DEMO;
+        lista.forEach(p => { p._plano = p._plano || 'basico'; p._nota = p.nota_media; });
+    } else {
+        lista.forEach(p => {
+            p._plano = (p.usuario_id && planos[p.usuario_id]) || 'basico';
+            p._nota  = parseFloat(p.nota_media || p.avaliacao || 0);
+        });
+    }
+
+    document.getElementById('stat-total').textContent = lista.length + '+';
+
+    /* Agrupa por categoria */
+    const grupos = {};
+    CATS.forEach(c => { grupos[c.nome] = []; });
+    lista.forEach(p => { if (grupos[p.categoria]) grupos[p.categoria].push(p); });
+
+    container.innerHTML = '';
+    let secoesRenderizadas = 0;
+
+    CATS.forEach((cat, ci) => {
+        const grupo = ordenar(grupos[cat.nome] || []);
+        if (!grupo.length) return;
+
+        /* Máx 7 no carrossel */
+        const exibir = grupo.slice(0, 7);
+
+        const sec = document.createElement('div');
+        sec.className = 'secao';
+        sec.innerHTML = `
+            <div class="secao-header">
+                <span class="secao-emoji">${cat.emoji}</span>
+                <h2 class="secao-titulo">${cat.nome}</h2>
+                <button class="btn-ver-todos" onclick="buscarCat('${cat.nome.replace(/'/g,"\\'")}')">
+                    Ver todos
+                    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+            <div class="carrossel">
+                ${exibir.map((p, i) => cardHTML(p, i * 0.055)).join('')}
+            </div>
+        `;
+        container.appendChild(sec);
+
+        /* Divisor */
+        const div = document.createElement('div');
+        div.className = 'divisor';
+        div.innerHTML = `<div class="linha"></div><span class="icone">✦</span><div class="linha"></div>`;
+        container.appendChild(div);
+
+        secoesRenderizadas++;
+
+        /* Banner após 3ª seção */
+        if (secoesRenderizadas === 3) {
+            const banner = document.getElementById('banner-anuncie');
+            banner.style.display = 'block';
+            container.appendChild(banner);
+        }
+    });
+}
+
+function buscarCat(cat) {
+    const url = new URL('buscapropriedade.html', window.location.href);
+    url.searchParams.set('tipo', cat);
+    window.location.href = url.toString();
+}
+
+function toggleFav(btn) {
+    btn.classList.toggle('fav-on');
+    btn.textContent = btn.classList.contains('fav-on') ? '❤' : '♡';
+}
+
+/* ── Dados demo quando banco estiver vazio ── */
+const DEMO = [
+    {id:'d1',nome:'Chácara Macacu',cidade:'Cachoeiras de Macacu, RJ',preco:3000,nota_media:4.9,_plano:'ultra',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara1/420/320'},
+    {id:'d2',nome:'Sítio Verde Vale',cidade:'Guapimirim, RJ',preco:2200,nota_media:4.7,_plano:'pro',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara2/420/320'},
+    {id:'d3',nome:'Sítio Brisa',cidade:'Petrópolis, RJ',preco:1900,nota_media:4.5,_plano:'pro',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara3/420/320'},
+    {id:'d4',nome:'Chácara das Flores',cidade:'Teresópolis, RJ',preco:1800,nota_media:4.3,_plano:'basico',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara4/420/320'},
+    {id:'d5',nome:'Espaço Aquarela',cidade:'Petrópolis, RJ',preco:3200,nota_media:4.8,_plano:'ultra',categoria:'Casas de Festas',imagem_url:'https://picsum.photos/seed/salao1/420/320'},
+    {id:'d6',nome:'Salão Primavera',cidade:'Nova Friburgo, RJ',preco:1500,nota_media:4.4,_plano:'pro',categoria:'Casas de Festas',imagem_url:'https://picsum.photos/seed/salao2/420/320'},
+    {id:'d7',nome:'Espaço Garden',cidade:'Niterói, RJ',preco:2100,nota_media:4.2,_plano:'basico',categoria:'Casas de Festas',imagem_url:'https://picsum.photos/seed/salao3/420/320'},
+    {id:'d8',nome:'Rooftop 360°',cidade:'Rio de Janeiro, RJ',preco:5000,nota_media:5.0,_plano:'ultra',categoria:'Rooftops',imagem_url:'https://picsum.photos/seed/roof1/420/320'},
+    {id:'d9',nome:'Sky Lounge',cidade:'São Paulo, SP',preco:4200,nota_media:4.9,_plano:'pro',categoria:'Rooftops',imagem_url:'https://picsum.photos/seed/roof2/420/320'},
+    {id:'d10',nome:'Terraço Carioca',cidade:'Rio de Janeiro, RJ',preco:3800,nota_media:4.6,_plano:'basico',categoria:'Rooftops',imagem_url:'https://picsum.photos/seed/roof3/420/320'},
+];
+DEMO.forEach(d => { d._nota = d.nota_media; });
+
+/* ── Estados ── */
+const ESTADOS = [
+    {n:'Acre',s:'AC'},{n:'Alagoas',s:'AL'},{n:'Amapá',s:'AP'},{n:'Amazonas',s:'AM'},
+    {n:'Bahia',s:'BA'},{n:'Ceará',s:'CE'},{n:'Distrito Federal',s:'DF'},
+    {n:'Espírito Santo',s:'ES'},{n:'Goiás',s:'GO'},{n:'Maranhão',s:'MA'},
+    {n:'Mato Grosso',s:'MT'},{n:'Mato Grosso do Sul',s:'MS'},{n:'Minas Gerais',s:'MG'},
+    {n:'Pará',s:'PA'},{n:'Paraíba',s:'PB'},{n:'Paraná',s:'PR'},
+    {n:'Pernambuco',s:'PE'},{n:'Piauí',s:'PI'},{n:'Rio de Janeiro',s:'RJ'},
+    {n:'Rio Grande do Norte',s:'RN'},{n:'Rio Grande do Sul',s:'RS'},
+    {n:'Rondônia',s:'RO'},{n:'Roraima',s:'RR'},{n:'Santa Catarina',s:'SC'},
+    {n:'São Paulo',s:'SP'},{n:'Sergipe',s:'SE'},{n:'Tocantins',s:'TO'},
+];
+
+const locInput = document.getElementById('location-input');
+const locDrop  = document.getElementById('location-suggestions');
+const locErro  = document.getElementById('location-erro');
+const btnBusca = document.getElementById('main-search-btn');
+let locOk = false;
+
+function sem(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+
+function renderSug(lista) {
+    locDrop.innerHTML = lista.map(e =>
+        `<div class="suggestion-item" data-n="${e.n}">
+            <span>📍</span>${e.n}<small style="color:#bbb;margin-left:6px">${e.s}</small>
+        </div>`
+    ).join('');
+    locDrop.style.display = lista.length ? 'block' : 'none';
+    locDrop.querySelectorAll('.suggestion-item').forEach(el => {
+        el.addEventListener('click', () => {
+            locInput.value = el.dataset.n; locOk = true;
+            locDrop.style.display = 'none'; checkBusca();
+        });
+    });
+}
+
+locInput.addEventListener('focus', () => {
+    locErro.style.display = 'none';
+    renderSug(locInput.value.trim() ? [] : ESTADOS.slice(0,5));
+});
+locInput.addEventListener('input', () => {
+    locOk = false;
+    const t = sem(locInput.value.trim());
+    renderSug(t ? ESTADOS.filter(e => sem(e.n).startsWith(t) || e.s.toLowerCase().startsWith(t)).slice(0,5) : ESTADOS.slice(0,5));
+    checkBusca();
+});
+locInput.addEventListener('blur', () => setTimeout(() => {
+    const v = locInput.value.trim();
+    if (v && !locOk && !ESTADOS.some(e => e.n.toLowerCase() === v.toLowerCase())) {
+        locInput.value = ''; locOk = false;
+        locErro.style.display = 'block'; checkBusca();
+    }
+    locDrop.style.display = 'none';
+}, 160));
+document.addEventListener('click', e => {
+    if (!document.getElementById('location-container').contains(e.target))
+        locDrop.style.display = 'none';
+});
+
+function checkBusca() {
+    const v = locInput.value.trim();
+    const ok = locOk || ESTADOS.some(e => e.n.toLowerCase() === v.toLowerCase());
+    btnBusca.style.opacity       = ok ? '1' : '.3';
+    btnBusca.style.pointerEvents = ok ? 'auto' : 'none';
+}
+
+/* Calendário */
+const dQuando = document.getElementById('display-quando');
+const mm = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const fd = d => `${d.getDate()} ${mm[d.getMonth()]}`;
+
+flatpickr('#input-periodo', {
+    mode:'range', minDate:'today', dateFormat:'Y-m-d',
+    locale:'pt', showMonths:2, disableMobile:true,
+    onChange(ds) {
+        if (!ds.length) { dQuando.textContent='Adicionar datas'; dQuando.style.color=''; }
+        else if (ds.length===1) { dQuando.textContent=`${fd(ds[0])} → ...`; dQuando.style.color='#222'; }
+        else { const a=fd(ds[0]),b=fd(ds[1]); dQuando.textContent=a===b?a:`${a} → ${b}`; dQuando.style.color='#222'; }
+    }
+});
+document.getElementById('range-container').addEventListener('click', () =>
+    document.getElementById('input-periodo')._flatpickr.open()
+);
+
+btnBusca.addEventListener('click', () => {
+    const estado = locInput.value.trim(); if (!estado) return;
+    const tipo  = document.getElementById('tipo-espaco')?.value || '';
+    const conv  = document.getElementById('qtd-total')?.value   || '0';
+    const data  = dQuando.textContent.trim();
+    const url   = new URL('buscapropriedade.html', window.location.href);
+    url.searchParams.set('estado', estado);
+    if (tipo)              url.searchParams.set('tipo', tipo);
+    if (conv && conv!=='0') url.searchParams.set('convidados', conv);
+    if (data && data!=='Adicionar datas') url.searchParams.set('data', data);
+    window.location.href = url.toString();
+});
+
+function alterarQtd(d) {
+    const i = document.getElementById('qtd-total');
+    i.value = Math.max(0, parseInt(i.value||0)+d);
+}
+function validarInput(el) { el.value = Math.max(0, parseInt(el.value)||0); }
+
+function toggleMenuExtra() {
+    const m = document.getElementById('extra-menu');
+    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.menu-hamburguer-container'))
+        document.getElementById('extra-menu').style.display = 'none';
+});
+
+document.addEventListener('DOMContentLoaded', render);
+</script>
 </body>
 </html>
