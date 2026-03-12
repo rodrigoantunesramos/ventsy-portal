@@ -570,6 +570,62 @@
     </div>
 </div>
 
+<!-- MODAL LIBERAR DIA (confirmação simples) -->
+<div class="modal-overlay" id="modal-liberar-dia">
+    <div class="modal-box">
+        <button class="btn-fechar-modal" onclick="fecharModalLiberarDia()">✕</button>
+        <div style="font-size:2.4rem; text-align:center; margin-bottom:12px;">🔓</div>
+        <h3 style="text-align:center;">Liberar este dia?</h3>
+        <p class="data-selecionada" style="text-align:center; margin-bottom:20px;">
+            Dia <strong id="liberar-dia-num">—</strong> de <span id="liberar-dia-mes">—</span>
+        </p>
+        <div style="background:#fff0f2; border-radius:12px; padding:14px 18px; margin-bottom:24px; display:flex; align-items:center; gap:12px;">
+            <span style="font-size:1.4rem;">🔒</span>
+            <div>
+                <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:#ff385c; margin-bottom:2px;">Motivo do bloqueio</div>
+                <div style="font-size:0.9rem; font-weight:600; color:#0d0d0d;" id="liberar-dia-motivo">—</div>
+            </div>
+        </div>
+        <p style="font-size:0.82rem; color:#888; margin-bottom:22px; text-align:center; line-height:1.5;">
+            Confirma que quer remover este bloqueio e deixar o dia disponível no seu anúncio?
+        </p>
+        <div class="modal-acoes">
+            <button class="btn-modal-cancel" onclick="fecharModalLiberarDia()">Cancelar</button>
+            <button class="btn-modal-confirm" style="background:#1ebc54; box-shadow:0 4px 12px rgba(30,188,84,0.25);"
+                    onclick="confirmarLiberarDia()">✅ Sim, liberar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL LIBERAR TODOS (exige digitar LIBERAR) -->
+<div class="modal-overlay" id="modal-liberar-todos">
+    <div class="modal-box">
+        <button class="btn-fechar-modal" onclick="fecharModalLiberarTodos()">✕</button>
+        <div style="font-size:2.4rem; text-align:center; margin-bottom:12px;">⚠️</div>
+        <h3 id="modal-liberar-titulo" style="text-align:center; font-size:1rem; margin-bottom:10px;">Liberar todos os dias</h3>
+        <p id="modal-liberar-subtitulo"
+           style="font-size:0.82rem; color:#888; text-align:center; line-height:1.5; margin-bottom:22px;"></p>
+
+        <div style="background:#fff8e1; border:1px solid #ffe082; border-radius:12px; padding:14px 16px; margin-bottom:22px; font-size:0.82rem; color:#7a5900; line-height:1.5;">
+            ⚠️ <strong>Atenção:</strong> todos os motivos de bloqueio deste mês serão apagados permanentemente. Esta ação não pode ser desfeita.
+        </div>
+
+        <label class="label-campo">Digite <strong>LIBERAR</strong> para confirmar</label>
+        <input type="text" class="input-modal" id="input-confirmar"
+               placeholder="LIBERAR" oninput="validarTextoLiberarTodos()"
+               autocomplete="off" spellcheck="false">
+
+        <div class="modal-acoes">
+            <button class="btn-modal-cancel" onclick="fecharModalLiberarTodos()">Cancelar</button>
+            <button class="btn-modal-confirm" id="btn-confirmar-liberar"
+                    style="background:#ff385c; opacity:0.4; cursor:not-allowed; transition:opacity 0.2s, background 0.2s;"
+                    onclick="executarLiberarTodos()" disabled>
+                🗑️ Liberar todos
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast">
     <span id="toast-icone">✅</span>
@@ -711,15 +767,12 @@ function clicarDia(dia, motivo) {
     const k = chave(anoAtual, mesAtual, dia);
 
     if (motivo) {
-        // Já bloqueado → desbloqueia direto
-        delete bloqueios[k];
-        salvarLocal();
-        renderizarCalendario();
-        mostrarToast('✅', `Dia ${dia} liberado!`);
+        // Já bloqueado → abre modal de confirmação antes de liberar
+        abrirModalLiberar(k, dia, motivo);
         return;
     }
 
-    // Abre modal para escolher motivo
+    // Abre modal para escolher motivo de bloqueio
     _diaSelecionado = { dia, chave: k };
     document.getElementById('modal-titulo').textContent = `🔒 Bloquear dia ${dia}`;
     document.getElementById('modal-data').textContent   =
@@ -765,16 +818,86 @@ function bloquearFimsDeSemana() {
 }
 
 function liberarTodoMes() {
-    const totalDias = new Date(anoAtual, mesAtual + 1, 0).getDate();
-    for (let d = 1; d <= totalDias; d++) {
-        delete bloqueios[chave(anoAtual, mesAtual, d)];
+    const bloqDoMes = Object.keys(bloqueios).filter(k =>
+        k.startsWith(`${anoAtual}-${String(mesAtual + 1).padStart(2,'0')}`)
+    );
+    if (bloqDoMes.length === 0) {
+        mostrarToast('ℹ️', 'Nenhum dia bloqueado neste mês.');
+        return;
     }
+    // Abre modal de confirmação com digitação obrigatória
+    _acaoPendente = () => {
+        bloqDoMes.forEach(k => delete bloqueios[k]);
+        salvarLocal();
+        renderizarCalendario();
+        mostrarToast('✅', `${bloqDoMes.length} dias liberados!`);
+    };
+    document.getElementById('modal-liberar-titulo').textContent  = `⚠️ Liberar todos os dias de ${MESES[mesAtual]}`;
+    document.getElementById('modal-liberar-subtitulo').textContent =
+        `Isso vai remover todos os ${bloqDoMes.length} bloqueio(s) deste mês de uma vez. Esta ação não pode ser desfeita.`;
+    document.getElementById('input-confirmar').value = '';
+    document.getElementById('btn-confirmar-liberar').disabled = true;
+    document.getElementById('modal-liberar-todos').classList.add('aberto');
+    setTimeout(() => document.getElementById('input-confirmar').focus(), 100);
+}
+
+function desbloquearDia(k, dia) {
+    abrirModalLiberar(k, dia, bloqueios[k]);
+}
+
+/* ── MODAL LIBERAR DIA (confirmação simples) ── */
+let _chaveParaLiberar = null;
+
+function abrirModalLiberar(k, dia, motivo) {
+    _chaveParaLiberar = { k, dia };
+    document.getElementById('liberar-dia-num').textContent    = dia;
+    document.getElementById('liberar-dia-mes').textContent    = `${MESES[mesAtual]} ${anoAtual}`;
+    document.getElementById('liberar-dia-motivo').textContent = motivo;
+    document.getElementById('modal-liberar-dia').classList.add('aberto');
+}
+
+function confirmarLiberarDia() {
+    if (!_chaveParaLiberar) return;
+    const { k, dia } = _chaveParaLiberar;
+    delete bloqueios[k];
     salvarLocal();
     renderizarCalendario();
-    mostrarToast('✅', 'Todos os dias do mês liberados!');
+    mostrarToast('✅', `Dia ${dia} liberado!`);
+    fecharModalLiberarDia();
+    _chaveParaLiberar = null;
+}
+
+function fecharModalLiberarDia() {
+    document.getElementById('modal-liberar-dia').classList.remove('aberto');
+}
+
+/* ── MODAL LIBERAR TODOS (exige digitar LIBERAR) ── */
+let _acaoPendente = null;
+
+function fecharModalLiberarTodos() {
+    document.getElementById('modal-liberar-todos').classList.remove('aberto');
+    _acaoPendente = null;
+}
+
+function validarTextoLiberarTodos() {
+    const val = document.getElementById('input-confirmar').value.trim().toUpperCase();
+    const btn = document.getElementById('btn-confirmar-liberar');
+    const ok  = val === 'LIBERAR';
+    btn.disabled      = !ok;
+    btn.style.opacity = ok ? '1'            : '0.4';
+    btn.style.cursor  = ok ? 'pointer'      : 'not-allowed';
+    btn.style.background = ok ? '#ff385c'   : '#ff385c';
+}
+
+function executarLiberarTodos() {
+    if (_acaoPendente) _acaoPendente();
+    fecharModalLiberarTodos();
 }
 
 function salvarDisponibilidade() {
+    salvarLocal();
+    mostrarToast('💾', 'Disponibilidade salva com sucesso!');
+}
     // Aqui entraria o UPSERT no Supabase quando a tabela estiver pronta
     salvarLocal();
     mostrarToast('💾', 'Disponibilidade salva com sucesso!');
@@ -833,15 +956,25 @@ function mudarMes(delta) {
     renderizarCalendario();
 }
 
-/* ── MODAL ── */
+/* ── MODAL (fechar todos) ── */
 function fecharModal() {
     document.getElementById('modal-bloqueio').classList.remove('aberto');
 }
 document.getElementById('modal-bloqueio').addEventListener('click', e => {
     if (e.target === document.getElementById('modal-bloqueio')) fecharModal();
 });
+document.getElementById('modal-liberar-dia').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-liberar-dia')) fecharModalLiberarDia();
+});
+document.getElementById('modal-liberar-todos').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-liberar-todos')) fecharModalLiberarTodos();
+});
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') fecharModal();
+    if (e.key === 'Escape') {
+        fecharModal();
+        fecharModalLiberarDia();
+        fecharModalLiberarTodos();
+    }
 });
 
 /* ── AVATAR ── */
