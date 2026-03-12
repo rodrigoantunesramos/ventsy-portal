@@ -2079,15 +2079,29 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                 height: 46px;
                 margin-left: 0;
             }
-            /* Main content: account for taller header */
+            /* Main content: account for taller header — stack filter button above cards */
             .listagem-split {
                 margin-top: 0;
                 height: auto;
                 overflow: visible;
+                flex-direction: column;
+            }
+            /* Cards column: reset fixed height so it scrolls naturally */
+            .coluna-cards {
+                padding: 12px 16px;
+                height: auto;
+                overflow-y: visible;
             }
             /* Cards: single column on small screens */
             .grid-resultados-split {
                 grid-template-columns: 1fr;
+            }
+            /* card-foto fixed widths: let them fill their container */
+            .card-foto {
+                width: 100%;
+            }
+            .foto-card {
+                width: 100%;
             }
             /* Filter button: full-width */
             .btn-abrir-filtro {
@@ -2095,10 +2109,6 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                 width: calc(100% - 32px);
                 justify-content: center;
                 border-radius: 12px;
-            }
-            /* Cards column padding */
-            .coluna-cards {
-                padding: 12px 16px;
             }
             /* Footer */
             .footer-container {

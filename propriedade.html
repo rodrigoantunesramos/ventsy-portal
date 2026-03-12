@@ -403,8 +403,9 @@
             .footer-container { flex-direction: column; gap: 40px; }
         }
         @media (max-width: 600px) {
-            .galeria-grid { grid-template-columns: 1fr; height: auto; }
-            .galeria-grid .foto-main { grid-column: 1; }
+            .galeria-grid { grid-template-columns: 1fr; grid-template-rows: auto; height: auto; }
+            .galeria-grid .foto-main { grid-column: 1; grid-row: auto; }
+            .galeria-grid .foto-slot { height: 200px; }
             .similares-grid { grid-template-columns: 1fr; }
             .form-duplo { grid-template-columns: 1fr; }
         }
@@ -496,6 +497,18 @@
             .preco-lateral {
                 font-size: 1.2rem;
             }
+            /* Gallery slot height reduced for tiny screens */
+            .galeria-grid .foto-slot {
+                height: 160px;
+            }
+            /* Gallery action buttons: stack vertically, smaller text */
+            .btn-galeria-acoes {
+                flex-direction: column;
+                gap: 4px;
+                bottom: 8px;
+                right: 8px;
+            }
+            /* Similares grid already 1-col at 600px */
         }
 
     </style>

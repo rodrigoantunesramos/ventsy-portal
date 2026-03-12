@@ -342,13 +342,52 @@
         }
 
         /* ── RESPONSIVO ── */
-        @media (max-width: 900px) {
-            .dash-sidebar { display: none; }
-            .dash-content { padding: 0 16px 60px; }
+
+        /* ── MOBILE SIDEBAR TOGGLE ── */
+        .btn-sidebar-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            width: 40px; height: 40px;
+            background: none; border: 1px solid #eee;
+            border-radius: 8px; cursor: pointer; padding: 8px;
+        }
+        .btn-sidebar-toggle span {
+            display: block; width: 18px; height: 2px;
+            background: #444; border-radius: 2px;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 9998;
+        }
+        .sidebar-overlay.ativo { display: block; }
+
+        @media (max-width: 768px) {
+            .btn-sidebar-toggle { display: flex; }
+            .dash-sidebar {
+                display: flex !important;
+                position: fixed; top: 80px; left: 0;
+                width: 280px; height: calc(100vh - 80px);
+                z-index: 9999;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            }
+            .dash-sidebar.aberta { transform: translateX(0); }
+            .dash-content { padding: 0 16px 40px; }
+            .dash-header-fixo h2 { font-size: 1.4rem; }
             .passos-indicacao { grid-template-columns: 1fr; }
             .card-hero { padding: 32px 20px; }
             .card-hero h3 { font-size: 1.4rem; }
             .footer-container { flex-direction: column; gap: 36px; }
+        }
+        @media (max-width: 480px) {
+            .logo { height: 44px; }
+            header { padding: 0 4%; }
         }
 
     </style>
