@@ -3,2886 +3,869 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Primeiro Site</title>
+    <title>Minha Propriedade — VENTSY</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
 
-	/*Configurações Gerais do site é o BODY*/	
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: Arial, sans-serif, Tahoma, Geneva, Verdana, 'Segoe UI';
-            display: flex;
-	        flex-direction: column; /* Alinha os itens um abaixo do outro */
-            align-items: left;
+            font-family: Arial, sans-serif;
+            display: flex; flex-direction: column;
             margin: 0 auto;
             background-color: #f0f2f5;
             padding: 0;
-            
         }
 
-	
-	/* BARRA DO TOPO (HEADER) */
-        header {
-            width: 100%;
-            height: 80px;
-            background-color: #ffffff;
-            display: flex;
-            align-items: center; /* Centraliza verticalmente */
-	        padding: 0 5%;  /* Padding em % para ser flexível */
+        /* ── LOADING ── */
+        #loading-screen {
+            position: fixed; inset: 0; background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 99999; flex-direction: column; gap: 16px;
+        }
+        .loading-logo { font-size: 2rem; font-weight: 900; color: #0d0d0d; letter-spacing: -1px; }
+        .loading-logo em { font-style: normal; color: #ff385c; }
+        .loading-dots { display: flex; gap: 6px; }
+        .loading-dots span { width: 8px; height: 8px; background: #ff385c; border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:.4} 40%{transform:scale(1);opacity:1} }
+
+        /* ── HEADER ── */
+        header.topbar {
+            width: 100%; height: 80px; background: #fff;
+            display: flex; align-items: center; padding: 0 5%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: fixed; /* Fixa no topo ao rolar a página */
-            top: 0;
-            z-index: 9999; /* Garante que a logo fique sempre por cima de tudo */
-            box-sizing: border-box; /* Garante que o padding não quebre a largura */
-            overflow: visible !important;
-           
+            position: fixed; top: 0; z-index: 9999;
+            box-sizing: border-box; overflow: visible !important;
+        }
+        .header-left, .header-right { flex: 1; display: flex; }
+        .header-right { align-items: center; gap: 15px; justify-content: flex-end; }
+        .logo { height: 100px; width: auto; cursor: pointer; }
+
+        /* Avatar dropmenu */
+        .avatar-container { position: relative; }
+        .avatar-btn {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: #ff385c; color: #fff; border: none;
+            font-size: 1.05rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 10px rgba(255,56,92,0.35);
+            transition: transform 0.2s;
+        }
+        .avatar-btn:hover { transform: scale(1.08); }
+        .avatar-dropdown {
+            position: absolute; top: 54px; right: 0; width: 210px;
+            background: white; border-radius: 14px;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.13);
+            display: none; flex-direction: column;
+            padding: 8px 0; z-index: 1001; border: 1px solid #f0f0f0;
+        }
+        .drop-header { padding: 12px 18px 10px; border-bottom: 1px solid #f0f0f0; margin-bottom: 4px; }
+        .drop-header strong { display: block; font-size: 0.92rem; color: #0d0d0d; margin-bottom: 2px; }
+        .drop-header span { font-size: 0.78rem; color: #999; }
+        .avatar-dropdown a, .avatar-dropdown button {
+            padding: 11px 18px; text-decoration: none; color: #444;
+            font-size: 0.88rem; display: flex; align-items: center; gap: 10px;
+            background: none; border: none; font-family: inherit;
+            cursor: pointer; width: 100%; text-align: left; transition: background 0.15s;
+        }
+        .avatar-dropdown a:hover, .avatar-dropdown button:hover { background: #f7f7f7; }
+        .drop-sair { color: #ff385c !important; border-top: 1px solid #f0f0f0; margin-top: 4px; }
+
+        /* ── LAYOUT ── */
+        .dashboard-container {
+            display: flex; min-height: 100vh;
+            background: #f0f2f5; margin-top: 80px;
         }
 
-        /* Garante que a logo e o botão tenham o mesmo peso visual para o centro ser real */
-.header-left, .header-right {
-    flex: 1; 
-    display: flex;
-}
+        /* ── SIDEBAR ── */
+        .dash-sidebar {
+            width: 260px; background: #fff; padding: 30px 20px;
+            border-right: 1px solid #eee; display: flex; flex-direction: column;
+            position: sticky; top: 80px; height: calc(100vh - 80px); overflow-y: auto;
+        }
+        .perfil-resumo { text-align: center; margin-bottom: 32px; }
+        .sidebar-avatar {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: #ff385c; color: #fff; font-size: 1.9rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
+        }
+        .perfil-resumo h3 { font-size: 1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 4px; }
+        .perfil-resumo .handle { font-size: 0.78rem; color: #717171; }
+        .plano-chip {
+            display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
+            background: rgba(255,56,92,0.08); border: 1px solid rgba(255,56,92,0.2);
+            border-radius: 20px; padding: 3px 12px; font-size: 0.72rem; font-weight: 700; color: #ff385c;
+        }
+        .dash-menu { display: flex; flex-direction: column; width: 100%; }
+        .dash-menu a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 14px; color: #666; text-decoration: none;
+            border-radius: 8px; margin-bottom: 4px; font-size: 0.9rem; transition: all 0.2s;
+        }
+        .dash-menu a:hover { background: #f7f7f7; color: #0d0d0d; }
+        .dash-menu a.active { background: rgba(255,56,92,0.08); color: #ff385c; font-weight: 600; }
 
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    justify-content: flex-end; /* Empurra o botão de login para o fim da direita */
-}
-
-/* Estilo do Menu Central */
-.header-center {
-    display: flex;
-    justify-content: space-between;
-    gap: 25px; /* Espaço entre os links */
-    overflow: visible !important;
-
-}
-
-.header-center a {
-    text-decoration: none;
-    color: #b11515;
-    font-size: 0.95rem;
-    font-weight: 500;
-    position: relative;
-    padding: 5px 0;
-}
-
-/* Efeito da linha embaixo que você queria */
-.header-center a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: 0;
-    left: 0;
-    background-color: #1a73e8;
-    transition: width 0.3s ease;
-}
-
-.header-center a:hover::after {
-    width: 100%;
-}
-
-/* Botão de Login (Lateral Direita) */
-.btn-login {
-    background-color: #f0f2f5;
-    color: #1a73e8;
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
-}
-
-.btn-login:hover {
-    background-color: #1a73e8;
-    color: white;
-    box-shadow: 0 4px 10px rgba(26, 115, 232, 0.2);
-}
-
-.btn-menu {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-}
-
-.btn-menu:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* Dropdown Extra */
-.menu-hamburguer-container { position: relative; }
-
-.extra-menu-dropdown {
-    position: absolute;
-    top: 50px;
-    right: 0;
-    width: 200px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-    display: none;
-    flex-direction: column;
-    padding: 10px 0;
-    z-index: 1001;
-}
-
-.extra-menu-dropdown a {
-    padding: 12px 20px;
-    text-decoration: none;
-    color: #444;
-    font-size: 0.9rem;
-}
-
-.extra-menu-dropdown a:hover {
-    background: #f7f7f7;
-}
-
-nav {
-    /* Isso faz o menu ocupar o espaço central */
-    flex-grow: 1;
-    display: flex;
-    justify-content: top; /* Centraliza os links dentro do NAV */
-}
-
-nav a {
-    margin: 0 15px; /* Espaçamento entre os links */
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    padding-bottom: 5px; /* Espaço entre o texto e a linha */
-    border-bottom: 2px solid transparent; /* Linha invisível por padrão */
-    transition: all 0.3s ease; /* Faz a transição ser suave */
-}
-
-nav a:hover {
-    color: #1a73e8; /* Muda de cor ao passar o mouse */
-    border-bottom: 2px solid #1a73e8; /* A linha aparece com cor */
-}
-
-/* Espaçador invisível para equilibrar a logo e manter o menu no centro real */
-.spacer {
-    width: 150px; /* Deve ter o mesmo tamanho aproximado da sua logo */
-}
-
-	.logo {
-            height: 100px; /* Ajusta a altura da logo */
-            width: auto;
-            cursor: pointer;
+        /* Separador de seção no menu */
+        .menu-section-label {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #bbb; padding: 14px 14px 4px; margin-top: 4px;
         }
 
-	/* CONTEÚDO PRINCIPAL */
-        main {
-            margin-top: 10px; /* Espaço para não ficar escondido atrás do header fixo */
-            text-align: left;
-	        padding: 20px;
+        /* ── CONTEÚDO ── */
+        .dash-content { overflow-y: visible; padding: 0 40px 60px 40px; width: 100%; }
+
+        .dash-header-fixo {
+            position: sticky; top: 0; z-index: 100; background: #f0f2f5;
+            display: flex; padding: 24px 0 20px;
+            justify-content: space-between; align-items: center;
+            margin-bottom: 4px; border: none;
+        }
+        .dash-header-fixo h2 { font-size: 1.6rem; font-weight: 700; color: #222; margin: 0; }
+
+        .btn-visualizar {
+            background: #0d0d0d; color: #fff; border: none;
+            padding: 10px 20px; border-radius: 10px; font-family: inherit;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .btn-visualizar:hover { background: #333; }
+
+        /* ── SUBMENU / ABAS ── */
+        .sub-menu-propriedade {
+            display: flex; gap: 4px;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 28px; overflow-x: auto; padding-bottom: 0;
+        }
+        .tab-link {
+            background: none; border: none; border-bottom: 2px solid transparent;
+            padding: 11px 18px; cursor: pointer; color: #666;
+            font-weight: 500; font-size: 0.88rem; white-space: nowrap;
+            transition: all 0.2s; margin-bottom: -2px; font-family: inherit;
+        }
+        .tab-link:hover { color: #0d0d0d; }
+        .tab-link.active { color: #ff385c; border-bottom-color: #ff385c; font-weight: 700; }
+
+        /* ── ABAS ── */
+        .tab-content { display: none; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+        /* ── SEÇÕES DE EDIÇÃO ── */
+        .sessao-edit {
+            background: #fff; padding: 28px; border-radius: 14px;
+            border: 1px solid #eee; margin-bottom: 20px;
+        }
+        .sessao-edit > h3 {
+            font-size: 1rem; font-weight: 700; color: #0d0d0d;
+            margin-bottom: 6px;
+        }
+        .header-sessao { margin-bottom: 22px; }
+        .header-sessao h3 { font-size: 1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 4px; }
+        .aviso-form { font-size: 0.8rem; color: #999; margin-top: 4px; margin-bottom: 18px; }
+
+        /* ── INPUTS GLOBAIS ── */
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        textarea, select {
+            width: 100%; padding: 12px 14px;
+            border: 1px solid #ddd; border-radius: 10px;
+            font-size: 0.92rem; font-family: inherit;
+            color: #222; outline: none;
+            transition: border-color 0.2s;
+            background: #fdfdfd;
+        }
+        input:focus, textarea:focus, select:focus { border-color: #ff385c; background: #fff; }
+
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .grid-form .span-2 { grid-column: span 2; }
+
+        /* Campo com label */
+        .campo { display: flex; flex-direction: column; gap: 6px; }
+        .campo label { font-size: 0.82rem; font-weight: 700; color: #444; }
+        .campo-dica { font-size: 0.75rem; color: #aaa; margin-top: 3px; }
+
+        /* ── ATENDIMENTO BOX ── */
+        .atendimento-box { display: flex; gap: 28px; align-items: flex-start; }
+        .foto-anfitriao { text-align: center; flex-shrink: 0; }
+        .foto-anfitriao .avatar-preview {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: #f0f0f0; border: 2px dashed #ddd;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem; margin-bottom: 10px; overflow: hidden;
+        }
+        .foto-anfitriao .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-trocar-foto {
+            background: #fff; border: 1px solid #ddd; padding: 7px 14px;
+            border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-family: inherit;
+            transition: all 0.2s;
+        }
+        .btn-trocar-foto:hover { border-color: #ff385c; color: #ff385c; }
+        .info-anfitriao { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+        .txt-descricao { width: 100%; min-height: 220px; resize: vertical; }
+
+        /* ── PREÇO / VALORES ── */
+        .preco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+        .input-moeda { position: relative; }
+        .input-moeda span {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            font-size: 0.88rem; color: #999; font-weight: 600; pointer-events: none;
+        }
+        .input-moeda input { padding-left: 32px; }
+
+        /* ── SERVIÇOS / AMENIDADES ── */
+        .amenidades-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px; margin-top: 6px;
+        }
+        .amenidade-check { cursor: pointer; }
+        .amenidade-check input { display: none; }
+        .amenidade-label {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 14px; border: 1.5px solid #eee;
+            border-radius: 10px; font-size: 0.85rem; font-weight: 500;
+            color: #555; transition: all 0.2s; background: #fff;
+        }
+        .amenidade-check input:checked + .amenidade-label {
+            border-color: #ff385c; color: #ff385c;
+            background: rgba(255,56,92,0.04);
+        }
+        .amenidade-label:hover { border-color: #ff385c50; }
+
+        /* ── EVENTOS CHECKLIST ── */
+        .grid-eventos-checklist {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 14px; margin-top: 6px;
+        }
+        .card-evento-check { cursor: pointer; position: relative; }
+        .card-evento-check input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+        .conteudo-check {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: #fff; border: 2px solid #eee; border-radius: 14px;
+            padding: 22px 14px; transition: all 0.2s; text-align: center;
+        }
+        .icon-evento { font-size: 2rem; margin-bottom: 8px; }
+        .nome-evento { font-weight: 600; color: #444; font-size: 0.88rem; }
+        .card-evento-check input:checked + .conteudo-check { border-color: #ff385c; background: rgba(255,56,92,0.03); }
+        .card-evento-check input:checked + .conteudo-check .nome-evento { color: #ff385c; }
+        .card-evento-check:hover .conteudo-check { border-color: rgba(255,56,92,0.4); transform: translateY(-2px); }
+
+        /* ── ENDEREÇO ── */
+        .grid-endereco {
+            display: grid; grid-template-columns: repeat(6, 1fr);
+            gap: 14px; margin-bottom: 24px;
+        }
+        .grid-endereco .campo-label {
+            display: block; font-size: 0.82rem; font-weight: 700;
+            margin-bottom: 5px; color: #444;
+        }
+        .campo-largo { grid-column: span 4; }
+        .campo-medio { grid-column: span 2; }
+        .campo-curto { grid-column: span 1; }
+        .campo-cep    { grid-column: span 2; }
+
+        .mapa-container {
+            height: 280px; background: #f5f5f5; border-radius: 14px;
+            overflow: hidden; border: 1px solid #eee;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; color: #aaa; gap: 10px;
+        }
+        .mapa-container span { font-size: 2.5rem; }
+        .mapa-container p { font-size: 0.85rem; }
+
+        /* ── FAQ ── */
+        .lista-faq { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
+        .faq-item {
+            display: flex; gap: 14px; background: #fdfdfd;
+            padding: 18px; border: 1px solid #eee; border-radius: 12px;
+            align-items: flex-start; animation: fadeIn 0.3s;
+        }
+        .faq-inputs { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .faq-inputs input { font-weight: 600; }
+        .faq-inputs textarea { min-height: 75px; resize: vertical; }
+        .btn-remover-faq {
+            background: #fff0f0; color: #ff385c; border: 1px solid #ffe0e0;
+            padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-remover-faq:hover { background: #ff385c; color: #fff; }
+        .btn-adicionar-faq {
+            background: #fff; color: #555; border: 2px dashed #ddd;
+            padding: 14px; width: 100%; border-radius: 12px; font-weight: 600;
+            cursor: pointer; transition: 0.3s; font-family: inherit; font-size: 0.9rem;
+        }
+        .btn-adicionar-faq:hover { border-color: #ff385c; color: #ff385c; background: #fffcfd; }
+
+        /* ── FOOTER AÇÕES ── */
+        .footer-acoes {
+            position: sticky; bottom: 0; z-index: 50;
+            padding: 16px 0; background: linear-gradient(to top, #f0f2f5 70%, transparent);
+            margin-top: 10px; display: flex; justify-content: flex-end; gap: 12px;
+        }
+        .btn-salvar {
+            background: #ff385c; color: #fff; border: none;
+            padding: 13px 28px; border-radius: 10px; font-family: inherit;
+            font-size: 0.95rem; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 16px rgba(255,56,92,0.25); transition: background 0.2s, transform 0.15s;
+        }
+        .btn-salvar:hover { background: #e0304f; transform: scale(1.02); }
+        .btn-cancelar {
+            background: #fff; color: #666; border: 1px solid #ddd;
+            padding: 13px 22px; border-radius: 10px; font-family: inherit;
+            font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-cancelar:hover { background: #f5f5f5; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #0d0d0d; color: #fff; padding: 14px 26px;
+            border-radius: 12px; font-size: 0.88rem; font-weight: 500;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.22); z-index: 9999;
+            display: flex; align-items: center; gap: 10px;
+            transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+            opacity: 0;
+        }
+        .toast.visivel { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* ── FOOTER ── */
+        .main-footer {
+            background: #f7f7f7; border-top: 1px solid #ddd;
+            padding: 60px 0 30px; margin-top: 50px; width: 100%;
+        }
+        .footer-container {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; padding: 0 5%; gap: 150px;
+        }
+        .footer-column h3 {
+            font-size: 0.9rem; font-weight: 700; text-transform: uppercase;
+            color: #222; margin-bottom: 20px; letter-spacing: 0.5px;
+        }
+        .footer-column ul { list-style: none; padding: 0; }
+        .footer-column ul li { margin-bottom: 12px; }
+        .footer-column ul li a { text-decoration: none; color: #484848; font-size: 0.95rem; }
+        .footer-column ul li a:hover { text-decoration: underline; }
+        .footer-bottom {
+            max-width: 1200px; margin: 40px auto 0;
+            padding: 25px 5% 0; border-top: 1px solid #ebebeb;
+            color: #717171; font-size: 0.85rem;
         }
 
-  
-	/* Estilizando o Link para parecer um Botão */
-        .botao {
-            display: inline-block;
-            padding: 15px 30px;
-            background-color: #1a73e8; /* Azul do Google */
-            color: white;
-            text-decoration: none; /* Remove o sublinhado padrão do link */
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background 0.3s, transform 0.2s;
-            margin-top: 15px;
+        /* ── RESPONSIVO ── */
+        @media (max-width: 768px) {
+            .dash-sidebar { display: none; }
+            .dash-content { padding: 0 16px 40px; }
+            .grid-form { grid-template-columns: 1fr; }
+            .preco-grid { grid-template-columns: 1fr; }
+            .grid-endereco { grid-template-columns: 1fr; }
+            .campo-largo, .campo-medio, .campo-curto, .campo-cep { grid-column: span 1; }
+            .atendimento-box { flex-direction: column; }
+            .footer-container { flex-direction: column; gap: 40px; }
         }
 
-        .botao:hover {
-            background-color: #1557b0; /* Azul mais escuro ao passar o mouse */
-            transform: translateY(-2px); /* Efeito de "levantar" levemente */
-        }
-
-        /* Container da Busca */
-.search-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-    background: transparent;
-    z-index: 10000 !important; /* Um número maior que o do header */
-}
-
-.search-bar {
-    background: rgb(255, 255, 255);
-    display: flex;
-    align-items: center;
-    padding: 10px 15px 10px 30px;
-    border-radius: 50px; /* Bordas bem arredondadas estilo Airbnb */
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border: 1px solid #ddd;
-    max-width:850px;
-    width: 100%;
-    overflow: visible;
-}
-
-.search-item {
-    display: flex;
-    flex-direction: column;
-    min-width: 120px;
-    padding: 10px 20px;
-    position: relative;
-    cursor: pointer;
-}
-
-.search-item label {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: #222;
-    pointer-events: none; /* O clique passa pelo texto e vai para a div */
-    z-index: 1;
-}
-
-/* Faz o input de data ocupar todo o espaço interno da div */
-.search-item input[type="date"] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0; /* Esconde o input padrão, mas ele continua lá */
-    cursor: pointer;
-    z-index: 2; /* Fica por cima de tudo para capturar o clique */
-}
-
-/* Criamos um "espelho" visual para mostrar a data selecionada, 
-   já que o input real está invisível (opacity: 0) */
-.date-display {
-    font-size: 0.9rem;
-    color: #666;
-    margin-top: 4px;
-    pointer-events: none; /* Deixa o clique passar direto para o input */
-
-}
-
-.date-text {
-    font-size: 0.9rem;
-    color: #717171;
-    margin-top: 2px;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.search-item input, .search-item select {
-    border: none;
-    outline: none;
-    font-size: 0.9rem;
-    color: #666;
-    background: transparent;
-}
-
-/* Divisória vertical entre os itens */
-.divider {
-    width: 1px;
-    height: 35px;
-    background-color: #eee;
-}
-
-/* Botão Vermelho com Lupa */
-.btn-search {
-    background-color: #ff385c; /* Vermelho vibrante */
-    border: none;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.2s, background 0.3s;
-    margin-left: 10px;
-}
-
-.btn-search:hover {
-    background-color: #e31c5f;
-    transform: scale(1.05);
-}
-
-#location-container {
-    position: relative; /* Necessário para posicionar o dropdown */
-}
-
-.suggestions-dropdown {
-    position: absolute;
-    top: 100%; /* Aparece logo abaixo da barra */
-    left: 0;
-    width: 250px;
-    background: white;
-    border-radius: 16px;
-    margin-top: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    display: none; /* Escondido por padrão */
-    overflow: hidden;
-    z-index: 1001;
-    border: 1px solid #eee;
-}
-
-.suggestion-item {
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-    font-size: 0.9rem;
-    color: #333;
-}
-
-.suggestion-item:hover {
-    background-color: #f7f7f7;
-}
-
-.suggestion-item span {
-    font-size: 1.1rem;
-}
- 
-.input-erro {
-    color: #ff385c !important; /* Vermelho do seu botão */
-    font-weight: bold;
-}
-
-.guest-direct-selector {
-    min-width: 140px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.stepper-control {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 5px;
-    background: #f7f7f7;
-    border-radius: 25px;
-    padding: 2px 8px;
-    border: 1px solid #eee;
-}
-
-.btn-step {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 1px solid #ddd;
-    background: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    color: #444;
-    transition: all 0.2s ease;
-    padding: 0;
-    line-height: 0;
-}
-
-.btn-step:hover {
-    border-color: #ff385c;
-    color: #ff385c;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.qtd-display {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #222;
-    min-width: 30px;
-    text-align: center;
-}
-
-.qtd-input {
-    width: 45px;
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #222;
-    outline: none;
-    appearance: textfield; /* Remove setas no Firefox */
-}
-
-/* Remove setas no Chrome/Safari */
-.qtd-input::-webkit-outer-spin-button,
-.qtd-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.stepper-control {
-    display: flex;
-    align-items: center;
-    background: #f7f7f7;
-    border-radius: 25px;
-    padding: 3px 10px;
-    border: 1px solid #eee;
-    margin-top: 5px;
-}
-
-.destinos-container {
-    padding: 20px 5%;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.titulo-sessao {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #222;
-    margin-bottom: 20px;
-}
-
-.carrossel-locais {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto; /* Permite scroll horizontal se a tela for pequena */
-    padding-bottom: 20px;
-    scrollbar-width: none; /* Esconde barra no Firefox */
-}
-
-.carrossel-locais::-webkit-scrollbar {
-    display: none; /* Esconde barra no Chrome/Safari */
-}
-
-.card-local {
-    min-width: 70px; /* Largura de cada card */
-    flex: 0 0 auto;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.card-local:hover {
-    transform: translateY(-5px);
-}
-
-.foto-container {
-    position: relative;
-    width: 165px;
-    height: 165px;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.foto-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Faz a foto preencher o espaço sem distorcer */
-}
-
-.btn-favorito {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    text-shadow: 0 0 5px rgba(0,0,0,0.5);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Quando o usuário clica e ativa o favorito */
-.btn-favorito.favoritado {
-    color: #ff385c !important; /* Vermelho vibrante */
-    transform: scale(1.2);
-    text-shadow: none;
-}
-
-/* Animação de clique (opcional, dá um toque premium) */
-.btn-favorito:active {
-    transform: scale(0.8);
-}
-
-.info-local {
-    padding: 20px 0;
-}
-
-.nome-local {
-    font-size: 12px;
-    font-weight: 600;
-    color: #222;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Corta o texto com "..." se for muito longo */
-}
-
-.detalhes-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 10px;
-    font-weight: 400;
-}
-
-
-.avaliacao {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #222;
-}
-
-.main-footer {
-    background-color: #f7f7f7;
-    border-top: 1px solid #dddddd;
-    padding: 60px 0 30px 0;
-    margin-top: 50px;
-    width: 100%; /* Força a largura total */
-    font-family: sans-serif;
-}
-
-.footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    padding: 0 5%;     /* Dá um respiro nas laterais apenas para o texto */
-    gap: 150px; /* Espaço entre as colunas */
-}
-
-.footer-column h3 {
-    font-size: 0.9rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #222;
-    margin-bottom: 20px;
-    letter-spacing: 0.5px;
-}
-
-.footer-column ul {
-    list-style: none;
-    padding: 0;
-}
-
-.footer-column ul li {
-    margin-bottom: 12px;
-}
-
-.footer-column ul li a {
-    text-decoration: none;
-    color: #484848;
-    font-size: 0.95rem;
-    transition: text-decoration 0.2s;
-    display: inline-block;
-    margin-bottom: 12px;
-}
-
-.footer-column ul li a:hover {
-    text-decoration: underline;
-    color: #000;
-}
-
-.footer-bottom {
-    max-width: 1200px;
-    margin: 40px auto 0 auto;
-    padding-top: 25px 5% 0 5%;
-    border-top: 1px solid #ebebeb;
-    text-align: left;
-    color: #717171;
-    font-size: 0.85rem;
-}
-
-/* Responsividade para Celular */
-@media (max-width: 768px) {
-    .footer-container {
-        flex-direction: column;
-        gap: 40px;
-    }
-}
-
-/* Espaçamento entre as grandes seções de categorias */
-.categoria-sessao {
-    padding: 5px 5%;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-/* Garante que o título de cada categoria seja claro */
-.titulo-categoria {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #222;
-    margin-bottom: 15px;
-    margin-top: 0px;
-    text-align: left; /* Garante o alinhamento à esquerda */
-    width: 100%;      /* Força o título a ocupar a largura total do container */
-}
-
-/* Estilo do carrossel (reutilizando a lógica anterior) */
-.carrossel-horizontal {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 15px;
-    scrollbar-width: none; /* Firefox */
-}
-
-.carrossel-horizontal::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-}
-
-.secao-galeria {
-    width: 100%;
-    padding: 0 5%; /* Alinhamento com a logo */
-    max-width: 1400px;
-    margin: 0 auto 30px auto; /* Margin-bottom garante que o corpo não sobreponha */
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr; /* Esquerda grande, direita mosaico */
-    grid-template-rows: 220px 220px; /* Duas linhas de altura fixa */
-    gap: 10px;
-    height: 450px; /* Altura total confortável da galeria */
-    background: transparent;
-    padding: 12px;
-    border-radius: 20px;
-    margin-bottom: 5px;
-}
-
-/* O container principal da galeria */
-.galeria-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr; /* Esquerda grande, direita mosaico */
-    grid-template-rows: 220px 220px; /* Duas linhas de altura fixa */
-    gap: 10px;
-    height: 500px; /* Altura total confortável da galeria */
-    background: transparent;
-    padding: 12px;
-    border-radius: 20px;
-    margin-bottom: 30px;
-}
-
-/* Garante que as imagens preencham o quadrado sem distorcer */
-.galeria-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 12px;
-}
-
-/* Mosaico das 4 fotos menores */
-.fotos-mosaico {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 colunas */
-    grid-template-rows: 1fr 1fr;    /* 2 linhas */
-    gap: 12px;
-}
-
-/* Container específico da última foto (para o botão) */
-.foto-ultimo-slot {
-    position: relative; /* Essencial para o botão flutuar dentro */
-}
-
-/* O Botão "Mostrar todas as fotos" */
-.btn-mostrar-fotos {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: white;
-    border: 1px solid #222;
-    color: #222;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.2s, background-color 0.2s;
-    z-index: 5;
-}
-
-.btn-mostrar-fotos:hover {
-    background-color: #f7f7f7;
-    transform: scale(1.02);
-}
-
-.btn-mostrar-fotos:active {
-    transform: scale(0.98);
-}
-
-.detalhes-corpo {
-    display: flex;
-    grid-template-columns: 2fr 1fr;
-    gap: 40px;
-    align-items: flex-start;
-}
-
-.card-reserva {
-    flex: 1; /* Ocupa 1/3 do espaço */
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    position: sticky;
-    top: 120px; /* Para não grudar no seu cabeçalho novo */
-    height: fit-content;
-    min-width: 300px;
-    text-align: center;
-    display: flex;
-    flex-direction: column; /* Coloca um embaixo do outro */
-    align-items: center;    /* Centraliza horizontalmente */
-    justify-content: center; /* Centraliza verticalmente se houver altura fixa */
-}
-
-/* Ajuste do texto do preço */
-.card-reserva h3, .card-reserva p {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 20px; /* Espaço entre o preço e o botão */
-    color: #000;
-}
-
-/* 1. Limitar a largura total da página para não espalhar */
-.propriedade-container {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 0 20px;
-}
-
-.foto-principal {
-    grid-column: 1 / 2;
-    grid-row: 1 / 3; /* Ocupa as duas linhas */
-}
-
-.foto-principal img, .foto-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Corta a imagem para caber sem distorcer */
-    border-radius: 12px;
-}
-
-.info-esquerda {
-    flex: 2; /* Ocupa 2/3 do espaço */
-}
-
-.inputs-reserva input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box; /* Garante que o padding não aumente a largura */
-}
-
-.secao-anfitriao {
-    width: 100%;
-    padding: 0px 2%; /* Alinhado com a galeria e logo */
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.anfitriao-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 20px 0;
-    border-bottom: 1px solid #ebebeb; /* Linha sutil de separação */
-}
-
-.foto-perfil-wrapper {
-    position: relative;
-    width: 60px;
-    height: 60px;
-}
-
-.foto-perfil {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.selo-superhost {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    background: #ff385c;
-    color: white;
-    font-size: 10px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white;
-}
-
-.info-anfitriao h2 {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin: 0;
-    color: #222;
-}
-
-.info-anfitriao .cargo {
-    font-size: 1rem;
-    color: #222;
-    margin: 2px 0;
-}
-
-.info-anfitriao .tempo-plataforma {
-    font-size: 0.9rem;
-    color: #717171;
-    margin: 0;
-}
-
-.secao-faq {
-    width: 100%;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 5%;
-}
-
-.titulo-sessao {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 25px;
-    text-align: left; /* Alinhado com a logo e títulos anteriores */
-}
-
-.faq-container {
-    border-top: 1px solid #ebebeb;
-}
-
-.faq-item {
-    border-bottom: 1px solid #ebebeb;
-}
-
-.faq-pergunta {
-    width: 100%;
-    padding: 20px 0;
-    background: none;
-    border: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #222;
-    cursor: pointer;
-    text-align: left;
-    transition: color 0.2s;
-}
-
-.faq-pergunta:hover {
-    color: #ff385c; /* Cor de destaque da Vents */
-}
-
-.faq-resposta {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-}
-
-.faq-resposta p {
-    padding-bottom: 20px;
-    color: #717171;
-    line-height: 1.6;
-}
-
-.faq-icon {
-    font-size: 1.5rem;
-    transition: transform 0.3s;
-}
-
-/* Classe ativa para o JavaScript */
-.faq-item.active .faq-resposta {
-    max-height: 200px; /* Altura suficiente para o texto */
-}
-
-.faq-item.active .faq-icon {
-    transform: rotate(45deg); /* Transforma o + em um x */
-}
-.secao-comentarios {
-    width: 100%;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 30px 5%;
-    border-top: 1px solid #ebebeb;
-}
-
-.comentarios-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-}
-
-.comentarios-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Duas colunas */
-    gap: 40px 80px; /* Espaço entre os cards */
-    margin-bottom: 30px;
-}
-
-.autor-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.autor-info img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.autor-info div {
-    display: flex;
-    flex-direction: column;
-}
-
-.autor-info strong {
-    font-size: 1rem;
-    color: #222;
-}
-
-.autor-info span {
-    font-size: 0.85rem;
-    color: #717171;
-}
-
-.texto-comentario {
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #222;
-    display: -webkit-box;
-    -webkit-line-clamp: 3; /* Limita a 3 linhas */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.btn-ver-comentarios {
-    background: white;
-    border: 1px solid #222;
-    padding: 13px 23px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-ver-comentarios:hover {
-    background: #f7f7f7;
-}
-
-/* Responsividade para celular */
-@media (max-width: 768px) {
-    .comentarios-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.secao-mapa {
-    width: 100%;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 5% 60px 5%; /* Padding inferior para dar respiro antes do rodapé */
-}
-
-.endereco-texto {
-    font-size: 1.1rem;
-    color: #222;
-    font-weight: 500;
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.mapa-container {
-    width: 100%;
-    border-radius: 15px; /* Bordas arredondadas como na galeria */
-    overflow: hidden;    /* Garante que o iframe respeite o arredondamento */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-.secao-contato {
-    width: 100%;
-    max-width: 1200px;
-    margin-top: 100px auto;
-    padding: 30px 5%;
-}
-
-.formulario-container {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 15px;
-    border: 1px solid #ddd;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-.formulario-container h3 {
-    margin-bottom: 10px;
-    font-size: 1.5rem;
-}
-
-.formulario-container p {
-    color: #717171;
-    margin-bottom: 25px;
-}
-
-.campo-grupo {
-    margin-bottom: 20px;
-    flex: 1; /* Faz com que cada campo ocupe metade do espaço disponível */
-    display: flex;
-    flex-direction: column;
-}
-
-.campo-grupo label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #222;
-}
-
-.campo-grupo input, 
-.campo-grupo textarea, 
-.campo-grupo select {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%; /* Garante que o input preencha a sua metade */
-    box-sizing: border-box;
-}
-
-.campo-grupo input:focus, 
-.campo-grupo textarea:focus {
-    border-color: #ff385c; /* Cor da Vents */
-}
-
-.linha-dupla {
-    display: flex;
-    grid-template-columns: 1fr 1fr;
-    gap: 0px;
-    width: 100%;
-    margin-bottom: 0px;
-    box-sizing: border-box; /* Garante que o padding não estoure a largura */
-}
-
-.select-datas {
-    display: flex;
-    gap: 10px;
-}
-
-.select-datas select {
-    flex: 1;
-}
-
-.btn-enviar-form {
-    width: 100%;
-    background-color: #ff385c;
-    color: white;
-    border: none;
-    padding: 15px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.3s;
-}
-
-.btn-enviar-form:hover {
-    background-color: #e31c5f;
-}
-
-@media (max-width: 600px) {
-    .linha-dupla {
-        grid-template-columns: 1fr;
-    }
-}
-
-.listagem-container {
-    max-width: 1400px;
-    margin-top: 0;
-    margin: 0 auto;
-    padding: 20px 5%;
-}
-
-.listagem-header h1 {
-    font-size: 1.6rem;
-    margin-top: 0;
-    margin-bottom: 10px;
-}
-
-.filtros-rapidos {
-    display: flex;
-    gap: 10px;
-    margin: 20px 0 40px 0;
-}
-
-.filtros-rapidos button {
-    background: white;
-    border: 1px solid #ddd;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-/* A Grade de Resultados */
-.grid-resultados {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Cria colunas automáticas */
-    gap: 30px;
-}
-
-.card-espaco {
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.card-espaco:hover {
-   transform: translateY(-4px); /* Sobe levemente */
-    background: #ffffff;
-    border-color: #eee;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra mais profunda */
-}
-
-.card-foto {
-   width: 300px;
-    height: 200px;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.card-foto img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease; /* Transição para o zoom */
-}
-
-.favorito-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.linha-titulo {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.linha-titulo h3 {
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.distancia {
-    color: #717171;
-    font-size: 0.9rem;
-    margin: 4px 0;
-}
-
-.preco {
-    font-size: 1rem;
-    margin-top: 8px;
-}
-
-.listagem-split {
-    margin-top: 80px;
-    display: flex;
-    height: calc(100vh - 80px); /* Altura total menos a altura do seu cabeçalho */
-    overflow: hidden; /* Evita scroll na página inteira, o scroll será interno */
-}
-
-/* Coluna da Esquerda */
-.coluna-cards {
-    flex: 1.2; /* Um pouco maior que o mapa */
-    overflow-y: auto; /* Permite rolar apenas os cards */
-    padding: 20px 30px;
-    background: #fff;
-    height: 100vh;
-}
-
-/* Coluna da Direita */
-.coluna-mapa {
-    flex: 0.8; /* Um pouco menor que os cards */
-    height: 100%;
-    position: sticky; /* Fica preso enquanto você rola os cards */
-    top: 80px; /* Ajuste para a altura do seu cabeçalho */
-}
-
-#mapa-container-seguro {
-    width: 100%;
-    height: 100%;
-}
-
-#mapa-fixo {
-    width: 100%;
-    height: 100%;
-}
-
-/* Estilo do Card Horizontal para caber melhor na listagem split */
-.card-espaco-horizontal {
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-    margin-bottom: 15px;
-    border-radius: 16px; /* Cantos arredondados como o formulário */
-    background: #fff;
-    border: 1px solid transparent; /* Borda invisível para não dar "pulo" no hover */
-    transition: all 0.3s cubic-bezier(0.2, 0, 0, 1); /* Transição suave e elegante */
-    cursor: pointer;
-}
-
-.card-espaco-horizontal:hover .foto-card img {
-    transform: scale(1.08); /* Leve zoom na foto quando passa o mouse no card */
-}
-
-/* Destaque para o preço no hover */
-.card-espaco-horizontal:hover .preco strong {
-    color: #ff385c; /* O preço ganha a cor da Vents no hover */
-    transition: color 0.3s;
-}
-
-.foto-card {
-    width: 250px;
-    height: 180px;
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-}
-
-.foto-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.info-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    flex: 1;
-}
-
-/* Responsividade: No celular o mapa some ou vai para baixo */
-@media (max-width: 1000px) {
-    .coluna-mapa {
-        display: none; /* Esconde o mapa em telas pequenas */
-    }
-    .listagem-split {
-        height: auto;
-        overflow: visible;
-    }
-}
-
-.preco-marker {
-    position: absolute;
-    background: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-weight: 700;
-    font-size: 14px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    border: 1px solid #ddd;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
-    transform: translate(-50%, -100%); /* Centraliza sobre o ponto */
-}
-
-.preco-marker:hover {
-    background-color: #ff385c; /* Rosa da Vents ao passar o mouse */
-    color: white;
-    transform: translate(-50%, -105%) scale(1.1);
-    z-index: 999;
-}
-
-/* Criando as duas colunas dentro da área de listagem */
-.grid-resultados-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* DUAS COLUNAS IGUAIS */
-    gap: 20px; /* Espaço entre os cards */
-    padding-top: 20px;
-}
-
-/* Ajustando o card para ser vertical (empilhado) */
-.card-espaco-vertical {
-    display: flex;
-    flex-direction: column; /* Foto em cima, texto embaixo */
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card-espaco-vertical:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-}
-
-.foto-card-v {
-    width: 100%;
-    aspect-ratio: 4 / 3; /* Proporção de foto perfeita */
-    overflow: hidden;
-}
-
-.foto-card-v img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.info-card-v {
-    padding: 12px 5px;
-}
-
-/* Botão de Filtro Principal */
-.btn-abrir-filtro {
-    padding: 10px 20px;
-    border: 1px solid #ddd;
-    background: #fff;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* Modal Overlay */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    inset: 0;
-    pointer-events: all;
-}
-
-.modal-content {
-    background: #fff;
-    width: 90%; max-width: 400px;
-    max-height: 80vh;
-    border-radius: 20px;
-    overflow-y: auto;
-    position: relative;
-    pointer-events: all;
-}
-
-.modal-header { padding: 20px; border-bottom: 1px solid #eee; text-align: center; }
-.modal-body { padding: 20px; }
-.filtro-secao { padding: 20px 0; border-bottom: 1px solid #eee; }
-
-/* Estilo do Slider de Preço Duplo */
-.range-container {
-    position: relative;
-    width: 100%;
-    height: 50px;
-    margin-top: 30px;
-}
-input[type="range"] {
-    -webkit-appearance: none;
-    width: 100%;
-    position: absolute;
-    background: none;
-    pointer-events: none;
-}
-input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    height: 25px; width: 25px;
-    background-color: #ff385c;
-    border-radius: 50%;
-    cursor: pointer;
-    pointer-events: auto;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.inputs-preco { display: flex; gap: 20px; margin-top: 20px; }
-.caixa-preco { flex: 1; border: 1px solid #ccc; padding: 10px; border-radius: 8px; }
-.caixa-preco input { border: none; width: 80%; outline: none; font-size: 1rem; }
-
-/* Switch Acessibilidade */
-.switch { position: relative; display: inline-block; width: 50px; height: 24px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider-round {
-    position: absolute; cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #ccc; transition: .4s; border-radius: 34px;
-}
-input:checked + .slider-round { background-color: #222; }
-.slider-round:before {
-    position: absolute; content: ""; height: 18px; width: 18px;
-    left: 4px; bottom: 3px; background-color: white;
-    transition: .4s; border-radius: 50%;
-}
-input:checked + .slider-round:before { transform: translateX(26px); }
-
-@keyframes abrirSuave {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.modal-content {
-    animation: abrirSuave 0.3s ease-out;
-}
-
-.cadastro-container {
-    max-width: 800px;
-    margin: 100px auto 100px auto;
-    padding: 0 20px;
-}
-
-.sessao-form {
-    background: #fff;
-    padding: 30px;
-    border-radius: 16px;
-    border: 1px solid #eee;
-    margin-bottom: 25px;
-}
-
-.grid-contatos {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.input-icone {
-    display: flex;
-    align-items: center;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 10px 15px;
-}
-
-.input-icone input {
-    border: none;
-    outline: none;
-    width: 100%;
-    margin-left: 10px;
-    font-size: 1rem;
-}
-
-.upload-area {
-    border: 2px dashed #ccc;
-    border-radius: 12px;
-    padding: 40px;
-    text-align: center;
-    cursor: pointer;
-    transition: background 0.3s;
-    margin-top: 15px;
-}
-
-.upload-area:hover { background: #f9f9f9; border-color: #ff385c; }
-
-.grid-check {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.footer-fixo {
-    position: fixed;
-    bottom: 0; left: 0; width: 100%;
-    background: #fff;
-    padding: 20px;
-    border-top: 1px solid #eee;
-    display: flex;
-    justify-content: center;
-}
-
-.btn-salvar {
-    background: #222;
-    color: #fff;
-    padding: 15px 60px;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-}
-
-.dashboard-container {
-    display: flex;
-    min-height: 100vh;
-    background: #f7f7f7;
-    margin-top: 80px ;
-}
-
-/* Sidebar */
-.dash-sidebar {
-    width: 300px;
-    background: #fff;
-    padding: 30px 20px;
-    border-right: 1px solid #eee;
-    flex-direction: column;
-    display: flex;
-}
-
-.perfil-resumo { text-align: center; margin-bottom: 40px; }
-.perfil-resumo img { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px; }
-
-.dash-menu {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-
-.dash-menu a {
-    display: flex; /* Alinha ícone e texto na mesma linha */
-    align-items: center; /* Alinha verticalmente ao centro */
-    justify-content: flex-start; /* Garante que comece da esquerda */
-    padding: 12px 15px;
-    color: #666;
-    text-decoration: none;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    transition: all 0.2s ease;
-    width: 100%;
-    box-sizing: border-box; /* Garante que o padding não quebre a largura */
-}
-
-/* Força o ícone/emoji a ter um tamanho fixo para não empurrar o texto */
-.dash-menu a span, 
-.dash-menu a i {
-    width: 24px; 
-    display: flex;
-    justify-content: center;
-    margin-right: 12px;
-    font-size: 1.2rem;
-}
-
-.dash-menu a.active {
-    background: #ff385c15;
-    color: #ff385c;
-    font-weight: 600;
-}
-
-/* Conteúdo */
-.dash-content { 
-    overflow-y: visible; 
-    padding: 0 40px 40px 40px;
-    width: 100%;
-}
-
-.dash-header { 
-    position: sticky;
-    top: 0; /* Se você tiver um header principal no site, mude para ex: 80px */
-    z-index: 100; /* Garante que os cards não passem por cima do título */
-    background-color: #f7f7f7; /* Deve ser a mesma cor de fundo da página para não ficar transparente */
-    display: flex;
-    padding: 20px 0;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    border: none;
-}
-
-.dash-header h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #222;
-    margin: 0;
-}
-
-.grid-propriedades-dash {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 25px;
-    margin-top: 10px;
-}
-
-.card-dash {
-    background: #fff;
-    border-radius: 12px;
-    display: flex;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.card-dash-img { width: 150px; position: relative; }
-.card-dash-img img { width: 100%; height: 100%; object-fit: cover; }
-
-.status-badge {
-    position: absolute; top: 10px; left: 10px;
-    padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;
-}
-.status-badge.ativo { background: #e6fcf5; color: #0ca678; }
-.status-badge.pendente { background: #fff4e6; color: #f76707; }
-
-.card-dash-info { padding: 20px; flex: 1; }
-.stats-mini { margin: 15px 0; font-size: 0.85rem; color: #777; display: flex; gap: 15px; }
-
-.acoes-dash { display: flex; gap: 10px; }
-.acoes-dash button { 
-    padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; 
-    background: #fff; cursor: pointer; font-size: 0.85rem;
-}
-.btn-edit:hover { background: #eee; }
-.btn-del { color: #fa5252; border-color: #ffe3e3; }
-  
-  /* Botão "Cadastrar Novo" mais moderno */
-.btn-novo {
-    background-color: #ff385c; /* Cor da Vents */
-    color: white;
-    padding: 12px 24px;
-    border-radius: 10px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s; background: 0.2s;
-    box-shadow: 0 4px 12px rgba(255, 56, 92, 0.2);
-}
-
-.btn-novo:hover {
-    background-color: #e31c5f;
-    transform: scale(1.02);
-}
-
-/* Layout da Grid de Métricas */
-.grid-metricas {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.card-metrica {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border: 1px solid #eee;
-}
-
-.card-metrica .icon { font-size: 2rem; }
-.card-metrica p { color: #666; font-size: 0.9rem; margin: 0; }
-.card-metrica h3 { font-size: 1.5rem; margin: 5px 0 0 0; }
-
-/* Estrutura das colunas de baixo */
-.container-duas-colunas {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
-}
-
-.secao-dash {
-    background: #fff;
-    padding: 25px;
-    border-radius: 16px;
-    border: 1px solid #eee;
-    margin-bottom: 20px;
-}
-
-.secao-dash h3 { margin-top: 0; font-size: 1.1rem; margin-bottom: 20px; }
-
-/* Estilo Lista de Atividade */
-.lista-atividades { list-style: none; padding: 0; }
-.lista-atividades li {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid #f9f9f9;
-    font-size: 0.9rem;
-}
-.lista-atividades li span { color: #999; }
-
-/* Status do Plano */
-.info-plano p { margin: 10px 0; font-size: 0.95rem; }
-.btn-upgrade {
-    width: 100%;
-    background: #222;
-    color: #fff;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    margin-top: 10px;
-    cursor: pointer;
-}
-
-/* Gráfico Placeholder */
-.placeholder-grafico {
-    height: 300px;
-    background: #fdfdfd;
-    border: 1px dashed #ddd;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-  
-/* Menu de Subpáginas */
-.sub-menu-propriedade {
-    display: flex;
-    gap: 10px;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 30px;
-    overflow-x: auto; /* Para mobile não quebrar */
-    padding-bottom: 10px;
-}
-
-.tab-link {
-    background: none;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    color: #666;
-    font-weight: 500;
-    white-space: nowrap;
-    transition: 0.3s;
-}
-
-.tab-link.active {
-    color: #ff385c;
-    border-bottom: 2px solid #ff385c;
-}
-
-/* Conteúdo das Abas */
-.tab-content {
-    display: none; /* Esconde todas por padrão */
-    animation: fadeIn 0.4s;
-}
-
-.tab-content.active { display: block; }
-
-.sessao-edit {
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    border: 1px solid #eee;
-    margin-bottom: 20px;
-}
-
-.grid-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-.atendimento-box {
-    display: flex;
-    gap: 30px;
-    align-items: flex-start;
-}
-
-.foto-anfitriao { text-align: center; }
-.foto-anfitriao img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; }
-
-.txt-descricao { width: 100%; height: 250px; padding: 15px; border-radius: 8px; border: 1px solid #ddd; resize: vertical; }
-
-.footer-acoes {
-    margin-top: 30px;
-    padding: 20px;
-    background: #fff;
-    border-top: 1px solid #eee;
-    text-align: right;
-}
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-.upload-container {
-    border: 2px dashed #ff385c;
-    background: #fffcfd;
-    border-radius: 16px;
-    padding: 40px;
-    text-align: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.upload-container.dragover {
-    background: #ff385c10;
-    border-color: #e31c5f;
-    transform: scale(1.01);
-}
-
-.upload-icon { font-size: 3rem; display: block; margin-bottom: 10px; }
-
-.btn-selecionar {
-    background: #222;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    margin-top: 15px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-/* Grid de Miniaturas */
-.preview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 30px;
-}
-
-.preview-item {
-    position: relative;
-    aspect-ratio: 1/1;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #eee;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.preview-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.btn-remover-foto {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    cursor: pointer;
-    color: #ff385c;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lista-faq {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.faq-item {
-    display: flex;
-    gap: 15px;
-    background: #fdfdfd;
-    padding: 20px;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    align-items: flex-start;
-    animation: fadeIn 0.3s ease;
-}
-
-.faq-inputs {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.faq-inputs input {
-    font-weight: 600;
-    border: 1px solid #ddd;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-}
-
-.faq-inputs textarea {
-    border: 1px solid #ddd;
-    padding: 12px;
-    border-radius: 8px;
-    resize: vertical;
-    min-height: 80px;
-    font-size: 0.9rem;
-    color: #555;
-}
-
-.btn-remover-faq {
-    background: #fff0f0;
-    color: #ff385c;
-    border: 1px solid #ffebeb;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.btn-remover-faq:hover {
-    background: #ff385c;
-    color: #fff;
-}
-
-.btn-adicionar-faq {
-    background: #fff;
-    color: #222;
-    border: 2px dashed #ddd;
-    padding: 15px;
-    width: 100%;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn-adicionar-faq:hover {
-    border-color: #ff385c;
-    color: #ff385c;
-    background: #fffcfd;
-}
-
-
-
-.grid-eventos-checklist {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.card-evento-check {
-    cursor: pointer;
-    position: relative;
-}
-
-/* Esconde o quadradinho padrão do checkbox */
-.card-evento-check input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0; width: 0;
-}
-
-.conteudo-check {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-    border: 2px solid #eee;
-    border-radius: 16px;
-    padding: 25px 15px;
-    transition: all 0.2s ease;
-    text-align: center;
-}
-
-.icon-evento {
-    font-size: 2rem;
-    margin-bottom: 10px;
-}
-
-.nome-evento {
-    font-weight: 600;
-    color: #444;
-    font-size: 0.95rem;
-}
-
-/* Estilo quando o Checkbox está marcado */
-.card-evento-check input:checked + .conteudo-check {
-    border-color: #ff385c;
-    background-color: #ff385c05;
-}
-
-.card-evento-check input:checked + .conteudo-check .nome-evento {
-    color: #ff385c;
-}
-
-/* Efeito de Hover */
-.card-evento-check:hover .conteudo-check {
-    border-color: #ff385c50;
-    transform: translateY(-3px);
-}
-
-.grid-endereco {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr); /* Divide em 6 partes para flexibilidade */
-    gap: 15px;
-    margin-bottom: 30px;
-}
-
-.grid-endereco label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: #444;
-}
-
-.grid-endereco input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 0.95rem;
-}
-
-/* Ajustes de largura das colunas */
-.campo-largo { grid-column: span 4; }
-.campo-medio { grid-column: span 2; }
-.campo-curto { grid-column: span 1; }
-
-.mapa-container {
-    height: 300px;
-    background: #f0f0f0;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #eee;
-}
-
-.mapa-placeholder {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #888;
-    text-align: center;
-    padding: 20px;
-}
-
-.icon-mapa { font-size: 2.5rem; margin-bottom: 10px; }
-
-/* Responsividade para telas menores */
-@media (max-width: 600px) {
-    .grid-endereco { grid-template-columns: 1fr; }
-    .campo-largo, .campo-medio, .campo-curto { grid-column: span 1; }
-}
-
-
-
-
-
-
-  </style>
-
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_red.css">
-    
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
-
-
-
+    </style>
 </head>
 <body>
 
-	<header>
-	   <div class="header-left">
-        <a href="https://www.vents.com">
-            <img src="logovents.png" alt="Logo" class="logo">
-        </a>
+<!-- LOADING -->
+<div id="loading-screen">
+    <div class="loading-logo"><em>VENTSY</em></div>
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- HEADER -->
+<header class="topbar">
+    <div class="header-left">
+        <a href="../index.html"><img src="../logovents.png" alt="Logo VENTSY" class="logo"></a>
     </div>
+    <div class="header-right">
+        <div class="avatar-container">
+            <button class="avatar-btn" id="avatar-btn" onclick="toggleAvatar()">
+                <span id="avatar-inicial">?</span>
+            </button>
+            <div class="avatar-dropdown" id="avatar-menu">
+                <div class="drop-header">
+                    <strong id="drop-nome">Carregando...</strong>
+                    <span id="drop-email"></span>
+                </div>
+                <a href="index.html">🏠 Dashboard</a>
+                <a href="minhapropriedade.html">🏡 Minha Propriedade</a>
+                <a href="configuracoes.html">⚙️ Configurações</a>
+                <a href="../planos.html">⭐ Planos Ventsy</a>
+                <a href="../fale-conosco.html">❓ Ajuda</a>
+                <button class="drop-sair" onclick="sair()">🚪 Sair da conta</button>
+            </div>
+        </div>
+    </div>
+</header>
 
-   
+<!-- LAYOUT PRINCIPAL -->
+<main class="dashboard-container" id="main-content" style="display:none;">
 
-      
-            
-    	</header>
-
-
-<main class="dashboard-container">
+    <!-- SIDEBAR -->
     <aside class="dash-sidebar">
         <div class="perfil-resumo">
-            <img src="eu.png" alt="Foto">
-            <h3>Rodrigo Ramos</h3>
-            <span>Membro desde 2024</span>
+            <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+            <h3 id="sidebar-nome">Carregando...</h3>
+            <span class="handle" id="sidebar-handle"></span>
+            <div class="plano-chip">⭐ Ultra — 30 dias grátis</div>
         </div>
         <nav class="dash-menu">
-            <a href="dashboard.html" class="active">󰋜 Dashboard</a>
-            <a href="minhapropriedade.html">󰇮 Minha Propriedade</a>
-            <a href="leads.html">󰈐 Contatos / Leads</a>
-            <a href="calendario.html">󰒓 Disponibilidade</a>
-            <a href="relatorio.html">󰒓 Relatório</a>
-            <a href="indique.html">󰒓 Programa de Indicação</a>
-            <a href="planos.html">󰒓 Planos Ventsy</a>
-            <a href="configuracoes.html">󰒓 Configurações</a>
+            <a href="index.html">🏠 Dashboard</a>
+
+            <span class="menu-section-label">Minha Propriedade</span>
+            <a href="minhapropriedade.html" class="active">🏡 Dados do Espaço</a>
+            <a href="fotos.html">📸 Fotos</a>
+
+            <span class="menu-section-label">Gestão</span>
+            <a href="leads.html">💬 Contatos / Leads</a>
+            <a href="calendario.html">📅 Disponibilidade</a>
+            <a href="relatorio.html">📊 Relatório</a>
+
+            <span class="menu-section-label">Conta</span>
+            <a href="indique.html">🎁 Programa de Indicação</a>
+            <a href="../planos.html">💳 Planos Ventsy</a>
+            <a href="configuracoes.html">⚙️ Configurações</a>
         </nav>
     </aside>
 
+    <!-- CONTEÚDO -->
     <section class="dash-content">
-    <header class="dash-header-fixo">
-        <h2>Minha Propriedade</h2>
-        <button class="btn-visualizar">Ver Anúncio Público</button>
-    </header>
 
-    <nav class="sub-menu-propriedade">
-        <button class="tab-link active" onclick="openTab(event, 'contato')">1. Contato</button>
-        <button class="tab-link" onclick="openTab(event, 'sobre')">2. Sobre</button>
-        <button class="tab-link" onclick="openTab(event, 'endereco')">3. Endereço</button>
-        <button class="tab-link" onclick="openTab(event, 'faq')">4. FAQ</button>
-        <button class="tab-link" onclick="openTab(event, 'midia')">5. Fotos/Vídeos</button>
-        <button class="tab-link" onclick="openTab(event, 'eventos')">6. Eventos</button>
-    </nav>
+        <header class="dash-header-fixo">
+            <h2>Minha Propriedade</h2>
+            <button class="btn-visualizar" onclick="window.open('#', '_blank')">👁 Ver Anúncio Público</button>
+        </header>
 
-    <div class="container-abas">
-        <div id="contato" class="tab-content active">
-            <div class="sessao-edit">
-                <h3>Dados de Contato</h3>
-                <div class="grid-form">
-                    <input type="text" placeholder="Nome do Espaço" value="Mansão das Palmeiras">
-                    <input type="email" placeholder="E-mail de Contato">
-                    <input type="tel" placeholder="Telefone Fixo">
-                    <input type="tel" placeholder="WhatsApp">
-                    <input type="text" placeholder="Instagram (@)">
-                    <input type="text" placeholder="Site Externo">
-                </div>
-            </div>
-            
-            <div class="sessao-edit">
-                <h3>Dados do Local</h3>
-                <div class="atendimento-box">
-                    <div class="foto-anfitriao">
-                        <img src="avatar-rodrigo.jpg" id="img-anfitriao">
-                        <button class="btn-trocar-foto">Trocar Foto</button>
+        <!-- ABAS -->
+        <nav class="sub-menu-propriedade">
+            <button class="tab-link active" onclick="openTab(event, 'contato')">1. Contato</button>
+            <button class="tab-link" onclick="openTab(event, 'sobre')">2. Sobre</button>
+            <button class="tab-link" onclick="openTab(event, 'valores')">3. Valores</button>
+            <button class="tab-link" onclick="openTab(event, 'endereco')">4. Endereço</button>
+            <button class="tab-link" onclick="openTab(event, 'eventos')">5. Eventos</button>
+            <button class="tab-link" onclick="openTab(event, 'faq')">6. FAQ</button>
+        </nav>
+
+        <div class="container-abas">
+
+            <!-- ── ABA 1: CONTATO ── -->
+            <div id="contato" class="tab-content active">
+                <div class="sessao-edit">
+                    <h3>Dados de Contato</h3>
+                    <p class="aviso-form">Essas informações serão exibidas no seu anúncio público.</p>
+                    <div class="grid-form">
+                        <div class="campo span-2">
+                            <label>Nome do Espaço</label>
+                            <input type="text" id="nome-espaco" placeholder="Ex: Mansão das Palmeiras">
+                        </div>
+                        <div class="campo">
+                            <label>E-mail de Contato</label>
+                            <input type="email" id="email-contato" placeholder="contato@seueespaco.com.br">
+                        </div>
+                        <div class="campo">
+                            <label>WhatsApp</label>
+                            <input type="tel" id="whatsapp" placeholder="(21) 99999-0000">
+                        </div>
+                        <div class="campo">
+                            <label>Telefone Fixo</label>
+                            <input type="tel" id="telefone" placeholder="(21) 3333-0000">
+                        </div>
+                        <div class="campo">
+                            <label>Instagram</label>
+                            <input type="text" id="instagram" placeholder="@seueespaco">
+                        </div>
+                        <div class="campo">
+                            <label>Site Externo</label>
+                            <input type="text" id="site" placeholder="www.seueespaco.com.br">
+                        </div>
                     </div>
-                    <div class="info-anfitriao">
-                        <input type="text" placeholder="Quem irá atender os clientes? (Nome)">
-                        <input type="number" placeholder="Capacidade Máxima (Pessoas)">
-                        <textarea placeholder="Breve bio da pessoa que atende..."></textarea>
+                </div>
+
+                <div class="sessao-edit">
+                    <h3>Responsável pelo Atendimento</h3>
+                    <p class="aviso-form">Quem os clientes vão encontrar ao entrar em contato?</p>
+                    <div class="atendimento-box">
+                        <div class="foto-anfitriao">
+                            <div class="avatar-preview" id="avatar-preview">😊</div>
+                            <button class="btn-trocar-foto" onclick="document.getElementById('input-foto-resp').click()">Trocar Foto</button>
+                            <input type="file" id="input-foto-resp" accept="image/*" hidden onchange="previewFotoResp(this)">
+                        </div>
+                        <div class="info-anfitriao">
+                            <div class="campo">
+                                <label>Nome do Responsável</label>
+                                <input type="text" id="nome-resp" placeholder="Ex: Rodrigo Ramos">
+                            </div>
+                            <div class="campo">
+                                <label>Capacidade Máxima (pessoas)</label>
+                                <input type="number" id="capacidade" placeholder="Ex: 200" min="1">
+                            </div>
+                            <div class="campo">
+                                <label>Mini bio / apresentação</label>
+                                <textarea id="bio-resp" placeholder="Apresente brevemente a pessoa que atende os clientes..." style="min-height:90px"></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div id="sobre" class="tab-content">
-            <div class="sessao-edit">
-                <h3>Descrição do Espaço</h3>
-                <p class="aviso-form">* Não inclua dados de contato aqui. Use conteúdo exclusivo.</p>
-                <textarea class="txt-descricao" placeholder="Apresente seu trabalho, explique seus diferenciais..."></textarea>
-            </div>
-        </div>
-
-        <div id="midia" class="tab-content">
-    <div class="sessao-edit">
-        <h3>Galeria de Fotos e Vídeos</h3>
-        <p class="aviso-form">Arraste as fotos para mudar a ordem. A primeira foto será a capa do seu anúncio.</p>
-        
-        <div class="upload-container" id="drop-zone">
-            <div class="upload-content">
-                <span class="upload-icon">📸</span>
-                <p>Arraste suas fotos e vídeos aqui</p>
-                <span>ou</span>
-                <button class="btn-selecionar" onclick="document.getElementById('file-input').click()">Selecionar do Computador</button>
-                <input type="file" id="file-input" multiple accept="image/*,video/*" hidden>
-            </div>
-        </div>
-
-        <div class="preview-grid" id="preview-grid">
-            </div>
-    </div>
-</div>
-
-        <div id="faq" class="tab-content">
-    <div class="sessao-edit">
-        <div class="header-sessao">
-            <h3>Perguntas Frequentes (FAQ)</h3>
-            <p class="aviso-form">Ajude seus clientes respondendo às dúvidas mais comuns antes que eles chamem você.</p>
-        </div>
-
-        <div id="lista-faq" class="lista-faq">
-            <div class="faq-item">
-                <div class="faq-inputs">
-                    <input type="text" placeholder="Pergunta (ex: O local possui gerador?)" value="O local possui gerador próprio?">
-                    <textarea placeholder="Resposta (ex: Sim, possuímos gerador de 50kVA que atende a iluminação...)">Sim, possuímos gerador que atende toda a área social e cozinha em caso de queda de energia.</textarea>
+            <!-- ── ABA 2: SOBRE ── -->
+            <div id="sobre" class="tab-content">
+                <div class="sessao-edit">
+                    <h3>Descrição do Espaço</h3>
+                    <p class="aviso-form">⚠️ Não inclua dados de contato aqui. Use conteúdo exclusivo e original.</p>
+                    <div class="campo">
+                        <label>Apresentação completa do espaço</label>
+                        <textarea id="descricao" class="txt-descricao" placeholder="Apresente seu espaço, explique seus diferenciais, o que torna seu local especial para os eventos..."></textarea>
+                    </div>
                 </div>
-                <button class="btn-remover-faq" onclick="this.parentElement.remove()">🗑️</button>
+
+                <div class="sessao-edit">
+                    <h3>Amenidades e Serviços Disponíveis</h3>
+                    <p class="aviso-form">Marque tudo que seu espaço oferece aos clientes.</p>
+                    <div class="amenidades-grid">
+                        <label class="amenidade-check"><input type="checkbox" value="climatizado">
+                            <span class="amenidade-label">❄️ Climatizado</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="estacionamento">
+                            <span class="amenidade-label">🅿️ Estacionamento</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="seguranca">
+                            <span class="amenidade-label">🛡️ Segurança</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="espaco-aberto">
+                            <span class="amenidade-label">🌿 Espaço Aberto</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="cozinha">
+                            <span class="amenidade-label">🍽️ Cozinha</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="gerador">
+                            <span class="amenidade-label">⚡ Gerador</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="piscina">
+                            <span class="amenidade-label">🏊 Piscina</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="wifi">
+                            <span class="amenidade-label">📶 Wi-Fi</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="acessibilidade">
+                            <span class="amenidade-label">♿ Acessibilidade</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="hospedagem">
+                            <span class="amenidade-label">🛏️ Hospedagem</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="palco">
+                            <span class="amenidade-label">🎤 Palco / Som</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="decoracao">
+                            <span class="amenidade-label">🎀 Decoração</span></label>
+                    </div>
+                </div>
             </div>
+
+            <!-- ── ABA 3: VALORES ── -->
+            <div id="valores" class="tab-content">
+                <div class="sessao-edit">
+                    <h3>Preços de Referência</h3>
+                    <p class="aviso-form">Informe os valores orientativos que serão exibidos no anúncio. Negociações ocorrem diretamente pelo WhatsApp.</p>
+                    <div class="preco-grid">
+                        <div class="campo">
+                            <label>Valor por Hora</label>
+                            <div class="input-moeda"><span>R$</span><input type="number" id="valor-hora" placeholder="0,00" min="0"></div>
+                        </div>
+                        <div class="campo">
+                            <label>Valor por Período (meio período)</label>
+                            <div class="input-moeda"><span>R$</span><input type="number" id="valor-periodo" placeholder="0,00" min="0"></div>
+                        </div>
+                        <div class="campo">
+                            <label>Valor por Diária (dia completo)</label>
+                            <div class="input-moeda"><span>R$</span><input type="number" id="valor-diaria" placeholder="0,00" min="0"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sessao-edit">
+                    <h3>Regras de Cobrança</h3>
+                    <p class="aviso-form">Esclareça aos clientes como funciona a negociação e possíveis taxas extras.</p>
+                    <div class="campo">
+                        <label>Informações adicionais sobre preços</label>
+                        <textarea id="regras-preco" placeholder="Ex: Valor inclui 6 horas de uso. Para eventos com mais de 150 pessoas, consulte pacotes especiais..." style="min-height:120px"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ABA 4: ENDEREÇO ── -->
+            <div id="endereco" class="tab-content">
+                <div class="sessao-edit">
+                    <div class="header-sessao">
+                        <h3>Localização do Espaço</h3>
+                        <p class="aviso-form">O endereço completo ajuda os clientes a traçarem a rota e decidirem pela reserva.</p>
+                    </div>
+                    <div class="grid-endereco">
+                        <div class="campo-cep">
+                            <span class="campo-label">CEP</span>
+                            <input type="text" id="cep" placeholder="00000-000" onblur="buscarCEP()">
+                        </div>
+                        <div class="campo-largo">
+                            <span class="campo-label">Logradouro (Rua / Avenida)</span>
+                            <input type="text" id="rua" placeholder="Ex: Rua das Flores">
+                        </div>
+                        <div class="campo-curto">
+                            <span class="campo-label">Número</span>
+                            <input type="text" id="numero" placeholder="123">
+                        </div>
+                        <div class="campo-medio">
+                            <span class="campo-label">Complemento</span>
+                            <input type="text" id="complemento" placeholder="Sala, Bloco...">
+                        </div>
+                        <div class="campo-medio">
+                            <span class="campo-label">Bairro</span>
+                            <input type="text" id="bairro" placeholder="Ex: Centro">
+                        </div>
+                        <div class="campo-medio">
+                            <span class="campo-label">Cidade</span>
+                            <input type="text" id="cidade" placeholder="Ex: São Paulo">
+                        </div>
+                        <div class="campo-curto">
+                            <span class="campo-label">UF</span>
+                            <input type="text" id="uf" placeholder="SP" maxlength="2" style="text-transform:uppercase">
+                        </div>
+                    </div>
+                    <div class="mapa-container">
+                        <span>📍</span>
+                        <p>O mapa será gerado automaticamente após o preenchimento do endereço.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ABA 5: EVENTOS ── -->
+            <div id="eventos" class="tab-content">
+                <div class="sessao-edit">
+                    <div class="header-sessao">
+                        <h3>Quais eventos seu espaço recebe?</h3>
+                        <p class="aviso-form">Selecione todos os tipos de celebrações que são permitidos no seu local.</p>
+                    </div>
+                    <div class="grid-eventos-checklist">
+                        <label class="card-evento-check">
+                            <input type="checkbox" name="tipo_evento" value="casamento" checked>
+                            <div class="conteudo-check"><span class="icon-evento">💍</span><span class="nome-evento">Casamentos</span></div>
+                        </label>
+                        <label class="card-evento-check">
+                            <input type="checkbox" name="tipo_evento" value="infantil">
+                            <div class="conteudo-check"><span class="icon-evento">🎈</span><span class="nome-evento">Festas Infantis</span></div>
+                        </label>
+                        <label class="card-evento-check">
+                            <input type="checkbox" name="tipo_evento" value="corporativo">
+                            <div class="conteudo-check"><span class="icon-evento">💼</span><span class="nome-evento">Corporativos</span></div>
+                        </label>
+                        <label class="card-evento-check">
+                            <input type="checkbox" name="tipo_evento" value="aniversario">
+                            <div class="conteudo-check"><span class="icon-evento">🎂</span><span class="nome-evento">Aniversários</span></div>
+                        </label>
+                        <label class="card-evento-check">
+                            <input type="checkbox" name="tipo_evento" value="confraternizacao">
+                            <div class="conteudo-check"><span class="icon-evento">🥂</span><span class="nome-evento">Confraternizações</span></div>
+                        </label>
+                        <label class="card-evento-check">
+                            <input type="checkbox" name="tipo_evento" value="formatura">
+                            <div class="conteudo-check"><span class="icon-evento">🎓</span><span class="nome-evento">Formaturas</span></div>
+                        </label>
+                        <label class="card-evento-check">
+                            <input type="checkbox" name="tipo_evento" value="workshop">
+                            <div class="conteudo-check"><span class="icon-evento">🎤</span><span class="nome-evento">Workshops / Cursos</span></div>
+                        </label>
+                        <label class="card-evento-check">
+                            <input type="checkbox" name="tipo_evento" value="religioso">
+                            <div class="conteudo-check"><span class="icon-evento">🕊️</span><span class="nome-evento">Retiros / Religiosos</span></div>
+                        </label>
+                        <label class="card-evento-check">
+                            <input type="checkbox" name="tipo_evento" value="show">
+                            <div class="conteudo-check"><span class="icon-evento">🎸</span><span class="nome-evento">Shows / Festivais</span></div>
+                        </label>
+                        <label class="card-evento-check">
+                            <input type="checkbox" name="tipo_evento" value="esportivo">
+                            <div class="conteudo-check"><span class="icon-evento">🏆</span><span class="nome-evento">Esportivos</span></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ABA 6: FAQ ── -->
+            <div id="faq" class="tab-content">
+                <div class="sessao-edit">
+                    <div class="header-sessao">
+                        <h3>Perguntas Frequentes (FAQ)</h3>
+                        <p class="aviso-form">Ajude seus clientes respondendo às dúvidas mais comuns antes que eles entrem em contato.</p>
+                    </div>
+                    <div id="lista-faq" class="lista-faq">
+                        <div class="faq-item">
+                            <div class="faq-inputs">
+                                <input type="text" placeholder="Pergunta (ex: O local possui gerador?)" value="O local possui gerador próprio?">
+                                <textarea placeholder="Resposta...">Sim, possuímos gerador que atende toda a área social e cozinha em caso de queda de energia.</textarea>
+                            </div>
+                            <button class="btn-remover-faq" onclick="this.parentElement.remove()">🗑️</button>
+                        </div>
+                    </div>
+                    <button class="btn-adicionar-faq" onclick="adicionarFAQ()">+ Adicionar Nova Pergunta</button>
+                </div>
+            </div>
+
+        </div><!-- /container-abas -->
+
+        <!-- FOOTER AÇÕES -->
+        <div class="footer-acoes">
+            <button class="btn-cancelar" onclick="window.location.href='index.html'">Cancelar</button>
+            <button class="btn-salvar" onclick="salvarAlteracoes()">💾 Salvar Alterações</button>
         </div>
 
-        <button class="btn-adicionar-faq" onclick="adicionarFAQ()">+ Adicionar Nova Pergunta</button>
-    </div>
-</div>
-
-        <div id="eventos" class="tab-content">
-    <div class="sessao-edit">
-        <div class="header-sessao">
-            <h3>Quais eventos seu espaço recebe?</h3>
-            <p class="aviso-form">Selecione todos os tipos de celebrações que são permitidas no seu local.</p>
-        </div>
-
-        <div class="grid-eventos-checklist">
-            <label class="card-evento-check">
-                <input type="checkbox" name="tipo_evento" value="casamento" checked>
-                <div class="conteudo-check">
-                    <span class="icon-evento">💍</span>
-                    <span class="nome-evento">Casamentos</span>
-                </div>
-            </label>
-
-            <label class="card-evento-check">
-                <input type="checkbox" name="tipo_evento" value="infantil">
-                <div class="conteudo-check">
-                    <span class="icon-evento">🎈</span>
-                    <span class="nome-evento">Festas Infantis</span>
-                </div>
-            </label>
-
-            <label class="card-evento-check">
-                <input type="checkbox" name="tipo_evento" value="corporativo">
-                <div class="conteudo-check">
-                    <span class="icon-evento">💼</span>
-                    <span class="nome-evento">Corporativos</span>
-                </div>
-            </label>
-
-            <label class="card-evento-check">
-                <input type="checkbox" name="tipo_evento" value="aniversario">
-                <div class="conteudo-check">
-                    <span class="icon-evento">🎂</span>
-                    <span class="nome-evento">Aniversários</span>
-                </div>
-            </label>
-
-            <label class="card-evento-check">
-                <input type="checkbox" name="tipo_evento" value="confraternizacao">
-                <div class="conteudo-check">
-                    <span class="icon-evento">🥂</span>
-                    <span class="nome-evento">Confraternizações</span>
-                </div>
-            </label>
-
-            <label class="card-evento-check">
-                <input type="checkbox" name="tipo_evento" value="formatura">
-                <div class="conteudo-check">
-                    <span class="icon-evento">🎓</span>
-                    <span class="nome-evento">Formaturas</span>
-                </div>
-            </label>
-
-            <label class="card-evento-check">
-                <input type="checkbox" name="tipo_evento" value="workshop">
-                <div class="conteudo-check">
-                    <span class="icon-evento">🎤</span>
-                    <span class="nome-evento">Workshops / Cursos</span>
-                </div>
-            </label>
-
-            <label class="card-evento-check">
-                <input type="checkbox" name="tipo_evento" value="religioso">
-                <div class="conteudo-check">
-                    <span class="icon-evento">🕊️</span>
-                    <span class="nome-evento">Retiros / Religiosos</span>
-                </div>
-            </label>
-        </div>
-    </div>
-</div>
-
-<div id="endereco" class="tab-content">
-    <div class="sessao-edit">
-        <div class="header-sessao">
-            <h3>Localização do Espaço</h3>
-            <p class="aviso-form">O endereço completo ajuda os clientes a traçarem a rota e decidirem pela reserva.</p>
-        </div>
-
-        <div class="grid-endereco">
-            <div class="campo-largo">
-                <label>CEP</label>
-                <input type="text" id="cep" placeholder="00000-000" onblur="buscarCEP()">
-            </div>
-            
-            <div class="campo-largo">
-                <label>Logradouro (Rua/Avenida)</label>
-                <input type="text" id="rua" placeholder="Ex: Rua das Flores, 123">
-            </div>
-
-            <div class="campo-curto">
-                <label>Número</label>
-                <input type="text" id="numero" placeholder="123">
-            </div>
-
-            <div class="campo-medio">
-                <label>Complemento</label>
-                <input type="text" id="complemento" placeholder="Sala, Bloco, etc.">
-            </div>
-
-            <div class="campo-medio">
-                <label>Bairro</label>
-                <input type="text" id="bairro" placeholder="Ex: Centro">
-            </div>
-
-            <div class="campo-medio">
-                <label>Cidade</label>
-                <input type="text" id="cidade" placeholder="Ex: São Paulo">
-            </div>
-
-            <div class="campo-curto">
-                <label>Estado (UF)</label>
-                <input type="text" id="uf" placeholder="SP" maxlength="2">
-            </div>
-        </div>
-
-        <div class="mapa-container">
-            <div class="mapa-placeholder">
-                <span class="icon-mapa">📍</span>
-                <p>O mapa será gerado automaticamente com base no endereço acima.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-
-        </div>
-
-    <div class="footer-acoes">
-        <button class="btn-salvar-alteracoes">Salvar Todas as Alterações</button>
-    </div>
-</section>
-
-
-
-
+    </section>
 </main>
 
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <span id="toast-icone">✅</span>
+    <span id="toast-msg">Alterações salvas!</span>
+</div>
 
-<script>  
-
-flatpickr("#input-periodo", {
-        mode: "range",           // Ativa seleção de intervalo
-        minDate: "today",        // Impede datas passadas
-        showMonths: 2,           // Mostra 2 calendários lado a lado
-        dateFormat: "d/m/Y",
-        locale: "pt",            // Tradução para PT-BR
-        
-        // Quando o usuário selecionar as datas:
-        onChange: function(selectedDates, dateStr, instance) {
-            const display = document.getElementById("display-quando");
-            
-            if (selectedDates.length === 2) {
-                // Se selecionou Início e Fim
-                const inicio = instance.formatDate(selectedDates[0], "d/m");
-                const fim = instance.formatDate(selectedDates[1], "d/m");
-                display.innerText = `${inicio} - ${fim}`;
-                display.style.color = "#222";
-            } else {
-                display.innerText = "Adicionar datas";
-            }
-        },
-        
-        // Faz o calendário abrir ao clicar em qualquer lugar da div "Quando"
-        static: true,
-        appendTo: document.getElementById('range-container')
-    });
-
-    // Gatilho para abrir o calendário ao clicar na div pai
-    document.getElementById('range-container').addEventListener('click', () => {
-        document.getElementById('input-periodo')._flatpickr.open();
-    });
-    
-// 1. Lista Única
-    const listaLocais = [
-        "Rio de Janeiro, RJ", "Recife, PE", "Ribeirão Preto, SP", "Resende, RJ", "Rio Branco, AC",
-        "São Paulo, SP", "Salvador, BA", "Santos, SP", "Santa Catarina, SC", "Sorocaba, SP",
-        "Belo Horizonte, MG", "Brasília, DF", "Belém, PA", "Blumenau, SC",
-        "Curitiba, PR", "Cuiabá, MT", "Campinas, SP", "Caxias do Sul, RS"
-    ];
-
-    const inputLocal = document.getElementById('location-input');
-    const dropdown = document.getElementById('location-suggestions');
-    const btnBusca = document.getElementById('main-search-btn');
-
-    // 2. Função de renderizar sugestões
-    function renderLista(listaFiltrada) {
-        dropdown.innerHTML = "";
-        const top5 = listaFiltrada.slice(0, 5);
-
-        if (top5.length > 0) {
-            top5.forEach(local => {
-                const item = document.createElement('div');
-                item.className = 'suggestion-item';
-                item.innerHTML = `<span>📍</span> ${local}`;
-                
-                item.addEventListener('click', () => {
-                    inputLocal.value = local;
-                    dropdown.style.display = 'none';
-                    validarTudo(); // Valida assim que clica
-                });
-                dropdown.appendChild(item);
-            });
-            dropdown.style.display = 'block';
-        } else {
-            dropdown.style.display = 'none';
-        }
-    }
-
-    // 3. Função Única de Validação (A "Capa Preta")
-    function validarTudo() {
-        const valorInput = inputLocal.value.trim();
-        const encontrado = listaLocais.find(l => l.toLowerCase() === valorInput.toLowerCase());
-
-        if (encontrado) {
-            inputLocal.value = encontrado; // Autocorreção (ex: sao paulo -> São Paulo, SP)
-            inputLocal.style.color = "#222";
-            btnBusca.style.opacity = "1";
-            btnBusca.style.pointerEvents = "auto";
-            btnBusca.style.cursor = "pointer";
-            return true;
-        } else {
-            if (valorInput !== "") {
-                inputLocal.style.color = "red";
-            }
-            btnBusca.style.opacity = "0.3";
-            btnBusca.style.pointerEvents = "none";
-            btnBusca.style.cursor = "not-allowed";
-            return false;
-        }
-    }
-
-    // 4. Eventos de Digitação
-    inputLocal.addEventListener('input', (e) => {
-        const busca = e.target.value.toLowerCase();
-        if (busca === "") {
-            renderLista(listaLocais);
-        } else {
-            const filtrados = listaLocais.filter(l => l.toLowerCase().startsWith(busca));
-            renderLista(filtrados);
-        }
-        validarTudo();
-    });
-
-    inputLocal.addEventListener('focus', () => renderLista(listaLocais));
-
-    // 5. O Fechamento e Limpeza (Blur)
-    document.addEventListener('click', (e) => {
-        if (!document.getElementById('location-container').contains(e.target)) {
-            dropdown.style.display = 'none';
-        }
-    });
-
-    inputLocal.addEventListener('blur', () => {
-        setTimeout(() => {
-            if (!validarTudo()) {
-                inputLocal.value = ""; 
-                inputLocal.placeholder = "⚠️ Selecione da lista!";
-                validarTudo();
-            }
-        }, 250);
-    });
-
-    // 6. Enter e Clique no Botão
-    inputLocal.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') validarTudo();
-    });
-
-    btnBusca.addEventListener('click', (e) => {
-        if (!validarTudo()) {
-            e.preventDefault();
-            alert("Selecione um local válido!");
-        }
-    });
-
-    const inputQtd = document.getElementById('qtd-total');
-
-    // Função para os botões + e -
-    function alterarQtd(valor) {
-        let atual = parseInt(inputQtd.value) || 0;
-        let novoValor = atual + valor;
-        
-        if (novoValor >= 1) {
-            inputQtd.value = novoValor;
-        }
-    }
-
-    // Função para validar quando o usuário digita manualmente
-    function validarInput(el) {
-        let valor = parseInt(el.value);
-        
-        if (isNaN(valor) || valor < 1) {
-            el.value = 1; // Reseta para 1 se digitarem algo inválido
-        }
-    }
-
-function toggleFavorito(elemento) {
-        // Alterna a classe 'favoritado' no botão clicado
-        elemento.classList.toggle('favoritado');
-        
-        // Lógica extra: salvar no navegador (opcional)
-        if (elemento.classList.contains('favoritado')) {
-            console.log("Local adicionado aos favoritos!");
-        } else {
-            console.log("Local removido dos favoritos.");
-        }
-    }
-
-function toggleMenuExtra() {
-        const menu = document.getElementById('extra-menu');
-        const isVisible = menu.style.display === 'flex';
-        menu.style.display = isVisible ? 'none' : 'flex';
-    }
-
-    // Fecha o menu se clicar fora dele
-    window.onclick = function(event) {
-        if (!event.target.closest('.menu-hamburguer-container')) {
-            document.getElementById('extra-menu').style.display = 'none';
-        }
-    }
-
-function toggleFaq(elemento) {
-    const item = elemento.parentElement;
-    item.classList.toggle('active');
-}
-
-// Função para salvar os dados da busca
-function salvarDadosBusca() {
-    const dataBusca = document.querySelector('input[name="quando"]').value; // Campo QUANDO
-    const convidadosBusca = document.querySelector('.convidados-count').innerText; // Campo CONVIDADOS
-
-    localStorage.setItem('vents_data', dataBusca);
-    localStorage.setItem('vents_convidados', convidadosBusca);
-}
-
-// Chame essa função ao clicar no botão de busca (lupa rosa)
-document.querySelector('.btn-busca-lupa').addEventListener('click', salvarDadosBusca);
-
-window.onload = function() {
-    const dataSalva = localStorage.getItem('vents_data');
-    const convidadosSalvos = localStorage.getItem('vents_convidados');
-
-    if (dataSalva) {
-        // Tenta extrair o mês e ano da string (Ex: "Março 2026")
-        // Isso depende de como o seu calendário entrega a data
-        const partes = dataSalva.split(' '); 
-        if(partes.length >= 2) {
-            // Aqui você mapeia o nome do mês para o valor do select
-            const meses = {"Janeiro":"01", "Fevereiro":"02", "Março":"03", "Abril":"04", "Maio":"05", "Junho":"06"};
-            document.querySelector('select[name="mes-evento"]').value = meses[partes[0]] || "";
-            document.querySelector('select[name="ano-evento"]').value = partes[1] || "";
-        }
-    }
-
-    if (convidadosSalvos) {
-        document.querySelector('input[name="convidados"]').value = convidadosSalvos;
-    }
-};
-
-function initMap() {
-    // Centraliza no Rio de Janeiro (ou na cidade buscada)
-    const centro = { lat: -22.9068, lng: -43.1729 };
-    const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 13,
-        center: centro,
-        disableDefaultUI: true, // Deixa o mapa limpo
-        zoomControl: true,
-    });
-
-    // Exemplo de dados dos espaços (Isso viria do seu banco de dados)
-    const locais = [
-        { nome: "Mansão das Palmeiras", preco: "R$ 500", lat: -22.9100, lng: -43.1800 },
-        { nome: "Sítio Primavera", preco: "R$ 350", lat: -22.9200, lng: -43.1900 },
-    ];
-
-    locais.forEach(local => {
-        // Cria um elemento HTML para o balão de preço
-        const precoTag = document.createElement("div");
-        precoTag.className = "preco-marker";
-        precoTag.textContent = local.preco;
-
-        // Adiciona o marcador customizado ao mapa
-        new google.maps.OverlayView({
-            onAdd: function() {
-                this.getPanes().overlayMouseTarget.appendChild(precoTag);
-            },
-            draw: function() {
-                const proj = this.getProjection();
-                const pos = proj.fromLatLngToDivPixel(new google.maps.LatLng(local.lat, local.lng));
-                precoTag.style.left = pos.x + "px";
-                precoTag.style.top = pos.y + "px";
-            },
-            // ... (implementação simplificada para visualização)
-        }).setMap(map);
-    });
-}
-
-// 1. FUNÇÕES GLOBAIS (O botão 'onclick' do HTML vai achar estas)
-function abrirModalFiltro() {
-    const modal = document.getElementById("modalFiltro");
-    if (modal) {
-        modal.style.display = "flex";
-        document.body.style.overflow = "hidden"; // Trava o scroll do site
-        console.log("Modal aberto!");
-    }
-}
-
-function fecharModalFiltro() {
-    const modal = document.getElementById("modalFiltro");
-    if (modal) {
-        modal.style.display = "none";
-        document.body.style.overflow = "auto"; // Libera o scroll
-    }
-}
-
-// 2. EVENTOS DE FECHAMENTO (Rodam sozinhos assim que a página carrega)
-document.addEventListener("DOMContentLoaded", function() {
-    const modal = document.getElementById("modalFiltro");
-
-    // Fechar ao clicar na parte escura (Overlay)
-    window.addEventListener("click", function(event) {
-        if (event.target === modal) {
-            fecharModalFiltro();
-        }
-    });
-
-    // Fechar ao apertar a tecla Esc
-    document.addEventListener("keydown", function(event) {
-        if (event.key === "Escape") {
-            fecharModalFiltro();
-        }
-    });
-
-    // --- LÓGICA DOS SLIDERS (Preço) ---
-    const sliderOne = document.getElementById("slider-1");
-    const sliderTwo = document.getElementById("slider-2");
-    const inputMin = document.getElementById("input-min");
-    const inputMax = document.getElementById("input-max");
-
-    if (sliderOne && sliderTwo) {
-        window.slideOne = function() {
-            if(parseInt(sliderTwo.value) - parseInt(sliderOne.value) <= 100) {
-                sliderOne.value = parseInt(sliderTwo.value) - 100;
-            }
-            inputMin.value = sliderOne.value;
-        }
-
-        window.slideTwo = function() {
-            if(parseInt(sliderTwo.value) - parseInt(sliderOne.value) <= 100) {
-                sliderTwo.value = parseInt(sliderOne.value) + 100;
-            }
-            inputMax.value = sliderTwo.value;
-        }
-
-        inputMin.oninput = () => { sliderOne.value = inputMin.value; };
-        inputMax.oninput = () => { sliderTwo.value = inputMax.value; };
-    }
-});
-
-
-
-function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
-    
-    // Esconde todos os conteúdos
-    tabcontent = document.getElementsByClassName("tab-content");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-        tabcontent[i].classList.remove("active");
-    }
-
-    // Remove a classe "active" de todos os botões
-    tablinks = document.getElementsByClassName("tab-link");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].classList.remove("active");
-    }
-
-    // Mostra a aba atual e marca o botão como ativo
-    document.getElementById(tabName).style.display = "block";
-    document.getElementById(tabName).classList.add("active");
-    evt.currentTarget.classList.add("active");
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const previewGrid = document.getElementById('preview-grid');
-
-    // Destacar área ao arrastar arquivo sobre ela
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-        }, false);
-    });
-
-    // Lidar com arquivos largados (Drop)
-    dropZone.addEventListener('drop', (e) => {
-        const files = e.dataTransfer.files;
-        handleFiles(files);
-    });
-
-    // Lidar com seleção via botão
-    fileInput.addEventListener('change', (e) => {
-        handleFiles(e.target.files);
-    });
-
-    function handleFiles(files) {
-        Array.from(files).forEach(file => {
-            if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const div = document.createElement('div');
-                    div.className = 'preview-item';
-                    div.innerHTML = `
-                        <img src="${e.target.result}">
-                        <button class="btn-remover-foto" onclick="this.parentElement.remove()">×</button>
-                    `;
-                    previewGrid.appendChild(div);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-});
-
-function adicionarFAQ() {
-    const lista = document.getElementById('lista-faq');
-    const novoItem = document.createElement('div');
-    novoItem.className = 'faq-item';
-    
-    novoItem.innerHTML = `
-        <div class="faq-inputs">
-            <input type="text" placeholder="Pergunta (ex: Qual o horário limite para som alto?)">
-            <textarea placeholder="Resposta..."></textarea>
-        </div>
-        <button class="btn-remover-faq" onclick="this.parentElement.remove()">🗑️</button>
-    `;
-    
-    lista.appendChild(novoItem);
-}
-
-function buscarCEP() {
-    let cep = document.getElementById('cep').value.replace(/\D/g, '');
-    if (cep !== "") {
-        fetch(`https://viacep.com.br/ws/${cep}/json/`)
-            .then(res => res.json())
-            .then(dados => {
-                if (!dados.erro) {
-                    document.getElementById('rua').value = dados.logradouro;
-                    document.getElementById('bairro').value = dados.bairro;
-                    document.getElementById('cidade').value = dados.localidade;
-                    document.getElementById('uf').value = dados.uf;
-                    document.getElementById('numero').focus();
-                }
-            });
-    }
-}
-
-
-
-
-
-
-
-</script>
-
+<!-- FOOTER -->
 <footer class="main-footer">
     <div class="footer-container">
         <div class="footer-column">
             <h3>Atendimento</h3>
             <ul>
                 <li><a href="#">Central de Ajuda</a></li>
-                <li><a href="#">Fale Conosco</a></li>
+                <li><a href="../fale-conosco.html">Fale Conosco</a></li>
                 <li><a href="#">Política de Privacidade</a></li>
                 <li><a href="#">Termos de Uso</a></li>
                 <li><a href="#">Sobre Nós</a></li>
-                <li><a href="#">Como Funciona</a></li>
+                <li><a href="../como-funciona.html">Como Funciona</a></li>
             </ul>
         </div>
-
         <div class="footer-column">
             <h3>Anunciar</h3>
             <ul>
                 <li><a href="#">Cadastre sua propriedade</a></li>
-                <li><a href="#">Planos Disponíveis</a></li>
+                <li><a href="../planos.html">Planos Disponíveis</a></li>
             </ul>
         </div>
     </div>
-
     <div class="footer-bottom">
-        <p>&copy; 2026 VENTS. Todos os direitos reservados.</p>
+        <p>&copy; 2026 VENTSY. Todos os direitos reservados.</p>
     </div>
 </footer>
 
-<div id="modalFiltro" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <button class="fechar-modal" onclick="fecharModalFiltro()">✕</button>
-            <h2>Filtros</h2>
-        </div>
+<script>
+    /* ── Supabase ── */
+    const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+    const { createClient } = supabase;
+    const sb = createClient(SUPA_URL, SUPA_KEY);
 
-        <div class="modal-body">
-            <section class="filtro-secao">
-                <h3>Faixa de preço</h3>
-                <p>Preços por dia antes de taxas</p>
-                <div class="range-container">
-                    <div class="slider-track"></div>
-                    <input type="range" min="0" max="10000" value="500" id="slider-1" oninput="slideOne()">
-                    <input type="range" min="0" max="10000" value="5000" id="slider-2" oninput="slideTwo()">
-                </div>
-                <div class="inputs-preco">
-                    <div class="caixa-preco">
-                        <label>Mínimo</label>
-                        <span>R$ <input type="number" id="input-min" value="500"></span>
-                    </div>
-                    <div class="caixa-preco">
-                        <label>Máximo</label>
-                        <span>R$ <input type="number" id="input-max" value="5000"></span>
-                    </div>
-                </div>
-            </section>
+    /* ── Init ── */
+    async function init() {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) { window.location.href = '../login.html'; return; }
 
-            <section class="filtro-secao">
-                <h3>Serviços oferecidos</h3>
-                <div class="grid-checkbox">
-                    <label><input type="checkbox"> Climatizado</label>
-                    <label><input type="checkbox"> Estacionamento gratuito</label>
-                    <label><input type="checkbox"> Segurança</label>
-                    <label><input type="checkbox"> Espaço aberto</label>
-                </div>
-            </section>
+        const user = session.user;
+        const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
 
-            <section class="filtro-secao">
-                <h3>Destaques</h3>
-                <div class="grid-checkbox">
-                    <label><input type="checkbox"> Preferidos pelos clientes</label>
-                    <label><input type="checkbox"> Propriedades premium</label>
-                </div>
-            </section>
+        const nome         = perfil?.nome    || user.email;
+        const usuario      = perfil?.usuario || '';
+        const primeiroNome = nome.split(' ')[0];
+        const inicial      = primeiroNome[0]?.toUpperCase() || '?';
 
-            <section class="filtro-secao">
-                <h3>Acessibilidade</h3>
-                <div class="switch-container">
-                    <span>Necessita de acessibilidade?</span>
-                    <label class="switch">
-                        <input type="checkbox">
-                        <span class="slider-round"></span>
-                    </label>
-                </div>
-            </section>
-        </div>
+        document.getElementById('avatar-inicial').textContent = inicial;
+        document.getElementById('drop-nome').textContent      = nome;
+        document.getElementById('drop-email').textContent     = user.email;
+        document.getElementById('sidebar-avatar').textContent = inicial;
+        document.getElementById('sidebar-nome').textContent   = nome;
+        document.getElementById('sidebar-handle').textContent = usuario ? '@' + usuario : '';
 
-        <div class="modal-footer">
-            <button class="btn-limpar" onclick="limparFiltros()">Remover todos</button>
-            <button class="btn-aplicar">Mostrar resultados</button>
-        </div>
-    </div>
-</div>
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('main-content').style.display   = 'flex';
+    }
+
+    /* ── Avatar dropdown ── */
+    function toggleAvatar() {
+        const m = document.getElementById('avatar-menu');
+        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+    }
+    document.addEventListener('click', e => {
+        const c = document.querySelector('.avatar-container');
+        if (c && !c.contains(e.target)) document.getElementById('avatar-menu').style.display = 'none';
+    });
+
+    /* ── Sair ── */
+    async function sair() {
+        await sb.auth.signOut();
+        window.location.href = '../login.html';
+    }
+
+    /* ── Abas ── */
+    function openTab(evt, tabName) {
+        document.querySelectorAll('.tab-content').forEach(t => {
+            t.style.display = 'none'; t.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+        const tab = document.getElementById(tabName);
+        tab.style.display = 'block'; tab.classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    /* ── Salvar ── */
+    function salvarAlteracoes() {
+        mostrarToast('✅', 'Alterações salvas com sucesso!');
+    }
+
+    /* ── Toast ── */
+    function mostrarToast(icone, msg) {
+        document.getElementById('toast-icone').textContent = icone;
+        document.getElementById('toast-msg').textContent   = msg;
+        const t = document.getElementById('toast');
+        t.classList.add('visivel');
+        setTimeout(() => t.classList.remove('visivel'), 4000);
+    }
+
+    /* ── Preview foto responsável ── */
+    function previewFotoResp(input) {
+        if (!input.files || !input.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            const prev = document.getElementById('avatar-preview');
+            prev.innerHTML = `<img src="${e.target.result}" alt="Foto">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    /* ── FAQ ── */
+    function adicionarFAQ() {
+        const lista = document.getElementById('lista-faq');
+        const item = document.createElement('div');
+        item.className = 'faq-item';
+        item.innerHTML = `
+            <div class="faq-inputs">
+                <input type="text" placeholder="Pergunta (ex: Qual o horário limite para som alto?)">
+                <textarea placeholder="Resposta..."></textarea>
+            </div>
+            <button class="btn-remover-faq" onclick="this.parentElement.remove()">🗑️</button>
+        `;
+        lista.appendChild(item);
+        item.querySelector('input').focus();
+    }
+
+    /* ── Busca CEP ── */
+    function buscarCEP() {
+        const cep = document.getElementById('cep').value.replace(/\D/g, '');
+        if (cep.length !== 8) return;
+        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+            .then(r => r.json())
+            .then(d => {
+                if (!d.erro) {
+                    document.getElementById('rua').value    = d.logradouro;
+                    document.getElementById('bairro').value = d.bairro;
+                    document.getElementById('cidade').value = d.localidade;
+                    document.getElementById('uf').value     = d.uf;
+                    document.getElementById('numero').focus();
+                    mostrarToast('📍', 'Endereço preenchido automaticamente!');
+                }
+            });
+    }
+
+    init();
+</script>
 
 </body>
 </html>
