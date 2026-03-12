@@ -3,1868 +3,1252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Primeiro Site</title>
-    <style>
-
-	/*Configurações Gerais do site é o BODY*/	
-
-        body {
-            font-family: Arial, sans-serif, Tahoma, Geneva, Verdana, 'Segoe UI';
-            display: flex;
-	        flex-direction: column; /* Alinha os itens um abaixo do outro */
-            align-items: left;
-            margin: 0 auto;
-            background-color: #f0f2f5;
-            padding: 0;
-            
-        }
-
-	
-	/* BARRA DO TOPO (HEADER) */
-        header {
-            width: 100%;
-            height: 80px;
-            background-color: #ffffff;
-            display: flex;
-            align-items: center; /* Centraliza verticalmente */
-	        padding: 0 5%;  /* Padding em % para ser flexível */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: fixed; /* Fixa no topo ao rolar a página */
-            top: 0;
-            z-index: 9999; /* Garante que a logo fique sempre por cima de tudo */
-            box-sizing: border-box; /* Garante que o padding não quebre a largura */
-            overflow: visible !important;
-           
-        }
-
-        /* Garante que a logo e o botão tenham o mesmo peso visual para o centro ser real */
-.header-left, .header-right {
-    flex: 1; 
-    display: flex;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    justify-content: flex-end; /* Empurra o botão de login para o fim da direita */
-}
-
-/* Estilo do Menu Central */
-.header-center {
-    display: flex;
-    justify-content: space-between;
-    gap: 25px; /* Espaço entre os links */
-    overflow: visible !important;
-
-}
-
-.header-center a {
-    text-decoration: none;
-    color: #b11515;
-    font-size: 0.95rem;
-    font-weight: 500;
-    position: relative;
-    padding: 5px 0;
-}
-
-/* Efeito da linha embaixo que você queria */
-.header-center a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: 0;
-    left: 0;
-    background-color: #1a73e8;
-    transition: width 0.3s ease;
-}
-
-.header-center a:hover::after {
-    width: 100%;
-}
-
-/* Botão de Login (Lateral Direita) */
-.btn-login {
-    background-color: #f0f2f5;
-    color: #1a73e8;
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
-}
-
-.btn-login:hover {
-    background-color: #1a73e8;
-    color: white;
-    box-shadow: 0 4px 10px rgba(26, 115, 232, 0.2);
-}
-
-.btn-menu {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-}
-
-.btn-menu:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* Dropdown Extra */
-.menu-hamburguer-container { position: relative; }
-
-.extra-menu-dropdown {
-    position: absolute;
-    top: 50px;
-    right: 0;
-    width: 200px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-    display: none;
-    flex-direction: column;
-    padding: 10px 0;
-    z-index: 1001;
-}
-
-.extra-menu-dropdown a {
-    padding: 12px 20px;
-    text-decoration: none;
-    color: #444;
-    font-size: 0.9rem;
-}
-
-.extra-menu-dropdown a:hover {
-    background: #f7f7f7;
-}
-
-nav {
-    /* Isso faz o menu ocupar o espaço central */
-    flex-grow: 1;
-    display: flex;
-    justify-content: center; /* Centraliza os links dentro do NAV */
-}
-
-nav a {
-    margin: 0 15px; /* Espaçamento entre os links */
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    padding-bottom: 5px; /* Espaço entre o texto e a linha */
-    border-bottom: 2px solid transparent; /* Linha invisível por padrão */
-    transition: all 0.3s ease; /* Faz a transição ser suave */
-}
-
-nav a:hover {
-    color: #1a73e8; /* Muda de cor ao passar o mouse */
-    border-bottom: 2px solid #1a73e8; /* A linha aparece com cor */
-}
-
-/* Espaçador invisível para equilibrar a logo e manter o menu no centro real */
-.spacer {
-    width: 150px; /* Deve ter o mesmo tamanho aproximado da sua logo */
-}
-
-	.logo {
-            height: 100px; /* Ajusta a altura da logo */
-            width: auto;
-            cursor: pointer;
-        }
-
-	/* CONTEÚDO PRINCIPAL */
-        main {
-            margin-top: 100px; /* Espaço para não ficar escondido atrás do header fixo */
-            text-align: left;
-	        padding: 20px;
-        }
-
-  
-	/* Estilizando o Link para parecer um Botão */
-        .botao {
-            display: inline-block;
-            padding: 15px 30px;
-            background-color: #1a73e8; /* Azul do Google */
-            color: white;
-            text-decoration: none; /* Remove o sublinhado padrão do link */
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background 0.3s, transform 0.2s;
-            margin-top: 15px;
-        }
-
-        .botao:hover {
-            background-color: #1557b0; /* Azul mais escuro ao passar o mouse */
-            transform: translateY(-2px); /* Efeito de "levantar" levemente */
-        }
-
-        /* Container da Busca */
-.search-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-    background: transparent;
-    z-index: 10000 !important; /* Um número maior que o do header */
-}
-
-.search-bar {
-    background: rgb(255, 255, 255);
-    display: flex;
-    align-items: center;
-    padding: 10px 15px 10px 30px;
-    border-radius: 50px; /* Bordas bem arredondadas estilo Airbnb */
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border: 1px solid #ddd;
-    max-width:850px;
-    width: 100%;
-    overflow: visible;
-}
-
-.search-item {
-    display: flex;
-    flex-direction: column;
-    min-width: 120px;
-    padding: 10px 20px;
-    position: relative;
-    cursor: pointer;
-}
-
-.search-item label {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: #222;
-    pointer-events: none; /* O clique passa pelo texto e vai para a div */
-    z-index: 1;
-}
-
-/* Faz o input de data ocupar todo o espaço interno da div */
-.search-item input[type="date"] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0; /* Esconde o input padrão, mas ele continua lá */
-    cursor: pointer;
-    z-index: 2; /* Fica por cima de tudo para capturar o clique */
-}
-
-/* Criamos um "espelho" visual para mostrar a data selecionada, 
-   já que o input real está invisível (opacity: 0) */
-.date-display {
-    font-size: 0.9rem;
-    color: #666;
-    margin-top: 4px;
-    pointer-events: none; /* Deixa o clique passar direto para o input */
-
-}
-
-.date-text {
-    font-size: 0.9rem;
-    color: #717171;
-    margin-top: 2px;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.search-item input, .search-item select {
-    border: none;
-    outline: none;
-    font-size: 0.9rem;
-    color: #666;
-    background: transparent;
-}
-
-/* Divisória vertical entre os itens */
-.divider {
-    width: 1px;
-    height: 35px;
-    background-color: #eee;
-}
-
-/* Botão Vermelho com Lupa */
-.btn-search {
-    background-color: #ff385c; /* Vermelho vibrante */
-    border: none;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.2s, background 0.3s;
-    margin-left: 10px;
-}
-
-.btn-search:hover {
-    background-color: #e31c5f;
-    transform: scale(1.05);
-}
-
-#location-container {
-    position: relative; /* Necessário para posicionar o dropdown */
-}
-
-.suggestions-dropdown {
-    position: absolute;
-    top: 100%; /* Aparece logo abaixo da barra */
-    left: 0;
-    width: 250px;
-    background: white;
-    border-radius: 16px;
-    margin-top: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    display: none; /* Escondido por padrão */
-    overflow: hidden;
-    z-index: 1001;
-    border: 1px solid #eee;
-}
-
-.suggestion-item {
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-    font-size: 0.9rem;
-    color: #333;
-}
-
-.suggestion-item:hover {
-    background-color: #f7f7f7;
-}
-
-.suggestion-item span {
-    font-size: 1.1rem;
-}
- 
-.input-erro {
-    color: #ff385c !important; /* Vermelho do seu botão */
-    font-weight: bold;
-}
-
-.guest-direct-selector {
-    min-width: 140px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.stepper-control {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 5px;
-    background: #f7f7f7;
-    border-radius: 25px;
-    padding: 2px 8px;
-    border: 1px solid #eee;
-}
-
-.btn-step {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 1px solid #ddd;
-    background: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    color: #444;
-    transition: all 0.2s ease;
-    padding: 0;
-    line-height: 0;
-}
-
-.btn-step:hover {
-    border-color: #ff385c;
-    color: #ff385c;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.qtd-display {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #222;
-    min-width: 30px;
-    text-align: center;
-}
-
-.qtd-input {
-    width: 45px;
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #222;
-    outline: none;
-    appearance: textfield; /* Remove setas no Firefox */
-}
-
-/* Remove setas no Chrome/Safari */
-.qtd-input::-webkit-outer-spin-button,
-.qtd-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.stepper-control {
-    display: flex;
-    align-items: center;
-    background: #f7f7f7;
-    border-radius: 25px;
-    padding: 3px 10px;
-    border: 1px solid #eee;
-    margin-top: 5px;
-}
-
-.destinos-container {
-    padding: 20px 5%;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-.titulo-sessao {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #222;
-    margin-bottom: 20px;
-}
-
-.carrossel-locais {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto; /* Permite scroll horizontal se a tela for pequena */
-    padding-bottom: 20px;
-    scrollbar-width: none; /* Esconde barra no Firefox */
-}
-
-.carrossel-locais::-webkit-scrollbar {
-    display: none; /* Esconde barra no Chrome/Safari */
-}
-
-.card-local {
-    min-width: 70px; /* Largura de cada card */
-    flex: 0 0 auto;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.card-local:hover {
-    transform: translateY(-5px);
-}
-
-.foto-container {
-    position: relative;
-    width: 165px;
-    height: 165px;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.foto-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Faz a foto preencher o espaço sem distorcer */
-}
-
-.btn-favorito {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    text-shadow: 0 0 5px rgba(0,0,0,0.5);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* Quando o usuário clica e ativa o favorito */
-.btn-favorito.favoritado {
-    color: #ff385c !important; /* Vermelho vibrante */
-    transform: scale(1.2);
-    text-shadow: none;
-}
-
-/* Animação de clique (opcional, dá um toque premium) */
-.btn-favorito:active {
-    transform: scale(0.8);
-}
-
-.info-local {
-    padding: 20px 0;
-}
-
-.nome-local {
-    font-size: 12px;
-    font-weight: 600;
-    color: #222;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Corta o texto com "..." se for muito longo */
-}
-
-.detalhes-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 10px;
-    font-weight: 400;
-}
-
-.preco {
-    font-size: 9px;
-    color: #444;
-}
-
-.avaliacao {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #222;
-}
-
-.main-footer {
-    background-color: #f7f7f7;
-    border-top: 1px solid #dddddd;
-    padding: 60px 0 30px 0;
-    margin-top: 50px;
-    width: 100%; /* Força a largura total */
-    font-family: sans-serif;
-}
-
-.footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    padding: 0 5%;     /* Dá um respiro nas laterais apenas para o texto */
-    gap: 150px; /* Espaço entre as colunas */
-}
-
-.footer-column h3 {
-    font-size: 0.9rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #222;
-    margin-bottom: 20px;
-    letter-spacing: 0.5px;
-}
-
-.footer-column ul {
-    list-style: none;
-    padding: 0;
-}
-
-.footer-column ul li {
-    margin-bottom: 12px;
-}
-
-.footer-column ul li a {
-    text-decoration: none;
-    color: #484848;
-    font-size: 0.95rem;
-    transition: text-decoration 0.2s;
-    display: inline-block;
-    margin-bottom: 12px;
-}
-
-.footer-column ul li a:hover {
-    text-decoration: underline;
-    color: #000;
-}
-
-.footer-bottom {
-    max-width: 1200px;
-    margin: 40px auto 0 auto;
-    padding-top: 25px 5% 0 5%;
-    border-top: 1px solid #ebebeb;
-    text-align: left;
-    color: #717171;
-    font-size: 0.85rem;
-}
-
-/* Responsividade para Celular */
-@media (max-width: 768px) {
-    .footer-container {
-        flex-direction: column;
-        gap: 40px;
-    }
-}
-
-/* Espaçamento entre as grandes seções de categorias */
-.categoria-sessao {
-    padding: 5px 5%;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-/* Garante que o título de cada categoria seja claro */
-.titulo-categoria {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #222;
-    margin-bottom: 15px;
-    margin-top: 0px;
-    text-align: left; /* Garante o alinhamento à esquerda */
-    width: 100%;      /* Força o título a ocupar a largura total do container */
-}
-
-/* Estilo do carrossel (reutilizando a lógica anterior) */
-.carrossel-horizontal {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 15px;
-    scrollbar-width: none; /* Firefox */
-}
-
-.carrossel-horizontal::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-}
-
-.secao-galeria {
-    width: 100%;
-    padding: 0 5%; /* Alinhamento com a logo */
-    max-width: 1400px;
-    margin: 0 auto 30px auto; /* Margin-bottom garante que o corpo não sobreponha */
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr; /* Esquerda grande, direita mosaico */
-    grid-template-rows: 220px 220px; /* Duas linhas de altura fixa */
-    gap: 10px;
-    height: 450px; /* Altura total confortável da galeria */
-    background: transparent;
-    padding: 12px;
-    border-radius: 20px;
-    margin-bottom: 5px;
-}
-
-/* O container principal da galeria */
-.galeria-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr; /* Esquerda grande, direita mosaico */
-    grid-template-rows: 220px 220px; /* Duas linhas de altura fixa */
-    gap: 10px;
-    height: 500px; /* Altura total confortável da galeria */
-    background: transparent;
-    padding: 12px;
-    border-radius: 20px;
-    margin-bottom: 30px;
-}
-
-/* Garante que as imagens preencham o quadrado sem distorcer */
-.galeria-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 12px;
-}
-
-/* Mosaico das 4 fotos menores */
-.fotos-mosaico {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* 2 colunas */
-    grid-template-rows: 1fr 1fr;    /* 2 linhas */
-    gap: 12px;
-}
-
-/* Container específico da última foto (para o botão) */
-.foto-ultimo-slot {
-    position: relative; /* Essencial para o botão flutuar dentro */
-}
-
-/* O Botão "Mostrar todas as fotos" */
-.btn-mostrar-fotos {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: white;
-    border: 1px solid #222;
-    color: #222;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.2s, background-color 0.2s;
-    z-index: 5;
-}
-
-.btn-mostrar-fotos:hover {
-    background-color: #f7f7f7;
-    transform: scale(1.02);
-}
-
-.btn-mostrar-fotos:active {
-    transform: scale(0.98);
-}
-
-.detalhes-corpo {
-    display: flex;
-    grid-template-columns: 2fr 1fr;
-    gap: 40px;
-    align-items: flex-start;
-}
-
-.card-reserva {
-    flex: 1; /* Ocupa 1/3 do espaço */
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    position: sticky;
-    top: 120px; /* Para não grudar no seu cabeçalho novo */
-    height: fit-content;
-    min-width: 300px;
-    text-align: center;
-    display: flex;
-    flex-direction: column; /* Coloca um embaixo do outro */
-    align-items: center;    /* Centraliza horizontalmente */
-    justify-content: center; /* Centraliza verticalmente se houver altura fixa */
-}
-
-
-/* Ajuste do texto do preço */
-.card-reserva h3, .card-reserva p {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 20px; /* Espaço entre o preço e o botão */
-    color: #000;
-}
-
-/* 1. Limitar a largura total da página para não espalhar */
-.propriedade-container {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 0 20px;
-}
-
-.foto-principal {
-    grid-column: 1 / 2;
-    grid-row: 1 / 3; /* Ocupa as duas linhas */
-}
-
-.foto-principal img, .foto-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Corta a imagem para caber sem distorcer */
-    border-radius: 12px;
-}
-
-.info-esquerda {
-    flex: 2; /* Ocupa 2/3 do espaço */
-}
-
-.inputs-reserva input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box; /* Garante que o padding não aumente a largura */
-}
-
-.secao-anfitriao {
-    width: 100%;
-    padding: 0px 2%; /* Alinhado com a galeria e logo */
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.anfitriao-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 20px 0;
-    border-bottom: 1px solid #ebebeb; /* Linha sutil de separação */
-}
-
-.foto-perfil-wrapper {
-    position: relative;
-    width: 60px;
-    height: 60px;
-}
-
-.foto-perfil {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.selo-superhost {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    background: #ff385c;
-    color: white;
-    font-size: 10px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid white;
-}
-
-.info-anfitriao h2 {
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin: 0;
-    color: #222;
-}
-
-.info-anfitriao .cargo {
-    font-size: 1rem;
-    color: #222;
-    margin: 2px 0;
-}
-
-.info-anfitriao .tempo-plataforma {
-    font-size: 0.9rem;
-    color: #717171;
-    margin: 0;
-}
-
-.secao-faq {
-    width: 100%;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 5%;
-}
-
-.titulo-sessao {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 25px;
-    text-align: left; /* Alinhado com a logo e títulos anteriores */
-}
-
-.faq-container {
-    border-top: 1px solid #ebebeb;
-}
-
-.faq-item {
-    border-bottom: 1px solid #ebebeb;
-}
-
-.faq-pergunta {
-    width: 100%;
-    padding: 20px 0;
-    background: none;
-    border: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #222;
-    cursor: pointer;
-    text-align: left;
-    transition: color 0.2s;
-}
-
-.faq-pergunta:hover {
-    color: #ff385c; /* Cor de destaque da Vents */
-}
-
-.faq-resposta {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-}
-
-.faq-resposta p {
-    padding-bottom: 20px;
-    color: #717171;
-    line-height: 1.6;
-}
-
-.faq-icon {
-    font-size: 1.5rem;
-    transition: transform 0.3s;
-}
-
-/* Classe ativa para o JavaScript */
-.faq-item.active .faq-resposta {
-    max-height: 200px; /* Altura suficiente para o texto */
-}
-
-.faq-item.active .faq-icon {
-    transform: rotate(45deg); /* Transforma o + em um x */
-}
-.secao-comentarios {
-    width: 100%;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 30px 5%;
-    border-top: 1px solid #ebebeb;
-}
-
-.comentarios-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-}
-
-.comentarios-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Duas colunas */
-    gap: 40px 80px; /* Espaço entre os cards */
-    margin-bottom: 30px;
-}
-
-.autor-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.autor-info img {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.autor-info div {
-    display: flex;
-    flex-direction: column;
-}
-
-.autor-info strong {
-    font-size: 1rem;
-    color: #222;
-}
-
-.autor-info span {
-    font-size: 0.85rem;
-    color: #717171;
-}
-
-.texto-comentario {
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #222;
-    display: -webkit-box;
-    -webkit-line-clamp: 3; /* Limita a 3 linhas */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.btn-ver-comentarios {
-    background: white;
-    border: 1px solid #222;
-    padding: 13px 23px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-ver-comentarios:hover {
-    background: #f7f7f7;
-}
-
-/* Responsividade para celular */
-@media (max-width: 768px) {
-    .comentarios-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.secao-mapa {
-    width: 100%;
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 5% 60px 5%; /* Padding inferior para dar respiro antes do rodapé */
-}
-
-.endereco-texto {
-    font-size: 1.1rem;
-    color: #222;
-    font-weight: 500;
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.mapa-container {
-    width: 100%;
-    border-radius: 15px; /* Bordas arredondadas como na galeria */
-    overflow: hidden;    /* Garante que o iframe respeite o arredondamento */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-.secao-contato {
-    width: 100%;
-    max-width: 1200px;
-    margin-top: 100px auto;
-    padding: 30px 5%;
-}
-
-.formulario-container {
-    background: #ffffff;
-    padding: 30px;
-    border-radius: 15px;
-    border: 1px solid #ddd;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-.formulario-container h3 {
-    margin-bottom: 10px;
-    font-size: 1.5rem;
-}
-
-.formulario-container p {
-    color: #717171;
-    margin-bottom: 25px;
-}
-
-.campo-grupo {
-    margin-bottom: 20px;
-    flex: 1; /* Faz com que cada campo ocupe metade do espaço disponível */
-    display: flex;
-    flex-direction: column;
-}
-
-.campo-grupo label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #222;
-}
-
-.campo-grupo input, 
-.campo-grupo textarea, 
-.campo-grupo select {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%; /* Garante que o input preencha a sua metade */
-    box-sizing: border-box;
-}
-
-.campo-grupo input:focus, 
-.campo-grupo textarea:focus {
-    border-color: #ff385c; /* Cor da Vents */
-}
-
-.linha-dupla {
-    display: flex;
-    grid-template-columns: 1fr 1fr;
-    gap: 0px;
-    width: 100%;
-    margin-bottom: 0px;
-    box-sizing: border-box; /* Garante que o padding não estoure a largura */
-}
-
-.select-datas {
-    display: flex;
-    gap: 10px;
-}
-
-.select-datas select {
-    flex: 1;
-}
-
-.btn-enviar-form {
-    width: 100%;
-    background-color: #ff385c;
-    color: white;
-    border: none;
-    padding: 15px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.3s;
-}
-
-.btn-enviar-form:hover {
-    background-color: #e31c5f;
-}
-
-@media (max-width: 600px) {
-    .linha-dupla {
-        grid-template-columns: 1fr;
-    }
-}
-
-.simulador-reserva {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    position: sticky;
-    top: 100px; /* Para acompanhar o scroll */
-    width: 100%;
-    max-width: 380px;
-}
-
-.simulador-header { margin-bottom: 20px; }
-.preco-base { font-size: 1.4rem; color: #222; display: block; }
-.preco-base strong { font-weight: 800; }
-.subtexto { font-size: 0.8rem; color: #717171; }
-
-.campo-simulador { margin-bottom: 20px; }
-.campo-simulador label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
-
-.campo-simulador select, 
-.campo-simulador input[type="range"] { width: 100%; cursor: pointer; }
-
-.check-adicional {
-    font-size: 0.85rem;
-    font-weight: 400 !important;
-    display: flex !important;
-    align-items: center;
-    gap: 10px;
-    margin-top: 8px;
-    cursor: pointer;
-}
-
-.resultado-simulacao { margin: 20px 0; }
-.linha-total {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #ff385c;
-}
-
-.aviso-estimativa { font-size: 0.7rem; color: #999; margin-top: 10px; }
-
-.btn-solicitar-contato {
-    width: 100%;
-    background: #ff385c;
-    color: white;
-    border: none;
-    padding: 16px;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn-solicitar-contato:hover { background: #e31c5f; transform: scale(1.02); }
-
-
-
-
-    </style>
-
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_red.css">
-    
+    <title>Chácara Macacu — VENTSY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    <style>
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        :root {
+            --preto: #0d0d0d;
+            --vermelho: #ff385c;
+            --cinza-claro: #f5f5f5;
+            --cinza-borda: #e8e8e8;
+            --texto: #3a3a3a;
+            --texto-suave: #888;
+            --verde: #22c55e;
+            --ouro: #f59e0b;
+        }
 
+        body { font-family: 'DM Sans', Arial, sans-serif; background: #fafafa; color: var(--texto); }
+
+        /* ── LOADING ── */
+        #loading-screen {
+            position: fixed; inset: 0; background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 99999; flex-direction: column; gap: 16px;
+        }
+        .loading-logo { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: var(--preto); }
+        .loading-logo em { font-style: normal; color: var(--vermelho); }
+        .loading-dots { display: flex; gap: 6px; }
+        .loading-dots span { width: 8px; height: 8px; background: var(--vermelho); border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
+        .loading-dots span:nth-child(2) { animation-delay: .2s; }
+        .loading-dots span:nth-child(3) { animation-delay: .4s; }
+        @keyframes bounce { 0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1} }
+
+        /* ── HEADER ── */
+        header {
+            width: 100%; height: 80px; background: #fff;
+            display: flex; align-items: center; padding: 0 5%;
+            box-shadow: 0 2px 5px rgba(0,0,0,.08);
+            position: sticky; top: 0; z-index: 9999;
+        }
+        .header-left { flex: 1; }
+        .logo { height: 100px; width: auto; cursor: pointer; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .btn-entrar {
+            background: var(--vermelho); color: #fff;
+            padding: 9px 20px; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: .88rem;
+            transition: background .2s;
+        }
+        .btn-entrar:hover { background: #e0304f; }
+
+        /* ── PAGE ── */
+        .page { max-width: 1240px; margin: 0 auto; padding: 32px 24px 80px; }
+
+        /* ── TÍTULO DA PROPRIEDADE ── */
+        .prop-titulo { margin-bottom: 18px; }
+        .prop-titulo h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 900; color: var(--preto); letter-spacing: -.02em; margin-bottom: 6px;
+        }
+        .prop-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: .9rem; color: var(--texto-suave); }
+        .prop-meta .nota { color: var(--preto); font-weight: 700; }
+        .prop-meta .nota span { color: var(--ouro); }
+        .selo-ultra {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #f0c040; border: 1px solid #f0c04050;
+            border-radius: 20px; padding: 4px 14px; font-size: .76rem; font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        /* ── GALERIA ── */
+        .galeria-wrapper { position: relative; margin-bottom: 32px; border-radius: 20px; overflow: hidden; }
+        .galeria-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-rows: 230px 230px;
+            gap: 4px; height: 464px;
+        }
+        .galeria-grid .foto-main { grid-column: 1; grid-row: 1/3; }
+        .galeria-grid .foto-slot { position: relative; overflow: hidden; }
+        .galeria-grid .foto-slot img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform .4s ease;
+        }
+        .galeria-grid .foto-slot:hover img { transform: scale(1.04); }
+
+        /* Básico: só 5 fotos. Slots extras ficam ocultos */
+        .galeria-grid .foto-slot.oculto { display: none; }
+
+        .btn-galeria-acoes {
+            position: absolute; bottom: 16px; right: 16px;
+            display: flex; gap: 8px; z-index: 5;
+        }
+        .btn-galeria {
+            background: rgba(255,255,255,.95); border: 1px solid #ddd;
+            color: var(--preto); padding: 9px 16px; border-radius: 8px;
+            font-weight: 600; font-size: .84rem; cursor: pointer;
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.12); transition: all .2s;
+        }
+        .btn-galeria:hover { background: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.16); }
+        .btn-galeria.vermelho { background: var(--vermelho); color: #fff; border-color: var(--vermelho); }
+        .btn-galeria.vermelho:hover { background: #e0304f; }
+
+        /* ── LAYOUT PRINCIPAL ── */
+        .prop-corpo {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 48px;
+            align-items: flex-start;
+        }
+        .prop-esquerda { min-width: 0; }
+
+        /* ── ANFITRIÃO ── */
+        .secao-anfitriao {
+            display: flex; align-items: center; gap: 14px;
+            padding: 20px 0; border-bottom: 1px solid var(--cinza-borda); margin-bottom: 24px;
+        }
+        .avatar-anfitriao {
+            width: 60px; height: 60px; border-radius: 50%;
+            object-fit: cover; border: 2px solid var(--cinza-borda);
+        }
+        .avatar-anfitriao-inicial {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: var(--vermelho); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .info-anfitriao h3 { font-size: 1rem; font-weight: 700; color: var(--preto); margin-bottom: 2px; }
+        .info-anfitriao p { font-size: .84rem; color: var(--texto-suave); }
+
+        /* ── DETALHES RÁPIDOS ── */
+        .detalhes-rapidos {
+            display: flex; gap: 20px; flex-wrap: wrap;
+            padding: 20px 0; border-bottom: 1px solid var(--cinza-borda); margin-bottom: 24px;
+        }
+        .detalhe-item { display: flex; flex-direction: column; }
+        .detalhe-item .label { font-size: .72rem; font-weight: 700; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .06em; }
+        .detalhe-item .valor { font-size: .92rem; font-weight: 600; color: var(--preto); margin-top: 2px; }
+
+        /* ── SOBRE ── */
+        .secao-sobre { margin-bottom: 28px; border-bottom: 1px solid var(--cinza-borda); padding-bottom: 28px; }
+        .secao-sobre h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: var(--preto); margin-bottom: 14px; }
+        .secao-sobre p { font-size: .93rem; line-height: 1.7; color: var(--texto); margin-bottom: 10px; }
+        .sobre-expandir { background: none; border: none; color: var(--vermelho); font-size: .88rem; font-weight: 600; cursor: pointer; padding: 0; margin-top: 6px; text-decoration: underline; }
+
+        /* ── COMODIDADES ── */
+        .secao-comodidades { margin-bottom: 28px; border-bottom: 1px solid var(--cinza-borda); padding-bottom: 28px; }
+        .secao-comodidades h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: var(--preto); margin-bottom: 16px; }
+        .comodidades-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .comodidade { font-size: .9rem; color: var(--texto); display: flex; align-items: center; gap: 8px; }
+
+        /* ── CARD LATERAL DIREITO ── */
+        .card-lateral {
+            position: sticky; top: 100px;
+            background: #fff; border: 1px solid var(--cinza-borda);
+            border-radius: 20px; padding: 28px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.1);
+        }
+
+        .preco-lateral { font-size: 1.4rem; font-weight: 700; color: var(--preto); margin-bottom: 16px; }
+        .preco-lateral span { font-size: .88rem; font-weight: 400; color: var(--texto-suave); }
+
+        /* Botão WhatsApp direto */
+        .btn-wpp {
+            width: 100%; background: #25d366; color: #fff;
+            border: none; padding: 14px; border-radius: 12px;
+            font-family: inherit; font-size: .95rem; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 8px; margin-bottom: 10px;
+            transition: background .2s, transform .15s;
+        }
+        .btn-wpp:hover { background: #1da851; transform: scale(1.01); }
+
+        /* Botão Solicitar Reserva */
+        .btn-reserva {
+            width: 100%; background: var(--vermelho); color: #fff;
+            border: none; padding: 14px; border-radius: 12px;
+            font-family: inherit; font-size: .95rem; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 8px; margin-bottom: 20px;
+            transition: background .2s, transform .15s;
+        }
+        .btn-reserva:hover:not(:disabled) { background: #e0304f; transform: scale(1.01); }
+        .btn-reserva:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+        /* ── FORMULÁRIO UNIFICADO ── */
+        .form-reserva { display: none; flex-direction: column; gap: 14px; margin-top: 4px; }
+        .form-reserva.aberto { display: flex; }
+        .form-grupo { display: flex; flex-direction: column; gap: 5px; }
+        .form-grupo label { font-size: .78rem; font-weight: 700; color: var(--preto); text-transform: uppercase; letter-spacing: .04em; }
+        .form-grupo input,
+        .form-grupo textarea,
+        .form-grupo select {
+            padding: 11px 14px; border: 1px solid var(--cinza-borda);
+            border-radius: 10px; font-family: inherit; font-size: .9rem; color: var(--preto);
+            outline: none; transition: border-color .2s; background: #fafafa;
+        }
+        .form-grupo input:focus,
+        .form-grupo textarea:focus,
+        .form-grupo select:focus { border-color: var(--vermelho); background: #fff; }
+        .form-duplo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* Simulador integrado */
+        .simulador-linha {
+            background: var(--cinza-claro); border-radius: 12px;
+            padding: 14px; font-size: .84rem;
+        }
+        .simulador-linha .total-linha {
+            display: flex; justify-content: space-between;
+            font-weight: 700; color: var(--preto); font-size: .96rem; margin-top: 8px;
+        }
+        .simulador-linha .aviso { font-size: .72rem; color: var(--texto-suave); margin-top: 4px; }
+
+        .check-adicional-sim {
+            display: flex; align-items: center; gap: 8px;
+            font-size: .84rem; cursor: pointer; margin-top: 6px;
+        }
+        .check-adicional-sim input { width: auto; }
+
+        .range-wrapper { display: flex; align-items: center; gap: 10px; }
+        .range-wrapper input[type=range] { flex: 1; accent-color: var(--vermelho); }
+        .range-valor { font-size: .84rem; font-weight: 700; color: var(--preto); white-space: nowrap; min-width: 60px; }
+
+        /* Botão final do form */
+        .btn-enviar-wpp {
+            width: 100%; background: #25d366; color: #fff;
+            border: none; padding: 15px; border-radius: 12px;
+            font-family: inherit; font-size: .96rem; font-weight: 700;
+            cursor: pointer; transition: background .2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-enviar-wpp:hover { background: #1da851; }
+
+        .form-hint { font-size: .74rem; color: var(--texto-suave); text-align: center; margin-top: 8px; }
+
+        /* ── BLOCO SEM CONTATO (plano básico) ── */
+        .bloco-basico-cta {
+            background: var(--cinza-claro); border-radius: 16px;
+            padding: 24px; text-align: center;
+        }
+        .bloco-basico-cta p { font-size: .88rem; color: var(--texto-suave); line-height: 1.5; }
+
+        /* ── AVALIAÇÕES ── */
+        .secao-avaliacoes { margin-bottom: 36px; border-top: 1px solid var(--cinza-borda); padding-top: 28px; }
+        .aval-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+        .aval-nota { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: var(--preto); }
+        .aval-estrelas { font-size: 1.1rem; }
+        .aval-total { font-size: .88rem; color: var(--texto-suave); }
+
+        /* Filtros de avaliação */
+        .aval-filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .aval-filtro {
+            padding: 7px 14px; border-radius: 20px; border: 1px solid var(--cinza-borda);
+            background: #fff; font-size: .82rem; font-weight: 600; cursor: pointer;
+            transition: all .2s; color: var(--texto);
+        }
+        .aval-filtro.ativo { background: var(--preto); color: #fff; border-color: var(--preto); }
+        .aval-filtro:hover:not(.ativo) { border-color: var(--preto); }
+
+        .aval-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; margin-bottom: 24px; }
+        .aval-card { }
+        .aval-autor { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .aval-autor img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+        .aval-autor-info strong { display: block; font-size: .92rem; color: var(--preto); }
+        .aval-autor-info span { font-size: .8rem; color: var(--texto-suave); }
+        .badge-verificado {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(34,197,94,.1); color: #15803d;
+            border-radius: 20px; padding: 2px 8px;
+            font-size: .7rem; font-weight: 700; margin-left: 6px;
+        }
+        .aval-texto { font-size: .9rem; line-height: 1.6; color: var(--texto); }
+        .aval-oculto { display: none; }
+
+        .btn-ver-mais {
+            background: #fff; border: 1.5px solid var(--preto);
+            padding: 12px 24px; border-radius: 8px; font-weight: 700;
+            cursor: pointer; font-family: inherit; transition: background .2s;
+        }
+        .btn-ver-mais:hover { background: var(--cinza-claro); }
+
+        /* ── MAPA ── */
+        .secao-mapa { margin-bottom: 48px; }
+        .secao-mapa h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: var(--preto); margin-bottom: 6px; }
+        .mapa-endereco { font-size: .9rem; color: var(--texto-suave); margin-bottom: 16px; }
+        .mapa-container { border-radius: 18px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+
+        /* ── FAQ ── */
+        .secao-faq { margin-bottom: 48px; border-top: 1px solid var(--cinza-borda); padding-top: 28px; }
+        .secao-faq h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: var(--preto); margin-bottom: 20px; }
+        .faq-item { border-bottom: 1px solid var(--cinza-borda); }
+        .faq-pergunta {
+            width: 100%; padding: 18px 0; background: none; border: none;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 1rem; font-weight: 600; color: var(--preto); cursor: pointer; text-align: left;
+        }
+        .faq-pergunta:hover { color: var(--vermelho); }
+        .faq-icon { font-size: 1.4rem; transition: transform .3s; flex-shrink: 0; }
+        .faq-resposta { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+        .faq-resposta p { padding-bottom: 16px; color: var(--texto-suave); line-height: 1.6; font-size: .92rem; }
+        .faq-item.active .faq-resposta { max-height: 200px; }
+        .faq-item.active .faq-icon { transform: rotate(45deg); }
+
+        /* ── PAINEL OUTRAS PROPRIEDADES (plano básico) ── */
+        .secao-similares { margin-bottom: 60px; padding-top: 28px; border-top: 1px solid var(--cinza-borda); }
+        .secao-similares h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: var(--preto); margin-bottom: 6px; }
+        .secao-similares .sub { font-size: .84rem; color: var(--texto-suave); margin-bottom: 20px; }
+        .similares-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .similar-card { border-radius: 14px; overflow: hidden; border: 1px solid var(--cinza-borda); background: #fff; cursor: pointer; transition: box-shadow .2s, transform .2s; }
+        .similar-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.1); transform: translateY(-2px); }
+        .similar-foto { width: 100%; height: 160px; object-fit: cover; }
+        .similar-info { padding: 14px 16px; }
+        .similar-info strong { display: block; font-size: .92rem; font-weight: 700; color: var(--preto); margin-bottom: 4px; }
+        .similar-info span { font-size: .8rem; color: var(--texto-suave); }
+        .similar-preco { font-size: .88rem; font-weight: 700; color: var(--vermelho); margin-top: 6px; display: block; }
+
+        /* ── FOOTER ── */
+        .main-footer { background: #f7f7f7; border-top: 1px solid #ddd; padding: 50px 0 24px; }
+        .footer-container { max-width: 1200px; margin: 0 auto; display: flex; padding: 0 5%; gap: 120px; }
+        .footer-column h3 { font-size: .88rem; font-weight: 700; text-transform: uppercase; color: #222; margin-bottom: 16px; }
+        .footer-column ul { list-style: none; }
+        .footer-column ul li { margin-bottom: 10px; }
+        .footer-column ul li a { text-decoration: none; color: #666; font-size: .88rem; }
+        .footer-column ul li a:hover { text-decoration: underline; }
+        .footer-bottom { max-width: 1200px; margin: 32px auto 0; padding: 20px 5% 0; border-top: 1px solid #ebebeb; color: #aaa; font-size: .82rem; }
+
+        /* ── MODAL GALERIA ── */
+        .modal-galeria {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.96); z-index: 99998;
+            flex-direction: column;
+        }
+        .modal-galeria.aberto { display: flex; }
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 28px; flex-shrink: 0;
+        }
+        .modal-header h3 { color: #fff; font-family: 'Playfair Display', serif; font-size: 1.2rem; }
+        .btn-fechar-modal { background: none; border: none; color: #fff; font-size: 1.8rem; cursor: pointer; line-height: 1; }
+        .modal-galeria-grid {
+            flex: 1; overflow-y: auto; padding: 0 28px 28px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;
+        }
+        .modal-foto-item { border-radius: 10px; overflow: hidden; }
+        .modal-foto-item img { width: 100%; height: 220px; object-fit: cover; display: block; }
+        .modal-foto-titulo { background: rgba(255,255,255,.08); color: #eee; font-size: .8rem; padding: 8px 12px; }
+
+        /* ── MODAL VÍDEOS ── */
+        .modal-videos {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.98); z-index: 99999; flex-direction: column;
+        }
+        .modal-videos.aberto { display: flex; }
+        .videos-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 28px; }
+        .videos-header h3 { color: #fff; font-family: 'Playfair Display', serif; font-size: 1.2rem; }
+        .videos-content { flex: 1; overflow-y: auto; padding: 0 28px 28px; }
+        .video-item { margin-bottom: 20px; border-radius: 14px; overflow: hidden; }
+        .video-item video { width: 100%; display: block; max-height: 520px; background: #111; }
+        .video-titulo { background: #1a1a1a; color: #ddd; font-size: .84rem; padding: 10px 14px; }
+
+        /* ── RESPONSIVO ── */
+        @media (max-width: 900px) {
+            .prop-corpo { grid-template-columns: 1fr; }
+            .card-lateral { position: static; }
+            .galeria-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 200px 200px; height: auto; }
+            .galeria-grid .foto-main { grid-column: 1/3; grid-row: 1; }
+            .aval-grid { grid-template-columns: 1fr; }
+            .similares-grid { grid-template-columns: 1fr 1fr; }
+            .footer-container { flex-direction: column; gap: 40px; }
+        }
+        @media (max-width: 600px) {
+            .galeria-grid { grid-template-columns: 1fr; height: auto; }
+            .galeria-grid .foto-main { grid-column: 1; }
+            .similares-grid { grid-template-columns: 1fr; }
+            .form-duplo { grid-template-columns: 1fr; }
+        }
+
+    </style>
 </head>
 <body>
 
-	<header>
-	   <div class="header-left">
-        <a href="https://www.vents.com">
-            <img src="logovents.png" alt="Logo" class="logo">
-        </a>
-    </div>
-
-    <nav class="header-center">
-        <section class="search-container">
-    <div class="search-bar">
-        <div class="search-item" id="location-container">
-            <label>Localização</label>
-            <input type="text" id="location-input" placeholder="Onde você vai?" autocomplete="off">
-            <div id="location-suggestions" class="suggestions-dropdown"></div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="search-item" id="range-container">
-            <label>Quando</label>
-            <span class="date-text" id="display-quando">Adicionar datas</span>
-            <input type="text" id="input-periodo" style="position: absolute; visibility: hidden;">
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="search-item">
-            <label>Tipo de Espaço</label>
-            <select id="tipo-espaco">
-                <option value="">Selecione...</option>
-                <option value="coworking">Coworking</option>
-                <option value="eventos">Eventos</option>
-            </select>
-        </div>
-
-        <div class="divider"></div>
-
-<div class="search-item guest-direct-selector">
-    <label>Convidados</label>
-    <div class="stepper-control">
-        <button type="button" class="btn-step" onclick="alterarQtd(-1)">–</button>
-        
-        <input type="number" 
-               id="qtd-total" 
-               class="qtd-input" 
-               value="1" 
-               min="1" 
-               onchange="validarInput(this)">
-        
-        <button type="button" class="btn-step" onclick="alterarQtd(1)">+</button>
-    </div>
+<!-- LOADING -->
+<div id="loading-screen">
+    <div class="loading-logo"><em>VENTSY</em></div>
+    <div class="loading-dots"><span></span><span></span><span></span></div>
 </div>
 
-        <button class="btn-search" id="main-search-btn" style="opacity: 0.3; pointer-events: none;">
-            <span>&#128269;</span>
-        </button>
+<!-- HEADER -->
+<header>
+    <div class="header-left">
+        <a href="index.html"><img src="logovents.png" alt="VENTSY" class="logo"></a>
     </div>
-</section>
-    </nav>
-
     <div class="header-right">
-        <a href="#" class="btn-login">ENTRAR</a>
+        <a href="login.html" class="btn-entrar">Entrar</a>
     </div>
-                
-            <div class="menu-hamburguer-container">
-                <button class="btn-menu" onclick="toggleMenuExtra()">
-                    <span class="icon-menu">☰</span>
-                </button>
-                
-                <div id="extra-menu" class="extra-menu-dropdown">
-                    <a href="#">Anunciar</a>
-                    <a href="#">Planos</a>
-                    <a href="#">Como Funciona</a>
-                    <a href="#">Fale Conosco</a>
-                </div>
-            </div>
-        </div>
+</header>
 
+<!-- MODAL GALERIA COMPLETA -->
+<div class="modal-galeria" id="modal-galeria">
+    <div class="modal-header">
+        <h3 id="modal-galeria-titulo">Todas as fotos</h3>
+        <button class="btn-fechar-modal" onclick="fecharModalGaleria()">✕</button>
     </div>
-    	</header>
-
-    <main>
-   
-        <main class="propriedade-container">
-    
-    <section style="margin-bottom: 20px;">
-        <h1 style="font-size: 1.8rem; margin-bottom: 5px;">Chácara Macacu - Sítio para Eventos</h1>
-        <p style="color: #717171;">⭐ 5.0 (120 avaliações) • Cachoeiras de Macacu, Rio de Janeiro, Brasil</p>
-    </section>
-
-    <section class="secao-galeria">
-        <div class="foto-principal">
-            <img src="foto1.jpeg">
-        </div>
-        <div class="foto-item"><img src="foto1.jpeg"></div>
-        <div class="foto-item"><img src="foto1.jpeg"></div>
-        <div class="foto-item"><img src="foto1.jpeg"></div>
-        <div class="foto-item" style="position: relative;">
-            <img src="foto1.jpeg">
-            <button class="btn-mostrar-fotos">Mostrar todas</button>
-        </div>
-    </section>
-
-<section class="secao-anfitriao">
-    <div class="anfitriao-container">
-        <div class="foto-perfil-wrapper">
-            <img src="eu.png" alt="Alex" class="foto-perfil">
-            <div class="selo-superhost">❤️</div>
-        </div>
-        
-        <div class="info-anfitriao">
-            <h2>Rodrigo Ramos</h2>
-            <p class="cargo">Gerente de Relacionamento</p>
-            <p class="tempo-plataforma">Na Vents · 2 anos</p>
-        </div>
-    </div>
-</section>
-
-    <div class="detalhes-corpo">
-        <div class="info-esquerda">
-            <p>Capacidade: até 1.000 pessoas</p>
-            <p>Localização: Cachoeiras de Macacu</p>
-            <p>Tipos de eventos: casamento, aniversário, corporativo</p>
-            <h2>Sobre este espaço</h2>
-
-<p>Se você procura natureza, conforto e estrutura completa para celebrar o seu grande dia, acabou de encontrar o lugar perfeito!</p>
-
-<p>A chácara está localizada em Cachoeiras de Macacu, cercada pelo verde, com clima tranquilo e ao mesmo tempo preparada para receber eventos inesquecíveis, sejam eles familiares, esportivos ou comemorativos.</p>
-
-<p>Destaques do espaço:</p>
-
-<p>Campo de futebol com grama tapete. Perfeito para jogos, torneios entre amigos, confraternizações esportivas e atividades em grupo.</p>
-
-<p>Lareira a céu aberto</p>
-<p>Um charme para noites especiais, rodas de conversa, música, vinho e aquele clima aconchegante que só o fogo proporciona.</p>
-
-<p>Piscina + Chuveirão</p>
-<p>Para curtir dias de sol e deixar o evento ainda mais animado.</p>
-
-<p>Área de churrasqueira completa</p>
-<p>Freezer e fogão, oferecendo toda a praticidade para festas, aniversários e encontros.</p>
-
-<p>Ambiente amplo, arejado e integrado à natureza</p>
-<p>Espaço perfeito para quem quer sair da rotina da cidade e viver momentos leves, alegres e memoráveis.</p>
-
-<p>Ideal para:</p>
-
-<p>Festas de aniversário</p>
-
-<p>Confraternizações de empresas</p>
-
-<p>Encontros de amigos e família</p>
-
-<p>Eventos esportivos</p>
-
-<p>Churrascos e celebrações privadas</p>
-
-<p>Day use e eventos de um dia</p>
-
-<p>Aqui, cada detalhe foi pensado para unir diversão, conforto e contato com a natureza.</p>
-
-<p>Reserve seu evento e transforme um simples encontro em uma experiência inesquecível.</p>
-
-            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-            <h3>O que o lugar oferece</h3>
-            <ul style="list-style: none; padding: 0;">
-                <li>📶 Wi-Fi rápido</li>
-                <li>🚗 Estacionamento gratuito</li>
-            </ul>
-        </div>
-
-        <aside class="card-reserva">
-            <div style="font-size: 1.2rem; margin-bottom: 20px;">
-                A partir de: <strong>R$ 3.000 / dia </strong>
-            </div>
-            <button style="font-size: 1.2rem; font-weight: 700; width: 100%; background: #ff385c; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer;">
-                Fale conosco
-            </button>
-
-            <section class="secao-contato">
-    <div class="formulario-container">
-        <h3>Interessado neste espaço?</h3>
-        <p>Preencha os dados abaixo e o anfitrião entrará em contato.</p>
-
-        <form id="form-contato-propriedade">
-            <div class="campo-grupo">
-                <label>Nome Completo *</label>
-                <input type="text" name="nome" placeholder="Seu nome aqui" required>
-            </div>
-
-            <div class="campo-grupo">
-                <label>Telefone com DDD *</label>
-                <input type="tel" name="telefone" placeholder="(00) 00000-0000" required>
-            </div>
-
-            <div class="campo-grupo">
-                <label>Mensagem *</label>
-                <textarea name="mensagem" placeholder="Diga o que você precisa..." rows="4" required></textarea>
-            </div>
-
-            <div class="campo-grupo">
-                <label>E-mail (Opcional)</label>
-                <input type="email" name="email" placeholder="seu@email.com">
-            </div>
-
-            <div class="linha-dupla">
-                <div class="campo-grupo">
-                    <label>Data do Evento (Opcional)</label>
-                    <div class="select-datas">
-                        <select name="mes-evento">
-                            <option value="">Mês</option>
-                            <option value="01">Janeiro</option>
-                            <option value="02">Fevereiro</option>
-                            <option value="03">Março</option>
-                            <option value="04">Abril</option>
-                            <option value="05">Maio</option>
-                            <option value="06">Junho</option>
-                            <option value="07">Julho</option>
-                            <option value="08">Agosto</option>
-                            <option value="09">Setembro</option>
-                            <option value="10">Outubro</option>
-                            <option value="11">Novembro</option>
-                            <option value="12">Dezembro</option>
-                        </select>
-                        <select name="ano-evento">
-                            <option value="">Ano</option>
-                            <option value="2026">2026</option>
-                            <option value="2027">2027</option>
-                            <option value="2028">2028</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-                <div class="campo-grupo">
-                    <label>Nº de Convidados (Opcional)</label>
-                    <input type="number" name="convidados" placeholder="Ex: 50" min="1">
-                </div>    
-
-            <div class="simulador-reserva">
-                <div class="simulador-header">
-                    <span class="preco-base">A partir de <strong>R$ 3.000,00</strong></span>
-                    <span class="subtexto">valor base da locação</span>
-                </div>
-
-                    <div class="campo-simulador">
-                        <label>Tipo de Evento</label>
-                        <select id="tipo-evento" onchange="calcularOrcamento()">
-                            <option value="1">Aniversário / Confraternização</option>
-                            <option value="1.5">Casamento / Formatura</option>
-                            <option value="1.2">Evento Corporativo</option>
-                        </select>
-                    </div>
-
-                    <div class="campo-simulador">
-                        <label>Número de Convidados</label>
-                        <div class="input-range-container">
-                            <input type="range" id="qtd-pessoas" min="20" max="300" step="10" value="50" oninput="calcularOrcamento()">
-                            <span id="valor-pessoas">50 pessoas</span>
-                        </div>
-                    </div>
-
-                    <div class="campo-simulador">
-                        <label>Adicionais</label>
-                        <label class="check-adicional">
-                            <input type="checkbox" value="500" onchange="calcularOrcamento()"> Limpeza Pós-Evento (+R$ 500)
-                        </label>
-                        <label class="check-adicional">
-                            <input type="checkbox" value="300" onchange="calcularOrcamento()"> Segurança (+R$ 300)
-                        </label>
-                    </div>
-
-                    <hr>
-
-                    <div class="resultado-simulacao">
-                        <div class="linha-total">
-                            <span>Total Estimado:</span>
-                            <span id="total-estimado">R$ 3.000,00</span>
-                        </div>
-                        <p class="aviso-estimativa">*Os valores podem variar conforme a data e detalhes específicos.</p>
-                    </div>
-
-                    <button type="button" class="btn-solicitar-contato" onclick="enviarParaWhatsapp()">
-                        Solicitar Reserva no WhatsApp
-                    </button>
-    
+    <div class="modal-galeria-grid" id="modal-galeria-grid"></div>
 </div>
- </form>
+
+<!-- MODAL VÍDEOS (Ultra) -->
+<div class="modal-videos" id="modal-videos">
+    <div class="videos-header">
+        <h3>🎬 Vídeos do Espaço — Tour 360°</h3>
+        <button class="btn-fechar-modal" onclick="fecharModalVideos()">✕</button>
     </div>
-</section>
+    <div class="videos-content" id="videos-content">
+        <p style="color:#888;text-align:center;padding:40px 0">Nenhum vídeo cadastrado ainda.</p>
+    </div>
+</div>
+
+<!-- CONTEÚDO PRINCIPAL -->
+<div class="page" id="main-content" style="display:none">
+
+    <!-- Título -->
+    <div class="prop-titulo">
+        <h1 id="prop-nome">Carregando...</h1>
+        <div class="prop-meta">
+            <span class="nota" id="prop-nota"><span>★</span> 4.9</span>
+            <span>•</span>
+            <span id="prop-total-aval">120 avaliações</span>
+            <span>•</span>
+            <span id="prop-cidade">Cachoeiras de Macacu, RJ</span>
+            <span id="badge-ultra" style="display:none">
+                <span class="selo-ultra">✦ ESPAÇO PREMIUM</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Galeria -->
+    <div class="galeria-wrapper">
+        <div class="galeria-grid" id="galeria-grid">
+            <!-- preenchido via JS -->
+        </div>
+        <div class="btn-galeria-acoes">
+            <button class="btn-galeria" id="btn-videos" onclick="abrirModalVideos()" style="display:none">🎬 Ver vídeos / Tour 360°</button>
+            <button class="btn-galeria" onclick="abrirModalGaleria()">⊞ Mostrar todas as fotos</button>
+        </div>
+    </div>
+
+    <!-- Corpo: esquerda + card lateral -->
+    <div class="prop-corpo">
+
+        <!-- ── ESQUERDA ── -->
+        <div class="prop-esquerda">
+
+            <!-- Anfitrião -->
+            <div class="secao-anfitriao">
+                <div id="avatar-anfitriao"></div>
+                <div class="info-anfitriao">
+                    <h3 id="anfitriao-nome">—</h3>
+                    <p>Proprietário • Na VENTSY há <span id="anfitriao-tempo">—</span></p>
+                </div>
+            </div>
+
+            <!-- Detalhes rápidos -->
+            <div class="detalhes-rapidos">
+                <div class="detalhe-item">
+                    <span class="label">Capacidade</span>
+                    <span class="valor" id="det-capacidade">—</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="label">Tipo de evento</span>
+                    <span class="valor" id="det-tipo">—</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="label">Localização</span>
+                    <span class="valor" id="det-cidade">—</span>
+                </div>
+            </div>
+
+            <!-- Sobre o espaço -->
+            <div class="secao-sobre">
+                <h2>Sobre este espaço</h2>
+                <div id="sobre-texto"></div>
+                <button class="sobre-expandir" id="btn-expandir" onclick="expandirSobre()" style="display:none">Ler mais →</button>
+            </div>
+
+            <!-- Comodidades -->
+            <div class="secao-comodidades">
+                <h2>O que o lugar oferece</h2>
+                <div class="comodidades-grid" id="comodidades-grid"></div>
+            </div>
+
+            <!-- Avaliações -->
+            <div class="secao-avaliacoes">
+                <div class="aval-header">
+                    <div class="aval-nota" id="aval-nota-num">4.9</div>
+                    <div>
+                        <div class="aval-estrelas">★★★★★</div>
+                        <div class="aval-total" id="aval-total-txt">120 avaliações verificadas</div>
+                    </div>
+                </div>
+                <!-- Filtros -->
+                <div class="aval-filtros">
+                    <button class="aval-filtro ativo" onclick="filtrarAval('todas', this)">Todas</button>
+                    <button class="aval-filtro" onclick="filtrarAval('5', this)">★★★★★</button>
+                    <button class="aval-filtro" onclick="filtrarAval('4', this)">★★★★</button>
+                    <button class="aval-filtro" onclick="filtrarAval('3', this)">★★★ ou menos</button>
+                    <button class="aval-filtro" onclick="filtrarAval('verificados', this)">✓ Verificados</button>
+                </div>
+                <div class="aval-grid" id="aval-grid"></div>
+                <button class="btn-ver-mais" id="btn-ver-mais-aval" onclick="carregarMaisAval()" style="display:none">Mostrar mais avaliações</button>
+            </div>
+
+            <!-- Mapa -->
+            <div class="secao-mapa">
+                <h2>Onde fica este espaço</h2>
+                <p class="mapa-endereco" id="mapa-endereco">Cachoeiras de Macacu, Rio de Janeiro, Brasil</p>
+                <div class="mapa-container">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1843.1167578070704!2d-42.66779852459859!3d-22.495420247955163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x982d67a0db401f%3A0xceb843a74d2f7138!2sChacara%20Macacu%20-%20Sitio%20para%20Eventos!5e0!3m2!1spt-BR!2sbr!4v1773071538942!5m2!1spt-BR!2sbr"
+                        width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy">
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="secao-faq">
+                <h2>Dúvidas frequentes</h2>
+                <div class="faq-item">
+                    <button class="faq-pergunta" onclick="toggleFaq(this)">
+                        Como funciona o processo de reserva?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-resposta"><p>Entre em contato pelo botão de WhatsApp ou preencha o formulário de reserva ao lado. O proprietário responderá para confirmar disponibilidade e combinar os detalhes.</p></div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-pergunta" onclick="toggleFaq(this)">
+                        Posso cancelar uma reserva confirmada?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-resposta"><p>A política de cancelamento é definida pelo proprietário. Consulte os termos antes de confirmar sua reserva.</p></div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-pergunta" onclick="toggleFaq(this)">
+                        Há serviços adicionais disponíveis?
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-resposta"><p>Alguns espaços oferecem limpeza, segurança e decoração. Use o simulador de orçamento ao lado para adicionar esses itens ao valor estimado.</p></div>
+                </div>
+            </div>
+
+            <!-- Seção de similares (somente plano básico) -->
+            <div class="secao-similares" id="secao-similares" style="display:none">
+                <h2>Outros espaços que podem te interessar</h2>
+                <p class="sub">Confira mais opções disponíveis na plataforma VENTSY</p>
+                <div class="similares-grid" id="similares-grid"></div>
+            </div>
+
+        </div>
+
+        <!-- ── CARD LATERAL ── -->
+        <aside class="card-lateral" id="card-lateral">
+            <!-- preenchido via JS conforme o plano -->
         </aside>
+
     </div>
-</main>
+</div>
 
-<section class="secao-comentarios">
-    <div class="comentarios-header">
-        <span class="nota-estrela">⭐ 4.9</span>
-        <span class="total-avaliacoes">120 avaliações</span>
-    </div>
-
-    <div class="comentarios-grid">
-        <div class="comentario-card">
-            <div class="autor-info">
-                <img src="https://i.pravatar.cc/150?u=1" alt="Usuário">
-                <div>
-                    <strong>Mariana Silva</strong>
-                    <span>Março de 2024</span>
-                </div>
-            </div>
-            <p class="texto-comentario">
-                O espaço é simplesmente incrível! Exatamente como nas fotos. O Alex foi super atencioso e o rooftop tem uma vista de tirar o fôlego. Com certeza voltarei!
-            </p>
-        </div>
-
-        <div class="comentario-card">
-            <div class="autor-info">
-                <img src="https://i.pravatar.cc/150?u=2" alt="Usuário">
-                <div>
-                    <strong>Ricardo Souza</strong>
-                    <span>Fevereiro de 2024</span>
-                </div>
-            </div>
-            <p class="texto-comentario">
-                Excelente infraestrutura para eventos corporativos. O Wi-Fi é estável e o ambiente é muito bem ventilado. Recomendo para todos.
-            </p>
-        </div>
-        
-        </div>
-
-    <button class="btn-ver-comentarios">Mostrar todos os 120 comentários</button>
-</section>
-
-<section class="secao-mapa">
-    <h2 class="titulo-sessao">Onde fica este espaço</h2>
-    <p class="endereco-texto">Cachoeiras de Macacu, Rio de Janeiro, Brasil</p>
-    
-    <div class="mapa-container">
-        <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1843.1167578070704!2d-42.66779852459859!3d-22.495420247955163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x982d67a0db401f%3A0xceb843a74d2f7138!2sChacara%20Macacu%20-%20Sitio%20para%20Eventos!5e0!3m2!1spt-BR!2sbr!4v1773071538942!5m2!1spt-BR!2sbr" 
-            width="100%" 
-            height="450" 
-            style="border:0;" 
-            allowfullscreen="" 
-            loading="lazy" 
-            referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
-    </div>
-</section>
-
-<section class="secao-faq">
-    <h2 class="titulo-sessao">Dúvidas frequentes</h2>
-    
-    <div class="faq-container">
-        <div class="faq-item">
-            <button class="faq-pergunta" onclick="toggleFaq(this)">
-                Como funciona o processo de reserva?
-                <span class="faq-icon">+</span>
-            </button>
-            <div class="faq-resposta">
-                <p>O processo é simples: escolha as datas e a quantidade de convidados na barra de busca, clique em "Reservar agora" e aguarde a confirmação do anfitrião.</p>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <button class="faq-pergunta" onclick="toggleFaq(this)">
-                Quais são as formas de pagamento aceitas?
-                <span class="faq-icon">+</span>
-            </button>
-            <div class="faq-resposta">
-                <p>Aceitamos cartões de crédito, PIX e boleto bancário através da nossa plataforma segura.</p>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <button class="faq-pergunta" onclick="toggleFaq(this)">
-                Posso cancelar uma reserva já confirmada?
-                <span class="faq-icon">+</span>
-            </button>
-            <div class="faq-resposta">
-                <p>Sim, o cancelamento depende da política escolhida pelo anfitrião para aquele espaço específico. Verifique os termos antes de finalizar.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-    </main>
-
-<script>  
-
-function calcularOrcamento() {
-    const valorBase = 3000;
-    const multiplicadorEvento = parseFloat(document.getElementById('tipo-evento').value);
-    const qtdPessoas = parseInt(document.getElementById('qtd-pessoas').value);
-    
-    // Atualiza o texto do número de pessoas
-    document.getElementById('valor-pessoas').innerText = `${qtdPessoas} pessoas`;
-
-    // Soma os adicionais (checkboxes)
-    let adicionais = 0;
-    document.querySelectorAll('.check-adicional input:checked').forEach(item => {
-        adicionais += parseFloat(item.value);
-    });
-
-    // Lógica simples: Base * Multiplicador + Adicionais (Pode incluir taxa por pessoa se quiser)
-    let total = (valorBase * multiplicadorEvento) + adicionais;
-    
-    // Se for mais de 100 pessoas, adiciona taxa extra de R$ 5 por pessoa excedente
-    if (qtdPessoas > 100) {
-        total += (qtdPessoas - 100) * 5;
-    }
-
-    // Formata para Real R$
-    document.getElementById('total-estimado').innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function enviarParaWhatsapp() {
-    const total = document.getElementById('total-estimado').innerText;
-    const pessoas = document.getElementById('qtd-pessoas').value;
-    const msg = `Olá! Vi o espaço no portal Vents e fiz uma simulação para ${pessoas} pessoas. O valor estimado foi de ${total}. Gostaria de saber sobre a disponibilidade.`;
-    
-    // Link do WhatsApp do Rodrigo
-    const url = `https://wa.me/5511999999999?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
-}
-
-flatpickr("#input-periodo", {
-        mode: "range",           // Ativa seleção de intervalo
-        minDate: "today",        // Impede datas passadas
-        showMonths: 2,           // Mostra 2 calendários lado a lado
-        dateFormat: "d/m/Y",
-        locale: "pt",            // Tradução para PT-BR
-        
-        // Quando o usuário selecionar as datas:
-        onChange: function(selectedDates, dateStr, instance) {
-            const display = document.getElementById("display-quando");
-            
-            if (selectedDates.length === 2) {
-                // Se selecionou Início e Fim
-                const inicio = instance.formatDate(selectedDates[0], "d/m");
-                const fim = instance.formatDate(selectedDates[1], "d/m");
-                display.innerText = `${inicio} - ${fim}`;
-                display.style.color = "#222";
-            } else {
-                display.innerText = "Adicionar datas";
-            }
-        },
-        
-        // Faz o calendário abrir ao clicar em qualquer lugar da div "Quando"
-        static: true,
-        appendTo: document.getElementById('range-container')
-    });
-
-    // Gatilho para abrir o calendário ao clicar na div pai
-    document.getElementById('range-container').addEventListener('click', () => {
-        document.getElementById('input-periodo')._flatpickr.open();
-    });
-    
-// 1. Lista Única
-    const listaLocais = [
-        "Rio de Janeiro, RJ", "Recife, PE", "Ribeirão Preto, SP", "Resende, RJ", "Rio Branco, AC",
-        "São Paulo, SP", "Salvador, BA", "Santos, SP", "Santa Catarina, SC", "Sorocaba, SP",
-        "Belo Horizonte, MG", "Brasília, DF", "Belém, PA", "Blumenau, SC",
-        "Curitiba, PR", "Cuiabá, MT", "Campinas, SP", "Caxias do Sul, RS"
-    ];
-
-    const inputLocal = document.getElementById('location-input');
-    const dropdown = document.getElementById('location-suggestions');
-    const btnBusca = document.getElementById('main-search-btn');
-
-    // 2. Função de renderizar sugestões
-    function renderLista(listaFiltrada) {
-        dropdown.innerHTML = "";
-        const top5 = listaFiltrada.slice(0, 5);
-
-        if (top5.length > 0) {
-            top5.forEach(local => {
-                const item = document.createElement('div');
-                item.className = 'suggestion-item';
-                item.innerHTML = `<span>📍</span> ${local}`;
-                
-                item.addEventListener('click', () => {
-                    inputLocal.value = local;
-                    dropdown.style.display = 'none';
-                    validarTudo(); // Valida assim que clica
-                });
-                dropdown.appendChild(item);
-            });
-            dropdown.style.display = 'block';
-        } else {
-            dropdown.style.display = 'none';
-        }
-    }
-
-    // 3. Função Única de Validação (A "Capa Preta")
-    function validarTudo() {
-        const valorInput = inputLocal.value.trim();
-        const encontrado = listaLocais.find(l => l.toLowerCase() === valorInput.toLowerCase());
-
-        if (encontrado) {
-            inputLocal.value = encontrado; // Autocorreção (ex: sao paulo -> São Paulo, SP)
-            inputLocal.style.color = "#222";
-            btnBusca.style.opacity = "1";
-            btnBusca.style.pointerEvents = "auto";
-            btnBusca.style.cursor = "pointer";
-            return true;
-        } else {
-            if (valorInput !== "") {
-                inputLocal.style.color = "red";
-            }
-            btnBusca.style.opacity = "0.3";
-            btnBusca.style.pointerEvents = "none";
-            btnBusca.style.cursor = "not-allowed";
-            return false;
-        }
-    }
-
-    // 4. Eventos de Digitação
-    inputLocal.addEventListener('input', (e) => {
-        const busca = e.target.value.toLowerCase();
-        if (busca === "") {
-            renderLista(listaLocais);
-        } else {
-            const filtrados = listaLocais.filter(l => l.toLowerCase().startsWith(busca));
-            renderLista(filtrados);
-        }
-        validarTudo();
-    });
-
-    inputLocal.addEventListener('focus', () => renderLista(listaLocais));
-
-    // 5. O Fechamento e Limpeza (Blur)
-    document.addEventListener('click', (e) => {
-        if (!document.getElementById('location-container').contains(e.target)) {
-            dropdown.style.display = 'none';
-        }
-    });
-
-    inputLocal.addEventListener('blur', () => {
-        setTimeout(() => {
-            if (!validarTudo()) {
-                inputLocal.value = ""; 
-                inputLocal.placeholder = "⚠️ Selecione da lista!";
-                validarTudo();
-            }
-        }, 250);
-    });
-
-    // 6. Enter e Clique no Botão
-    inputLocal.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') validarTudo();
-    });
-
-    btnBusca.addEventListener('click', (e) => {
-        if (!validarTudo()) {
-            e.preventDefault();
-            alert("Selecione um local válido!");
-        }
-    });
-
-    const inputQtd = document.getElementById('qtd-total');
-
-    // Função para os botões + e -
-    function alterarQtd(valor) {
-        let atual = parseInt(inputQtd.value) || 0;
-        let novoValor = atual + valor;
-        
-        if (novoValor >= 1) {
-            inputQtd.value = novoValor;
-        }
-    }
-
-    // Função para validar quando o usuário digita manualmente
-    function validarInput(el) {
-        let valor = parseInt(el.value);
-        
-        if (isNaN(valor) || valor < 1) {
-            el.value = 1; // Reseta para 1 se digitarem algo inválido
-        }
-    }
-
-function toggleFavorito(elemento) {
-        // Alterna a classe 'favoritado' no botão clicado
-        elemento.classList.toggle('favoritado');
-        
-        // Lógica extra: salvar no navegador (opcional)
-        if (elemento.classList.contains('favoritado')) {
-            console.log("Local adicionado aos favoritos!");
-        } else {
-            console.log("Local removido dos favoritos.");
-        }
-    }
-
-function toggleMenuExtra() {
-        const menu = document.getElementById('extra-menu');
-        const isVisible = menu.style.display === 'flex';
-        menu.style.display = isVisible ? 'none' : 'flex';
-    }
-
-    // Fecha o menu se clicar fora dele
-    window.onclick = function(event) {
-        if (!event.target.closest('.menu-hamburguer-container')) {
-            document.getElementById('extra-menu').style.display = 'none';
-        }
-    }
-
-function toggleFaq(elemento) {
-    const item = elemento.parentElement;
-    item.classList.toggle('active');
-}
-
-// Função para salvar os dados da busca
-function salvarDadosBusca() {
-    const dataBusca = document.querySelector('input[name="quando"]').value; // Campo QUANDO
-    const convidadosBusca = document.querySelector('.convidados-count').innerText; // Campo CONVIDADOS
-
-    localStorage.setItem('vents_data', dataBusca);
-    localStorage.setItem('vents_convidados', convidadosBusca);
-}
-
-// Chame essa função ao clicar no botão de busca (lupa rosa)
-document.querySelector('.btn-busca-lupa').addEventListener('click', salvarDadosBusca);
-
-window.onload = function() {
-    const dataSalva = localStorage.getItem('vents_data');
-    const convidadosSalvos = localStorage.getItem('vents_convidados');
-
-    if (dataSalva) {
-        // Tenta extrair o mês e ano da string (Ex: "Março 2026")
-        // Isso depende de como o seu calendário entrega a data
-        const partes = dataSalva.split(' '); 
-        if(partes.length >= 2) {
-            // Aqui você mapeia o nome do mês para o valor do select
-            const meses = {"Janeiro":"01", "Fevereiro":"02", "Março":"03", "Abril":"04", "Maio":"05", "Junho":"06"};
-            document.querySelector('select[name="mes-evento"]').value = meses[partes[0]] || "";
-            document.querySelector('select[name="ano-evento"]').value = partes[1] || "";
-        }
-    }
-
-    if (convidadosSalvos) {
-        document.querySelector('input[name="convidados"]').value = convidadosSalvos;
-    }
-};
-
-</script>
-
+<!-- FOOTER -->
 <footer class="main-footer">
     <div class="footer-container">
         <div class="footer-column">
             <h3>Atendimento</h3>
             <ul>
                 <li><a href="#">Central de Ajuda</a></li>
-                <li><a href="#">Fale Conosco</a></li>
+                <li><a href="fale-conosco.html">Fale Conosco</a></li>
                 <li><a href="#">Política de Privacidade</a></li>
                 <li><a href="#">Termos de Uso</a></li>
-                <li><a href="#">Sobre Nós</a></li>
-                <li><a href="#">Como Funciona</a></li>
             </ul>
         </div>
-
         <div class="footer-column">
-            <h3>Anunciar</h3>
+            <h3>Plataforma</h3>
             <ul>
-                <li><a href="#">Cadastre sua propriedade</a></li>
-                <li><a href="#">Planos Disponíveis</a></li>
+                <li><a href="planos.html">Planos Disponíveis</a></li>
+                <li><a href="como-funciona.html">Como Funciona</a></li>
             </ul>
         </div>
     </div>
-
-    <div class="footer-bottom">
-        <p>&copy; 2026 VENTS. Todos os direitos reservados.</p>
-    </div>
+    <div class="footer-bottom"><p>&copy; 2026 VENTSY. Todos os direitos reservados.</p></div>
 </footer>
 
+<script>
+
+/* ────────────────────────────────────────────────────────
+   CONFIG SUPABASE
+──────────────────────────────────────────────────────── */
+const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+/* ────────────────────────────────────────────────────────
+   DADOS GLOBAIS
+──────────────────────────────────────────────────────── */
+let PROP       = null;   // dados da propriedade
+let PLANO      = 'basico'; // 'basico' | 'pro' | 'ultra'
+let FOTOS      = [];     // fotos do Supabase
+let VIDEOS     = [];     // vídeos do Supabase (ultra)
+let TODAS_AVAL = [];     // avaliações verificadas
+let AVAL_VISIVEIS = 4;
+let AVAL_FILTRO_ATUAL = 'todas';
+let WPP_NUMBER = '5521999999999'; // substituído ao carregar
+let VALOR_BASE = 3000;
+
+/* ────────────────────────────────────────────────────────
+   INIT PRINCIPAL
+──────────────────────────────────────────────────────── */
+async function init() {
+    try {
+        // Pega o proprietario_id da URL: propriedade.html?id=UUID
+        const params = new URLSearchParams(window.location.search);
+        const propId = params.get('id');
+
+        if (!propId) {
+            // Modo demonstração — usa dados fixos
+            carregarDemostracao();
+            return;
+        }
+
+        // Busca a propriedade
+        const { data: prop } = await sb.from('propriedades').select('*').eq('id', propId).single();
+        if (!prop) { carregarDemostracao(); return; }
+        PROP = prop;
+
+        // Busca o plano do proprietário
+        try {
+            const { data: ass } = await sb.from('assinaturas')
+                .select('plano_ativo')
+                .eq('usuario_id', prop.usuario_id)
+                .single();
+            PLANO = ass?.plano_ativo || 'basico';
+        } catch (_) { PLANO = 'basico'; }
+
+        // Busca dados do proprietário
+        try {
+            const { data: usr } = await sb.from('usuarios').select('nome, usuario, criado_em').eq('id', prop.usuario_id).single();
+            if (usr) {
+                document.getElementById('anfitriao-nome').textContent = usr.nome || '—';
+                const meses = Math.max(1, Math.round((new Date() - new Date(usr.criado_em)) / 2592000000));
+                document.getElementById('anfitriao-tempo').textContent = meses >= 12
+                    ? Math.floor(meses/12) + ' ano(s)' : meses + ' meses';
+                const ini = (usr.nome || '?')[0].toUpperCase();
+                document.getElementById('avatar-anfitriao').innerHTML = `<div class="avatar-anfitriao-inicial">${ini}</div>`;
+                WPP_NUMBER = prop.whatsapp ? prop.whatsapp.replace(/\D/g,'') : WPP_NUMBER;
+            }
+        } catch (_) {}
+
+        // Busca fotos
+        try {
+            const { data: fotos } = await sb.from('fotos_propriedade')
+                .select('url, titulo, ordem')
+                .eq('propriedade_id', propId)
+                .order('ordem');
+            FOTOS = fotos || [];
+        } catch (_) {}
+
+        // Busca vídeos (apenas ultra)
+        if (PLANO === 'ultra') {
+            try {
+                const { data: vids } = await sb.from('videos_propriedade')
+                    .select('url, titulo').eq('propriedade_id', propId);
+                VIDEOS = vids || [];
+            } catch (_) {}
+        }
+
+        // Busca avaliações verificadas
+        try {
+            const { data: avals } = await sb.from('avaliacoes')
+                .select('*')
+                .eq('propriedade_id', propId)
+                .eq('verificada', true)
+                .order('criado_em', { ascending: false });
+            TODAS_AVAL = avals || [];
+        } catch (_) {}
+
+        renderPagina(prop);
+
+    } catch (err) {
+        console.error('Erro init:', err);
+        carregarDemostracao();
+    } finally {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+    }
+}
+
+/* ────────────────────────────────────────────────────────
+   DEMONSTRAÇÃO (quando não há id na URL ou falha)
+──────────────────────────────────────────────────────── */
+function carregarDemostracao() {
+    PLANO = 'ultra'; // mostra tudo na demo
+    PROP = {
+        nome: 'Chácara Macacu — Sítio para Eventos',
+        descricao: `Se você procura natureza, conforto e estrutura completa para celebrar o seu grande dia, acabou de encontrar o lugar perfeito!
+
+A chácara está localizada em Cachoeiras de Macacu, cercada pelo verde, com clima tranquilo e ao mesmo tempo preparada para receber eventos inesquecíveis, sejam eles familiares, esportivos ou comemorativos.
+
+Destaques do espaço: Campo de futebol com grama tapete. Piscina + Chuveirão. Área de churrasqueira completa com freezer e fogão. Lareira a céu aberto para noites especiais. Ambiente amplo, arejado e integrado à natureza.`,
+        capacidade: 'até 1.000 pessoas',
+        tipo_evento: 'Casamentos, aniversários, corporativos',
+        cidade: 'Cachoeiras de Macacu',
+        estado: 'RJ',
+        valor_base: 3000,
+        nota_media: 4.9,
+        total_avaliacoes: 120,
+        comodidades: ['📶 Wi-Fi rápido', '🚗 Estacionamento gratuito', '🔥 Churrasqueira', '🏊 Piscina', '⚽ Campo de futebol', '🌳 Área verde'],
+        whatsapp: '5521999999999',
+        id: 'demo'
+    };
+    FOTOS = Array.from({length: 5}, (_, i) => ({
+        url: `https://picsum.photos/seed/chacara${i+1}/800/600`,
+        titulo: ['Vista principal', 'Área da piscina', 'Churrasqueira', 'Campo de futebol', 'Lareira'][i],
+        ordem: i
+    }));
+    VIDEOS = [
+        { url: '', titulo: 'Tour completo da Chácara' },
+        { url: '', titulo: 'Vista 360° da área de eventos' }
+    ];
+    TODAS_AVAL = AVALIACOES_DEMO;
+    WPP_NUMBER = '5521999999999';
+
+    document.getElementById('avatar-anfitriao').innerHTML = `<div class="avatar-anfitriao-inicial">R</div>`;
+    document.getElementById('anfitriao-nome').textContent = 'Rodrigo Ramos';
+    document.getElementById('anfitriao-tempo').textContent = '2 anos';
+
+    renderPagina(PROP);
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+}
+
+/* ────────────────────────────────────────────────────────
+   RENDER PRINCIPAL POR PLANO
+──────────────────────────────────────────────────────── */
+function renderPagina(p) {
+    VALOR_BASE = p.valor_base || 3000;
+
+    // Título e meta
+    document.getElementById('prop-nome').textContent = p.nome || '—';
+    document.title = (p.nome || 'Espaço') + ' — VENTSY';
+    document.getElementById('prop-nota').innerHTML = `<span>★</span> ${p.nota_media || '—'}`;
+    document.getElementById('prop-total-aval').textContent = (p.total_avaliacoes || TODAS_AVAL.length) + ' avaliações';
+    document.getElementById('prop-cidade').textContent = [p.cidade, p.estado].filter(Boolean).join(', ');
+    document.getElementById('det-capacidade').textContent = p.capacidade || '—';
+    document.getElementById('det-tipo').textContent = p.tipo_evento || '—';
+    document.getElementById('det-cidade').textContent = p.cidade || '—';
+    document.getElementById('mapa-endereco').textContent = [p.endereco, p.cidade, p.estado, 'Brasil'].filter(Boolean).join(', ');
+    document.getElementById('aval-nota-num').textContent = p.nota_media || '4.9';
+    document.getElementById('aval-total-txt').textContent = (TODAS_AVAL.length || p.total_avaliacoes || 0) + ' avaliações verificadas';
+
+    // Sobre
+    renderSobre(p.descricao || '');
+
+    // Comodidades
+    renderComodidades(p.comodidades || []);
+
+    // Galeria conforme plano
+    renderGaleria();
+
+    // Card lateral conforme plano
+    renderCardLateral();
+
+    // Badge ultra
+    if (PLANO === 'ultra') {
+        document.getElementById('badge-ultra').style.display = 'inline';
+    }
+
+    // Avaliações
+    renderAvaliacoes();
+
+    // Similares (só básico)
+    if (PLANO === 'basico') {
+        document.getElementById('secao-similares').style.display = 'block';
+        renderSimilares();
+    }
+}
+
+/* ────────────────────────────────────────────────────────
+   GALERIA
+──────────────────────────────────────────────────────── */
+function renderGaleria() {
+    const grid = document.getElementById('galeria-grid');
+    grid.innerHTML = '';
+
+    // Limite por plano
+    const limite = PLANO === 'basico' ? 5 : FOTOS.length;
+    const fotosExibir = FOTOS.slice(0, Math.max(5, limite));
+
+    // Precisamos de exatamente 5 slots para o grid (1 principal + 4)
+    const slots = Math.min(fotosExibir.length, 5);
+
+    fotosExibir.slice(0, slots).forEach((foto, i) => {
+        const div = document.createElement('div');
+        div.className = 'foto-slot' + (i === 0 ? ' foto-main' : '');
+        div.innerHTML = `<img src="${foto.url}" alt="${foto.titulo || 'Foto ' + (i+1)}" loading="lazy" onerror="this.src='https://picsum.photos/seed/fallback${i}/800/600'">`;
+        grid.appendChild(div);
+    });
+
+    // Botão vídeos no ultra
+    if (PLANO === 'ultra' && VIDEOS.length > 0) {
+        document.getElementById('btn-videos').style.display = 'flex';
+    }
+}
+
+/* ────────────────────────────────────────────────────────
+   SOBRE
+──────────────────────────────────────────────────────── */
+function renderSobre(texto) {
+    const div = document.getElementById('sobre-texto');
+    const linhas = texto.split('\n').filter(l => l.trim());
+    const preview = linhas.slice(0, 3);
+    const resto = linhas.slice(3);
+
+    let html = preview.map(l => `<p>${l}</p>`).join('');
+    if (resto.length > 0) {
+        html += `<div id="sobre-expandido" style="display:none">${resto.map(l => `<p>${l}</p>`).join('')}</div>`;
+        document.getElementById('btn-expandir').style.display = 'inline';
+    }
+    div.innerHTML = html;
+}
+
+function expandirSobre() {
+    document.getElementById('sobre-expandido').style.display = 'block';
+    document.getElementById('btn-expandir').style.display = 'none';
+}
+
+/* ────────────────────────────────────────────────────────
+   COMODIDADES
+──────────────────────────────────────────────────────── */
+function renderComodidades(lista) {
+    const grid = document.getElementById('comodidades-grid');
+    if (!lista.length) { grid.innerHTML = '<p style="color:#aaa;font-size:.88rem">Não informado.</p>'; return; }
+    grid.innerHTML = lista.map(c => `<div class="comodidade">${c}</div>`).join('');
+}
+
+/* ────────────────────────────────────────────────────────
+   CARD LATERAL POR PLANO
+──────────────────────────────────────────────────────── */
+function renderCardLateral() {
+    const card = document.getElementById('card-lateral');
+
+    if (PLANO === 'basico') {
+        card.innerHTML = `
+            <div class="bloco-basico-cta">
+                <p style="font-size:2rem;margin-bottom:10px">🏡</p>
+                <p>Este espaço está disponível na VENTSY. Para ver preços e entrar em contato com o proprietário, conheça nossos planos.</p>
+                <a href="planos.html" style="display:inline-block;margin-top:14px;background:var(--vermelho);color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;text-decoration:none;font-size:.88rem">Ver planos VENTSY</a>
+            </div>
+        `;
+        return;
+    }
+
+    // PRO e ULTRA: exibe preço + dois botões + formulário
+    const precoHtml = `<div class="preco-lateral">A partir de <strong>R$ ${VALOR_BASE.toLocaleString('pt-BR')}</strong> <span>/ dia</span></div>`;
+
+    const botoesHtml = `
+        <button class="btn-wpp" onclick="irParaWhatsapp()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.09.544 4.05 1.493 5.754L0 24l6.39-1.648A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.847 0-3.579-.5-5.076-1.373l-.364-.213-3.791.977.993-3.682-.236-.38A9.971 9.971 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+            Falar pelo WhatsApp
+        </button>
+        <button class="btn-reserva" id="btn-abrir-reserva" onclick="toggleFormReserva()" disabled>
+            📋 Solicitar Reserva
+        </button>
+    `;
+
+    const formHtml = `
+        <form class="form-reserva" id="form-reserva" onsubmit="return false">
+
+            <div class="form-grupo">
+                <label>Nome completo *</label>
+                <input type="text" id="f-nome" placeholder="Seu nome" oninput="validarForm()" required>
+            </div>
+
+            <div class="form-duplo">
+                <div class="form-grupo">
+                    <label>Telefone *</label>
+                    <input type="tel" id="f-tel" placeholder="(21) 99999-9999" oninput="validarForm()" required>
+                </div>
+                <div class="form-grupo">
+                    <label>E-mail</label>
+                    <input type="email" id="f-email" placeholder="seu@email.com">
+                </div>
+            </div>
+
+            <div class="form-grupo">
+                <label>Tipo de Evento *</label>
+                <select id="f-tipo-evento" onchange="calcularOrcamento(); validarForm()" required>
+                    <option value="">Selecione...</option>
+                    <option value="1">Aniversário / Confraternização</option>
+                    <option value="1.5">Casamento / Formatura</option>
+                    <option value="1.2">Evento Corporativo</option>
+                </select>
+            </div>
+
+            <div class="form-duplo">
+                <div class="form-grupo">
+                    <label>Mês do evento</label>
+                    <select id="f-mes">
+                        <option value="">Mês</option>
+                        ${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+                            .map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-grupo">
+                    <label>Ano</label>
+                    <select id="f-ano">
+                        <option value="">Ano</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grupo">
+                <label>Número de convidados *</label>
+                <div class="range-wrapper">
+                    <input type="range" id="f-pessoas" min="20" max="500" step="10" value="50" oninput="calcularOrcamento(); validarForm()">
+                    <span class="range-valor" id="f-pessoas-val">50 pessoas</span>
+                </div>
+            </div>
+
+            <div class="form-grupo">
+                <label>Mensagem *</label>
+                <textarea id="f-msg" rows="3" placeholder="Conte mais sobre o seu evento..." oninput="validarForm()" required></textarea>
+            </div>
+
+            <!-- Simulador integrado -->
+            <div class="simulador-linha">
+                <div style="font-size:.8rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Estimativa de orçamento</div>
+                <label class="check-adicional-sim">
+                    <input type="checkbox" value="500" onchange="calcularOrcamento()"> Limpeza pós-evento (+R$ 500)
+                </label>
+                <label class="check-adicional-sim">
+                    <input type="checkbox" value="300" onchange="calcularOrcamento()"> Segurança (+R$ 300)
+                </label>
+                <div class="total-linha"><span>Total estimado:</span><span id="f-total">R$ ${VALOR_BASE.toLocaleString('pt-BR')},00</span></div>
+                <div class="aviso">*Valor estimado, sujeito a confirmação do proprietário.</div>
+            </div>
+
+            <button type="button" class="btn-enviar-wpp" id="btn-enviar-wpp" onclick="enviarParaWhatsapp()" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.09.544 4.05 1.493 5.754L0 24l6.39-1.648A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.847 0-3.579-.5-5.076-1.373l-.364-.213-3.791.977.993-3.682-.236-.38A9.971 9.971 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+                Enviar solicitação pelo WhatsApp
+            </button>
+            <p class="form-hint">Todas as informações serão enviadas ao proprietário via WhatsApp.</p>
+        </form>
+    `;
+
+    // Diferencial ultra
+    const ultraExtra = PLANO === 'ultra' ? `
+        <div style="background:linear-gradient(135deg,#1a1a1a,#2a2a2a);border-radius:12px;padding:14px 16px;margin-bottom:16px;text-align:center">
+            <div style="color:#f0c040;font-size:.76rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">✦ Espaço Premium VENTSY</div>
+            <div style="color:#aaa;font-size:.78rem;line-height:1.5">Fotos profissionais, vídeos e tour 360° disponíveis. Resposta prioritária garantida.</div>
+        </div>
+    ` : '';
+
+    card.innerHTML = precoHtml + ultraExtra + botoesHtml + formHtml;
+
+    // Valida o form assim que renderiza
+    setTimeout(validarForm, 50);
+}
+
+/* ────────────────────────────────────────────────────────
+   FORM: TOGGLE, VALIDAÇÃO, CÁLCULO
+──────────────────────────────────────────────────────── */
+function toggleFormReserva() {
+    const form = document.getElementById('form-reserva');
+    const btn  = document.getElementById('btn-abrir-reserva');
+    if (!form) return;
+    const aberto = form.classList.toggle('aberto');
+    btn.textContent = aberto ? '▲ Fechar formulário' : '📋 Solicitar Reserva';
+}
+
+function validarForm() {
+    const nome  = (document.getElementById('f-nome')?.value || '').trim();
+    const tel   = (document.getElementById('f-tel')?.value || '').trim();
+    const tipo  = document.getElementById('f-tipo-evento')?.value || '';
+    const msg   = (document.getElementById('f-msg')?.value || '').trim();
+    const pessoa = parseInt(document.getElementById('f-pessoas')?.value || 0);
+
+    const ok = nome.length >= 3 && tel.length >= 10 && tipo && msg.length >= 10 && pessoa >= 20;
+
+    const btnReserva = document.getElementById('btn-abrir-reserva');
+    const btnEnviar  = document.getElementById('btn-enviar-wpp');
+    if (btnReserva) btnReserva.disabled = !ok;
+    if (btnEnviar)  btnEnviar.disabled  = !ok;
+}
+
+function calcularOrcamento() {
+    const tipo = parseFloat(document.getElementById('f-tipo-evento')?.value || 1);
+    const pessoas = parseInt(document.getElementById('f-pessoas')?.value || 50);
+    const vVal = document.getElementById('f-pessoas-val');
+    if (vVal) vVal.textContent = pessoas + ' pessoas';
+
+    let adicionais = 0;
+    document.querySelectorAll('#form-reserva .check-adicional-sim input:checked')
+        .forEach(c => adicionais += parseFloat(c.value));
+
+    let total = (VALOR_BASE * (isNaN(tipo) ? 1 : tipo)) + adicionais;
+    if (pessoas > 100) total += (pessoas - 100) * 5;
+
+    const el = document.getElementById('f-total');
+    if (el) el.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+/* ────────────────────────────────────────────────────────
+   WHATSAPP
+──────────────────────────────────────────────────────── */
+function irParaWhatsapp() {
+    const msg = `Olá! Vi seu espaço "${PROP?.nome || 'no portal VENTSY'}" e gostaria de mais informações.`;
+    window.open(`https://wa.me/${WPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function enviarParaWhatsapp() {
+    const nome   = document.getElementById('f-nome')?.value?.trim() || '';
+    const tel    = document.getElementById('f-tel')?.value?.trim() || '';
+    const email  = document.getElementById('f-email')?.value?.trim() || '';
+    const tipo   = document.getElementById('f-tipo-evento');
+    const tipoTxt = tipo?.options[tipo.selectedIndex]?.text || '';
+    const mes    = document.getElementById('f-mes')?.value || '';
+    const ano    = document.getElementById('f-ano')?.value || '';
+    const pessoas = document.getElementById('f-pessoas')?.value || '';
+    const msg    = document.getElementById('f-msg')?.value?.trim() || '';
+    const total  = document.getElementById('f-total')?.textContent || '';
+
+    const meses = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const data  = mes && ano ? `${meses[parseInt(mes)]}/${ano}` : 'A combinar';
+
+    const texto = `
+🏡 *Solicitação de Reserva — VENTSY*
+
+📍 *Espaço:* ${PROP?.nome || '—'}
+👤 *Nome:* ${nome}
+📞 *Telefone:* ${tel}${email ? `\n📧 *E-mail:* ${email}` : ''}
+🎉 *Tipo de evento:* ${tipoTxt}
+📅 *Data desejada:* ${data}
+👥 *Convidados:* ${pessoas} pessoas
+💰 *Estimativa:* ${total}
+
+💬 *Mensagem:*
+${msg}
+
+_Enviado pelo portal VENTSY_`.trim();
+
+    window.open(`https://wa.me/${WPP_NUMBER}?text=${encodeURIComponent(texto)}`, '_blank');
+}
+
+/* ────────────────────────────────────────────────────────
+   AVALIAÇÕES VERIFICADAS
+   Sistema: só exibe avaliações onde verificada=true.
+   Na tabela `avaliacoes` do Supabase, o campo `verificada`
+   só é setado como true por trigger/função quando o lead
+   associado a esse usuário tiver status='fechado'
+   (ou seja, confirmamos que ele realmente usou o espaço).
+──────────────────────────────────────────────────────── */
+const AVALIACOES_DEMO = [
+    { id: 1, autor: 'Mariana Silva', avatar: 'https://i.pravatar.cc/150?u=11', data: 'Março de 2025', nota: 5, texto: 'Espaço incrível! Exatamente como nas fotos. O campo de futebol e a piscina foram um sucesso com os convidados. Super recomendo!', verificada: true, evento_tipo: 'Aniversário' },
+    { id: 2, autor: 'Ricardo Souza', avatar: 'https://i.pravatar.cc/150?u=12', data: 'Fevereiro de 2025', nota: 5, texto: 'Excelente para confraternização corporativa. Ótima estrutura e o Rodrigo foi super atencioso com todas as nossas demandas.', verificada: true, evento_tipo: 'Corporativo' },
+    { id: 3, autor: 'Fernanda Lima', avatar: 'https://i.pravatar.cc/150?u=13', data: 'Janeiro de 2025', nota: 4, texto: 'Lugar lindo, espaço perfeito para o nosso casamento. Único ponto foi o acesso um pouco complicado à noite, mas no geral valeu cada centavo.', verificada: true, evento_tipo: 'Casamento' },
+    { id: 4, autor: 'Carlos Henrique', avatar: 'https://i.pravatar.cc/150?u=14', data: 'Dezembro de 2024', nota: 5, texto: 'Churrasqueira completa, piscina limpa, campo bem cuidado. Família toda amou. Com certeza vou repetir no próximo ano!', verificada: true, evento_tipo: 'Aniversário' },
+    { id: 5, autor: 'Ana Beatriz', avatar: 'https://i.pravatar.cc/150?u=15', data: 'Novembro de 2024', nota: 5, texto: 'Contratei para aniversário de 15 anos da minha filha. Tudo perfeito, muito espaço verde, o local é lindo.', verificada: true, evento_tipo: 'Aniversário' },
+    { id: 6, autor: 'Pedro Costa', avatar: 'https://i.pravatar.cc/150?u=16', data: 'Outubro de 2024', nota: 4, texto: 'Ótima opção para eventos grandes. Boa infraestrutura e proprietário bem comunicativo.', verificada: true, evento_tipo: 'Corporativo' },
+];
+
+function renderAvaliacoes() {
+    filtrarAval('todas', document.querySelector('.aval-filtro.ativo'));
+}
+
+function filtrarAval(filtro, btn) {
+    AVAL_FILTRO_ATUAL = filtro;
+    AVAL_VISIVEIS = 4;
+
+    // Ativa botão
+    document.querySelectorAll('.aval-filtro').forEach(b => b.classList.remove('ativo'));
+    if (btn) btn.classList.add('ativo');
+
+    // Filtra
+    let lista = TODAS_AVAL.length ? TODAS_AVAL : AVALIACOES_DEMO;
+    if (filtro === '5')           lista = lista.filter(a => a.nota === 5);
+    else if (filtro === '4')      lista = lista.filter(a => a.nota === 4);
+    else if (filtro === '3')      lista = lista.filter(a => a.nota <= 3);
+    else if (filtro === 'verificados') lista = lista.filter(a => a.verificada);
+
+    renderListaAval(lista);
+}
+
+function renderListaAval(lista) {
+    const grid = document.getElementById('aval-grid');
+    grid.innerHTML = '';
+
+    if (!lista.length) {
+        grid.innerHTML = '<p style="color:#aaa;grid-column:1/-1">Nenhuma avaliação encontrada com este filtro.</p>';
+        document.getElementById('btn-ver-mais-aval').style.display = 'none';
+        return;
+    }
+
+    lista.slice(0, AVAL_VISIVEIS).forEach(a => {
+        const stars = '★'.repeat(a.nota || 5) + '☆'.repeat(5 - (a.nota || 5));
+        const badge = a.verificada ? `<span class="badge-verificado">✓ Verificado</span>` : '';
+        const div = document.createElement('div');
+        div.className = 'aval-card';
+        div.innerHTML = `
+            <div class="aval-autor">
+                <img src="${a.avatar || 'https://i.pravatar.cc/150?u=' + a.id}" alt="${a.autor}" loading="lazy">
+                <div class="aval-autor-info">
+                    <strong>${a.autor}${badge}</strong>
+                    <span>${a.data || ''} ${a.evento_tipo ? '· ' + a.evento_tipo : ''}</span>
+                </div>
+            </div>
+            <div style="color:var(--ouro);font-size:.88rem;margin-bottom:6px">${stars}</div>
+            <p class="aval-texto">${a.texto}</p>
+        `;
+        grid.appendChild(div);
+    });
+
+    const btnMais = document.getElementById('btn-ver-mais-aval');
+    btnMais.style.display = lista.length > AVAL_VISIVEIS ? 'inline-block' : 'none';
+
+    // Guarda lista filtrada pra paginação
+    grid.dataset.filtroLista = JSON.stringify(lista);
+}
+
+function carregarMaisAval() {
+    AVAL_VISIVEIS += 4;
+    const lista = JSON.parse(document.getElementById('aval-grid').dataset.filtroLista || '[]');
+    renderListaAval(lista);
+}
+
+/* ────────────────────────────────────────────────────────
+   MODAL GALERIA
+──────────────────────────────────────────────────────── */
+function abrirModalGaleria() {
+    const grid = document.getElementById('modal-galeria-grid');
+    const fotos = FOTOS.length ? FOTOS : Array.from({length:5},(_,i)=>({url:`https://picsum.photos/seed/demo${i}/800/600`,titulo:'Foto '+(i+1)}));
+    const limite = PLANO === 'basico' ? 5 : fotos.length;
+
+    grid.innerHTML = '';
+    fotos.slice(0, limite).forEach(f => {
+        grid.innerHTML += `
+            <div class="modal-foto-item">
+                <img src="${f.url}" alt="${f.titulo || ''}" loading="lazy">
+                ${f.titulo ? `<div class="modal-foto-titulo">${f.titulo}</div>` : ''}
+            </div>`;
+    });
+
+    document.getElementById('modal-galeria-titulo').textContent = `Todas as fotos (${Math.min(limite, fotos.length)})`;
+    document.getElementById('modal-galeria').classList.add('aberto');
+    document.body.style.overflow = 'hidden';
+}
+function fecharModalGaleria() {
+    document.getElementById('modal-galeria').classList.remove('aberto');
+    document.body.style.overflow = '';
+}
+
+/* ────────────────────────────────────────────────────────
+   MODAL VÍDEOS (Ultra)
+──────────────────────────────────────────────────────── */
+function abrirModalVideos() {
+    const cont = document.getElementById('videos-content');
+    if (VIDEOS.length === 0) {
+        cont.innerHTML = '<p style="color:#888;text-align:center;padding:60px 0">Nenhum vídeo cadastrado ainda.</p>';
+    } else {
+        cont.innerHTML = VIDEOS.map(v => `
+            <div class="video-item">
+                ${v.url
+                    ? `<video controls><source src="${v.url}">Seu navegador não suporta vídeo.</video>`
+                    : `<div style="background:#111;height:200px;display:flex;align-items:center;justify-content:center;color:#555;font-size:.9rem">Vídeo em breve</div>`}
+                <div class="video-titulo">${v.titulo || 'Vídeo do espaço'}</div>
+            </div>
+        `).join('');
+    }
+    document.getElementById('modal-videos').classList.add('aberto');
+    document.body.style.overflow = 'hidden';
+}
+function fecharModalVideos() {
+    document.getElementById('modal-videos').classList.remove('aberto');
+    document.body.style.overflow = '';
+}
+
+/* ────────────────────────────────────────────────────────
+   SIMILARES (plano básico)
+──────────────────────────────────────────────────────── */
+async function renderSimilares() {
+    const grid = document.getElementById('similares-grid');
+    let similares = [];
+
+    try {
+        // Tenta buscar propriedades de plano pro/ultra que não sejam a atual
+        const { data } = await sb.from('propriedades')
+            .select('id, nome, cidade, nota_media, valor_base, foto_capa')
+            .neq('id', PROP?.id || 'demo')
+            .limit(3);
+        similares = data || [];
+    } catch (_) {}
+
+    // Demo
+    if (!similares.length) {
+        similares = [
+            { id: 1, nome: 'Sítio Verde Vale', cidade: 'Guapimirim, RJ', nota_media: 4.8, valor_base: 2500, foto_capa: 'https://picsum.photos/seed/sim1/400/250' },
+            { id: 2, nome: 'Chácara das Flores', cidade: 'Teresópolis, RJ', nota_media: 4.7, valor_base: 1800, foto_capa: 'https://picsum.photos/seed/sim2/400/250' },
+            { id: 3, nome: 'Espaço Aquarela', cidade: 'Petrópolis, RJ', nota_media: 4.9, valor_base: 3200, foto_capa: 'https://picsum.photos/seed/sim3/400/250' },
+        ];
+    }
+
+    grid.innerHTML = similares.map(s => `
+        <div class="similar-card" onclick="window.location.href='propriedade.html?id=${s.id}'">
+            <img class="similar-foto" src="${s.foto_capa || 'https://picsum.photos/seed/'+s.id+'/400/250'}" alt="${s.nome}" loading="lazy">
+            <div class="similar-info">
+                <strong>${s.nome}</strong>
+                <span>📍 ${s.cidade || '—'} &nbsp;·&nbsp; ⭐ ${s.nota_media || '—'}</span>
+                <span class="similar-preco">A partir de R$ ${(s.valor_base||0).toLocaleString('pt-BR')}/dia</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+/* ────────────────────────────────────────────────────────
+   FAQ
+──────────────────────────────────────────────────────── */
+function toggleFaq(btn) {
+    btn.parentElement.classList.toggle('active');
+}
+
+/* ── Fecha modais com ESC ── */
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { fecharModalGaleria(); fecharModalVideos(); }
+});
+
+/* ── Arranca ── */
+init();
+
+</script>
 </body>
 </html>
