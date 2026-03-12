@@ -499,7 +499,7 @@
             <a href="relatorio.html">📊 Relatório</a>
             <span class="menu-section-label">Conta</span>
             <a href="indique.html">🎁 Programa de Indicação</a>
-            <a href="planos.html" class="active">💳 Planos Ventsy</a>
+            <a href="planos2.html" class="active">💳 Planos Ventsy</a>
             <a href="configuracoes.html">⚙️ Configurações</a>
         </nav>
     </aside>
@@ -737,19 +737,81 @@ const PLANOS = [
 ];
 
 /* ─────────────────────────────────────────
-   ESTADO SIMULADO DO USUÁRIO
-   (substituir por leitura do Supabase quando
-    a tabela de assinaturas estiver pronta)
+   ESTADO — preenchido pelo Supabase
 ───────────────────────────────────────── */
 let ESTADO = {
-    planoAtivo:          'pro',      // 'basico' | 'pro' | 'ultra'
-    validadeAte:         '15/07/2026',
-    downgradeAgendado:   null,       // null | 'basico' | 'pro'
+    planoAtivo:        'basico',
+    validadeAte:       '—',
+    downgradeAgendado: null,
 };
 
-// Plano sendo processado no modal
-let _planoCheckout    = null;
-let _planoDowngrade   = null;
+let _userId        = null;
+let _planoCheckout = null;
+let _planoDowngrade = null;
+
+/* ─────────────────────────────────────────
+   HELPERS DE DATA
+───────────────────────────────────────── */
+function formatarData(isoDate) {
+    if (!isoDate) return '—';
+    const [y, m, d] = isoDate.split('T')[0].split('-');
+    return `${d}/${m}/${y}`;
+}
+
+function dataParaISO(dd_mm_yyyy) {
+    const [d, m, y] = dd_mm_yyyy.split('/');
+    return `${y}-${m}-${d}`;
+}
+
+function hoje() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function addDias(isoDate, dias) {
+    const d = new Date(isoDate);
+    d.setDate(d.getDate() + dias);
+    return d.toISOString().split('T')[0];
+}
+
+/* ─────────────────────────────────────────
+   CARREGAR ASSINATURA DO SUPABASE
+───────────────────────────────────────── */
+async function carregarAssinatura(userId) {
+    const { data, error } = await sb
+        .from('assinaturas')
+        .select('*')
+        .eq('usuario_id', userId)
+        .single();
+
+    if (error || !data) {
+        // Usuário sem registro → cria plano Básico automaticamente
+        await criarAssinaturaBasico(userId);
+        return;
+    }
+
+    ESTADO.planoAtivo        = data.plano_ativo;
+    ESTADO.validadeAte       = formatarData(data.fim_periodo);
+    ESTADO.downgradeAgendado = data.downgrade_para || null;
+}
+
+async function criarAssinaturaBasico(userId) {
+    const inicio = hoje();
+    const fim    = addDias(inicio, 30);
+
+    const { error } = await sb.from('assinaturas').insert({
+        usuario_id:      userId,
+        plano_ativo:     'basico',
+        status:          'ativa',
+        valor_pago:      0,
+        inicio_periodo:  inicio,
+        fim_periodo:     fim,
+    });
+
+    if (!error) {
+        ESTADO.planoAtivo  = 'basico';
+        ESTADO.validadeAte = formatarData(fim);
+    }
+}
 
 /* ─────────────────────────────────────────
    INIT
@@ -759,8 +821,10 @@ async function init() {
     if (!session) { window.location.href = '../login.html'; return; }
 
     const user = session.user;
-    const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
+    _userId = user.id;
 
+    // Perfil do usuário
+    const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
     const nome    = perfil?.nome    || user.email;
     const usuario = perfil?.usuario || '';
     const ini     = (nome.split(' ')[0][0] || '?').toUpperCase();
@@ -771,6 +835,9 @@ async function init() {
     document.getElementById('sidebar-avatar').textContent  = ini;
     document.getElementById('sidebar-nome').textContent    = nome;
     document.getElementById('sidebar-handle').textContent  = usuario ? '@' + usuario : '';
+
+    // Carrega assinatura real do Supabase
+    await carregarAssinatura(user.id);
 
     renderizarBanner();
     renderizarCards();
@@ -932,28 +999,79 @@ function abrirCheckout(planoId) {
 }
 
 /* ─────────────────────────────────────────
-   FINALIZAR COMPRA
+   FINALIZAR COMPRA — grava no Supabase
 ───────────────────────────────────────── */
-function finalizarCompra() {
+async function finalizarCompra() {
     if (!_planoCheckout) return;
-    const metodo = document.querySelector('input[name="pagamento"]:checked')?.value;
 
-    // Aqui entraria a integração com gateway de pagamento (Stripe, MercadoPago etc.)
-    // Por ora simulamos a ativação:
-    ESTADO.planoAtivo = _planoCheckout;
-    ESTADO.downgradeAgendado = null;
+    const btnFinalizar = document.querySelector('.btn-finalizar');
+    btnFinalizar.disabled    = true;
+    btnFinalizar.textContent = '⏳ Processando...';
 
-    fecharModal('modal-checkout');
-    renderizarBanner();
-    renderizarCards();
+    const metodo       = document.querySelector('input[name="pagamento"]:checked')?.value || 'pix';
+    const planoAnterior = ESTADO.planoAtivo;
+    const planoNovo     = _planoCheckout;
+    const planoObj      = PLANOS.find(p => p.id === planoNovo);
+    const planoAtualObj = PLANOS.find(p => p.id === planoAnterior);
 
-    const plano = PLANOS.find(p => p.id === _planoCheckout);
-    mostrarToast('🎉', 'Plano ' + plano.nome + ' ativado com sucesso!');
-    _planoCheckout = null;
+    // Calcula valor cobrado (diferença se já tem plano pago)
+    const diferenca   = planoObj.preco - planoAtualObj.preco;
+    const valorCobrado = planoAtualObj.preco > 0 ? diferenca : planoObj.preco;
+
+    const novoInicio  = hoje();
+    const novoFim     = addDias(novoInicio, 30);
+    const tipoEvento  = planoAnterior === 'basico' ? 'novo' : 'upgrade';
+
+    try {
+        // 1. Atualiza assinatura
+        const { error: errUpdate } = await sb
+            .from('assinaturas')
+            .update({
+                plano_ativo:      planoNovo,
+                status:           'ativa',
+                inicio_periodo:   novoInicio,
+                fim_periodo:      novoFim,
+                downgrade_para:   null,
+                valor_pago:       planoObj.preco,
+                metodo_pagamento: metodo,
+            })
+            .eq('usuario_id', _userId);
+
+        if (errUpdate) throw errUpdate;
+
+        // 2. Registra no histórico
+        await sb.from('historico_assinaturas').insert({
+            usuario_id:       _userId,
+            tipo_evento:      tipoEvento,
+            plano_anterior:   planoAnterior,
+            plano_novo:       planoNovo,
+            valor_cobrado:    valorCobrado,
+            metodo_pagamento: metodo,
+            observacao:       `Upgrade de ${planoAnterior} para ${planoNovo}`,
+        });
+
+        // 3. Atualiza estado local
+        ESTADO.planoAtivo        = planoNovo;
+        ESTADO.validadeAte       = formatarData(novoFim);
+        ESTADO.downgradeAgendado = null;
+
+        fecharModal('modal-checkout');
+        renderizarBanner();
+        renderizarCards();
+        mostrarToast('🎉', 'Plano ' + planoObj.nome + ' ativado com sucesso!');
+
+    } catch (err) {
+        console.error('Erro ao ativar plano:', err);
+        mostrarToast('❌', 'Erro ao processar. Tente novamente.');
+    } finally {
+        btnFinalizar.disabled    = false;
+        btnFinalizar.textContent = '✅ Confirmar e Ativar Agora';
+        _planoCheckout = null;
+    }
 }
 
 /* ─────────────────────────────────────────
-   DOWNGRADE
+   DOWNGRADE — grava no Supabase
 ───────────────────────────────────────── */
 function abrirDowngrade(planoId) {
     _planoDowngrade = planoId;
@@ -975,17 +1093,52 @@ function validarConfirmaDowngrade(valor) {
     btn.disabled = !ok;
 }
 
-function executarDowngrade() {
+async function executarDowngrade() {
     if (!_planoDowngrade) return;
-    ESTADO.downgradeAgendado = _planoDowngrade;
 
-    fecharModal('modal-downgrade');
-    renderizarBanner();
-    renderizarCards();
+    const btnOk = document.getElementById('btn-ok-downgrade');
+    btnOk.disabled    = true;
+    btnOk.textContent = '⏳ Salvando...';
 
-    const plano = PLANOS.find(p => p.id === _planoDowngrade);
-    mostrarToast('⏳', 'Downgrade para ' + plano.nome + ' agendado. Ativo após ' + ESTADO.validadeAte);
-    _planoDowngrade = null;
+    const planoDestino    = _planoDowngrade;
+    const planoDestinoObj = PLANOS.find(p => p.id === planoDestino);
+    const planoAtualObj   = PLANOS.find(p => p.id === ESTADO.planoAtivo);
+
+    try {
+        // 1. Agenda o downgrade na assinatura
+        const { error: errUpdate } = await sb
+            .from('assinaturas')
+            .update({ downgrade_para: planoDestino })
+            .eq('usuario_id', _userId);
+
+        if (errUpdate) throw errUpdate;
+
+        // 2. Registra no histórico
+        await sb.from('historico_assinaturas').insert({
+            usuario_id:     _userId,
+            tipo_evento:    'downgrade',
+            plano_anterior: ESTADO.planoAtivo,
+            plano_novo:     planoDestino,
+            valor_cobrado:  0,
+            observacao:     `Downgrade agendado para ${planoDestino}. Efetiva após ${ESTADO.validadeAte}`,
+        });
+
+        // 3. Atualiza estado local
+        ESTADO.downgradeAgendado = planoDestino;
+
+        fecharModal('modal-downgrade');
+        renderizarBanner();
+        renderizarCards();
+        mostrarToast('⏳', 'Downgrade para ' + planoDestinoObj.nome + ' agendado. Ativo após ' + ESTADO.validadeAte);
+
+    } catch (err) {
+        console.error('Erro ao agendar downgrade:', err);
+        mostrarToast('❌', 'Erro ao salvar. Tente novamente.');
+    } finally {
+        btnOk.disabled    = false;
+        btnOk.textContent = 'Confirmar downgrade';
+        _planoDowngrade   = null;
+    }
 }
 
 /* ─────────────────────────────────────────
