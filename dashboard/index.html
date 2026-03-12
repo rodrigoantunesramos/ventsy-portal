@@ -113,12 +113,13 @@
            SIDEBAR
         ───────────────────────────────────────── */
         .dash-sidebar {
-            width: 280px; background: #fff;
+            width: 260px; background: #fff;
             padding: 30px 20px;
             border-right: 1px solid #eee;
             display: flex; flex-direction: column;
             position: sticky; top: 80px;
             height: calc(100vh - 80px); overflow-y: auto;
+            flex-shrink: 0;
         }
 
         .perfil-resumo { text-align: center; margin-bottom: 36px; }
@@ -144,6 +145,10 @@
         }
 
         .dash-menu { display: flex; flex-direction: column; width: 100%; }
+        .menu-section-label {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #bbb; padding: 14px 14px 4px;
+        }
         .dash-menu a {
             display: flex; align-items: center; gap: 10px;
             padding: 12px 14px; color: #666; text-decoration: none;
@@ -432,9 +437,10 @@
                     <strong id="drop-nome">Carregando...</strong>
                     <span id="drop-email"></span>
                 </div>
+                <a href="index.html">🏠 Dashboard</a>
                 <a href="minhapropriedade.html">🏡 Minha Propriedade</a>
                 <a href="configuracoes.html">⚙️ Configurações</a>
-                <a href="../planos.html">⭐ Planos Ventsy</a>
+                <a href="../planos.html">💳 Planos Ventsy</a>
                 <a href="../fale-conosco.html">❓ Ajuda</a>
                 <button class="drop-sair" onclick="sair()">🚪 Sair da conta</button>
             </div>
@@ -451,14 +457,18 @@
             <div class="sidebar-avatar" id="sidebar-avatar">?</div>
             <h3 id="sidebar-nome">Carregando...</h3>
             <span class="handle" id="sidebar-handle"></span>
-            <div class="plano-chip">⭐ Ultra — 30 dias grátis</div>
+            <div class="plano-chip" id="sidebar-plano-chip">⭐ Carregando...</div>
         </div>
         <nav class="dash-menu">
             <a href="index.html" class="active">🏠 Dashboard</a>
-            <a href="minhapropriedade.html">🏡 Minha Propriedade</a>
+            <span class="menu-section-label">Minha Propriedade</span>
+            <a href="minhapropriedade.html">🏡 Dados do Espaço</a>
+            <a href="fotos.html">📸 Fotos</a>
+            <span class="menu-section-label">Gestão</span>
             <a href="leads.html">💬 Contatos / Leads</a>
             <a href="calendario.html">📅 Disponibilidade</a>
             <a href="relatorio.html">📊 Relatório</a>
+            <span class="menu-section-label">Conta</span>
             <a href="indique.html">🎁 Programa de Indicação</a>
             <a href="planos2.html">💳 Planos Ventsy</a>
             <a href="configuracoes.html">⚙️ Configurações</a>
@@ -669,41 +679,54 @@
 
     /* ── Init ── */
     async function init() {
-        const { data: { session } } = await sb.auth.getSession();
-        if (!session) { window.location.href = '../login.html'; return; }
+        try {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) { window.location.href = '../login.html'; return; }
 
-        const user = session.user;
+            const user = session.user;
+            let nome = user.email, usuario = '';
 
-        // Busca perfil completo
-        const { data: perfil } = await sb
-            .from('usuarios')
-            .select('*')
-            .eq('id', user.id)
-            .single();
+            try {
+                const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
+                if (perfil) {
+                    nome    = perfil.nome    || user.email;
+                    usuario = perfil.usuario || '';
+                }
+            } catch (_) {}
 
-        const nome         = perfil?.nome    || user.email;
-        const usuario      = perfil?.usuario || '';
-        const primeiroNome = nome.split(' ')[0];
-        const inicial      = primeiroNome[0]?.toUpperCase() || '?';
+            const primeiroNome = nome.split(' ')[0];
+            const inicial      = primeiroNome[0]?.toUpperCase() || '?';
 
-        // Header
-        document.getElementById('avatar-inicial').textContent = inicial;
-        document.getElementById('drop-nome').textContent      = nome;
-        document.getElementById('drop-email').textContent     = user.email;
+            // Header
+            document.getElementById('avatar-inicial').textContent = inicial;
+            document.getElementById('drop-nome').textContent      = nome;
+            document.getElementById('drop-email').textContent     = user.email;
 
-        // Sidebar
-        document.getElementById('sidebar-avatar').textContent = inicial;
-        document.getElementById('sidebar-nome').textContent   = nome;
-        document.getElementById('sidebar-handle').textContent = usuario ? '@' + usuario : '';
+            // Sidebar
+            document.getElementById('sidebar-avatar').textContent = inicial;
+            document.getElementById('sidebar-nome').textContent   = nome;
+            document.getElementById('sidebar-handle').textContent = usuario ? '@' + usuario : '';
 
-        // Boas-vindas
-        document.getElementById('hero-nome').textContent = primeiroNome;
+            // Boas-vindas
+            document.getElementById('hero-nome').textContent = primeiroNome;
 
-        // Mostra conteúdo
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('main-content').style.display   = 'flex';
+            // Plano
+            try {
+                const { data: ass } = await sb.from('assinaturas').select('plano_ativo, status').eq('usuario_id', user.id).single();
+                const pl = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
+                document.getElementById('sidebar-plano-chip').textContent = pl[ass?.plano_ativo] || '🏷️ Básico';
+            } catch (_) {
+                document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
+            }
 
-        montarGrafico();
+            montarGrafico();
+
+        } catch (err) {
+            console.error('Erro no init:', err);
+        } finally {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('main-content').style.display   = 'flex';
+        }
     }
 
     /* ── Toggle dropmenu ── */
