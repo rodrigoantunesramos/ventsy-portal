@@ -38,7 +38,7 @@
             box-sizing: border-box; overflow: visible;
         }
         .header-left { flex: 1; display: flex; align-items: center; }
-        .logo { height: 56px; width: auto; cursor: pointer; }
+        .logo { height: 100px; width: auto; cursor: pointer; }
         .header-center { flex: 2; display: flex; justify-content: center; overflow: visible; }
         .header-right  { flex: 1; display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
 
@@ -290,14 +290,6 @@
             border: 1px solid rgba(240,192,64,.35);
             font-size: .62rem;
         }
-
-        /* ──────────── DIVISOR ENTRE SEÇÕES ──────────── */
-        .divisor {
-            max-width: 1440px; margin: 20px auto 0;
-            padding: 0 5%; display: flex; align-items: center; gap: 14px;
-        }
-        .divisor .linha { flex: 1; height: 1px; background: var(--borda); }
-        .divisor .icone { font-size: 1rem; opacity: .3; user-select: none; }
 
         /* ──────────── BANNER ANUNCIE ──────────── */
         .banner-anuncie {
@@ -647,12 +639,6 @@ async function render() {
         `;
         container.appendChild(sec);
 
-        /* Divisor */
-        const div = document.createElement('div');
-        div.className = 'divisor';
-        div.innerHTML = `<div class="linha"></div><span class="icone">✦</span><div class="linha"></div>`;
-        container.appendChild(div);
-
         secoesRenderizadas++;
 
         /* Banner após 3ª seção */
@@ -806,4 +792,3 @@ document.addEventListener('DOMContentLoaded', render);
 </script>
 </body>
 </html>
-
