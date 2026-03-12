@@ -97,6 +97,16 @@
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @media (max-width: 540px) { .login-card { padding: 28px 20px; } .footer-container { flex-direction: column; gap: 30px; } }
+        @media (max-width: 768px) {
+            .logo { height: 44px; }
+            .btn-cadastrar-header { padding: 8px 14px; font-size: 0.82rem; }
+            .footer-container { flex-wrap: wrap; gap: 28px; }
+        }
+        @media (max-width: 480px) {
+            header { padding: 0 4%; }
+            .login-wrap { padding: 0 4px; }
+            main { padding: 110px 4% 48px; }
+        }
     </style>
 </head>
 <body>

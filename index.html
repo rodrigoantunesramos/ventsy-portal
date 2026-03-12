@@ -368,6 +368,40 @@
             .divider { display: none; }
             .search-item { min-width: calc(50% - 8px); }
         }
+        /* ── MOBILE HEADER ── */
+        @media (max-width: 768px) {
+            header {
+                height: auto;
+                min-height: 64px;
+                flex-wrap: wrap;
+                padding: 10px 4%;
+                gap: 8px;
+            }
+            .header-left { flex: 0 0 auto; margin-right: 0; }
+            .logo { height: 44px; }
+            .header-right { flex: 0 0 auto; margin-left: auto; gap: 8px; }
+            .btn-login { padding: 8px 14px; font-size: .82rem; }
+            .header-center { order: 3; width: 100%; flex: 0 0 100%; justify-content: stretch; }
+            .search-container { width: 100%; }
+            .search-bar { max-width: 100%; border-radius: 14px; flex-wrap: wrap; padding: 8px 10px; gap: 6px; }
+            .search-item { min-width: calc(50% - 8px); }
+            .divider { display: none; }
+            .search-item label { font-size: .75rem; }
+            main { margin-top: 4px; }
+            .secao { padding: 6px 4% 0; }
+            .footer-container { flex-wrap: wrap; gap: 36px; }
+            .banner-inner { padding: 28px 24px; }
+            .banner-txt h3 { font-size: 1.4rem; }
+        }
+        @media (max-width: 480px) {
+            .search-bar { flex-direction: column; gap: 4px; border-radius: 12px; }
+            .search-item { min-width: 100%; border-bottom: 1px solid #f0f0f0; padding-bottom: 6px; }
+            .search-item:last-of-type { border-bottom: none; }
+            .guest-direct-selector { min-width: auto; }
+            .btn-step { width: 36px; height: 36px; font-size: 1.1rem; }
+            .btn-search { width: 100%; border-radius: 10px; height: 44px; }
+            .secao-titulo { font-size: 1rem; }
+        }
     </style>
 </head>
 <body>
@@ -465,11 +499,9 @@
         <div class="footer-column">
             <h3>Atendimento</h3>
             <ul>
-                <li><a href="#">Central de Ajuda</a></li>
                 <li><a href="fale-conosco.html">Fale Conosco</a></li>
-                <li><a href="#">Política de Privacidade</a></li>
-                <li><a href="#">Termos de Uso</a></li>
-                <li><a href="#">Sobre Nós</a></li>
+                <li><a href="privacidade.html">Política de Privacidade</a></li>
+                <li><a href="termos.html">Termos de Uso</a></li>
                 <li><a href="como-funciona.html">Como Funciona</a></li>
             </ul>
         </div>

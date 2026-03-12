@@ -2463,9 +2463,13 @@ input:checked + .slider-round:before { transform: translateX(26px); }
     margin-bottom: 20px;
 }
 
-
-
-
+        @media (max-width: 768px) {
+            .logo { height: 44px; }
+            .footer-container { flex-wrap: wrap; gap: 28px; }
+        }
+        @media (max-width: 480px) {
+            header { padding: 0 4%; }
+        }
   </style>
 
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
