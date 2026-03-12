@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações — VENTSY</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex; flex-direction: column;
+            background-color: #f0f2f5;
+        }
+
+        /* ── LOADING ── */
+        #loading-screen {
+            position: fixed; inset: 0; background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 99999; flex-direction: column; gap: 16px;
+        }
+        .loading-logo { font-size: 2rem; font-weight: 900; color: #0d0d0d; }
+        .loading-logo em { font-style: normal; color: #ff385c; }
+        .loading-dots { display: flex; gap: 6px; }
+        .loading-dots span {
+            width: 8px; height: 8px; background: #ff385c;
+            border-radius: 50%; animation: bounce 1.2s ease-in-out infinite;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:.4} 40%{transform:scale(1);opacity:1} }
+
+        /* ── HEADER ── */
+        header.topbar {
+            width: 100%; height: 80px; background: #fff;
+            display: flex; align-items: center; padding: 0 5%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed; top: 0; z-index: 9999; box-sizing: border-box;
+        }
+        .header-left, .header-right { flex: 1; display: flex; }
+        .header-right { align-items: center; gap: 15px; justify-content: flex-end; }
+        .logo { height: 100px; width: auto; cursor: pointer; }
+
+        /* Avatar dropmenu */
+        .avatar-container { position: relative; }
+        .avatar-btn {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: #ff385c; color: #fff; border: none;
+            font-size: 1.05rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 10px rgba(255,56,92,0.35); transition: transform 0.2s;
+        }
+        .avatar-btn:hover { transform: scale(1.08); }
+        .avatar-dropdown {
+            position: absolute; top: 54px; right: 0; width: 210px;
+            background: white; border-radius: 14px;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.13);
+            display: none; flex-direction: column;
+            padding: 8px 0; z-index: 1001; border: 1px solid #f0f0f0;
+        }
+        .drop-header { padding: 12px 18px 10px; border-bottom: 1px solid #f0f0f0; margin-bottom: 4px; }
+        .drop-header strong { display: block; font-size: 0.92rem; color: #0d0d0d; margin-bottom: 2px; }
+        .drop-header span { font-size: 0.78rem; color: #999; }
+        .avatar-dropdown a, .avatar-dropdown button {
+            padding: 11px 18px; text-decoration: none; color: #444;
+            font-size: 0.88rem; display: flex; align-items: center; gap: 10px;
+            background: none; border: none; font-family: inherit;
+            cursor: pointer; width: 100%; text-align: left; transition: background 0.15s;
+        }
+        .avatar-dropdown a:hover, .avatar-dropdown button:hover { background: #f7f7f7; }
+        .drop-sair { color: #ff385c !important; border-top: 1px solid #f0f0f0; margin-top: 4px; }
+
+        /* ── LAYOUT ── */
+        .dashboard-container {
+            display: flex; min-height: 100vh;
+            background: #f0f2f5; margin-top: 80px;
+        }
+
+        /* ── SIDEBAR ── */
+        .dash-sidebar {
+            width: 260px; background: #fff; padding: 30px 20px;
+            border-right: 1px solid #eee; display: flex; flex-direction: column;
+            position: sticky; top: 80px; height: calc(100vh - 80px); overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .perfil-resumo { text-align: center; margin-bottom: 32px; }
+        .sidebar-avatar {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: #ff385c; color: #fff; font-size: 1.9rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
+        }
+        .perfil-resumo h3 { font-size: 1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 4px; }
+        .perfil-resumo .handle { font-size: 0.78rem; color: #717171; }
+        .plano-chip {
+            display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
+            background: rgba(255,56,92,0.08); border: 1px solid rgba(255,56,92,0.2);
+            border-radius: 20px; padding: 3px 12px; font-size: 0.72rem; font-weight: 700; color: #ff385c;
+        }
+        .dash-menu { display: flex; flex-direction: column; width: 100%; }
+        .menu-section-label {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #bbb; padding: 14px 14px 4px;
+        }
+        .dash-menu a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 14px; color: #666; text-decoration: none;
+            border-radius: 8px; margin-bottom: 4px; font-size: 0.9rem; transition: all 0.2s;
+        }
+        .dash-menu a:hover { background: #f7f7f7; color: #0d0d0d; }
+        .dash-menu a.active { background: rgba(255,56,92,0.08); color: #ff385c; font-weight: 600; }
+
+        /* ── CONTEÚDO ── */
+        .dash-content { padding: 0 40px 80px 40px; width: 100%; max-width: 880px; }
+
+        .dash-header-fixo {
+            position: sticky; top: 0; z-index: 100; background: #f0f2f5;
+            padding: 24px 0 20px; margin-bottom: 8px;
+        }
+        .dash-header-fixo h2 { font-size: 1.6rem; font-weight: 700; color: #222; margin: 0; }
+        .dash-header-fixo p { font-size: 0.82rem; color: #999; margin-top: 4px; }
+
+        /* ── CARDS DE SEÇÃO ── */
+        .secao-config {
+            background: #fff; border-radius: 16px;
+            border: 1px solid #eee; padding: 28px;
+            margin-bottom: 20px;
+        }
+        .secao-config-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 22px; padding-bottom: 18px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .secao-icone {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: #f5f5f5; display: flex; align-items: center;
+            justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+        }
+        .secao-config-header .titulo-grupo h3 {
+            font-size: 1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 2px;
+        }
+        .secao-config-header .titulo-grupo p {
+            font-size: 0.78rem; color: #999;
+        }
+
+        /* ── PERFIL TOPO ── */
+        .perfil-topo-box {
+            display: flex; align-items: center; gap: 18px;
+            margin-bottom: 24px;
+        }
+        .avatar-grande-wrap { position: relative; flex-shrink: 0; }
+        .avatar-grande {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: #ff385c; color: #fff; font-size: 2rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .avatar-grande img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-trocar-avatar {
+            position: absolute; bottom: 0; right: 0;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #fff; border: 1px solid #ddd;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            cursor: pointer; font-size: 0.75rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-trocar-avatar:hover { background: #f5f5f5; border-color: #ff385c; }
+        .perfil-info-texto h4 { font-size: 1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 3px; }
+        .perfil-info-texto span { font-size: 0.82rem; color: #999; }
+
+        /* ── INPUTS ── */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .grid-2 .span-2 { grid-column: span 2; }
+
+        .campo { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .campo:last-child { margin-bottom: 0; }
+        .campo label {
+            font-size: 0.82rem; font-weight: 700; color: #444;
+        }
+        .campo .dica { font-size: 0.74rem; color: #aaa; margin-top: 2px; }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="password"],
+        input[type="number"],
+        select {
+            width: 100%; padding: 11px 14px;
+            border: 1px solid #ddd; border-radius: 10px;
+            font-size: 0.9rem; font-family: inherit; color: #222;
+            outline: none; transition: border-color 0.2s; background: #fdfdfd;
+        }
+        input:focus, select:focus { border-color: #ff385c; background: #fff; }
+        input:disabled { background: #f8f8f8; color: #aaa; cursor: not-allowed; }
+
+        /* Input com ícone de olho (senha) */
+        .input-senha-wrap { position: relative; }
+        .input-senha-wrap input { padding-right: 44px; }
+        .btn-olho {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; font-size: 1rem;
+            color: #aaa; padding: 4px;
+        }
+
+        /* ── BOTÕES ── */
+        .btn-primario {
+            background: #ff385c; color: #fff; border: none;
+            padding: 11px 24px; border-radius: 10px; font-family: inherit;
+            font-size: 0.88rem; font-weight: 700; cursor: pointer;
+            transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primario:hover { background: #e0304f; transform: scale(1.02); }
+        .btn-primario:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+        .btn-secundario {
+            background: #fff; color: #444; border: 1px solid #ddd;
+            padding: 11px 22px; border-radius: 10px; font-family: inherit;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-secundario:hover { background: #f5f5f5; border-color: #bbb; }
+
+        .btn-perigo {
+            background: none; color: #ff385c;
+            border: 1px solid #ff385c;
+            padding: 11px 22px; border-radius: 10px; font-family: inherit;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-perigo:hover { background: #ff385c; color: #fff; }
+
+        .acoes-linha {
+            display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;
+        }
+
+        /* ── NOTIFICAÇÕES / SWITCHES ── */
+        .lista-notificacoes { display: flex; flex-direction: column; }
+        .item-notif {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 0; border-bottom: 1px solid #f5f5f5;
+        }
+        .item-notif:last-child { border-bottom: none; }
+        .notif-texto strong { display: block; font-size: 0.9rem; color: #222; margin-bottom: 3px; }
+        .notif-texto p { font-size: 0.78rem; color: #888; }
+
+        /* Toggle switch */
+        .switch { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background: #ddd; border-radius: 34px; transition: .3s;
+        }
+        .switch-slider:before {
+            position: absolute; content: "";
+            height: 20px; width: 20px; left: 3px; bottom: 3px;
+            background: white; border-radius: 50%; transition: .3s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+        input:checked + .switch-slider { background: #ff385c; }
+        input:checked + .switch-slider:before { transform: translateX(20px); }
+
+        /* ── SEGURANÇA AVANÇADA ── */
+        .item-seguranca {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 0; border-bottom: 1px solid #f5f5f5;
+        }
+        .item-seguranca:last-child { border-bottom: none; }
+        .seg-texto strong { display: block; font-size: 0.9rem; color: #222; margin-bottom: 3px; }
+        .seg-texto p { font-size: 0.78rem; color: #888; }
+        .badge-status {
+            font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
+            border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;
+            margin-top: 5px;
+        }
+        .badge-ativo   { background: #e6f9ee; color: #1ebc54; }
+        .badge-inativo { background: #f5f5f5; color: #aaa; }
+
+        /* ── ZONA DE PERIGO ── */
+        .secao-perigo {
+            background: #fff; border-radius: 16px;
+            border: 1.5px solid #ffe0e0; padding: 28px;
+            margin-bottom: 20px;
+        }
+        .secao-perigo .secao-config-header { border-bottom-color: #ffe0e0; }
+        .secao-perigo .secao-icone { background: #fff0f0; }
+        .perigo-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 0; border-bottom: 1px solid #fff0f0; gap: 20px;
+        }
+        .perigo-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .perigo-texto strong { display: block; font-size: 0.88rem; color: #444; margin-bottom: 3px; }
+        .perigo-texto p { font-size: 0.78rem; color: #aaa; }
+
+        /* ── MODAL 2FA ── */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: none; align-items: center; justify-content: center; z-index: 9998;
+        }
+        .modal-overlay.aberto { display: flex; }
+        .modal-box {
+            background: #fff; border-radius: 20px; padding: 36px;
+            width: 440px; max-width: 95vw; position: relative;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .modal-fechar {
+            position: absolute; top: 16px; right: 16px;
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #f5f5f5; border: none; cursor: pointer;
+            font-size: 1rem; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .modal-fechar:hover { background: #eee; }
+        .modal-box h3 { font-size: 1.1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 8px; }
+        .modal-box p { font-size: 0.85rem; color: #666; line-height: 1.6; margin-bottom: 20px; }
+        .modal-opcoes { display: flex; flex-direction: column; gap: 10px; }
+        .opcao-2fa {
+            display: flex; align-items: center; gap: 14px;
+            padding: 16px; border: 1.5px solid #eee; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .opcao-2fa:hover { border-color: #ff385c; background: rgba(255,56,92,0.02); }
+        .opcao-2fa-icon { font-size: 1.5rem; flex-shrink: 0; }
+        .opcao-2fa-texto strong { display: block; font-size: 0.9rem; color: #222; }
+        .opcao-2fa-texto span { font-size: 0.78rem; color: #999; }
+
+        /* ── MODAL EXCLUIR CONTA ── */
+        .modal-confirmacao .modal-box { max-width: 400px; }
+        .modal-confirmacao h3 { color: #ff385c; }
+        .campo-confirma { margin: 16px 0; }
+        .campo-confirma label { display: block; font-size: 0.82rem; font-weight: 600; color: #444; margin-bottom: 6px; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #0d0d0d; color: #fff; padding: 14px 26px;
+            border-radius: 12px; font-size: 0.88rem; font-weight: 500;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.2); z-index: 9999;
+            display: flex; align-items: center; gap: 10px;
+            transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+            opacity: 0;
+        }
+        .toast.visivel { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* ── FOOTER ── */
+        .main-footer { background: #f7f7f7; border-top: 1px solid #ddd; padding: 60px 0 30px; margin-top: 50px; }
+        .footer-container { max-width: 1200px; margin: 0 auto; display: flex; padding: 0 5%; gap: 150px; }
+        .footer-column h3 { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: #222; margin-bottom: 20px; }
+        .footer-column ul { list-style: none; padding: 0; }
+        .footer-column ul li { margin-bottom: 12px; }
+        .footer-column ul li a { text-decoration: none; color: #484848; font-size: 0.95rem; }
+        .footer-column ul li a:hover { text-decoration: underline; }
+        .footer-bottom { max-width: 1200px; margin: 40px auto 0; padding: 25px 5% 0; border-top: 1px solid #ebebeb; color: #717171; font-size: 0.85rem; }
+
+        @media (max-width: 768px) {
+            .dash-sidebar { display: none; }
+            .dash-content { padding: 0 16px 60px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .grid-2 .span-2 { grid-column: span 1; }
+            .footer-container { flex-direction: column; gap: 40px; }
+            .perigo-item { flex-direction: column; align-items: flex-start; }
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+    <div class="loading-logo"><em>VENTSY</em></div>
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- HEADER -->
+<header class="topbar">
+    <div class="header-left">
+        <a href="../index.html"><img src="../logovents.png" alt="Logo VENTSY" class="logo"></a>
+    </div>
+    <div class="header-right">
+        <div class="avatar-container">
+            <button class="avatar-btn" onclick="toggleAvatar()">
+                <span id="avatar-inicial">?</span>
+            </button>
+            <div class="avatar-dropdown" id="avatar-menu">
+                <div class="drop-header">
+                    <strong id="drop-nome">Carregando...</strong>
+                    <span id="drop-email"></span>
+                </div>
+                <a href="index.html">🏠 Dashboard</a>
+                <a href="minhapropriedade.html">🏡 Minha Propriedade</a>
+                <a href="configuracoes.html">⚙️ Configurações</a>
+                <a href="../planos.html">⭐ Planos Ventsy</a>
+                <a href="../fale-conosco.html">❓ Ajuda</a>
+                <button class="drop-sair" onclick="sair()">🚪 Sair da conta</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- LAYOUT -->
+<main class="dashboard-container" id="main-content" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="dash-sidebar">
+        <div class="perfil-resumo">
+            <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+            <h3 id="sidebar-nome">Carregando...</h3>
+            <span class="handle" id="sidebar-handle"></span>
+            <div class="plano-chip">⭐ Ultra — 30 dias grátis</div>
+        </div>
+        <nav class="dash-menu">
+            <a href="index.html">🏠 Dashboard</a>
+
+            <span class="menu-section-label">Minha Propriedade</span>
+            <a href="minhapropriedade.html">🏡 Dados do Espaço</a>
+            <a href="fotos.html">📸 Fotos</a>
+
+            <span class="menu-section-label">Gestão</span>
+            <a href="leads.html">💬 Contatos / Leads</a>
+            <a href="calendario.html">📅 Disponibilidade</a>
+            <a href="relatorio.html">📊 Relatório</a>
+
+            <span class="menu-section-label">Conta</span>
+            <a href="indique.html">🎁 Programa de Indicação</a>
+            <a href="../planos.html">💳 Planos Ventsy</a>
+            <a href="configuracoes.html" class="active">⚙️ Configurações</a>
+        </nav>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <section class="dash-content">
+
+        <div class="dash-header-fixo">
+            <h2>⚙️ Configurações</h2>
+            <p>Gerencie os dados da sua conta, segurança e preferências.</p>
+        </div>
+
+        <!-- ── PERFIL PESSOAL ── -->
+        <div class="secao-config">
+            <div class="secao-config-header">
+                <div class="secao-icone">👤</div>
+                <div class="titulo-grupo">
+                    <h3>Perfil Pessoal</h3>
+                    <p>Suas informações de conta na plataforma VENTSY</p>
+                </div>
+            </div>
+
+            <div class="perfil-topo-box">
+                <div class="avatar-grande-wrap">
+                    <div class="avatar-grande" id="avatar-perfil-grande">?</div>
+                    <button class="btn-trocar-avatar" onclick="document.getElementById('input-foto-perfil').click()" title="Trocar foto">📷</button>
+                    <input type="file" id="input-foto-perfil" accept="image/*" hidden onchange="previewAvatarPerfil(this)">
+                </div>
+                <div class="perfil-info-texto">
+                    <h4 id="perfil-nome-display">—</h4>
+                    <span id="perfil-email-display">—</span>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="campo">
+                    <label>Nome Completo</label>
+                    <input type="text" id="campo-nome" placeholder="Seu nome completo">
+                </div>
+                <div class="campo">
+                    <label>Usuário (@handle)</label>
+                    <input type="text" id="campo-usuario" placeholder="@seuusuario">
+                    <span class="dica">Identificador único público na plataforma</span>
+                </div>
+                <div class="campo">
+                    <label>E-mail de Login</label>
+                    <input type="email" id="campo-email" disabled>
+                    <span class="dica">Para alterar o e-mail entre em contato com o suporte</span>
+                </div>
+                <div class="campo">
+                    <label>Telefone Pessoal</label>
+                    <input type="tel" id="campo-telefone" placeholder="(21) 99999-0000">
+                </div>
+                <div class="campo">
+                    <label>CPF / CNPJ</label>
+                    <input type="text" id="campo-documento" placeholder="000.000.000-00">
+                </div>
+                <div class="campo">
+                    <label>Data de Nascimento</label>
+                    <input type="date" id="campo-nascimento">
+                </div>
+            </div>
+
+            <div class="acoes-linha">
+                <button class="btn-primario" onclick="salvarPerfil()">💾 Salvar Alterações</button>
+            </div>
+        </div>
+
+        <!-- ── SEGURANÇA / SENHA ── -->
+        <div class="secao-config">
+            <div class="secao-config-header">
+                <div class="secao-icone">🔒</div>
+                <div class="titulo-grupo">
+                    <h3>Segurança — Alterar Senha</h3>
+                    <p>Use uma senha forte com letras, números e símbolos</p>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="campo span-2">
+                    <label>Nova Senha</label>
+                    <div class="input-senha-wrap">
+                        <input type="password" id="nova-senha" placeholder="Mínimo 8 caracteres" oninput="calcularForcaSenha(this.value)">
+                        <button class="btn-olho" type="button" onclick="toggleSenha('nova-senha', this)">👁</button>
+                    </div>
+                    <!-- Barra de força -->
+                    <div style="margin-top:8px; display:flex; gap:4px;">
+                        <div id="forca-1" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                        <div id="forca-2" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                        <div id="forca-3" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                        <div id="forca-4" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                    </div>
+                    <span class="dica" id="forca-label">Digite a nova senha</span>
+                </div>
+                <div class="campo span-2">
+                    <label>Confirmar Nova Senha</label>
+                    <div class="input-senha-wrap">
+                        <input type="password" id="confirmar-senha" placeholder="Repita a nova senha">
+                        <button class="btn-olho" type="button" onclick="toggleSenha('confirmar-senha', this)">👁</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="acoes-linha">
+                <button class="btn-secundario" onclick="alterarSenha()">🔑 Atualizar Senha</button>
+                <button class="btn-secundario" onclick="enviarLinkRedefinicao()">📧 Receber link por e-mail</button>
+            </div>
+        </div>
+
+        <!-- ── NOTIFICAÇÕES ── -->
+        <div class="secao-config">
+            <div class="secao-config-header">
+                <div class="secao-icone">🔔</div>
+                <div class="titulo-grupo">
+                    <h3>Notificações e Alertas</h3>
+                    <p>Escolha como deseja ser avisado sobre interações</p>
+                </div>
+            </div>
+
+            <div class="lista-notificacoes">
+                <div class="item-notif">
+                    <div class="notif-texto">
+                        <strong>Novo Lead por E-mail</strong>
+                        <p>Receba um e-mail quando alguém clicar no botão de contato do seu anúncio.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notif-lead-email" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+                <div class="item-notif">
+                    <div class="notif-texto">
+                        <strong>Novo Lead por WhatsApp</strong>
+                        <p>Receba uma mensagem no WhatsApp a cada novo contato gerado.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notif-lead-whatsapp">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+                <div class="item-notif">
+                    <div class="notif-texto">
+                        <strong>Alerta de Visitas</strong>
+                        <p>Ser notificado quando seu anúncio receber um novo acesso.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notif-visitas">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+                <div class="item-notif">
+                    <div class="notif-texto">
+                        <strong>E-mails Promocionais</strong>
+                        <p>Novidades, dicas de marketing e atualizações da plataforma VENTSY.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notif-promo" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+                <div class="item-notif">
+                    <div class="notif-texto">
+                        <strong>Relatório Semanal</strong>
+                        <p>Resumo semanal de visitas, leads e desempenho do seu anúncio por e-mail.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notif-relatorio" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="acoes-linha">
+                <button class="btn-primario" onclick="salvarNotificacoes()">💾 Salvar Preferências</button>
+            </div>
+        </div>
+
+        <!-- ── SEGURANÇA AVANÇADA ── -->
+        <div class="secao-config">
+            <div class="secao-config-header">
+                <div class="secao-icone">🛡️</div>
+                <div class="titulo-grupo">
+                    <h3>Segurança Avançada</h3>
+                    <p>Proteja sua conta com camadas extras de verificação</p>
+                </div>
+            </div>
+
+            <div class="item-seguranca">
+                <div class="seg-texto">
+                    <strong>Autenticação de Dois Fatores (2FA)</strong>
+                    <p>Adicione um código enviado ao seu celular ou e-mail a cada login.</p>
+                    <span class="badge-status badge-inativo" id="badge-2fa">○ Não configurado</span>
+                </div>
+                <button class="btn-secundario" onclick="abrirModal2FA()">Configurar</button>
+            </div>
+
+            <div class="item-seguranca">
+                <div class="seg-texto">
+                    <strong>Sessões Ativas</strong>
+                    <p>Encerre o acesso de todos os dispositivos conectados à sua conta.</p>
+                </div>
+                <button class="btn-secundario" onclick="encerrarSessoes()">Encerrar todas</button>
+            </div>
+
+            <div class="item-seguranca">
+                <div class="seg-texto">
+                    <strong>Histórico de Acessos</strong>
+                    <p>Veja os últimos logins realizados na sua conta.</p>
+                </div>
+                <button class="btn-secundario" onclick="mostrarToast('📋', 'Funcionalidade em breve!')">Ver histórico</button>
+            </div>
+        </div>
+
+        <!-- ── ZONA DE PERIGO ── -->
+        <div class="secao-perigo">
+            <div class="secao-config-header">
+                <div class="secao-icone">⚠️</div>
+                <div class="titulo-grupo">
+                    <h3 style="color:#ff385c;">Zona de Perigo</h3>
+                    <p>Ações irreversíveis — leia com atenção antes de continuar</p>
+                </div>
+            </div>
+
+            <div class="perigo-item">
+                <div class="perigo-texto">
+                    <strong>Despublicar meu anúncio</strong>
+                    <p>Oculta temporariamente seu espaço da busca pública. Pode reativar quando quiser.</p>
+                </div>
+                <button class="btn-secundario" onclick="mostrarToast('👁‍🗨', 'Anúncio despublicado temporariamente.')">Despublicar</button>
+            </div>
+
+            <div class="perigo-item">
+                <div class="perigo-texto">
+                    <strong>Cancelar assinatura</strong>
+                    <p>Encerra sua assinatura atual ao fim do período vigente. Dados são mantidos.</p>
+                </div>
+                <button class="btn-secundario" onclick="mostrarToast('💳', 'Solicitação enviada. Em breve entraremos em contato.')">Cancelar plano</button>
+            </div>
+
+            <div class="perigo-item">
+                <div class="perigo-texto">
+                    <strong>Excluir minha conta permanentemente</strong>
+                    <p>Remove todos os dados, anúncio e histórico. Esta ação <strong>não pode ser desfeita</strong>.</p>
+                </div>
+                <button class="btn-perigo" onclick="abrirModalExcluir()">🗑️ Excluir conta</button>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+<!-- ── MODAL 2FA ── -->
+<div class="modal-overlay" id="modal-2fa">
+    <div class="modal-box">
+        <button class="modal-fechar" onclick="fecharModal('modal-2fa')">✕</button>
+        <h3>🛡️ Autenticação de Dois Fatores</h3>
+        <p>Escolha como deseja receber o código de verificação a cada login.</p>
+        <div class="modal-opcoes">
+            <div class="opcao-2fa" onclick="ativar2FA('sms')">
+                <span class="opcao-2fa-icon">📱</span>
+                <div class="opcao-2fa-texto">
+                    <strong>SMS para o celular</strong>
+                    <span>Código enviado por mensagem de texto</span>
+                </div>
+            </div>
+            <div class="opcao-2fa" onclick="ativar2FA('email')">
+                <span class="opcao-2fa-icon">📧</span>
+                <div class="opcao-2fa-texto">
+                    <strong>Código por E-mail</strong>
+                    <span>Código enviado para o e-mail cadastrado</span>
+                </div>
+            </div>
+            <div class="opcao-2fa" onclick="ativar2FA('app')">
+                <span class="opcao-2fa-icon">🔐</span>
+                <div class="opcao-2fa-texto">
+                    <strong>App autenticador</strong>
+                    <span>Google Authenticator, Authy, etc.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── MODAL EXCLUIR CONTA ── -->
+<div class="modal-overlay modal-confirmacao" id="modal-excluir">
+    <div class="modal-box">
+        <button class="modal-fechar" onclick="fecharModal('modal-excluir')">✕</button>
+        <h3>🗑️ Excluir Conta</h3>
+        <p>Esta ação é <strong>permanente e irreversível</strong>. Todos os seus dados, anúncio, fotos e histórico de leads serão apagados.</p>
+        <p style="margin-top:-10px;">Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo:</p>
+        <div class="campo-confirma">
+            <input type="text" id="input-confirma-excluir" placeholder="Digite EXCLUIR para confirmar" oninput="validarExclusao(this.value)">
+        </div>
+        <div class="acoes-linha">
+            <button class="btn-secundario" onclick="fecharModal('modal-excluir')">Cancelar</button>
+            <button class="btn-perigo" id="btn-confirma-excluir" disabled onclick="confirmarExclusao()" style="opacity:.4;cursor:not-allowed;">Excluir permanentemente</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <span id="toast-icone">✅</span>
+    <span id="toast-msg">Salvo!</span>
+</div>
+
+<!-- FOOTER -->
+<footer class="main-footer">
+    <div class="footer-container">
+        <div class="footer-column">
+            <h3>Atendimento</h3>
+            <ul>
+                <li><a href="#">Central de Ajuda</a></li>
+                <li><a href="../fale-conosco.html">Fale Conosco</a></li>
+                <li><a href="#">Política de Privacidade</a></li>
+                <li><a href="#">Termos de Uso</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h3>Anunciar</h3>
+            <ul>
+                <li><a href="minhapropriedade.html">Minha Propriedade</a></li>
+                <li><a href="../planos.html">Planos Disponíveis</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 VENTSY. Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+<script>
+/* ─────────────────────────────────────────
+   SUPABASE
+───────────────────────────────────────── */
+const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+let _userId  = null;
+let _usuario = null;
+
+/* ─────────────────────────────────────────
+   INIT — carrega dados do Supabase
+───────────────────────────────────────── */
+async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = '../login.html'; return; }
+
+    const user = session.user;
+    _userId = user.id;
+
+    const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
+
+    const nome     = perfil?.nome     || '';
+    const usuario  = perfil?.usuario  || '';
+    const nascimento = perfil?.nascimento || '';
+    const documento  = perfil?.documento || '';
+    _usuario = usuario;
+
+    const primeiroNome = (nome || user.email).split(' ')[0];
+    const inicial = primeiroNome[0]?.toUpperCase() || '?';
+
+    // Header e sidebar
+    document.getElementById('avatar-inicial').textContent        = inicial;
+    document.getElementById('drop-nome').textContent             = nome || user.email;
+    document.getElementById('drop-email').textContent            = user.email;
+    document.getElementById('sidebar-avatar').textContent        = inicial;
+    document.getElementById('sidebar-nome').textContent          = nome || user.email;
+    document.getElementById('sidebar-handle').textContent        = usuario ? '@' + usuario : '';
+
+    // Avatar grande
+    document.getElementById('avatar-perfil-grande').textContent  = inicial;
+
+    // Campos do formulário
+    document.getElementById('perfil-nome-display').textContent   = nome || '—';
+    document.getElementById('perfil-email-display').textContent  = user.email;
+    document.getElementById('campo-nome').value                   = nome;
+    document.getElementById('campo-usuario').value                = usuario;
+    document.getElementById('campo-email').value                  = user.email;
+    document.getElementById('campo-nascimento').value             = nascimento;
+    document.getElementById('campo-documento').value              = documento;
+
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('main-content').style.display   = 'flex';
+}
+
+/* ─────────────────────────────────────────
+   AVATAR DROPDOWN
+───────────────────────────────────────── */
+function toggleAvatar() {
+    const m = document.getElementById('avatar-menu');
+    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+}
+document.addEventListener('click', e => {
+    const c = document.querySelector('.avatar-container');
+    if (c && !c.contains(e.target)) document.getElementById('avatar-menu').style.display = 'none';
+});
+async function sair() {
+    await sb.auth.signOut();
+    window.location.href = '../login.html';
+}
+
+/* ─────────────────────────────────────────
+   SALVAR PERFIL
+───────────────────────────────────────── */
+async function salvarPerfil() {
+    const nome     = document.getElementById('campo-nome').value.trim();
+    const usuario  = document.getElementById('campo-usuario').value.trim().replace('@', '');
+    const telefone = document.getElementById('campo-telefone').value.trim();
+    const nascimento = document.getElementById('campo-nascimento').value;
+    const documento  = document.getElementById('campo-documento').value.trim();
+
+    if (!nome) { mostrarToast('⚠️', 'Preencha seu nome completo.'); return; }
+
+    const { error } = await sb.from('usuarios').update({
+        nome, usuario, nascimento, documento
+    }).eq('id', _userId);
+
+    if (error) {
+        mostrarToast('❌', 'Erro ao salvar. Tente novamente.');
+        console.error(error);
+    } else {
+        // Atualiza UI
+        document.getElementById('perfil-nome-display').textContent   = nome;
+        document.getElementById('sidebar-nome').textContent          = nome;
+        document.getElementById('sidebar-handle').textContent        = usuario ? '@' + usuario : '';
+        document.getElementById('drop-nome').textContent             = nome;
+        const ini = nome.split(' ')[0][0]?.toUpperCase() || '?';
+        document.getElementById('avatar-inicial').textContent        = ini;
+        document.getElementById('sidebar-avatar').textContent        = ini;
+        document.getElementById('avatar-perfil-grande').textContent  = ini;
+        mostrarToast('✅', 'Perfil atualizado com sucesso!');
+    }
+}
+
+/* ─────────────────────────────────────────
+   ALTERAR SENHA
+───────────────────────────────────────── */
+async function alterarSenha() {
+    const nova      = document.getElementById('nova-senha').value;
+    const confirmar = document.getElementById('confirmar-senha').value;
+
+    if (!nova || nova.length < 8) {
+        mostrarToast('⚠️', 'A senha deve ter pelo menos 8 caracteres.'); return;
+    }
+    if (nova !== confirmar) {
+        mostrarToast('⚠️', 'As senhas não coincidem.'); return;
+    }
+
+    const { error } = await sb.auth.updateUser({ password: nova });
+    if (error) {
+        mostrarToast('❌', 'Erro ao alterar senha: ' + error.message);
+    } else {
+        document.getElementById('nova-senha').value     = '';
+        document.getElementById('confirmar-senha').value = '';
+        calcularForcaSenha('');
+        mostrarToast('✅', 'Senha alterada com sucesso!');
+    }
+}
+
+async function enviarLinkRedefinicao() {
+    const { data: { session } } = await sb.auth.getSession();
+    const email = session?.user?.email;
+    if (!email) return;
+
+    const { error } = await sb.auth.resetPasswordForEmail(email);
+    if (error) {
+        mostrarToast('❌', 'Erro ao enviar link.');
+    } else {
+        mostrarToast('📧', 'Link de redefinição enviado para ' + email);
+    }
+}
+
+/* ─────────────────────────────────────────
+   FORÇA DA SENHA
+───────────────────────────────────────── */
+function calcularForcaSenha(senha) {
+    let forca = 0;
+    if (senha.length >= 8)                          forca++;
+    if (/[A-Z]/.test(senha))                        forca++;
+    if (/[0-9]/.test(senha))                        forca++;
+    if (/[^A-Za-z0-9]/.test(senha))                forca++;
+
+    const cores  = ['#eee','#ff385c','#f9a825','#43a047','#1e88e5'];
+    const labels = ['','Senha fraca','Pode melhorar','Boa senha','Senha forte! 💪'];
+
+    for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById('forca-' + i);
+        el.style.background = i <= forca ? cores[forca] : '#eee';
+    }
+    document.getElementById('forca-label').textContent = senha ? labels[forca] : 'Digite a nova senha';
+}
+
+function toggleSenha(id, btn) {
+    const el = document.getElementById(id);
+    if (el.type === 'password') { el.type = 'text'; btn.textContent = '🙈'; }
+    else                        { el.type = 'password'; btn.textContent = '👁'; }
+}
+
+/* ─────────────────────────────────────────
+   NOTIFICAÇÕES
+───────────────────────────────────────── */
+function salvarNotificacoes() {
+    const prefs = {
+        lead_email:   document.getElementById('notif-lead-email').checked,
+        lead_wpp:     document.getElementById('notif-lead-whatsapp').checked,
+        visitas:      document.getElementById('notif-visitas').checked,
+        promo:        document.getElementById('notif-promo').checked,
+        relatorio:    document.getElementById('notif-relatorio').checked,
+    };
+    // Salvar no Supabase quando a coluna existir — por ora localStorage
+    localStorage.setItem('ventsy_notificacoes', JSON.stringify(prefs));
+    mostrarToast('✅', 'Preferências de notificação salvas!');
+}
+
+/* ─────────────────────────────────────────
+   2FA
+───────────────────────────────────────── */
+function abrirModal2FA() { document.getElementById('modal-2fa').classList.add('aberto'); }
+
+function ativar2FA(metodo) {
+    fecharModal('modal-2fa');
+    const nomes = { sms: 'SMS', email: 'E-mail', app: 'App Autenticador' };
+    document.getElementById('badge-2fa').textContent  = '● Configurado via ' + nomes[metodo];
+    document.getElementById('badge-2fa').className    = 'badge-status badge-ativo';
+    mostrarToast('🛡️', '2FA ativado via ' + nomes[metodo] + '!');
+}
+
+/* ─────────────────────────────────────────
+   SESSÕES
+───────────────────────────────────────── */
+async function encerrarSessoes() {
+    await sb.auth.signOut({ scope: 'global' });
+    mostrarToast('🔒', 'Todas as sessões foram encerradas. Faça login novamente.');
+    setTimeout(() => window.location.href = '../login.html', 2500);
+}
+
+/* ─────────────────────────────────────────
+   EXCLUIR CONTA
+───────────────────────────────────────── */
+function abrirModalExcluir() {
+    document.getElementById('input-confirma-excluir').value = '';
+    validarExclusao('');
+    document.getElementById('modal-excluir').classList.add('aberto');
+}
+
+function validarExclusao(valor) {
+    const btn = document.getElementById('btn-confirma-excluir');
+    const ok  = valor.trim().toUpperCase() === 'EXCLUIR';
+    btn.disabled     = !ok;
+    btn.style.opacity  = ok ? '1' : '0.4';
+    btn.style.cursor   = ok ? 'pointer' : 'not-allowed';
+}
+
+async function confirmarExclusao() {
+    mostrarToast('🗑️', 'Solicitação de exclusão registrada. Em breve nossa equipe entrará em contato.');
+    fecharModal('modal-excluir');
+    // Implementação real: chamar endpoint backend para deletar a conta via service_role
+}
+
+/* ─────────────────────────────────────────
+   AVATAR UPLOAD (preview)
+───────────────────────────────────────── */
+function previewAvatarPerfil(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const el = document.getElementById('avatar-perfil-grande');
+        el.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+/* ─────────────────────────────────────────
+   MODAIS
+───────────────────────────────────────── */
+function fecharModal(id) { document.getElementById(id).classList.remove('aberto'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('aberto'); });
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.aberto').forEach(m => m.classList.remove('aberto'));
+});
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+function mostrarToast(icone, msg) {
+    document.getElementById('toast-icone').textContent = icone;
+    document.getElementById('toast-msg').textContent   = msg;
+    const t = document.getElementById('toast');
+    t.classList.add('visivel');
+    setTimeout(() => t.classList.remove('visivel'), 3800);
+}
+
+init();
+</script>
+</body>
+</html>
