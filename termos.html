@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termos de Uso — VENTSY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --preto:    #0d0d0d;
+            --vermelho: #ff385c;
+            --borda:    #e8e8e8;
+            --texto:    #3a3a3a;
+            --suave:    #888;
+            --bg:       #fafafa;
+        }
+        body { font-family: 'DM Sans', Arial, sans-serif; background: var(--bg); color: var(--texto); }
+
+        /* HEADER */
+        header {
+            width: 100%; height: 80px; background: #fff;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; box-shadow: 0 2px 8px rgba(0,0,0,.07);
+            position: fixed; top: 0; z-index: 999;
+        }
+        .logo { height: 100px; width: auto; cursor: pointer; }
+        .btn-login {
+            background: var(--vermelho); color: #fff;
+            padding: 9px 20px; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: .88rem;
+        }
+        .btn-login:hover { background: #e0304f; }
+
+        /* HERO TOPO */
+        .page-hero {
+            margin-top: 80px;
+            background: var(--preto);
+            padding: 56px 5% 48px;
+            text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .page-hero::before {
+            content: ''; position: absolute;
+            width: 400px; height: 400px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,56,92,.2) 0%, transparent 70%);
+            top: -120px; left: -80px; pointer-events: none;
+        }
+        .page-hero-inner { position: relative; z-index: 1; }
+        .page-hero-tag {
+            font-size: .7rem; font-weight: 800; color: var(--vermelho);
+            text-transform: uppercase; letter-spacing: .16em;
+            display: block; margin-bottom: 12px;
+        }
+        .page-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            font-weight: 900; color: #fff;
+            letter-spacing: -.03em; margin-bottom: 12px;
+        }
+        .page-hero p { font-size: .9rem; color: #666; }
+
+        /* CONTEÚDO */
+        .content-wrap {
+            max-width: 820px; margin: 0 auto;
+            padding: 60px 5% 80px;
+        }
+
+        /* Índice */
+        .indice {
+            background: #fff; border: 1px solid var(--borda);
+            border-radius: 16px; padding: 28px 32px; margin-bottom: 48px;
+        }
+        .indice h2 {
+            font-size: .72rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .1em; color: var(--suave); margin-bottom: 16px;
+        }
+        .indice ol {
+            list-style: none; counter-reset: idx;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .indice ol li { counter-increment: idx; display: flex; align-items: center; gap: 10px; }
+        .indice ol li::before {
+            content: counter(idx, decimal-leading-zero);
+            font-size: .72rem; font-weight: 800; color: var(--vermelho); min-width: 26px;
+        }
+        .indice ol li a {
+            text-decoration: none; color: var(--texto);
+            font-size: .9rem; font-weight: 500; transition: color .2s;
+        }
+        .indice ol li a:hover { color: var(--vermelho); }
+
+        /* Seções */
+        .secao { margin-bottom: 44px; scroll-margin-top: 100px; }
+        .secao-num {
+            font-size: .68rem; font-weight: 800; color: var(--vermelho);
+            text-transform: uppercase; letter-spacing: .14em;
+            display: block; margin-bottom: 6px;
+        }
+        .secao h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem; font-weight: 900;
+            color: var(--preto); margin-bottom: 16px;
+            padding-bottom: 12px; border-bottom: 2px solid var(--borda);
+        }
+        .secao p {
+            font-size: .93rem; line-height: 1.75;
+            color: var(--texto); margin-bottom: 12px;
+        }
+        .secao p:last-child { margin-bottom: 0; }
+        .secao ul {
+            list-style: none; margin: 12px 0;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .secao ul li {
+            display: flex; gap: 10px; align-items: flex-start;
+            font-size: .93rem; line-height: 1.65; color: var(--texto);
+        }
+        .secao ul li::before {
+            content: '✦'; color: var(--vermelho);
+            font-size: .6rem; margin-top: 5px; flex-shrink: 0;
+        }
+
+        /* Destaque */
+        .destaque {
+            background: #fff; border-left: 3px solid var(--vermelho);
+            border-radius: 0 12px 12px 0; padding: 16px 20px;
+            margin: 16px 0; font-size: .9rem; line-height: 1.65; color: #555;
+        }
+
+        /* Alerta */
+        .alerta {
+            background: #fff8f0; border: 1px solid #ffd0a0;
+            border-radius: 12px; padding: 16px 20px;
+            margin: 16px 0; font-size: .88rem; line-height: 1.65; color: #8a5a00;
+            display: flex; gap: 10px; align-items: flex-start;
+        }
+        .alerta-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+        /* Data */
+        .update-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #fff; border: 1px solid var(--borda);
+            border-radius: 20px; padding: 6px 14px;
+            font-size: .78rem; color: var(--suave); margin-bottom: 40px;
+        }
+        .update-badge span { color: var(--vermelho); font-weight: 700; }
+
+        /* Contato card */
+        .contato-card {
+            background: var(--preto); border-radius: 20px;
+            padding: 36px 40px; text-align: center; margin-top: 60px;
+        }
+        .contato-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 8px;
+        }
+        .contato-card p { font-size: .9rem; color: #666; margin-bottom: 20px; }
+        .btn-contato {
+            display: inline-block; background: var(--vermelho); color: #fff;
+            padding: 12px 28px; border-radius: 10px; text-decoration: none;
+            font-weight: 700; font-size: .9rem; transition: background .2s;
+        }
+        .btn-contato:hover { background: #e0304f; }
+
+        /* FOOTER */
+        footer {
+            background: #f7f7f7; border-top: 1px solid #ddd;
+            padding: 40px 5%; text-align: center;
+            color: #aaa; font-size: .82rem;
+        }
+        footer a { color: var(--vermelho); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html"><img src="logovents.png" alt="VENTSY" class="logo"></a>
+    <a href="login.html" class="btn-login">Entrar</a>
+</header>
+
+<section class="page-hero">
+    <div class="page-hero-inner">
+        <span class="page-hero-tag">Documentos legais</span>
+        <h1>Termos de Uso</h1>
+        <p>Regras e condições para utilização da plataforma VENTSY.</p>
+    </div>
+</section>
+
+<div class="content-wrap">
+
+    <div class="update-badge">
+        📅 Última atualização: <span>Janeiro de 2026</span>
+    </div>
+
+    <div class="alerta">
+        <span class="alerta-icon">⚠️</span>
+        <span>Ao criar uma conta ou utilizar a plataforma VENTSY, você declara ter lido, compreendido e concordado com todos os termos abaixo. Caso não concorde, não utilize o serviço.</span>
+    </div>
+
+    <!-- ÍNDICE -->
+    <div class="indice">
+        <h2>Índice</h2>
+        <ol>
+            <li><a href="#t1">Definições</a></li>
+            <li><a href="#t2">Aceitação dos termos</a></li>
+            <li><a href="#t3">Cadastro e conta</a></li>
+            <li><a href="#t4">Uso da plataforma</a></li>
+            <li><a href="#t5">Regras para proprietários</a></li>
+            <li><a href="#t6">Regras para locatários</a></li>
+            <li><a href="#t7">Pagamentos e tarifas</a></li>
+            <li><a href="#t8">Cancelamentos e reembolsos</a></li>
+            <li><a href="#t9">Avaliações e conteúdo</a></li>
+            <li><a href="#t10">Responsabilidades e limitações</a></li>
+            <li><a href="#t11">Propriedade intelectual</a></li>
+            <li><a href="#t12">Suspensão e encerramento</a></li>
+            <li><a href="#t13">Disposições gerais</a></li>
+        </ol>
+    </div>
+
+    <!-- 1 -->
+    <div class="secao" id="t1">
+        <span class="secao-num">01</span>
+        <h2>Definições</h2>
+        <p>Para os fins destes Termos de Uso, considera-se:</p>
+        <ul>
+            <li><strong>VENTSY:</strong> plataforma digital marketplace de locação de espaços para eventos.</li>
+            <li><strong>Usuário:</strong> qualquer pessoa física ou jurídica que acessa ou utiliza a plataforma.</li>
+            <li><strong>Proprietário:</strong> usuário que cadastra e disponibiliza um espaço para locação.</li>
+            <li><strong>Locatário:</strong> usuário que busca e reserva espaços através da plataforma.</li>
+            <li><strong>Espaço:</strong> imóvel ou local disponibilizado pelo Proprietário para eventos.</li>
+            <li><strong>Reserva:</strong> confirmação de uso de um Espaço em data e condições acordadas.</li>
+        </ul>
+    </div>
+
+    <!-- 2 -->
+    <div class="secao" id="t2">
+        <span class="secao-num">02</span>
+        <h2>Aceitação dos termos</h2>
+        <p>Ao acessar, criar uma conta ou utilizar qualquer funcionalidade da VENTSY, o Usuário concorda com estes Termos de Uso e com a <a href="privacidade.html" style="color:var(--vermelho)">Política de Privacidade</a>.</p>
+        <p>Estes termos podem ser atualizados periodicamente. O uso continuado da plataforma após notificação de alterações implica aceitação das novas condições.</p>
+    </div>
+
+    <!-- 3 -->
+    <div class="secao" id="t3">
+        <span class="secao-num">03</span>
+        <h2>Cadastro e conta</h2>
+        <p>Para utilizar as funcionalidades completas da plataforma, é necessário criar uma conta. Ao se cadastrar, o Usuário declara que:</p>
+        <ul>
+            <li>É maior de 18 anos ou possui autorização legal de um responsável.</li>
+            <li>Forneceu informações verdadeiras, precisas e atualizadas.</li>
+            <li>É responsável por manter a confidencialidade de sua senha.</li>
+            <li>Notificará imediatamente a VENTSY sobre qualquer uso não autorizado de sua conta.</li>
+        </ul>
+        <div class="destaque">
+            A VENTSY reserva-se o direito de recusar ou cancelar cadastros que violem estes termos ou que apresentem informações falsas.
+        </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="secao" id="t4">
+        <span class="secao-num">04</span>
+        <h2>Uso da plataforma</h2>
+        <p>O Usuário compromete-se a utilizar a plataforma de forma lícita e ética. É expressamente proibido:</p>
+        <ul>
+            <li>Publicar conteúdo falso, enganoso, difamatório ou ilegal.</li>
+            <li>Realizar transações financeiras fora da plataforma com o objetivo de burlar as tarifas.</li>
+            <li>Utilizar a plataforma para fins de spam, fraude ou phishing.</li>
+            <li>Tentar acessar áreas restritas ou sistemas da VENTSY sem autorização.</li>
+            <li>Reproduzir, copiar ou distribuir conteúdo da plataforma sem permissão expressa.</li>
+            <li>Interferir no funcionamento técnico da plataforma ou de seus servidores.</li>
+        </ul>
+    </div>
+
+    <!-- 5 -->
+    <div class="secao" id="t5">
+        <span class="secao-num">05</span>
+        <h2>Regras para proprietários</h2>
+        <p>Ao cadastrar um espaço na VENTSY, o Proprietário declara e garante que:</p>
+        <ul>
+            <li>Possui autorização legal para disponibilizar o espaço para locação.</li>
+            <li>As informações, fotos e descrições do espaço são verídicas e atualizadas.</li>
+            <li>O espaço está em condições adequadas de uso, higiene e segurança.</li>
+            <li>Possui todas as licenças e alvarás necessários para realização de eventos no local.</li>
+            <li>Cumprirá as reservas confirmadas nos termos anunciados.</li>
+            <li>Comunicará com antecedência mínima de 48h qualquer impossibilidade de cumprimento.</li>
+        </ul>
+        <p>A VENTSY não se responsabiliza por irregularidades legais dos espaços cadastrados, sendo a responsabilidade exclusiva do Proprietário.</p>
+    </div>
+
+    <!-- 6 -->
+    <div class="secao" id="t6">
+        <span class="secao-num">06</span>
+        <h2>Regras para locatários</h2>
+        <p>Ao realizar uma reserva, o Locatário compromete-se a:</p>
+        <ul>
+            <li>Utilizar o espaço exclusivamente para o evento declarado no momento da reserva.</li>
+            <li>Respeitar a capacidade máxima de pessoas informada pelo Proprietário.</li>
+            <li>Devolver o espaço nas mesmas condições em que o recebeu.</li>
+            <li>Cumprir os horários acordados de entrada e saída.</li>
+            <li>Responsabilizar-se por danos causados ao espaço durante o evento.</li>
+            <li>Respeitar as normas de conduta, vizinhança e legislação local.</li>
+        </ul>
+    </div>
+
+    <!-- 7 -->
+    <div class="secao" id="t7">
+        <span class="secao-num">07</span>
+        <h2>Pagamentos e tarifas</h2>
+        <p>Os pagamentos realizados através da plataforma são processados por parceiros certificados. A VENTSY cobra uma <strong>taxa de serviço</strong> sobre cada transação concluída, cujo valor é informado antes da confirmação da reserva.</p>
+        <ul>
+            <li>Os preços exibidos são de responsabilidade dos Proprietários e podem ser alterados a qualquer momento para novas reservas.</li>
+            <li>Reservas já confirmadas têm o valor garantido conforme acordado.</li>
+            <li>Taxas bancárias ou de câmbio eventualmente aplicadas são de responsabilidade do Usuário.</li>
+        </ul>
+        <p>Planos pagos de anúncio (Básico, Pro, Ultra) são cobrados mensalmente e renovados automaticamente salvo cancelamento pelo Proprietário com antecedência de 48h do vencimento.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="secao" id="t8">
+        <span class="secao-num">08</span>
+        <h2>Cancelamentos e reembolsos</h2>
+        <p>A política de cancelamento de cada espaço é definida pelo Proprietário e exibida na página do anúncio. Em regra geral:</p>
+        <ul>
+            <li><strong>Cancelamento pelo Locatário com mais de 30 dias de antecedência:</strong> reembolso integral.</li>
+            <li><strong>Cancelamento entre 15 e 30 dias:</strong> reembolso de 50% do valor pago.</li>
+            <li><strong>Cancelamento com menos de 15 dias:</strong> sem reembolso, salvo política específica do espaço.</li>
+            <li><strong>Cancelamento pelo Proprietário:</strong> reembolso integral ao Locatário.</li>
+        </ul>
+        <div class="destaque">
+            A taxa de serviço da VENTSY não é reembolsável em casos de cancelamento pelo Locatário.
+        </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="secao" id="t9">
+        <span class="secao-num">09</span>
+        <h2>Avaliações e conteúdo</h2>
+        <p>A VENTSY permite que Locatários publiquem avaliações sobre os espaços após a realização do evento. Ao publicar uma avaliação, o Usuário:</p>
+        <ul>
+            <li>Garante que o conteúdo é verdadeiro e baseado em experiência real.</li>
+            <li>Concede à VENTSY licença não exclusiva para exibir o conteúdo na plataforma.</li>
+            <li>Não publica conteúdo ofensivo, discriminatório ou que viole direitos de terceiros.</li>
+        </ul>
+        <p>A VENTSY reserva-se o direito de remover avaliações que violem estas diretrizes, sem necessidade de aviso prévio.</p>
+        <p>Apenas avaliações <strong>verificadas</strong> (vinculadas a reservas reais concluídas) são exibidas publicamente nas páginas dos espaços.</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="secao" id="t10">
+        <span class="secao-num">10</span>
+        <h2>Responsabilidades e limitações</h2>
+        <p>A VENTSY atua como intermediária entre Proprietários e Locatários, <strong>não sendo parte nos contratos de locação</strong>. Portanto:</p>
+        <ul>
+            <li>A VENTSY não se responsabiliza pela qualidade, segurança ou legalidade dos espaços anunciados.</li>
+            <li>A VENTSY não se responsabiliza por danos materiais, pessoais ou financeiros ocorridos durante os eventos.</li>
+            <li>A VENTSY não garante a disponibilidade ininterrupta da plataforma e não se responsabiliza por falhas técnicas temporárias.</li>
+        </ul>
+        <p>Em nenhum caso a responsabilidade total da VENTSY excederá o valor da taxa de serviço cobrada na transação relacionada à reclamação.</p>
+    </div>
+
+    <!-- 11 -->
+    <div class="secao" id="t11">
+        <span class="secao-num">11</span>
+        <h2>Propriedade intelectual</h2>
+        <p>Todo o conteúdo da plataforma VENTSY — incluindo logotipos, textos, design, código-fonte e funcionalidades — é protegido por direitos de propriedade intelectual e pertence à VENTSY ou a seus licenciadores.</p>
+        <p>É proibida a reprodução, modificação ou distribuição de qualquer elemento da plataforma sem autorização prévia e expressa por escrito.</p>
+        <p>Ao publicar fotos ou conteúdo na plataforma, o Usuário garante possuir os direitos sobre esse conteúdo e concede à VENTSY licença para usá-lo na plataforma.</p>
+    </div>
+
+    <!-- 12 -->
+    <div class="secao" id="t12">
+        <span class="secao-num">12</span>
+        <h2>Suspensão e encerramento</h2>
+        <p>A VENTSY pode suspender ou encerrar uma conta, a qualquer momento e sem aviso prévio, nos seguintes casos:</p>
+        <ul>
+            <li>Violação de qualquer disposição destes Termos de Uso.</li>
+            <li>Comportamento fraudulento ou lesivo a outros usuários.</li>
+            <li>Uso da plataforma para fins ilegais.</li>
+            <li>Fornecimento de informações falsas no cadastro ou nos anúncios.</li>
+        </ul>
+        <p>O encerramento da conta não elimina obrigações já assumidas pelo Usuário em reservas confirmadas anteriormente.</p>
+    </div>
+
+    <!-- 13 -->
+    <div class="secao" id="t13">
+        <span class="secao-num">13</span>
+        <h2>Disposições gerais</h2>
+        <p>Estes Termos de Uso são regidos pelas leis da República Federativa do Brasil. Fica eleito o foro da comarca do Rio de Janeiro — RJ para dirimir eventuais controvérsias, com renúncia a qualquer outro, por mais privilegiado que seja.</p>
+        <p>A eventual invalidade de alguma cláusula não afeta a validade das demais disposições deste instrumento.</p>
+        <p>Para dúvidas ou solicitações relacionadas a estes termos, entre em contato: <strong>juridico@ventsy.com.br</strong>.</p>
+    </div>
+
+    <div class="contato-card">
+        <h3>Dúvidas sobre os termos?</h3>
+        <p>Nossa equipe jurídica está disponível para esclarecimentos.</p>
+        <a href="fale-conosco.html" class="btn-contato">Fale conosco →</a>
+    </div>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 VENTSY. Todos os direitos reservados. &nbsp;|&nbsp;
+        <a href="privacidade.html">Política de Privacidade</a> &nbsp;|&nbsp;
+        <a href="termos.html">Termos de Uso</a>
+    </p>
+</footer>
+
+</body>
+</html>

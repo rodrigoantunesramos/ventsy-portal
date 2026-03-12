@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidade — VENTSY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --preto:    #0d0d0d;
+            --vermelho: #ff385c;
+            --borda:    #e8e8e8;
+            --texto:    #3a3a3a;
+            --suave:    #888;
+            --bg:       #fafafa;
+        }
+        body { font-family: 'DM Sans', Arial, sans-serif; background: var(--bg); color: var(--texto); }
+
+        /* HEADER */
+        header {
+            width: 100%; height: 80px; background: #fff;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; box-shadow: 0 2px 8px rgba(0,0,0,.07);
+            position: fixed; top: 0; z-index: 999;
+        }
+        .logo { height: 100px; width: auto; cursor: pointer; }
+        .btn-login {
+            background: var(--vermelho); color: #fff;
+            padding: 9px 20px; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: .88rem;
+        }
+        .btn-login:hover { background: #e0304f; }
+
+        /* HERO TOPO */
+        .page-hero {
+            margin-top: 80px;
+            background: var(--preto);
+            padding: 56px 5% 48px;
+            text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .page-hero::before {
+            content: ''; position: absolute;
+            width: 400px; height: 400px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,56,92,.2) 0%, transparent 70%);
+            top: -120px; right: -80px; pointer-events: none;
+        }
+        .page-hero-inner { position: relative; z-index: 1; }
+        .page-hero-tag {
+            font-size: .7rem; font-weight: 800; color: var(--vermelho);
+            text-transform: uppercase; letter-spacing: .16em;
+            display: block; margin-bottom: 12px;
+        }
+        .page-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            font-weight: 900; color: #fff;
+            letter-spacing: -.03em; margin-bottom: 12px;
+        }
+        .page-hero p { font-size: .9rem; color: #666; }
+
+        /* CONTEÚDO */
+        .content-wrap {
+            max-width: 820px; margin: 0 auto;
+            padding: 60px 5% 80px;
+        }
+
+        /* Índice */
+        .indice {
+            background: #fff; border: 1px solid var(--borda);
+            border-radius: 16px; padding: 28px 32px; margin-bottom: 48px;
+        }
+        .indice h2 {
+            font-size: .72rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .1em; color: var(--suave); margin-bottom: 16px;
+        }
+        .indice ol {
+            list-style: none; counter-reset: idx; display: flex;
+            flex-direction: column; gap: 8px;
+        }
+        .indice ol li { counter-increment: idx; display: flex; align-items: center; gap: 10px; }
+        .indice ol li::before {
+            content: counter(idx, decimal-leading-zero);
+            font-size: .72rem; font-weight: 800; color: var(--vermelho);
+            min-width: 26px;
+        }
+        .indice ol li a {
+            text-decoration: none; color: var(--texto);
+            font-size: .9rem; font-weight: 500;
+            transition: color .2s;
+        }
+        .indice ol li a:hover { color: var(--vermelho); }
+
+        /* Seções */
+        .secao { margin-bottom: 44px; scroll-margin-top: 100px; }
+        .secao-num {
+            font-size: .68rem; font-weight: 800; color: var(--vermelho);
+            text-transform: uppercase; letter-spacing: .14em;
+            display: block; margin-bottom: 6px;
+        }
+        .secao h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem; font-weight: 900;
+            color: var(--preto); margin-bottom: 16px;
+            padding-bottom: 12px; border-bottom: 2px solid var(--borda);
+        }
+        .secao p {
+            font-size: .93rem; line-height: 1.75;
+            color: var(--texto); margin-bottom: 12px;
+        }
+        .secao p:last-child { margin-bottom: 0; }
+        .secao ul {
+            list-style: none; margin: 12px 0; display: flex; flex-direction: column; gap: 8px;
+        }
+        .secao ul li {
+            display: flex; gap: 10px; align-items: flex-start;
+            font-size: .93rem; line-height: 1.65; color: var(--texto);
+        }
+        .secao ul li::before {
+            content: '✦'; color: var(--vermelho);
+            font-size: .6rem; margin-top: 5px; flex-shrink: 0;
+        }
+
+        /* Destaque */
+        .destaque {
+            background: #fff; border-left: 3px solid var(--vermelho);
+            border-radius: 0 12px 12px 0; padding: 16px 20px;
+            margin: 16px 0; font-size: .9rem; line-height: 1.65; color: #555;
+        }
+
+        /* Data atualização */
+        .update-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: #fff; border: 1px solid var(--borda);
+            border-radius: 20px; padding: 6px 14px;
+            font-size: .78rem; color: var(--suave);
+            margin-bottom: 40px;
+        }
+        .update-badge span { color: var(--vermelho); font-weight: 700; }
+
+        /* Contato card */
+        .contato-card {
+            background: var(--preto); border-radius: 20px;
+            padding: 36px 40px; text-align: center; margin-top: 60px;
+        }
+        .contato-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 8px;
+        }
+        .contato-card p { font-size: .9rem; color: #666; margin-bottom: 20px; }
+        .btn-contato {
+            display: inline-block; background: var(--vermelho); color: #fff;
+            padding: 12px 28px; border-radius: 10px; text-decoration: none;
+            font-weight: 700; font-size: .9rem; transition: background .2s;
+        }
+        .btn-contato:hover { background: #e0304f; }
+
+        /* FOOTER */
+        footer {
+            background: #f7f7f7; border-top: 1px solid #ddd;
+            padding: 40px 5%; text-align: center;
+            color: #aaa; font-size: .82rem;
+        }
+        footer a { color: var(--vermelho); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html"><img src="logovents.png" alt="VENTSY" class="logo"></a>
+    <a href="login.html" class="btn-login">Entrar</a>
+</header>
+
+<section class="page-hero">
+    <div class="page-hero-inner">
+        <span class="page-hero-tag">Documentos legais</span>
+        <h1>Política de Privacidade</h1>
+        <p>Como coletamos, usamos e protegemos suas informações.</p>
+    </div>
+</section>
+
+<div class="content-wrap">
+
+    <div class="update-badge">
+        📅 Última atualização: <span>Janeiro de 2026</span>
+    </div>
+
+    <!-- ÍNDICE -->
+    <div class="indice">
+        <h2>Índice</h2>
+        <ol>
+            <li><a href="#s1">Quem somos</a></li>
+            <li><a href="#s2">Quais dados coletamos</a></li>
+            <li><a href="#s3">Como usamos seus dados</a></li>
+            <li><a href="#s4">Compartilhamento de dados</a></li>
+            <li><a href="#s5">Cookies e rastreamento</a></li>
+            <li><a href="#s6">Segurança das informações</a></li>
+            <li><a href="#s7">Seus direitos (LGPD)</a></li>
+            <li><a href="#s8">Retenção de dados</a></li>
+            <li><a href="#s9">Menores de idade</a></li>
+            <li><a href="#s10">Alterações nesta política</a></li>
+            <li><a href="#s11">Contato</a></li>
+        </ol>
+    </div>
+
+    <!-- 1 -->
+    <div class="secao" id="s1">
+        <span class="secao-num">01</span>
+        <h2>Quem somos</h2>
+        <p>A <strong>VENTSY</strong> é uma plataforma digital que conecta pessoas que buscam espaços para eventos com proprietários de locais disponíveis para locação. Operamos como marketplace e nos comprometemos com a transparência no tratamento de dados pessoais.</p>
+        <p>Esta Política de Privacidade se aplica a todos os usuários da plataforma VENTSY, incluindo visitantes, locatários e proprietários cadastrados, nos termos da <strong>Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD)</strong>.</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="secao" id="s2">
+        <span class="secao-num">02</span>
+        <h2>Quais dados coletamos</h2>
+        <p>Coletamos apenas os dados necessários para o funcionamento da plataforma:</p>
+        <ul>
+            <li><strong>Dados de cadastro:</strong> nome completo, CPF ou CNPJ, data de nascimento, endereço de e-mail e número de telefone.</li>
+            <li><strong>Dados de uso:</strong> endereço IP, tipo de navegador, páginas visitadas, buscas realizadas e interações com a plataforma.</li>
+            <li><strong>Dados de pagamento:</strong> informações de transação processadas por gateways parceiros. Não armazenamos dados completos de cartão de crédito.</li>
+            <li><strong>Dados de propriedades:</strong> endereço, fotos, descrições e valores cadastrados por proprietários.</li>
+            <li><strong>Comunicações:</strong> mensagens trocadas entre usuários dentro da plataforma.</li>
+        </ul>
+    </div>
+
+    <!-- 3 -->
+    <div class="secao" id="s3">
+        <span class="secao-num">03</span>
+        <h2>Como usamos seus dados</h2>
+        <p>Utilizamos suas informações para:</p>
+        <ul>
+            <li>Criar e gerenciar sua conta na plataforma.</li>
+            <li>Processar reservas e facilitar o contato entre locatários e proprietários.</li>
+            <li>Enviar confirmações, notificações de reserva e comunicados relevantes.</li>
+            <li>Melhorar continuamente a experiência de busca e recomendação de espaços.</li>
+            <li>Cumprir obrigações legais e prevenir fraudes.</li>
+            <li>Enviar comunicações de marketing, apenas com seu consentimento.</li>
+        </ul>
+        <div class="destaque">
+            Nunca vendemos seus dados pessoais a terceiros. Seus dados são usados exclusivamente para os fins descritos nesta política.
+        </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="secao" id="s4">
+        <span class="secao-num">04</span>
+        <h2>Compartilhamento de dados</h2>
+        <p>Seus dados podem ser compartilhados nas seguintes situações:</p>
+        <ul>
+            <li><strong>Entre usuários da plataforma:</strong> nome e informações de contato são compartilhados entre locatário e proprietário ao confirmar uma reserva.</li>
+            <li><strong>Parceiros de pagamento:</strong> processadores de pagamento (como Stripe ou MercadoPago) recebem os dados necessários para processar transações.</li>
+            <li><strong>Parceiros de infraestrutura:</strong> serviços de nuvem, hospedagem e banco de dados que operam sob acordos de confidencialidade.</li>
+            <li><strong>Autoridades legais:</strong> quando exigido por lei, ordem judicial ou autoridade competente.</li>
+        </ul>
+    </div>
+
+    <!-- 5 -->
+    <div class="secao" id="s5">
+        <span class="secao-num">05</span>
+        <h2>Cookies e rastreamento</h2>
+        <p>Utilizamos cookies e tecnologias similares para:</p>
+        <ul>
+            <li>Manter sua sessão ativa após o login.</li>
+            <li>Lembrar suas preferências de busca.</li>
+            <li>Analisar o desempenho das páginas e identificar melhorias.</li>
+            <li>Exibir conteúdo relevante com base em seu histórico de navegação.</li>
+        </ul>
+        <p>Você pode configurar seu navegador para recusar cookies, porém algumas funcionalidades da plataforma podem ser afetadas.</p>
+    </div>
+
+    <!-- 6 -->
+    <div class="secao" id="s6">
+        <span class="secao-num">06</span>
+        <h2>Segurança das informações</h2>
+        <p>Adotamos medidas técnicas e organizacionais para proteger seus dados contra acesso não autorizado, alteração, divulgação ou destruição, incluindo:</p>
+        <ul>
+            <li>Transmissão de dados via protocolo HTTPS com criptografia TLS.</li>
+            <li>Armazenamento seguro de senhas com hash e salt.</li>
+            <li>Controle de acesso baseado em funções (RBAC) para nossa equipe.</li>
+            <li>Monitoramento contínuo de acessos e tentativas de invasão.</li>
+        </ul>
+        <p>Em caso de incidente de segurança que possa afetar seus dados, notificaremos você e a Autoridade Nacional de Proteção de Dados (ANPD) nos prazos previstos em lei.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="secao" id="s7">
+        <span class="secao-num">07</span>
+        <h2>Seus direitos (LGPD)</h2>
+        <p>Nos termos da LGPD, você tem direito a:</p>
+        <ul>
+            <li><strong>Acesso:</strong> solicitar uma cópia dos seus dados pessoais que tratamos.</li>
+            <li><strong>Correção:</strong> atualizar dados incompletos, inexatos ou desatualizados.</li>
+            <li><strong>Exclusão:</strong> solicitar a exclusão dos seus dados, salvo quando houver obrigação legal de retenção.</li>
+            <li><strong>Portabilidade:</strong> receber seus dados em formato estruturado para transferência a outro serviço.</li>
+            <li><strong>Revogação do consentimento:</strong> retirar o consentimento para tratamentos baseados nessa base legal.</li>
+            <li><strong>Oposição:</strong> opor-se ao tratamento realizado com base em legítimo interesse.</li>
+        </ul>
+        <p>Para exercer qualquer um desses direitos, entre em contato conosco pelo e-mail <strong>privacidade@ventsy.com.br</strong>.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="secao" id="s8">
+        <span class="secao-num">08</span>
+        <h2>Retenção de dados</h2>
+        <p>Mantemos seus dados pelo tempo necessário para cumprir as finalidades descritas nesta política ou conforme exigido por lei. Dados de transações financeiras são retidos por <strong>5 anos</strong>, conforme exigência fiscal.</p>
+        <p>Após o encerramento da sua conta, seus dados serão anonimizados ou excluídos em até 90 dias, salvo obrigações legais que exijam retenção por prazo maior.</p>
+    </div>
+
+    <!-- 9 -->
+    <div class="secao" id="s9">
+        <span class="secao-num">09</span>
+        <h2>Menores de idade</h2>
+        <p>A plataforma VENTSY é destinada a pessoas com <strong>18 anos ou mais</strong>. Não coletamos intencionalmente dados de menores de idade. Caso identifiquemos que um menor realizou cadastro sem autorização, excluiremos os dados imediatamente.</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="secao" id="s10">
+        <span class="secao-num">10</span>
+        <h2>Alterações nesta política</h2>
+        <p>Podemos atualizar esta Política de Privacidade periodicamente. Quando realizarmos alterações relevantes, notificaremos você por e-mail ou por aviso destacado na plataforma com pelo menos <strong>15 dias de antecedência</strong>.</p>
+        <p>O uso continuado da plataforma após a entrada em vigor das alterações implica aceitação da nova política.</p>
+    </div>
+
+    <!-- 11 -->
+    <div class="secao" id="s11">
+        <span class="secao-num">11</span>
+        <h2>Contato</h2>
+        <p>Para dúvidas, solicitações ou exercício dos seus direitos, entre em contato com nosso Encarregado de Dados (DPO):</p>
+        <ul>
+            <li><strong>E-mail:</strong> privacidade@ventsy.com.br</li>
+            <li><strong>Atendimento:</strong> Segunda a sexta, das 9h às 18h</li>
+            <li><strong>Prazo de resposta:</strong> até 15 dias úteis</li>
+        </ul>
+    </div>
+
+    <div class="contato-card">
+        <h3>Ficou com alguma dúvida?</h3>
+        <p>Nossa equipe está pronta para te ajudar com qualquer questão sobre privacidade.</p>
+        <a href="fale-conosco.html" class="btn-contato">Fale conosco →</a>
+    </div>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 VENTSY. Todos os direitos reservados. &nbsp;|&nbsp;
+        <a href="privacidade.html">Política de Privacidade</a> &nbsp;|&nbsp;
+        <a href="termos.html">Termos de Uso</a>
+    </p>
+</footer>
+
+</body>
+</html>
