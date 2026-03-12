@@ -686,10 +686,9 @@ async function init() {
 
         // Busca avaliações verificadas
         try {
-            const { data: avals } = await sb.from('avaliacoes')
+            const { data: avals } = await sb.from('avaliacoes_publicas')
                 .select('*')
                 .eq('propriedade_id', propId)
-                .eq('verificada', true)
                 .order('criado_em', { ascending: false });
             TODAS_AVAL = avals || [];
         } catch (_) {}
@@ -1252,3 +1251,4 @@ init();
 </script>
 </body>
 </html>
+
