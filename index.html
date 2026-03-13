@@ -634,11 +634,11 @@ async function render() {
     /* Se banco vazio → demo */
     if (!lista.length || error) {
         lista = DEMO;
-        lista.forEach(p => { p._plano = p._plano || 'basico'; p._nota = p.nota_media; });
+        lista.forEach(p => { p._plano = p._plano || 'basico'; p._nota = p.avaliacao || p.nota_media || 0; });
     } else {
         lista.forEach(p => {
-            p._plano = (p.usuario_id && planos[p.usuario_id]) || 'basico';
-            p._nota  = parseFloat(p.nota_media || p.avaliacao || 0);
+            p._plano = (p.user_id && planos[p.user_id]) || 'basico';
+            p._nota  = parseFloat(p.avaliacao || 0);
         });
     }
 

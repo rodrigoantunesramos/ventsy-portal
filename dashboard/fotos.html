@@ -696,7 +696,7 @@ async function init() {
     const { data: propData, error: propError } = await sb
         .from('propriedades')
         .select('id')
-        .eq('usuario_id', user.id)
+        .eq('user_id', user.id)
         .single();
 
     PROP_ID = propData?.id || null;
@@ -980,150 +980,106 @@ async function salvarTudo() {
     });
 
     try {
-        const { error } = await sb
-            .from('propriedades')
-            .update({ fotos_secoes: secoesParaSalvar })
-            .eq('usuario_id', userId);
+        if (!PROP_ID) throw new Error('Propriedade não encontrada. Preencha os dados em Minha Propriedade primeiro.');
 
-        if (error) throw error;
-
-        // Sincroniza com a tabela fotos_propriedade para exibição pública
-        if (PROP_ID) {
-            await sincronizarFotosPropriedade();
-        } else {
-            console.warn('PROP_ID não encontrado — fotos_propriedade não foi sincronizado.');
-        }
+        await sincronizarFotosPropriedade();
 
         mostrarToast('✅', 'Alterações salvas com sucesso!');
     } catch (err) {
         console.error('Erro ao salvar no Supabase:', err);
-        mostrarToast('❌', 'Erro ao salvar. Verifique o console para detalhes.');
+        mostrarToast('❌', err.message || 'Erro ao salvar. Verifique o console para detalhes.');
     } finally {
         btns.forEach(btn => { btn.disabled = false; btn.textContent = '💾 Salvar'; });
     }
 }
 
 async function sincronizarFotosPropriedade() {
-    // Coleta todas as fotos das seções
-    const todasFotos = [];
+    // Coleta todas as fotos com seção e ordem
+    const fotosParaSalvar = [];
+    let ordemGlobal = 1;
+
+    // Fotos de destaque (posições 1–5, seção = '__destaque__')
+    destaqueState.forEach((url, i) => {
+        if (url) {
+            fotosParaSalvar.push({ propriedade_id: PROP_ID, url, secao: '__destaque__', ordem: i + 1 });
+        }
+    });
+
+    // Demais fotos das seções regulares
+    const destaqueUrls = new Set(destaqueState.filter(Boolean));
+    ordemGlobal = 6;
     document.querySelectorAll('.secao-fotos').forEach(card => {
-        const secaoTitulo = card.querySelector('.secao-titulo-input')?.value.trim() || '';
+        const secao = card.querySelector('.secao-titulo-input')?.value.trim() || 'Sem título';
         card.querySelectorAll('.foto-card').forEach(fcard => {
-            const src = fcard.dataset.src;
-            if (src) todasFotos.push({ src, titulo: secaoTitulo });
+            const url = fcard.dataset.src;
+            if (url && !destaqueUrls.has(url)) {
+                fotosParaSalvar.push({ propriedade_id: PROP_ID, url, secao, ordem: ordemGlobal++ });
+            }
         });
     });
 
-    if (todasFotos.length === 0) return;
+    // Remove fotos antigas e insere novas na tabela fotos_imovel
+    const { error: delErr } = await sb
+        .from('fotos_imovel')
+        .delete()
+        .eq('propriedade_id', PROP_ID);
+    if (delErr) throw delErr;
 
-    // Determina as 5 fotos de destaque (posições 1-5)
-    // Posições definidas pelo usuário têm prioridade; lacunas são preenchidas automaticamente
-    const destaqueUrls = new Set(destaqueState.filter(Boolean));
-    const fotosParaAutoFill = todasFotos.filter(f => !destaqueUrls.has(f.src));
-    let autoFillIdx = 0;
-
-    const fotosParaSalvar = [];
-
-    for (let i = 0; i < 5; i++) {
-        const pos = i + 1;
-        let url = destaqueState[i];
-        let titulo = '';
-
-        if (!url && autoFillIdx < fotosParaAutoFill.length) {
-            url = fotosParaAutoFill[autoFillIdx].src;
-            titulo = fotosParaAutoFill[autoFillIdx].titulo;
-            autoFillIdx++;
-        } else if (url) {
-            const found = todasFotos.find(f => f.src === url);
-            titulo = found?.titulo || '';
-        }
-
-        if (url) {
-            fotosParaSalvar.push({ propriedade_id: PROP_ID, url, titulo, ordem: pos });
-        }
-    }
-
-    // Adiciona as demais fotos (não destaque) com ordem > 5
-    const syncedUrls = new Set(fotosParaSalvar.map(f => f.url));
-    let ordemExtra = 6;
-    todasFotos.forEach(({ src, titulo }) => {
-        if (!syncedUrls.has(src)) {
-            fotosParaSalvar.push({ propriedade_id: PROP_ID, url: src, titulo, ordem: ordemExtra++ });
-            syncedUrls.add(src);
-        }
-    });
-
-    try {
-        // Remove fotos antigas desta propriedade
-        const { error: delErr } = await sb
-            .from('fotos_propriedade')
-            .delete()
-            .eq('propriedade_id', PROP_ID);
-
-        if (delErr) {
-            console.error('Erro ao limpar fotos_propriedade:', delErr);
-            return;
-        }
-
-        // Insere as novas fotos
+    if (fotosParaSalvar.length > 0) {
         const { error: insErr } = await sb
-            .from('fotos_propriedade')
+            .from('fotos_imovel')
             .insert(fotosParaSalvar);
-
-        if (insErr) {
-            console.error('Erro ao inserir em fotos_propriedade:', insErr);
-        }
-    } catch (e) {
-        console.error('Erro na sincronização com fotos_propriedade:', e);
+        if (insErr) throw insErr;
     }
 }
 
 async function carregarFotosSalvas() {
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) return;
-    const userId = session.user.id;
-
-    const { data, error } = await sb
-        .from('propriedades')
-        .select('fotos_secoes')
-        .eq('usuario_id', userId)
-        .single();
-
-    const secoesSalvas = data?.fotos_secoes;
-
-    if (error || !secoesSalvas || secoesSalvas.length === 0) {
-        console.log('Nenhuma estrutura de fotos salva. Criando exemplos.');
+    if (!PROP_ID) {
         criarSecao('Área Externa');
         criarSecao('Salão Principal');
         return;
     }
 
-    // Extrai e restaura o estado de destaque da seção especial __destaque__
-    const destaqueSection = secoesSalvas.find(s => s.titulo === '__destaque__');
-    if (destaqueSection && Array.isArray(destaqueSection.fotos)) {
-        destaqueSection.fotos.forEach((src, i) => {
-            if (i < 5) destaqueState[i] = src || null;
-        });
-        atualizarPainelDestaque();
-    }
+    // Carrega fotos da tabela fotos_imovel
+    const { data: fotos, error } = await sb
+        .from('fotos_imovel')
+        .select('url, secao, ordem')
+        .eq('propriedade_id', PROP_ID)
+        .order('ordem');
 
-    // Renderiza apenas as seções regulares (filtra __destaque__)
-    const regularSections = secoesSalvas.filter(s => s.titulo !== '__destaque__');
-
-    if (regularSections.length === 0) {
+    if (error || !fotos || fotos.length === 0) {
         criarSecao('Área Externa');
         criarSecao('Salão Principal');
         return;
     }
 
-    regularSections.sort((a, b) => a.ordem - b.ordem);
-    regularSections.forEach(secao => {
-        const secaoId = criarSecao(secao.titulo);
-        if (secao.fotos && secao.fotos.length > 0) {
-            secao.fotos.forEach(fotoSrc => {
-                if (fotoSrc) adicionarFotoNaSecao(fotoSrc, secaoId, '');
-            });
-        }
+    // Restaura estado de destaque (seção '__destaque__')
+    const fotosDestaque = fotos.filter(f => f.secao === '__destaque__');
+    fotosDestaque.sort((a, b) => a.ordem - b.ordem);
+    fotosDestaque.forEach(f => {
+        const idx = f.ordem - 1;
+        if (idx >= 0 && idx < 5) destaqueState[idx] = f.url;
+    });
+    if (fotosDestaque.length > 0) atualizarPainelDestaque();
+
+    // Agrupa fotos regulares por seção
+    const secaoMap = {};
+    fotos.filter(f => f.secao !== '__destaque__').forEach(f => {
+        const nome = f.secao || 'Geral';
+        if (!secaoMap[nome]) secaoMap[nome] = [];
+        secaoMap[nome].push(f.url);
+    });
+
+    const secoes = Object.entries(secaoMap);
+    if (secoes.length === 0) {
+        criarSecao('Área Externa');
+        criarSecao('Salão Principal');
+        return;
+    }
+
+    secoes.forEach(([titulo, urls]) => {
+        const secaoId = criarSecao(titulo);
+        urls.forEach(url => { if (url) adicionarFotoNaSecao(url, secaoId, ''); });
     });
 
     // Aplica badges de destaque após todas as fotos serem renderizadas
