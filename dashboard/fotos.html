@@ -517,9 +517,6 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
-/* ─────────────────────────────────────────
-   INIT
-───────────────────────────────────────── */
 async function init() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { window.location.href = '../login.html'; return; }
@@ -527,24 +524,23 @@ async function init() {
     const user = session.user;
     const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
 
-    const nome  = perfil?.nome || user.email;
-    const usu   = perfil?.usuario || '';
-    const ini   = nome.split(' ')[0][0]?.toUpperCase() || '?';
+    const nome = perfil?.nome || user.email;
+    const usu = perfil?.usuario || '';
+    const ini = nome.split(' ')[0][0]?.toUpperCase() || '?';
 
     document.getElementById('avatar-inicial').textContent = ini;
-    document.getElementById('drop-nome').textContent      = nome;
-    document.getElementById('drop-email').textContent     = user.email;
+    document.getElementById('drop-nome').textContent = nome;
+    document.getElementById('drop-email').textContent = user.email;
     document.getElementById('sidebar-avatar').textContent = ini;
-    document.getElementById('sidebar-nome').textContent   = nome;
+    document.getElementById('sidebar-nome').textContent = nome;
     document.getElementById('sidebar-handle').textContent = usu ? '@' + usu : '';
 
-await carregarFotosSalvas();
+    await carregarFotosSalvas();
 
     document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('main-content').style.display   = 'flex';
+    document.getElementById('main-content').style.display = 'flex';
 }
 
-/* ── Toggle sidebar mobile ── */
 function toggleSidebar() {
     const sidebar = document.querySelector('.dash-sidebar');
     const overlay = document.getElementById('sidebar-overlay');
@@ -552,52 +548,37 @@ function toggleSidebar() {
     overlay.classList.toggle('ativo');
 }
 
-/* ─────────────────────────────────────────
-   AVATAR DROPDOWN
-───────────────────────────────────────── */
 function toggleAvatar() {
     const m = document.getElementById('avatar-menu');
     m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
 }
+
 document.addEventListener('click', e => {
     const c = document.querySelector('.avatar-container');
     if (c && !c.contains(e.target)) document.getElementById('avatar-menu').style.display = 'none';
 });
+
 async function sair() {
     await sb.auth.signOut();
     window.location.href = '../login.html';
 }
 
-/* ─────────────────────────────────────────
-   GERENCIAMENTO DE SEÇÕES
-───────────────────────────────────────── */
 let contadorSecao = 0;
 
 function criarSecao(titulo = '') {
     contadorSecao++;
     const id = 'secao-' + contadorSecao;
-
-    // Esconde placeholder
     document.getElementById('placeholder-vazio').style.display = 'none';
-
     const lista = document.getElementById('lista-secoes');
-
     const card = document.createElement('div');
     card.className = 'secao-fotos';
     card.id = id;
     card.dataset.id = id;
-
     card.innerHTML = `
         <div class="secao-header">
             <span class="secao-drag-handle" title="Arrastar para reordenar">⠿</span>
             <div class="secao-titulo-wrap">
-                <input
-                    type="text"
-                    class="secao-titulo-input"
-                    placeholder="Ex: Área Externa, Lareira, Salão Principal..."
-                    value="${titulo}"
-                    oninput="atualizarContador('${id}')"
-                >
+                <input type="text" class="secao-titulo-input" placeholder="Ex: Área Externa, Lareira, Salão Principal..." value="${titulo}" oninput="atualizarContador('${id}')">
                 <div class="secao-contador" id="contador-${id}">0 foto(s)</div>
             </div>
             <div class="secao-acoes">
@@ -606,32 +587,18 @@ function criarSecao(titulo = '') {
             </div>
         </div>
         <div class="secao-body" id="body-${id}">
-            <div class="fotos-grid" id="grid-${id}">
-                <!-- Fotos aparecem aqui -->
-            </div>
-            <div class="drop-zone" id="drop-${id}"
-                ondragover="onDragOver(event, '${id}')"
-                ondragleave="onDragLeave('${id}')"
-                ondrop="onDrop(event, '${id}')">
+            <div class="fotos-grid" id="grid-${id}"></div>
+            <div class="drop-zone" id="drop-${id}" ondragover="onDragOver(event, '${id}')" ondragleave="onDragLeave('${id}')" ondrop="onDrop(event, '${id}')">
                 <span class="drop-zone-icon">📷</span>
                 <p>Arraste as fotos aqui ou clique para selecionar</p>
-                <button class="btn-selecionar-fotos"
-                    onclick="document.getElementById('file-${id}').click()">
-                    Selecionar fotos
-                </button>
-                <input type="file" id="file-${id}" multiple accept="image/*" hidden
-                    onchange="handleFiles(this.files, '${id}')">
+                <button class="btn-selecionar-fotos" onclick="document.getElementById('file-${id}').click()">Selecionar fotos</button>
+                <input type="file" id="file-${id}" multiple accept="image/*" hidden onchange="handleFiles(this.files, '${id}')">
             </div>
-        </div>
-    `;
-
+        </div>`;
     lista.appendChild(card);
-
-    // Foca no título se estiver vazio
     if (!titulo) {
         setTimeout(() => card.querySelector('.secao-titulo-input').focus(), 100);
     }
-
     atualizarContador(id);
     return id;
 }
@@ -639,18 +606,12 @@ function criarSecao(titulo = '') {
 function excluirSecao(id) {
     const card = document.getElementById(id);
     if (!card) return;
-
-    // Confirmação rápida visual
     card.style.opacity = '0.4';
     card.style.transform = 'scale(0.97)';
     card.style.transition = 'all 0.25s';
-
     setTimeout(() => {
         card.remove();
-        // Mostra placeholder se não há mais seções
-        const lista = document.getElementById('lista-secoes');
-        const secoes = lista.querySelectorAll('.secao-fotos');
-        if (secoes.length === 0) {
+        if (document.querySelectorAll('.secao-fotos').length === 0) {
             document.getElementById('placeholder-vazio').style.display = 'block';
         }
         mostrarToast('🗑️', 'Seção removida.');
@@ -659,15 +620,15 @@ function excluirSecao(id) {
 
 function toggleSecao(id) {
     const body = document.getElementById('body-' + id);
-    const btn  = document.querySelector(`#${id} .collapse-btn`);
+    const btn = document.querySelector(`#${id} .collapse-btn`);
     const collapsed = body.classList.toggle('collapsed');
     btn.textContent = collapsed ? '▶' : '▼';
 }
 
 function atualizarContador(id) {
-    const grid  = document.getElementById('grid-' + id);
+    const grid = document.getElementById('grid-' + id);
     const count = grid ? grid.querySelectorAll('.foto-card').length : 0;
-    const el    = document.getElementById('contador-' + id);
+    const el = document.getElementById('contador-' + id);
     if (el) el.textContent = count + (count === 1 ? ' foto' : ' fotos');
     atualizarBadgeCapa(id);
 }
@@ -691,48 +652,63 @@ function atualizarBadgeCapa(id) {
     });
 }
 
-/* ─────────────────────────────────────────
-   UPLOAD DE FOTOS
-───────────────────────────────────────── */
-async function handleFiles(files, secaoId) {
-
-    for (const file of files) {
-
-        if (!file.type.startsWith('image/')) continue;
-
-        const fileName = `${propriedadeId}/${Date.now()}-${file.name}`;
-
-        // upload storage
-        const { data, error } = await supabase.storage
-            .from('fotos-dashboard')
-            .upload(fileName, file);
-
-        if (error) {
-            console.error(error);
-            return;
-        }
-
-        const { data: publicUrl } = supabase.storage
-            .from('fotos-dashboard')
-            .getPublicUrl(fileName);
-
-        const url = publicUrl.publicUrl;
-
-        const { error: dbError } = await supabase
-.from('fotos_imovel')
-.insert({
-    propriedade_id: propriedadeId,
-    secao: secaoId,
-    url: url,
-    ordem: 0
-});
-
-if (dbError) {
-    console.error("Erro ao salvar no banco:", dbError);
+function onDragOver(e, id) {
+    e.preventDefault();
+    document.getElementById('drop-' + id)?.classList.add('dragover');
 }
 
-        adicionarFotoNaSecao(url, secaoId, file.name);
+function onDragLeave(id) {
+    document.getElementById('drop-' + id)?.classList.remove('dragover');
+}
+
+function onDrop(e, id) {
+    e.preventDefault();
+    document.getElementById('drop-' + id)?.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+        handleFiles(files, id);
     }
+}
+
+async function handleFiles(files, secaoId) {
+    const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (fileArray.length === 0) return;
+
+    mostrarToast('⏳', `Enviando ${fileArray.length} foto(s)...`);
+    const dropZone = document.getElementById('drop-' + secaoId);
+    const originalContent = dropZone.innerHTML;
+    dropZone.innerHTML = `<span class="drop-zone-icon">⏳</span><p>Enviando, por favor aguarde...</p>`;
+    dropZone.style.pointerEvents = 'none';
+
+    for (const file of fileArray) {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) {
+            mostrarToast('❌', 'Sessão expirada. Faça login novamente.');
+            dropZone.innerHTML = originalContent;
+            dropZone.style.pointerEvents = 'auto';
+            return;
+        }
+        const userId = session.user.id;
+        const filePath = `${userId}/${secaoId}/${Date.now()}-${file.name}`;
+        const BUCKET_NAME = 'fotos-propriedades';
+
+        const { error: uploadError } = await sb.storage.from(BUCKET_NAME).upload(filePath, file);
+
+        if (uploadError) {
+            console.error('Erro no upload:', uploadError);
+            mostrarToast('❌', `Falha ao enviar ${file.name}.`);
+            continue;
+        }
+
+        const { data: { publicUrl } } = sb.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+
+        if (publicUrl) {
+            adicionarFotoNaSecao(publicUrl, secaoId, file.name);
+        }
+    }
+    dropZone.innerHTML = originalContent;
+    dropZone.style.pointerEvents = 'auto';
+    mostrarToast('✅', 'Fotos enviadas com sucesso!');
 }
 
 function adicionarFotoNaSecao(src, secaoId, nome) {
@@ -749,7 +725,6 @@ function adicionarFotoNaSecao(src, secaoId, nome) {
         <button class="btn-remover-foto" title="Remover foto" onclick="removerFoto(this, '${secaoId}')">✕</button>
     `;
 
-    // Drag entre fotos (reordenação dentro da seção)
     card.addEventListener('dragstart', e => {
         e.dataTransfer.setData('foto-src', src);
         e.dataTransfer.setData('foto-secao', secaoId);
@@ -771,62 +746,7 @@ function removerFoto(btn, secaoId) {
         atualizarContador(secaoId);
     }, 200);
 }
-/* ─────────────────────────────────────────
-   Buscar foto
-───────────────────────────────────────── */
-async function handleFiles(files, secaoId) {
-    const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
-    if (fileArray.length === 0) return;
 
-    mostrarToast('⏳', `Enviando ${fileArray.length} foto(s)...`);
-    const dropZone = document.getElementById('drop-' + secaoId);
-    const originalContent = dropZone.innerHTML;
-    dropZone.innerHTML = `<span class="drop-zone-icon">⏳</span><p>Enviando, por favor aguarde...</p>`;
-    dropZone.style.pointerEvents = 'none'; // Desativa cliques durante o upload
-
-    for (const file of fileArray) {
-        const { data: { session } } = await sb.auth.getSession();
-        if (!session) {
-            mostrarToast('❌', 'Sessão expirada. Faça login novamente.');
-            dropZone.innerHTML = originalContent;
-            dropZone.style.pointerEvents = 'auto';
-            return;
-        }
-        const userId = session.user.id;
-        const filePath = `${userId}/${secaoId}/${Date.now()}-${file.name}`;
-
-        // IMPORTANTE: Substitua 'fotos-propriedades' pelo nome do seu bucket no Supabase.
-        const BUCKET_NAME = 'fotos-propriedades';
-
-        const { error: uploadError } = await sb.storage
-            .from(BUCKET_NAME)
-            .upload(filePath, file);
-
-        if (uploadError) {
-            console.error('Erro no upload:', uploadError);
-            mostrarToast('❌', `Falha ao enviar ${file.name}.`);
-            continue; // Pula para o próximo arquivo em caso de erro
-        }
-
-        const { data: { publicUrl } } = sb.storage
-            .from(BUCKET_NAME)
-            .getPublicUrl(filePath);
-
-        if (publicUrl) {
-            adicionarFotoNaSecao(publicUrl, secaoId, file.name);
-        }
-    }
-    dropZone.innerHTML = originalContent;
-    dropZone.style.pointerEvents = 'auto';
-    mostrarToast('✅', 'Fotos enviadas com sucesso!');
-}
-
-function adicionarFotoNaSecao(src, secaoId, nome) {
-
-
-/* ─────────────────────────────────────────
-   SALVAR
-───────────────────────────────────────── */
 async function salvarTudo() {
     const btns = document.querySelectorAll('.btn-salvar, .btn-salvar-tudo');
     btns.forEach(btn => {
@@ -845,17 +765,11 @@ async function salvarTudo() {
     const secoesParaSalvar = [];
     document.querySelectorAll('.secao-fotos').forEach((card, index) => {
         const titulo = card.querySelector('.secao-titulo-input').value.trim() || 'Sem título';
-        const fotos  = Array.from(card.querySelectorAll('.foto-card')).map(f => f.dataset.src);
-
-        secoesParaSalvar.push({
-            titulo,
-            fotos,
-            ordem: index
-        });
+        const fotos = Array.from(card.querySelectorAll('.foto-card')).map(f => f.dataset.src);
+        secoesParaSalvar.push({ titulo, fotos, ordem: index });
     });
 
     try {
-        // Assumindo que você tem uma tabela 'propriedades' com uma coluna 'fotos_secoes' (tipo jsonb)
         const { error } = await sb
             .from('propriedades')
             .update({ fotos_secoes: secoesParaSalvar })
@@ -871,23 +785,20 @@ async function salvarTudo() {
         btns.forEach(btn => { btn.disabled = false; btn.textContent = '💾 Salvar'; });
     }
 }
-/* ─────────────────────────────────────────
-   SEÇÕES DE EXEMPLO (pré-carregadas)
-───────────────────────────────────────── */
+
 async function carregarFotosSalvas() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return;
     const userId = session.user.id;
 
     const { data, error } = await sb
-        .from('propriedades') // Nome da sua tabela de propriedades
+        .from('propriedades')
         .select('fotos_secoes')
         .eq('usuario_id', userId)
         .single();
 
     if (error || !data || !data.fotos_secoes || data.fotos_secoes.length === 0) {
         console.log('Nenhuma estrutura de fotos salva. Criando exemplos.');
-        // Se não houver nada salvo, cria seções de exemplo para guiar o usuário
         criarSecao('Área Externa');
         criarSecao('Salão Principal');
         return;
@@ -895,17 +806,24 @@ async function carregarFotosSalvas() {
 
     const secoesSalvas = data.fotos_secoes;
     if (secoesSalvas && secoesSalvas.length > 0) {
-        secoesSalvas.sort((a, b) => a.ordem - b.ordem); // Garante a ordem correta
-
+        secoesSalvas.sort((a, b) => a.ordem - b.ordem);
         secoesSalvas.forEach(secao => {
             const secaoId = criarSecao(secao.titulo);
             if (secao.fotos && secao.fotos.length > 0) {
                 secao.fotos.forEach(fotoSrc => {
-                    adicionarFotoNaSecao(fotoSrc, secaoId, ''); // O nome do arquivo não é crucial na recarga
+                    adicionarFotoNaSecao(fotoSrc, secaoId, '');
                 });
             }
         });
     }
+}
+
+function mostrarToast(icone, msg) {
+    document.getElementById('toast-icone').textContent = icone;
+    document.getElementById('toast-msg').textContent = msg;
+    const t = document.getElementById('toast');
+    t.classList.add('visivel');
+    setTimeout(() => t.classList.remove('visivel'), 3000);
 }
 
 /* Arranca */
