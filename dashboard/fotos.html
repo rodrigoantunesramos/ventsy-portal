@@ -698,7 +698,7 @@ async function handleFiles(files, secaoId) {
 
         if (!file.type.startsWith('image/')) continue;
 
-        const fileName = Date.now() + '-' + file.name;
+        const fileName = `${propriedadeId}/${Date.now()}-${file.name}`;
 
         // upload storage
         const { data, error } = await supabase.storage
@@ -766,7 +766,39 @@ function removerFoto(btn, secaoId) {
         atualizarContador(secaoId);
     }, 200);
 }
+/* ─────────────────────────────────────────
+   Buscar foto
+───────────────────────────────────────── */
 
+async function carregarFotos() {
+
+    const { data, error } = await supabase
+    .from('fotos_imovel')
+    .select('*')
+    .eq('propriedade_id', propriedadeId)
+    .order('ordem');
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    data.forEach(foto => {
+        adicionarFotoNaSecao(
+            foto.url,
+            foto.secao,
+            "foto"
+        );
+    });
+
+}
+
+    document.addEventListener("DOMContentLoaded", () => {
+    carregarFotos();
+});
+
+
+    
 /* ─────────────────────────────────────────
    DRAG & DROP NA ZONA DE UPLOAD
 ───────────────────────────────────────── */
