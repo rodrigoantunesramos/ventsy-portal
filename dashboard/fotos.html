@@ -914,60 +914,78 @@ async function handleFiles(files, secaoId) {
         }
     }
 
-    mostrarToast('⏳', `Enviando ${fileArray.length} foto(s)...`);
+    mostrarToast('⏳', `Processando ${fileArray.length} arquivo(s)...`);
     const dropZone = document.getElementById('drop-' + secaoId);
     const originalContent = dropZone.innerHTML;
-    dropZone.innerHTML = `<span class="drop-zone-icon">⏳</span><p>Enviando, por favor aguarde...</p>`;
+    dropZone.innerHTML = `<span class="drop-zone-icon">⏳</span><p>Processando, por favor aguarde...</p>`;
     dropZone.style.pointerEvents = 'none';
 
     let successCount = 0;
     let errorCount = 0;
 
     for (const file of fileArray) {
-        const { data: { session } } = await sb.auth.getSession();
-        if (!session) {
-            mostrarToast('❌', 'Sessão expirada. Faça login novamente.');
-            dropZone.innerHTML = originalContent;
-            dropZone.style.pointerEvents = 'auto';
-            return;
-        }
-        const userId = session.user.id;
-        // Sanitiza o nome do arquivo para evitar caracteres inválidos
-        const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const filePath = `${userId}/${secaoId}/${Date.now()}-${safeFileName}`;
-        const BUCKET_NAME = 'fotos-dashboard';
-
-        const { error: uploadError } = await sb.storage.from(BUCKET_NAME).upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false
-        });
-
-        if (uploadError) {
-            console.error('Erro no upload para o Supabase:', uploadError.message, uploadError);
-            errorCount++;
-            continue; // Pula para o próximo arquivo
-        }
-
-        // Se chegou aqui, o upload funcionou. Agora pega a URL.
-        const { data: urlData } = sb.storage.from(BUCKET_NAME).getPublicUrl(filePath);
-
-        if (urlData && urlData.publicUrl) {
-            adicionarFotoNaSecao(urlData.publicUrl, secaoId, file.name);
-            successCount++;
-        } else {
-            console.error('Upload bem-sucedido, mas falha ao obter URL pública para:', filePath);
+        try {
+            if (file.type.startsWith('image/')) {
+                // Imagens: comprime via Canvas e armazena como base64 (sem necessidade de bucket)
+                const dataUrl = await comprimirImagem(file, 1200, 0.82);
+                adicionarFotoNaSecao(dataUrl, secaoId, file.name);
+                successCount++;
+            } else if (file.type.startsWith('video/') && PLANO_ATIVO === 'ultra') {
+                // Vídeos: envia para Supabase Storage (bucket fotos-dashboard)
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session) { mostrarToast('❌', 'Sessão expirada.'); break; }
+                const userId = session.user.id;
+                const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                const filePath = `${userId}/${secaoId}/${Date.now()}-${safeFileName}`;
+                const { error: uploadError } = await sb.storage.from('fotos-dashboard').upload(filePath, file, {
+                    cacheControl: '3600', upsert: false
+                });
+                if (uploadError) {
+                    console.error('Erro no upload de vídeo:', uploadError.message);
+                    mostrarToast('❌', `Vídeo falhou: ${uploadError.message}`);
+                    errorCount++;
+                } else {
+                    const { data: urlData } = sb.storage.from('fotos-dashboard').getPublicUrl(filePath);
+                    adicionarFotoNaSecao(urlData.publicUrl, secaoId, file.name);
+                    successCount++;
+                }
+            }
+        } catch (e) {
+            console.error('Erro ao processar arquivo:', e);
             errorCount++;
         }
     }
+
     dropZone.innerHTML = originalContent;
     dropZone.style.pointerEvents = 'auto';
-    
-    if (successCount > 0) {
-        mostrarToast('✅', `${successCount} foto(s) enviada(s) com sucesso!`);
-    }
-    if (errorCount > 0) {
-        mostrarToast('❌', `${errorCount} foto(s) falharam. Verifique as permissões do bucket e o console do navegador.`);
-    }
+
+    if (successCount > 0) mostrarToast('✅', `${successCount} arquivo(s) adicionado(s)! Clique em Salvar.`);
+    if (errorCount > 0)   mostrarToast('❌', `${errorCount} arquivo(s) falharam.`);
+}
+
+function comprimirImagem(file, maxPx, quality) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = e => {
+            const img = new Image();
+            img.onerror = reject;
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > maxPx || height > maxPx) {
+                    const ratio = Math.min(maxPx / width, maxPx / height);
+                    width  = Math.round(width  * ratio);
+                    height = Math.round(height * ratio);
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width; canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 function adicionarFotoNaSecao(src, secaoId, nome) {
