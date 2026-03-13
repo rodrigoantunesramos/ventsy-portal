@@ -482,7 +482,7 @@
 
         <header class="dash-header-fixo">
             <h2>Minha Propriedade</h2>
-            <button class="btn-visualizar" onclick="window.open('#', '_blank')">👁 Ver Anúncio Público</button>
+            <button class="btn-visualizar" id="btn-visualizar" onclick="verAnuncio()">👁 Ver Anúncio Público</button>
         </header>
 
         <!-- ABAS -->
@@ -798,6 +798,8 @@
     const { createClient } = supabase;
     const sb = createClient(SUPA_URL, SUPA_KEY);
 
+    let PROP_ID = null;
+
     /* ── Init ── */
     async function init() {
         const { data: { session } } = await sb.auth.getSession();
@@ -818,8 +820,110 @@
         document.getElementById('sidebar-nome').textContent   = nome;
         document.getElementById('sidebar-handle').textContent = usuario ? '@' + usuario : '';
 
+        // Carrega dados da propriedade do usuário
+        const { data: prop } = await sb
+            .from('propriedades')
+            .select('*')
+            .eq('usuario_id', user.id)
+            .single();
+
+        if (prop) {
+            PROP_ID = prop.id;
+
+            // Aba 1 — Contato
+            setVal('nome-espaco',     prop.nome);
+            setVal('email-contato',   prop.email_contato);
+            setVal('whatsapp',        prop.whatsapp);
+            setVal('telefone',        prop.telefone);
+            setVal('instagram',       prop.instagram);
+            setVal('site',            prop.site);
+            setVal('nome-resp',       prop.nome_responsavel);
+            setVal('bio-resp',        prop.bio_responsavel);
+            // capacidade: pode vir como número ou texto "até 200 pessoas"
+            if (prop.capacidade !== null && prop.capacidade !== undefined) {
+                const capNum = String(prop.capacidade).replace(/\D/g, '');
+                document.getElementById('capacidade').value = capNum || prop.capacidade;
+            }
+
+            // Aba 2 — Sobre
+            setVal('descricao', prop.descricao);
+            if (Array.isArray(prop.comodidades) && prop.comodidades.length) {
+                const salvas = prop.comodidades.map(c => c.toLowerCase());
+                document.querySelectorAll('.amenidade-check input').forEach(cb => {
+                    cb.checked = salvas.some(s => s.includes(cb.value.toLowerCase()));
+                });
+            }
+
+            // Aba 3 — Valores
+            if (prop.valor_hora)     document.getElementById('valor-hora').value     = prop.valor_hora;
+            if (prop.valor_periodo)  document.getElementById('valor-periodo').value  = prop.valor_periodo;
+            if (prop.valor_base)     document.getElementById('valor-diaria').value   = prop.valor_base;
+            setVal('regras-preco', prop.regras_preco);
+
+            // Aba 4 — Endereço
+            setVal('cep',         prop.cep);
+            setVal('rua',         prop.rua);
+            setVal('numero',      prop.numero);
+            setVal('complemento', prop.complemento);
+            setVal('bairro',      prop.bairro);
+            setVal('cidade',      prop.cidade);
+            setVal('uf',          prop.estado);
+
+            // Aba 5 — Eventos
+            if (prop.tipo_evento) {
+                const tipos = prop.tipo_evento.split(',').map(t => t.trim().toLowerCase());
+                document.querySelectorAll('input[name="tipo_evento"]').forEach(cb => {
+                    cb.checked = tipos.some(t => t.includes(cb.value) || cb.value.includes(t));
+                });
+            }
+
+            // Aba 6 — FAQ
+            if (Array.isArray(prop.faq) && prop.faq.length) {
+                const lista = document.getElementById('lista-faq');
+                lista.innerHTML = '';
+                prop.faq.forEach(f => {
+                    const item = document.createElement('div');
+                    item.className = 'faq-item';
+                    item.innerHTML = `
+                        <div class="faq-inputs">
+                            <input type="text" placeholder="Pergunta..." value="${esc(f.pergunta)}">
+                            <textarea placeholder="Resposta...">${esc(f.resposta)}</textarea>
+                        </div>
+                        <button class="btn-remover-faq" onclick="this.parentElement.remove()">🗑️</button>`;
+                    lista.appendChild(item);
+                });
+            }
+
+            atualizarBtnAnuncio();
+        }
+
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('main-content').style.display   = 'flex';
+    }
+
+    function setVal(id, val) {
+        const el = document.getElementById(id);
+        if (el && val != null) el.value = val;
+    }
+
+    function esc(str) {
+        return (str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function atualizarBtnAnuncio() {
+        const btn = document.getElementById('btn-visualizar');
+        if (btn) {
+            btn.style.opacity = PROP_ID ? '1' : '0.5';
+            btn.title = PROP_ID ? 'Ver como o cliente vê sua propriedade' : 'Salve os dados primeiro para visualizar o anúncio';
+        }
+    }
+
+    function verAnuncio() {
+        if (PROP_ID) {
+            window.open('../propriedade.html?id=' + PROP_ID, '_blank');
+        } else {
+            mostrarToast('⚠️', 'Salve os dados da propriedade primeiro para visualizar o anúncio.');
+        }
     }
 
     /* ── Toggle sidebar mobile ── */
@@ -858,8 +962,137 @@
     }
 
     /* ── Salvar ── */
-    function salvarAlteracoes() {
-        mostrarToast('✅', 'Alterações salvas com sucesso!');
+    async function salvarAlteracoes() {
+        const btn = document.querySelector('.btn-salvar');
+        btn.disabled = true;
+        btn.textContent = '💾 Salvando...';
+
+        try {
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) throw new Error('Sessão expirada. Faça login novamente.');
+            const userId = session.user.id;
+
+            // Coleta Aba 1
+            const nome        = document.getElementById('nome-espaco').value.trim();
+            const emailContat = document.getElementById('email-contato').value.trim();
+            const whatsapp    = document.getElementById('whatsapp').value.trim();
+            const telefone    = document.getElementById('telefone').value.trim();
+            const instagram   = document.getElementById('instagram').value.trim();
+            const site        = document.getElementById('site').value.trim();
+            const nomeResp    = document.getElementById('nome-resp').value.trim();
+            const capVal      = document.getElementById('capacidade').value.trim();
+            const bioResp     = document.getElementById('bio-resp').value.trim();
+
+            // Coleta Aba 2
+            const descricao   = document.getElementById('descricao').value.trim();
+            const comodidades = Array.from(
+                document.querySelectorAll('.amenidade-check input:checked')
+            ).map(cb => cb.closest('label').querySelector('.amenidade-label').textContent.trim());
+
+            // Coleta Aba 3
+            const valorHora   = document.getElementById('valor-hora').value;
+            const valorPer    = document.getElementById('valor-periodo').value;
+            const valorDiaria = document.getElementById('valor-diaria').value;
+            const regrasPreco = document.getElementById('regras-preco').value.trim();
+
+            // Coleta Aba 4
+            const cep         = document.getElementById('cep').value.trim();
+            const rua         = document.getElementById('rua').value.trim();
+            const numero      = document.getElementById('numero').value.trim();
+            const complemento = document.getElementById('complemento').value.trim();
+            const bairro      = document.getElementById('bairro').value.trim();
+            const cidade      = document.getElementById('cidade').value.trim();
+            const uf          = document.getElementById('uf').value.trim().toUpperCase();
+            const endereco    = [rua, numero, complemento].filter(Boolean).join(', ');
+
+            // Coleta Aba 5
+            const tipos = Array.from(
+                document.querySelectorAll('input[name="tipo_evento"]:checked')
+            ).map(cb => cb.value);
+            const tipoEventoStr = tipos.join(', ');
+
+            // Coleta Aba 6
+            const faq = Array.from(document.querySelectorAll('#lista-faq .faq-item')).map(item => ({
+                pergunta: item.querySelector('input')?.value.trim() || '',
+                resposta: item.querySelector('textarea')?.value.trim() || ''
+            })).filter(f => f.pergunta);
+
+            const dados = {
+                usuario_id:       userId,
+                nome:             nome        || null,
+                descricao:        descricao   || null,
+                capacidade:       capVal      || null,
+                tipo_evento:      tipoEventoStr || null,
+                cidade:           cidade      || null,
+                estado:           uf          || null,
+                valor_base:       valorDiaria ? parseFloat(valorDiaria) : null,
+                whatsapp:         whatsapp    || null,
+                comodidades:      comodidades,
+                endereco:         endereco    || null,
+                // Campos extras (adicionados à tabela conforme necessidade)
+                email_contato:    emailContat || null,
+                telefone:         telefone    || null,
+                instagram:        instagram   || null,
+                site:             site        || null,
+                nome_responsavel: nomeResp    || null,
+                bio_responsavel:  bioResp     || null,
+                valor_hora:       valorHora   ? parseFloat(valorHora)   : null,
+                valor_periodo:    valorPer    ? parseFloat(valorPer)    : null,
+                regras_preco:     regrasPreco || null,
+                cep:              cep         || null,
+                rua:              rua         || null,
+                numero:           numero      || null,
+                complemento:      complemento || null,
+                bairro:           bairro      || null,
+                faq:              faq
+            };
+
+            // Verifica se já existe uma propriedade para este usuário
+            const { data: existing } = await sb
+                .from('propriedades')
+                .select('id')
+                .eq('usuario_id', userId)
+                .single();
+
+            let saveError;
+            if (existing?.id) {
+                PROP_ID = existing.id;
+                const res = await sb.from('propriedades').update(dados).eq('usuario_id', userId);
+                saveError = res.error;
+            } else {
+                const res = await sb.from('propriedades').insert(dados).select('id').single();
+                saveError = res.error;
+                if (res.data?.id) PROP_ID = res.data.id;
+            }
+
+            if (saveError) {
+                // Tenta salvar apenas os campos garantidos caso haja coluna inexistente
+                console.error('Erro ao salvar (tentativa completa):', saveError);
+                const dadosSeguros = {
+                    usuario_id: userId, nome: dados.nome, descricao: dados.descricao,
+                    capacidade: dados.capacidade, tipo_evento: dados.tipo_evento,
+                    cidade: dados.cidade, estado: dados.estado, valor_base: dados.valor_base,
+                    whatsapp: dados.whatsapp, comodidades: dados.comodidades, endereco: dados.endereco
+                };
+                const res2 = existing?.id
+                    ? await sb.from('propriedades').update(dadosSeguros).eq('usuario_id', userId)
+                    : await sb.from('propriedades').insert(dadosSeguros).select('id').single();
+                if (res2.error) throw res2.error;
+                if (res2.data?.id) PROP_ID = res2.data.id;
+                mostrarToast('⚠️', 'Dados principais salvos. Alguns campos extras podem precisar ser criados no banco.');
+            } else {
+                mostrarToast('✅', 'Alterações salvas com sucesso!');
+            }
+
+            atualizarBtnAnuncio();
+
+        } catch (err) {
+            console.error('Erro ao salvar propriedade:', err);
+            mostrarToast('❌', err.message || 'Erro ao salvar. Verifique o console.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '💾 Salvar Alterações';
+        }
     }
 
     /* ── Toast ── */
@@ -921,6 +1154,7 @@
 
 </body>
 </html>
+
 
 
 
