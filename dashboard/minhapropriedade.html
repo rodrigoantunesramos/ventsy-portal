@@ -824,13 +824,16 @@
         const { data: prop } = await sb
             .from('propriedades')
             .select('*')
+
             .eq('usuario_id', user.id)
+
             .single();
 
         if (prop) {
             PROP_ID = prop.id;
 
             // Aba 1 — Contato
+
             setVal('nome-espaco',     prop.nome);
             setVal('email-contato',   prop.email_contato);
             setVal('whatsapp',        prop.whatsapp);
@@ -843,10 +846,12 @@
             if (prop.capacidade !== null && prop.capacidade !== undefined) {
                 const capNum = String(prop.capacidade).replace(/\D/g, '');
                 document.getElementById('capacidade').value = capNum || prop.capacidade;
+
             }
 
             // Aba 2 — Sobre
             setVal('descricao', prop.descricao);
+
             if (Array.isArray(prop.comodidades) && prop.comodidades.length) {
                 const salvas = prop.comodidades.map(c => c.toLowerCase());
                 document.querySelectorAll('.amenidade-check input').forEach(cb => {
@@ -857,7 +862,8 @@
             // Aba 3 — Valores
             if (prop.valor_hora)     document.getElementById('valor-hora').value     = prop.valor_hora;
             if (prop.valor_periodo)  document.getElementById('valor-periodo').value  = prop.valor_periodo;
-            if (prop.valor_base)     document.getElementById('valor-diaria').value   = prop.valor_base;
+
+          
             setVal('regras-preco', prop.regras_preco);
 
             // Aba 4 — Endereço
@@ -870,10 +876,12 @@
             setVal('uf',          prop.estado);
 
             // Aba 5 — Eventos
+
             if (prop.tipo_evento) {
                 const tipos = prop.tipo_evento.split(',').map(t => t.trim().toLowerCase());
                 document.querySelectorAll('input[name="tipo_evento"]').forEach(cb => {
                     cb.checked = tipos.some(t => t.includes(cb.value) || cb.value.includes(t));
+
                 });
             }
 
@@ -1018,6 +1026,7 @@
             })).filter(f => f.pergunta);
 
             const dados = {
+
                 usuario_id:       userId,
                 nome:             nome        || null,
                 descricao:        descricao   || null,
@@ -1044,6 +1053,8 @@
                 numero:           numero      || null,
                 complemento:      complemento || null,
                 bairro:           bairro      || null,
+
+              
                 faq:              faq
             };
 
@@ -1051,13 +1062,17 @@
             const { data: existing } = await sb
                 .from('propriedades')
                 .select('id')
+
                 .eq('usuario_id', userId)
+
                 .single();
 
             let saveError;
             if (existing?.id) {
                 PROP_ID = existing.id;
+
                 const res = await sb.from('propriedades').update(dados).eq('usuario_id', userId);
+
                 saveError = res.error;
             } else {
                 const res = await sb.from('propriedades').insert(dados).select('id').single();
@@ -1065,24 +1080,25 @@
                 if (res.data?.id) PROP_ID = res.data.id;
             }
 
-            if (saveError) {
-                // Tenta salvar apenas os campos garantidos caso haja coluna inexistente
-                console.error('Erro ao salvar (tentativa completa):', saveError);
-                const dadosSeguros = {
-                    usuario_id: userId, nome: dados.nome, descricao: dados.descricao,
-                    capacidade: dados.capacidade, tipo_evento: dados.tipo_evento,
-                    cidade: dados.cidade, estado: dados.estado, valor_base: dados.valor_base,
-                    whatsapp: dados.whatsapp, comodidades: dados.comodidades, endereco: dados.endereco
-                };
-                const res2 = existing?.id
-                    ? await sb.from('propriedades').update(dadosSeguros).eq('usuario_id', userId)
-                    : await sb.from('propriedades').insert(dadosSeguros).select('id').single();
-                if (res2.error) throw res2.error;
-                if (res2.data?.id) PROP_ID = res2.data.id;
-                mostrarToast('⚠️', 'Dados principais salvos. Alguns campos extras podem precisar ser criados no banco.');
-            } else {
-                mostrarToast('✅', 'Alterações salvas com sucesso!');
+            if (saveError) throw saveError;
+
+            // Sincroniza comodidades na tabela propriedadexcomodidades
+            if (PROP_ID && comodidades.length > 0) {
+                try {
+                    // Busca IDs das comodidades pelo nome
+                    const { data: comods } = await sb
+                        .from('comodidades')
+                        .select('id, nome')
+                        .in('nome', comodidades);
+                    if (comods && comods.length) {
+                        await sb.from('propriedadexcomodidades').delete().eq('propriedadeID', PROP_ID);
+                        const linhas = comods.map(c => ({ propriedadeID: PROP_ID, comodidadeID: c.id }));
+                        await sb.from('propriedadexcomodidades').insert(linhas);
+                    }
+                } catch (e) { console.warn('Aviso: comodidades não sincronizadas:', e.message); }
             }
+
+            mostrarToast('✅', 'Alterações salvas com sucesso!');
 
             atualizarBtnAnuncio();
 

@@ -779,32 +779,37 @@ async function init() {
         try {
             const { data: ass } = await sb.from('assinaturas')
                 .select('plano_ativo')
-                .eq('usuario_id', prop.usuario_id)
+                .eq('usuario_id', prop.user_id)
                 .single();
             PLANO = ass?.plano_ativo || 'basico';
         } catch (_) { PLANO = 'basico'; }
 
-        // Busca dados do proprietário
+        // Dados do responsável (nome_responsavel tem prioridade sobre usuarios.nome)
         try {
-            const { data: usr } = await sb.from('usuarios').select('nome, usuario, criado_em').eq('id', prop.usuario_id).single();
+            const { data: usr } = await sb.from('usuarios').select('nome, usuario, criado_em').eq('id', prop.user_id).single();
             if (usr) {
-                document.getElementById('anfitriao-nome').textContent = usr.nome || '—';
+                const nomeExibir = prop.nome_responsavel || usr.nome || '—';
+                document.getElementById('anfitriao-nome').textContent = nomeExibir;
                 const meses = Math.max(1, Math.round((new Date() - new Date(usr.criado_em)) / 2592000000));
                 document.getElementById('anfitriao-tempo').textContent = meses >= 12
                     ? Math.floor(meses/12) + ' ano(s)' : meses + ' meses';
-                const ini = (usr.nome || '?')[0].toUpperCase();
-                document.getElementById('avatar-anfitriao').innerHTML = `<div class="avatar-anfitriao-inicial">${ini}</div>`;
-                WPP_NUMBER = prop.whatsapp ? prop.whatsapp.replace(/\D/g,'') : WPP_NUMBER;
+                if (prop.foto_responsavel) {
+                    document.getElementById('avatar-anfitriao').innerHTML =
+                        `<img src="${prop.foto_responsavel}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+                } else {
+                    const ini = (nomeExibir || '?')[0].toUpperCase();
+                    document.getElementById('avatar-anfitriao').innerHTML = `<div class="avatar-anfitriao-inicial">${ini}</div>`;
+                }
             }
         } catch (_) {}
 
-        // Busca fotos
+        // Busca fotos (tabela: fotos_imovel)
         try {
-            const { data: fotos } = await sb.from('fotos_propriedade')
-                .select('url, titulo, ordem')
+            const { data: fotos } = await sb.from('fotos_imovel')
+                .select('url, secao, ordem')
                 .eq('propriedade_id', propId)
                 .order('ordem');
-            FOTOS = fotos || [];
+            FOTOS = (fotos || []).map(f => ({ url: f.url, titulo: f.secao || '', ordem: f.ordem }));
         } catch (_) {}
 
         // Busca vídeos (apenas ultra)
@@ -885,26 +890,33 @@ Destaques do espaço: Campo de futebol com grama tapete. Piscina + Chuveirão. �
    RENDER PRINCIPAL POR PLANO
 ──────────────────────────────────────────────────────── */
 function renderPagina(p) {
-    VALOR_BASE = p.valor_base || 3000;
+    // preco → coluna existente em propriedades (valor_base não existe)
+    VALOR_BASE = p.preco || p.valor_base || 3000;
 
     // Título e meta
     document.getElementById('prop-nome').textContent = p.nome || '—';
     document.title = (p.nome || 'Espaço') + ' — VENTSY';
-    document.getElementById('prop-nota').innerHTML = `<span>★</span> ${p.nota_media || '—'}`;
-    document.getElementById('prop-total-aval').textContent = (p.total_avaliacoes || TODAS_AVAL.length) + ' avaliações';
+    // avaliacao → coluna existente (nota_media não existe)
+    const nota = p.avaliacao || p.nota_media;
+    document.getElementById('prop-nota').innerHTML = `<span>★</span> ${nota || '—'}`;
+    document.getElementById('prop-total-aval').textContent = TODAS_AVAL.length + ' avaliações';
     document.getElementById('prop-cidade').textContent = [p.cidade, p.estado].filter(Boolean).join(', ');
-    document.getElementById('det-capacidade').textContent = p.capacidade || '—';
-    document.getElementById('det-tipo').textContent = p.tipo_evento || '—';
+    document.getElementById('det-capacidade').textContent = p.capacidade ? p.capacidade + ' pessoas' : '—';
+    document.getElementById('det-tipo').textContent = p.categoria || '—';
     document.getElementById('det-cidade').textContent = p.cidade || '—';
-    document.getElementById('mapa-endereco').textContent = [p.endereco, p.cidade, p.estado, 'Brasil'].filter(Boolean).join(', ');
-    document.getElementById('aval-nota-num').textContent = p.nota_media || '4.9';
-    document.getElementById('aval-total-txt').textContent = (TODAS_AVAL.length || p.total_avaliacoes || 0) + ' avaliações verificadas';
+    const enderecoCompleto = [p.rua, p.numero, p.complemento, p.bairro, p.cidade, p.estado].filter(Boolean).join(', ');
+    document.getElementById('mapa-endereco').textContent = enderecoCompleto || [p.endereco, p.cidade, p.estado, 'Brasil'].filter(Boolean).join(', ');
+    document.getElementById('aval-nota-num').textContent = nota || '—';
+    document.getElementById('aval-total-txt').textContent = TODAS_AVAL.length + ' avaliações verificadas';
+
+    // WhatsApp
+    if (p.whatsapp) WPP_NUMBER = p.whatsapp.replace(/\D/g, '');
 
     // Sobre
     renderSobre(p.descricao || '');
 
-    // Comodidades
-    renderComodidades(p.comodidades || []);
+    // Comodidades via tabela propriedadexcomodidades
+    carregarComodidades(p.id);
 
     // Galeria conforme plano
     renderGaleria();
@@ -925,6 +937,18 @@ function renderPagina(p) {
         document.getElementById('secao-similares').style.display = 'block';
         renderSimilares();
     }
+}
+
+/* ── Comodidades via junction table ── */
+async function carregarComodidades(propId) {
+    try {
+        const { data } = await sb
+            .from('propriedadexcomodidades')
+            .select('comodidadeID, comodidades(nome)')
+            .eq('propriedadeID', propId);
+        const lista = (data || []).map(r => r.comodidades?.nome).filter(Boolean);
+        renderComodidades(lista);
+    } catch (_) { renderComodidades([]); }
 }
 
 /* ────────────────────────────────────────────────────────
@@ -1334,8 +1358,8 @@ async function renderSimilares() {
     try {
         // Tenta buscar propriedades de plano pro/ultra que não sejam a atual
         const { data } = await sb.from('propriedades')
-            .select('id, nome, cidade, nota_media, valor_base, foto_capa')
-            .neq('id', PROP?.id || 'demo')
+            .select('id, nome, cidade, estado, avaliacao, preco, imagem_url')
+            .neq('id', PROP?.id || 0)
             .limit(3);
         similares = data || [];
     } catch (_) {}
@@ -1343,19 +1367,19 @@ async function renderSimilares() {
     // Demo
     if (!similares.length) {
         similares = [
-            { id: 1, nome: 'Sítio Verde Vale', cidade: 'Guapimirim, RJ', nota_media: 4.8, valor_base: 2500, foto_capa: 'https://picsum.photos/seed/sim1/400/250' },
-            { id: 2, nome: 'Chácara das Flores', cidade: 'Teresópolis, RJ', nota_media: 4.7, valor_base: 1800, foto_capa: 'https://picsum.photos/seed/sim2/400/250' },
-            { id: 3, nome: 'Espaço Aquarela', cidade: 'Petrópolis, RJ', nota_media: 4.9, valor_base: 3200, foto_capa: 'https://picsum.photos/seed/sim3/400/250' },
+            { id: 1, nome: 'Sítio Verde Vale', cidade: 'Guapimirim', estado: 'RJ', avaliacao: 4.8, preco: 2500, imagem_url: 'https://picsum.photos/seed/sim1/400/250' },
+            { id: 2, nome: 'Chácara das Flores', cidade: 'Teresópolis', estado: 'RJ', avaliacao: 4.7, preco: 1800, imagem_url: 'https://picsum.photos/seed/sim2/400/250' },
+            { id: 3, nome: 'Espaço Aquarela', cidade: 'Petrópolis', estado: 'RJ', avaliacao: 4.9, preco: 3200, imagem_url: 'https://picsum.photos/seed/sim3/400/250' },
         ];
     }
 
     grid.innerHTML = similares.map(s => `
         <div class="similar-card" onclick="window.location.href='propriedade.html?id=${s.id}'">
-            <img class="similar-foto" src="${s.foto_capa || 'https://picsum.photos/seed/'+s.id+'/400/250'}" alt="${s.nome}" loading="lazy">
+            <img class="similar-foto" src="${s.imagem_url || 'https://picsum.photos/seed/'+s.id+'/400/250'}" alt="${s.nome}" loading="lazy">
             <div class="similar-info">
                 <strong>${s.nome}</strong>
-                <span>📍 ${s.cidade || '—'} &nbsp;·&nbsp; ⭐ ${s.nota_media || '—'}</span>
-                <span class="similar-preco">A partir de R$ ${(s.valor_base||0).toLocaleString('pt-BR')}/dia</span>
+                <span>📍 ${[s.cidade, s.estado].filter(Boolean).join(', ') || '—'} &nbsp;·&nbsp; ⭐ ${s.avaliacao || '—'}</span>
+                <span class="similar-preco">A partir de R$ ${(s.preco||0).toLocaleString('pt-BR')}/dia</span>
             </div>
         </div>
     `).join('');
