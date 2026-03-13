@@ -457,6 +457,14 @@
         .btn-pos:hover { background: rgba(255,56,92,0.65); border-color: #ff385c; }
         .btn-pos.ativo { background: #ff385c; border-color: #ff385c; }
 
+        .banner-plano {
+            margin-bottom: 16px; padding: 12px 18px; border-radius: 10px;
+            font-size: 0.85rem; display: flex; align-items: center; gap: 10px;
+        }
+        .banner-plano.basico { background: #fff3e0; border: 1px solid #ffcc80; color: #e65100; }
+        .banner-plano.pro    { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; }
+        .banner-plano.ultra  { background: #ede7f6; border: 1px solid #ce93d8; color: #6a1b9a; }
+
         .aviso-sem-propriedade {
             background: #fff3e0; border: 1px solid #ffe0b2;
             border-radius: 12px; padding: 14px 18px;
@@ -518,7 +526,7 @@
             <div class="sidebar-avatar" id="sidebar-avatar">?</div>
             <h3 id="sidebar-nome">Carregando...</h3>
             <span class="handle" id="sidebar-handle"></span>
-            <div class="plano-chip">⭐ Ultra — 30 dias grátis</div>
+            <div class="plano-chip" id="plano-chip">🎯 Plano Básico</div>
         </div>
         <nav class="dash-menu">
             <a href="index.html">🏠 Dashboard</a>
@@ -567,6 +575,9 @@
             <span style="font-size:1.5rem">⚠️</span>
             <p>Você precisa cadastrar sua propriedade antes de adicionar fotos. <a href="minhapropriedade.html">Cadastrar agora →</a></p>
         </div>
+
+        <!-- BANNER LIMITE DO PLANO -->
+        <div class="banner-plano" id="banner-plano" style="display:none"></div>
 
         <!-- PAINEL FOTOS EM DESTAQUE -->
         <div class="destaque-panel" id="destaque-panel">
@@ -671,6 +682,7 @@ const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
 let PROP_ID = null;
+let PLANO_ATIVO = 'basico'; // 'basico' | 'pro' | 'ultra'
 // destaqueState[0] = url para posição 1, [1] = posição 2, ..., [4] = posição 5
 let destaqueState = [null, null, null, null, null];
 
@@ -692,11 +704,24 @@ async function init() {
     document.getElementById('sidebar-nome').textContent = nome;
     document.getElementById('sidebar-handle').textContent = usu ? '@' + usu : '';
 
-    // Carrega o ID da propriedade do usuário
-    const { data: propData, error: propError } = await sb
+    // Carrega plano do usuário
+    const { data: assinatura } = await sb
+        .from('assinaturas')
+        .select('plano_ativo')
+        .eq('usuario_id', user.id)
+        .single();
+    PLANO_ATIVO = (assinatura?.plano_ativo || 'basico').toLowerCase();
+    const chipLabels = { basico: '🎯 Plano Básico', pro: '🚀 Plano Pro', ultra: '⭐ Plano Ultra' };
+    document.getElementById('plano-chip').textContent = chipLabels[PLANO_ATIVO] || '🎯 Plano Básico';
+
+    // Mostra banner de limite conforme plano
+    atualizarBannerPlano();
+
+    // Carrega o ID da propriedade do usuário (coluna correta: usuario_id)
+    const { data: propData } = await sb
         .from('propriedades')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('usuario_id', user.id)
         .single();
 
     PROP_ID = propData?.id || null;
@@ -734,6 +759,26 @@ async function sair() {
     window.location.href = '../login.html';
 }
 
+function atualizarBannerPlano() {
+    const el = document.getElementById('banner-plano');
+    if (!el) return;
+    el.className = 'banner-plano ' + PLANO_ATIVO;
+    if (PLANO_ATIVO === 'basico') {
+        el.innerHTML = '🔒 <strong>Plano Básico:</strong> máximo de 5 fotos. <a href="../planos.html" style="color:inherit;font-weight:700">Fazer upgrade →</a>';
+        el.style.display = 'flex';
+    } else if (PLANO_ATIVO === 'pro') {
+        el.innerHTML = '🚀 <strong>Plano Pro:</strong> fotos ilimitadas. Para adicionar vídeos, faça upgrade para o Plano Ultra. <a href="../planos.html" style="color:inherit;font-weight:700">Ver planos →</a>';
+        el.style.display = 'flex';
+    } else {
+        el.innerHTML = '⭐ <strong>Plano Ultra:</strong> fotos e vídeos ilimitados.';
+        el.style.display = 'flex';
+    }
+}
+
+function contarTotalMidias() {
+    return document.querySelectorAll('.foto-card').length;
+}
+
 let contadorSecao = 0;
 
 function criarSecao(titulo = '') {
@@ -760,10 +805,10 @@ function criarSecao(titulo = '') {
         <div class="secao-body" id="body-${id}">
             <div class="fotos-grid" id="grid-${id}"></div>
             <div class="drop-zone" id="drop-${id}" ondragover="onDragOver(event, '${id}')" ondragleave="onDragLeave('${id}')" ondrop="onDrop(event, '${id}')">
-                <span class="drop-zone-icon">📷</span>
-                <p>Arraste as fotos aqui ou clique para selecionar</p>
-                <button class="btn-selecionar-fotos" onclick="document.getElementById('file-${id}').click()">Selecionar fotos</button>
-                <input type="file" id="file-${id}" multiple accept="image/*" hidden onchange="handleFiles(this.files, '${id}')">
+                <span class="drop-zone-icon">${PLANO_ATIVO === 'ultra' ? '🎬' : '📷'}</span>
+                <p>${PLANO_ATIVO === 'ultra' ? 'Arraste fotos ou vídeos aqui ou clique para selecionar' : 'Arraste as fotos aqui ou clique para selecionar'}</p>
+                <button class="btn-selecionar-fotos" onclick="document.getElementById('file-${id}').click()">${PLANO_ATIVO === 'ultra' ? 'Selecionar fotos/vídeos' : 'Selecionar fotos'}</button>
+                <input type="file" id="file-${id}" multiple accept="${PLANO_ATIVO === 'ultra' ? 'image/*,video/*' : 'image/*'}" hidden onchange="handleFiles(this.files, '${id}')">
             </div>
         </div>`;
     lista.appendChild(card);
@@ -842,8 +887,32 @@ function onDrop(e, id) {
 }
 
 async function handleFiles(files, secaoId) {
-    const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
-    if (fileArray.length === 0) return;
+    let fileArray = Array.from(files).filter(f => {
+        if (f.type.startsWith('image/')) return true;
+        if (f.type.startsWith('video/') && PLANO_ATIVO === 'ultra') return true;
+        return false;
+    });
+
+    if (fileArray.length === 0) {
+        if (PLANO_ATIVO !== 'ultra' && Array.from(files).some(f => f.type.startsWith('video/'))) {
+            mostrarToast('🔒', 'Vídeos disponíveis apenas no Plano Ultra.');
+        }
+        return;
+    }
+
+    // Enforce Básico: max 5 fotos/mídias total
+    if (PLANO_ATIVO === 'basico') {
+        const totalAtual = contarTotalMidias();
+        const restantes = Math.max(0, 5 - totalAtual);
+        if (restantes === 0) {
+            mostrarToast('🔒', 'Limite de 5 fotos atingido. Faça upgrade para adicionar mais.');
+            return;
+        }
+        if (fileArray.length > restantes) {
+            mostrarToast('⚠️', `Plano Básico: apenas mais ${restantes} foto(s) permitida(s). Restantes foram ignoradas.`);
+            fileArray = fileArray.slice(0, restantes);
+        }
+    }
 
     mostrarToast('⏳', `Enviando ${fileArray.length} foto(s)...`);
     const dropZone = document.getElementById('drop-' + secaoId);
@@ -910,8 +979,13 @@ function adicionarFotoNaSecao(src, secaoId, nome) {
     card.draggable = true;
     card.dataset.src = src;
 
+    const isVideo = src.match(/\.(mp4|webm|mov|avi|mkv)(\?|$)/i) || (nome && nome.match(/\.(mp4|webm|mov|avi|mkv)$/i));
+    const mediaEl = isVideo
+        ? `<video src="${src}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;border-radius:10px"></video>`
+        : `<img src="${src}" alt="${nome || 'foto'}">`;
+
     card.innerHTML = `
-        <img src="${src}" alt="${nome || 'foto'}">
+        ${mediaEl}
         <button class="btn-remover-foto" title="Remover foto" onclick="removerFoto(this, '${secaoId}')">✕</button>
         <div class="badge-destaque-num"></div>
         <div class="foto-destaque-bar">
