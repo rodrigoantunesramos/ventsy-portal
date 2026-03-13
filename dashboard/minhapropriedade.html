@@ -824,46 +824,46 @@
         const { data: prop } = await sb
             .from('propriedades')
             .select('*')
-            .eq('user_id', user.id)
+
+            .eq('usuario_id', user.id)
+
             .single();
 
         if (prop) {
             PROP_ID = prop.id;
 
             // Aba 1 — Contato
-            setVal('nome-espaco',   prop.nome);
-            setVal('email-contato', prop.email_contato);
-            setVal('whatsapp',      prop.whatsapp);
-            setVal('telefone',      prop.telefone);
-            setVal('instagram',     prop.instagram);
-            setVal('site',          prop.site);
-            setVal('nome-resp',     prop.nome_responsavel);
-            setVal('bio-resp',      prop.bio_responsavel);
-            if (prop.capacidade) document.getElementById('capacidade').value = prop.capacidade;
-            if (prop.foto_responsavel) {
-                document.getElementById('avatar-preview').innerHTML =
-                    `<img src="${prop.foto_responsavel}" alt="Foto">`;
+
+            setVal('nome-espaco',     prop.nome);
+            setVal('email-contato',   prop.email_contato);
+            setVal('whatsapp',        prop.whatsapp);
+            setVal('telefone',        prop.telefone);
+            setVal('instagram',       prop.instagram);
+            setVal('site',            prop.site);
+            setVal('nome-resp',       prop.nome_responsavel);
+            setVal('bio-resp',        prop.bio_responsavel);
+            // capacidade: pode vir como número ou texto "até 200 pessoas"
+            if (prop.capacidade !== null && prop.capacidade !== undefined) {
+                const capNum = String(prop.capacidade).replace(/\D/g, '');
+                document.getElementById('capacidade').value = capNum || prop.capacidade;
+
             }
 
             // Aba 2 — Sobre
             setVal('descricao', prop.descricao);
-            try {
-                const { data: juncao } = await sb
-                    .from('propriedadexcomodidades')
-                    .select('comodidadeID, comodidades(nome)')
-                    .eq('propriedadeID', PROP_ID);
-                if (juncao && juncao.length) {
-                    const nomesSalvos = juncao.map(j => (j.comodidades?.nome || '').toLowerCase());
-                    document.querySelectorAll('.amenidade-check input').forEach(cb => {
-                        cb.checked = nomesSalvos.some(n => n.includes(cb.value.toLowerCase()));
-                    });
-                }
-            } catch (e) { console.warn('Comodidades não carregadas:', e.message); }
+
+            if (Array.isArray(prop.comodidades) && prop.comodidades.length) {
+                const salvas = prop.comodidades.map(c => c.toLowerCase());
+                document.querySelectorAll('.amenidade-check input').forEach(cb => {
+                    cb.checked = salvas.some(s => s.includes(cb.value.toLowerCase()));
+                });
+            }
 
             // Aba 3 — Valores
-            if (prop.valor_hora)    document.getElementById('valor-hora').value    = prop.valor_hora;
-            if (prop.valor_periodo) document.getElementById('valor-periodo').value = prop.valor_periodo;
-            if (prop.preco)         document.getElementById('valor-diaria').value  = prop.preco;
+            if (prop.valor_hora)     document.getElementById('valor-hora').value     = prop.valor_hora;
+            if (prop.valor_periodo)  document.getElementById('valor-periodo').value  = prop.valor_periodo;
+
+          
             setVal('regras-preco', prop.regras_preco);
 
             // Aba 4 — Endereço
@@ -876,10 +876,12 @@
             setVal('uf',          prop.estado);
 
             // Aba 5 — Eventos
-            if (prop.categoria) {
-                const cats = prop.categoria.split(',').map(t => t.trim().toLowerCase());
+
+            if (prop.tipo_evento) {
+                const tipos = prop.tipo_evento.split(',').map(t => t.trim().toLowerCase());
                 document.querySelectorAll('input[name="tipo_evento"]').forEach(cb => {
-                    cb.checked = cats.some(c => c.includes(cb.value) || cb.value.includes(c));
+                    cb.checked = tipos.some(t => t.includes(cb.value) || cb.value.includes(t));
+
                 });
             }
 
@@ -1024,30 +1026,35 @@
             })).filter(f => f.pergunta);
 
             const dados = {
-                user_id:          userId,
-                nome:             nome          || null,
-                whatsapp:         whatsapp      || null,
-                telefone:         telefone      || null,
-                email_contato:    emailContat   || null,
-                instagram:        instagram     || null,
-                site:             site          || null,
-                nome_responsavel: nomeResp      || null,
-                bio_responsavel:  bioResp       || null,
-                capacidade:       capVal        ? parseInt(capVal) : null,
-                descricao:        descricao     || null,
-                valor_hora:       valorHora     ? parseFloat(valorHora)   : null,
-                valor_periodo:    valorPer      ? parseFloat(valorPer)    : null,
-                preco:            valorDiaria   ? parseFloat(valorDiaria) : null,
-                regras_preco:     regrasPreco   || null,
-                cep:              cep           || null,
-                rua:              rua           || null,
-                numero:           numero        || null,
-                complemento:      complemento   || null,
-                bairro:           bairro        || null,
-                cidade:           cidade        || null,
-                estado:           uf            || null,
-                endereco:         endereco      || null,
-                categoria:        tipoEventoStr || null,
+
+                usuario_id:       userId,
+                nome:             nome        || null,
+                descricao:        descricao   || null,
+                capacidade:       capVal      || null,
+                tipo_evento:      tipoEventoStr || null,
+                cidade:           cidade      || null,
+                estado:           uf          || null,
+                valor_base:       valorDiaria ? parseFloat(valorDiaria) : null,
+                whatsapp:         whatsapp    || null,
+                comodidades:      comodidades,
+                endereco:         endereco    || null,
+                // Campos extras (adicionados à tabela conforme necessidade)
+                email_contato:    emailContat || null,
+                telefone:         telefone    || null,
+                instagram:        instagram   || null,
+                site:             site        || null,
+                nome_responsavel: nomeResp    || null,
+                bio_responsavel:  bioResp     || null,
+                valor_hora:       valorHora   ? parseFloat(valorHora)   : null,
+                valor_periodo:    valorPer    ? parseFloat(valorPer)    : null,
+                regras_preco:     regrasPreco || null,
+                cep:              cep         || null,
+                rua:              rua         || null,
+                numero:           numero      || null,
+                complemento:      complemento || null,
+                bairro:           bairro      || null,
+
+              
                 faq:              faq
             };
 
@@ -1055,13 +1062,17 @@
             const { data: existing } = await sb
                 .from('propriedades')
                 .select('id')
-                .eq('user_id', userId)
+
+                .eq('usuario_id', userId)
+
                 .single();
 
             let saveError;
             if (existing?.id) {
                 PROP_ID = existing.id;
-                const res = await sb.from('propriedades').update(dados).eq('user_id', userId);
+
+                const res = await sb.from('propriedades').update(dados).eq('usuario_id', userId);
+
                 saveError = res.error;
             } else {
                 const res = await sb.from('propriedades').insert(dados).select('id').single();
@@ -1159,6 +1170,7 @@
 
 </body>
 </html>
+
 
 
 
