@@ -510,6 +510,24 @@
                             <label>Nome do Espaço</label>
                             <input type="text" id="nome-espaco" placeholder="Ex: Mansão das Palmeiras">
                         </div>
+                        <div class="campo span-2">
+                            <label>Tipo de Propriedade</label>
+                            <select id="tipo-propriedade">
+                                <option value="">Selecione o tipo...</option>
+                                <option value="Sítio">🌿 Sítio</option>
+                                <option value="Chácara">🏡 Chácara</option>
+                                <option value="Salão de Festas">🎉 Salão de Festas</option>
+                                <option value="Fazenda">🐄 Fazenda</option>
+                                <option value="Casa de Campo">🏠 Casa de Campo</option>
+                                <option value="Mansão / Villa">🏛️ Mansão / Villa</option>
+                                <option value="Espaço Gourmet">🍷 Espaço Gourmet</option>
+                                <option value="Haras / Rancho">🐎 Haras / Rancho</option>
+                                <option value="Clube / Resort">🏊 Clube / Resort</option>
+                                <option value="Espaço Corporativo">💼 Espaço Corporativo</option>
+                                <option value="Espaço ao Ar Livre">🌳 Espaço ao Ar Livre</option>
+                                <option value="Outro">📍 Outro</option>
+                            </select>
+                        </div>
                         <div class="campo">
                             <label>E-mail de Contato</label>
                             <input type="email" id="email-contato" placeholder="contato@seueespaco.com.br">
@@ -774,6 +792,45 @@
                             <span class="amenidade-label">🚁 Heliponto</span></label>
                     </div>
                 </div>
+
+                <div class="sessao-edit">
+                    <h3>Serviços Extras que Você Pode Oferecer</h3>
+                    <p class="aviso-form">Além do que o espaço já inclui, marque os serviços adicionais que você disponibiliza ou pode contratar para os clientes (pode ter custo extra).</p>
+                    <div class="amenidades-grid">
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="buffet">
+                            <span class="amenidade-label">🍽️ Buffet Completo</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="garcom">
+                            <span class="amenidade-label">🤵 Garçons / Staff</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="seguranca-extra">
+                            <span class="amenidade-label">🛡️ Equipe de Segurança</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="bar-open">
+                            <span class="amenidade-label">🍹 Bar Open Bar</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="mesa-cadeira">
+                            <span class="amenidade-label">🪑 Aluguel de Mesas/Cadeiras</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="decoracao-extra">
+                            <span class="amenidade-label">🎀 Decoração Completa</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="floricultura">
+                            <span class="amenidade-label">💐 Floricultura / Arranjos</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="dj">
+                            <span class="amenidade-label">🎧 DJ / Sonorização</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="foto-video">
+                            <span class="amenidade-label">📸 Foto e Vídeo</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="cerimonialista">
+                            <span class="amenidade-label">📋 Cerimonialista</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="valet">
+                            <span class="amenidade-label">🚗 Valet / Estacionamento</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="limpeza">
+                            <span class="amenidade-label">🧹 Limpeza Pós-Evento</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="iluminacao">
+                            <span class="amenidade-label">💡 Iluminação Especial</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="locacao-tendas">
+                            <span class="amenidade-label">⛺ Locação de Tendas</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="transporte">
+                            <span class="amenidade-label">🚌 Transfer / Transporte</span></label>
+                        <label class="amenidade-check"><input type="checkbox" class="svc-extra" value="hospedagem-extra">
+                            <span class="amenidade-label">🛏️ Hospedagem de Convidados</span></label>
+                    </div>
+                </div>
             </div>
 
         </div><!-- /container-abas -->
@@ -864,6 +921,7 @@
             // Aba 1 — Contato
 
             setVal('nome-espaco',     prop.nome);
+            setVal('tipo-propriedade', prop.tipo_propriedade);
             setVal('email-contato',   prop.email_contato);
             setVal('whatsapp',        prop.whatsapp);
             setVal('telefone',        prop.telefone);
@@ -885,11 +943,18 @@
             // Aba 2 — Sobre
             setVal('descricao', prop.descricao);
 
-            // Aba 7 — Serviços
+            // Aba 7 — Serviços inclusos
             if (Array.isArray(prop.comodidades) && prop.comodidades.length) {
                 const salvas = prop.comodidades.map(c => c.toLowerCase());
-                document.querySelectorAll('#servicos .amenidade-check input').forEach(cb => {
+                document.querySelectorAll('#servicos .amenidade-check input:not(.svc-extra)').forEach(cb => {
                     cb.checked = salvas.some(s => s.includes(cb.value.toLowerCase()));
+                });
+            }
+            // Aba 7 — Serviços extras
+            if (Array.isArray(prop.servicos_extras) && prop.servicos_extras.length) {
+                const extras = prop.servicos_extras.map(c => c.toLowerCase());
+                document.querySelectorAll('#servicos .svc-extra').forEach(cb => {
+                    cb.checked = extras.some(s => s.includes(cb.value.toLowerCase()));
                 });
             }
 
@@ -1017,7 +1082,8 @@
             const userId = session.user.id;
 
             // Coleta Aba 1
-            const nome        = document.getElementById('nome-espaco').value.trim();
+            const nome           = document.getElementById('nome-espaco').value.trim();
+            const tipoPropriedade = document.getElementById('tipo-propriedade').value;
             const emailContat = document.getElementById('email-contato').value.trim();
             const whatsapp    = document.getElementById('whatsapp').value.trim();
             const telefone    = document.getElementById('telefone').value.trim();
@@ -1033,9 +1099,14 @@
             // Coleta Aba 2
             const descricao   = document.getElementById('descricao').value.trim();
 
-            // Coleta Aba 7 — Serviços
+            // Coleta Aba 7 — Serviços inclusos
             const comodidades = Array.from(
-                document.querySelectorAll('#servicos .amenidade-check input:checked')
+                document.querySelectorAll('#servicos .amenidade-check input:not(.svc-extra):checked')
+            ).map(cb => cb.closest('label').querySelector('.amenidade-label').textContent.trim());
+
+            // Coleta Aba 7 — Serviços extras
+            const servicosExtras = Array.from(
+                document.querySelectorAll('#servicos .svc-extra:checked')
             ).map(cb => cb.closest('label').querySelector('.amenidade-label').textContent.trim());
 
             // Coleta Aba 3
@@ -1069,7 +1140,8 @@
             const dados = {
 
                 usuario_id:       userId,
-                nome:             nome        || null,
+                nome:             nome              || null,
+                tipo_propriedade: tipoPropriedade   || null,
                 descricao:        descricao   || null,
                 capacidade:       capVal      || null,
                 tipo_evento:      tipoEventoStr || null,
@@ -1078,6 +1150,7 @@
                 valor_base:       valorDiaria ? parseFloat(valorDiaria) : null,
                 whatsapp:         whatsapp    || null,
                 comodidades:      comodidades,
+                servicos_extras:  servicosExtras,
                 endereco:         endereco    || null,
                 // Campos extras (adicionados à tabela conforme necessidade)
                 email_contato:    emailContat || null,
