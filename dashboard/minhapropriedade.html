@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minha Propriedade — VENTSY</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -493,6 +495,7 @@
             <button class="tab-link" onclick="openTab(event, 'endereco')">4. Endereço</button>
             <button class="tab-link" onclick="openTab(event, 'eventos')">5. Eventos</button>
             <button class="tab-link" onclick="openTab(event, 'faq')">6. FAQ</button>
+            <button class="tab-link" onclick="openTab(event, 'servicos')">7. Serviços</button>
         </nav>
 
         <div class="container-abas">
@@ -538,6 +541,7 @@
                             <div class="avatar-preview" id="avatar-preview">😊</div>
                             <button class="btn-trocar-foto" onclick="document.getElementById('input-foto-resp').click()">Trocar Foto</button>
                             <input type="file" id="input-foto-resp" accept="image/*" hidden onchange="previewFotoResp(this)">
+                            <input type="hidden" id="foto-resp-data">
                         </div>
                         <div class="info-anfitriao">
                             <div class="campo">
@@ -568,36 +572,6 @@
                     </div>
                 </div>
 
-                <div class="sessao-edit">
-                    <h3>Amenidades e Serviços Disponíveis</h3>
-                    <p class="aviso-form">Marque tudo que seu espaço oferece aos clientes.</p>
-                    <div class="amenidades-grid">
-                        <label class="amenidade-check"><input type="checkbox" value="climatizado">
-                            <span class="amenidade-label">❄️ Climatizado</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="estacionamento">
-                            <span class="amenidade-label">🅿️ Estacionamento</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="seguranca">
-                            <span class="amenidade-label">🛡️ Segurança</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="espaco-aberto">
-                            <span class="amenidade-label">🌿 Espaço Aberto</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="cozinha">
-                            <span class="amenidade-label">🍽️ Cozinha</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="gerador">
-                            <span class="amenidade-label">⚡ Gerador</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="piscina">
-                            <span class="amenidade-label">🏊 Piscina</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="wifi">
-                            <span class="amenidade-label">📶 Wi-Fi</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="acessibilidade">
-                            <span class="amenidade-label">♿ Acessibilidade</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="hospedagem">
-                            <span class="amenidade-label">🛏️ Hospedagem</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="palco">
-                            <span class="amenidade-label">🎤 Palco / Som</span></label>
-                        <label class="amenidade-check"><input type="checkbox" value="decoracao">
-                            <span class="amenidade-label">🎀 Decoração</span></label>
-                    </div>
-                </div>
             </div>
 
             <!-- ── ABA 3: VALORES ── -->
@@ -668,9 +642,14 @@
                             <input type="text" id="uf" placeholder="SP" maxlength="2" style="text-transform:uppercase">
                         </div>
                     </div>
-                    <div class="mapa-container">
-                        <span>📍</span>
-                        <p>O mapa será gerado automaticamente após o preenchimento do endereço.</p>
+                    <div class="mapa-container" style="margin-top:24px;">
+                        <div id="mapa-leaflet" style="height:320px;border-radius:12px;display:none;"></div>
+                        <p id="mapa-msg" style="text-align:center;color:#717171;font-size:0.85rem;padding:20px 0;">
+                            📍 Preencha o endereço e clique em <strong>Atualizar Mapa</strong>.
+                        </p>
+                        <button type="button" onclick="atualizarMapa()" style="margin-top:8px;background:#ff385c;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:0.88rem;cursor:pointer;font-weight:600;">
+                            📍 Atualizar Mapa
+                        </button>
                     </div>
                 </div>
             </div>
@@ -744,6 +723,56 @@
                         </div>
                     </div>
                     <button class="btn-adicionar-faq" onclick="adicionarFAQ()">+ Adicionar Nova Pergunta</button>
+                </div>
+            </div>
+
+            <!-- ── ABA 7: SERVIÇOS DISPONÍVEIS ── -->
+            <div id="servicos" class="tab-content">
+                <div class="sessao-edit">
+                    <h3>Serviços e Amenidades Disponíveis</h3>
+                    <p class="aviso-form">Marque tudo que seu espaço oferece. Apenas os itens marcados serão exibidos no anúncio.</p>
+                    <div class="amenidades-grid">
+                        <label class="amenidade-check"><input type="checkbox" value="climatizado">
+                            <span class="amenidade-label">❄️ Climatizado</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="estacionamento">
+                            <span class="amenidade-label">🅿️ Estacionamento</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="seguranca">
+                            <span class="amenidade-label">🛡️ Segurança</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="espaco-aberto">
+                            <span class="amenidade-label">🌿 Espaço Aberto</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="cozinha">
+                            <span class="amenidade-label">🍽️ Cozinha Equipada</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="gerador">
+                            <span class="amenidade-label">⚡ Gerador</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="piscina">
+                            <span class="amenidade-label">🏊 Piscina</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="wifi">
+                            <span class="amenidade-label">📶 Wi-Fi</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="acessibilidade">
+                            <span class="amenidade-label">♿ Acessibilidade</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="hospedagem">
+                            <span class="amenidade-label">🛏️ Hospedagem</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="palco">
+                            <span class="amenidade-label">🎤 Palco / Som</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="decoracao">
+                            <span class="amenidade-label">🎀 Decoração</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="bar">
+                            <span class="amenidade-label">🍹 Bar / Chopeira</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="churrasqueira">
+                            <span class="amenidade-label">🔥 Churrasqueira</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="playground">
+                            <span class="amenidade-label">🛝 Playground</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="quadra">
+                            <span class="amenidade-label">⚽ Quadra Esportiva</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="camarim">
+                            <span class="amenidade-label">💄 Camarim</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="projetor">
+                            <span class="amenidade-label">📽️ Projetor / Telão</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="sauna">
+                            <span class="amenidade-label">🧖 Sauna</span></label>
+                        <label class="amenidade-check"><input type="checkbox" value="heliponto">
+                            <span class="amenidade-label">🚁 Heliponto</span></label>
+                    </div>
                 </div>
             </div>
 
@@ -846,15 +875,20 @@
             if (prop.capacidade !== null && prop.capacidade !== undefined) {
                 const capNum = String(prop.capacidade).replace(/\D/g, '');
                 document.getElementById('capacidade').value = capNum || prop.capacidade;
-
+            }
+            if (prop.foto_responsavel) {
+                document.getElementById('avatar-preview').innerHTML =
+                    `<img src="${prop.foto_responsavel}" alt="Foto" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+                document.getElementById('foto-resp-data').value = prop.foto_responsavel;
             }
 
             // Aba 2 — Sobre
             setVal('descricao', prop.descricao);
 
+            // Aba 7 — Serviços
             if (Array.isArray(prop.comodidades) && prop.comodidades.length) {
                 const salvas = prop.comodidades.map(c => c.toLowerCase());
-                document.querySelectorAll('.amenidade-check input').forEach(cb => {
+                document.querySelectorAll('#servicos .amenidade-check input').forEach(cb => {
                     cb.checked = salvas.some(s => s.includes(cb.value.toLowerCase()));
                 });
             }
@@ -903,6 +937,7 @@
             }
 
             atualizarBtnAnuncio();
+            if (prop.cidade) setTimeout(atualizarMapa, 800);
         }
 
         document.getElementById('loading-screen').style.display = 'none';
@@ -967,6 +1002,7 @@
         const tab = document.getElementById(tabName);
         tab.style.display = 'block'; tab.classList.add('active');
         evt.currentTarget.classList.add('active');
+        if (tabName === 'endereco' && _mapa) setTimeout(() => _mapa.invalidateSize(), 150);
     }
 
     /* ── Salvar ── */
@@ -991,10 +1027,15 @@
             const capVal      = document.getElementById('capacidade').value.trim();
             const bioResp     = document.getElementById('bio-resp').value.trim();
 
+            // Foto responsável
+            const fotoResp = document.getElementById('foto-resp-data').value || null;
+
             // Coleta Aba 2
             const descricao   = document.getElementById('descricao').value.trim();
+
+            // Coleta Aba 7 — Serviços
             const comodidades = Array.from(
-                document.querySelectorAll('.amenidade-check input:checked')
+                document.querySelectorAll('#servicos .amenidade-check input:checked')
             ).map(cb => cb.closest('label').querySelector('.amenidade-label').textContent.trim());
 
             // Coleta Aba 3
@@ -1044,6 +1085,7 @@
                 instagram:        instagram   || null,
                 site:             site        || null,
                 nome_responsavel: nomeResp    || null,
+                foto_responsavel: fotoResp,
                 bio_responsavel:  bioResp     || null,
                 valor_hora:       valorHora   ? parseFloat(valorHora)   : null,
                 valor_periodo:    valorPer    ? parseFloat(valorPer)    : null,
@@ -1120,15 +1162,62 @@
         setTimeout(() => t.classList.remove('visivel'), 4000);
     }
 
-    /* ── Preview foto responsável ── */
+    /* ── Preview + resize foto responsável (salva como base64 no banco) ── */
     function previewFotoResp(input) {
         if (!input.files || !input.files[0]) return;
         const reader = new FileReader();
         reader.onload = e => {
-            const prev = document.getElementById('avatar-preview');
-            prev.innerHTML = `<img src="${e.target.result}" alt="Foto">`;
+            const img = new Image();
+            img.onload = () => {
+                const MAX = 300;
+                let w = img.width, h = img.height;
+                if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+                else       { w = Math.round(w * MAX / h); h = MAX; }
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+                document.getElementById('avatar-preview').innerHTML =
+                    `<img src="${dataUrl}" alt="Foto" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+                document.getElementById('foto-resp-data').value = dataUrl;
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(input.files[0]);
+    }
+
+    /* ── Mapa Leaflet + OpenStreetMap ── */
+    let _mapa = null;
+    function atualizarMapa() {
+        const rua    = document.getElementById('rua').value.trim();
+        const numero = document.getElementById('numero').value.trim();
+        const bairro = document.getElementById('bairro').value.trim();
+        const cidade = document.getElementById('cidade').value.trim();
+        const uf     = document.getElementById('uf').value.trim();
+        if (!cidade) { document.getElementById('mapa-msg').textContent = '⚠️ Preencha ao menos a cidade para gerar o mapa.'; return; }
+        const q = [rua, numero, bairro, cidade, uf, 'Brasil'].filter(Boolean).join(', ');
+        document.getElementById('mapa-msg').textContent = '⏳ Buscando localização...';
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`)
+            .then(r => r.json())
+            .then(res => {
+                if (!res.length) { document.getElementById('mapa-msg').textContent = '⚠️ Endereço não encontrado. Verifique os dados.'; return; }
+                const lat = parseFloat(res[0].lat), lon = parseFloat(res[0].lon);
+                document.getElementById('mapa-leaflet').style.display = 'block';
+                document.getElementById('mapa-msg').textContent = '';
+                if (!_mapa) {
+                    _mapa = L.map('mapa-leaflet').setView([lat, lon], 16);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }).addTo(_mapa);
+                    L.marker([lat, lon]).addTo(_mapa);
+                } else {
+                    _mapa.setView([lat, lon], 16);
+                    _mapa.eachLayer(l => { if (l instanceof L.Marker) _mapa.removeLayer(l); });
+                    L.marker([lat, lon]).addTo(_mapa);
+                }
+                setTimeout(() => _mapa.invalidateSize(), 100);
+            })
+            .catch(() => { document.getElementById('mapa-msg').textContent = '⚠️ Não foi possível carregar o mapa.'; });
     }
 
     /* ── FAQ ── */
@@ -1161,6 +1250,7 @@
                     document.getElementById('uf').value     = d.uf;
                     document.getElementById('numero').focus();
                     mostrarToast('📍', 'Endereço preenchido automaticamente!');
+                    atualizarMapa();
                 }
             });
     }
