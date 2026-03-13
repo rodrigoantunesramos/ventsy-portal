@@ -775,6 +775,8 @@ function removerFoto(btn, secaoId) {
 
 async function carregarFotos() {
 
+    document.querySelectorAll('.grid-fotos').forEach(g => g.innerHTML = '');
+
     const { data, error } = await supabase
     .from('fotos_imovel')
     .select('*')
@@ -793,7 +795,6 @@ async function carregarFotos() {
             "foto"
         );
     });
-
 }
 
     document.addEventListener("DOMContentLoaded", () => {
