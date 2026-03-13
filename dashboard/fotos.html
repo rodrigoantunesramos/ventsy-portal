@@ -362,6 +362,110 @@
         }
         .secao-fotos { animation: slideDown 0.3s ease; }
 
+        /* ── DESTAQUE PANEL ── */
+        .destaque-panel {
+            background: #fff;
+            border: 2px solid rgba(255,56,92,0.2);
+            border-radius: 16px;
+            padding: 20px 22px;
+            margin-bottom: 24px;
+        }
+        .destaque-panel-top {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .destaque-panel-top h3 { font-size: 0.95rem; font-weight: 700; color: #0d0d0d; margin-bottom: 3px; }
+        .destaque-panel-top p { font-size: 0.78rem; color: #888; line-height: 1.4; }
+        .destaque-slots-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-rows: 90px 90px;
+            gap: 5px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .destaque-slot {
+            position: relative;
+            background: #f5f5f5;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            cursor: default;
+            transition: border-color 0.2s;
+        }
+        .destaque-slot.slot-main { grid-column: 1; grid-row: 1 / 3; }
+        .destaque-slot img {
+            width: 100%; height: 100%; object-fit: cover;
+            display: none; position: absolute; inset: 0;
+        }
+        .destaque-slot.preenchido { border-color: transparent; }
+        .destaque-slot.preenchido img { display: block; }
+        .dslot-num {
+            position: absolute; bottom: 5px; left: 5px;
+            background: rgba(0,0,0,0.65); color: #fff;
+            font-size: 0.65rem; font-weight: 700;
+            width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2;
+        }
+        .dslot-empty {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 3px; color: #ccc; font-size: 0.65rem; text-align: center;
+        }
+        .dslot-empty span:first-child { font-size: 1.1rem; }
+        .btn-limpar-dslot {
+            position: absolute; top: 4px; right: 4px;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: rgba(0,0,0,0.55); color: #fff;
+            border: none; cursor: pointer; font-size: 0.6rem;
+            display: none; align-items: center; justify-content: center;
+            z-index: 3;
+        }
+        .destaque-slot.preenchido .btn-limpar-dslot { display: flex; }
+
+        /* ── BADGE E BARRA DE DESTAQUE NAS FOTOS ── */
+        .badge-destaque-num {
+            position: absolute; bottom: 6px; right: 6px;
+            background: #ff385c; color: #fff;
+            font-size: 0.6rem; font-weight: 700;
+            padding: 2px 6px; border-radius: 6px;
+            display: none; align-items: center; gap: 3px;
+            z-index: 2;
+        }
+        .foto-destaque-bar {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.82);
+            display: flex; align-items: center; padding: 5px 6px; gap: 3px;
+            transform: translateY(100%);
+            transition: transform 0.2s;
+            z-index: 3;
+        }
+        .foto-card:hover .foto-destaque-bar { transform: translateY(0); }
+        .foto-destaque-bar .bar-label {
+            font-size: 0.58rem; color: #aaa; white-space: nowrap; flex-shrink: 0;
+        }
+        .btn-pos {
+            width: 20px; height: 20px; border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: #fff; font-size: 0.65rem; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background 0.15s;
+        }
+        .btn-pos:hover { background: rgba(255,56,92,0.65); border-color: #ff385c; }
+        .btn-pos.ativo { background: #ff385c; border-color: #ff385c; }
+
+        .aviso-sem-propriedade {
+            background: #fff3e0; border: 1px solid #ffe0b2;
+            border-radius: 12px; padding: 14px 18px;
+            display: none; align-items: center; gap: 12px;
+            margin-bottom: 20px;
+        }
+        .aviso-sem-propriedade p { font-size: 0.85rem; color: #e65100; }
+        .aviso-sem-propriedade a { font-weight: 700; color: #e65100; text-decoration: underline; }
+
     </style>
 </head>
 <body>
@@ -458,6 +562,55 @@
             </div>
         </div>
 
+        <!-- AVISO: sem propriedade cadastrada -->
+        <div class="aviso-sem-propriedade" id="aviso-sem-prop">
+            <span style="font-size:1.5rem">⚠️</span>
+            <p>Você precisa cadastrar sua propriedade antes de adicionar fotos. <a href="minhapropriedade.html">Cadastrar agora →</a></p>
+        </div>
+
+        <!-- PAINEL FOTOS EM DESTAQUE -->
+        <div class="destaque-panel" id="destaque-panel">
+            <div class="destaque-panel-top">
+                <div>
+                    <h3>⭐ Galeria Principal — 5 Fotos em Destaque</h3>
+                    <p>Selecione quais fotos aparecem na página da sua propriedade. Clique no número desejado em cada foto abaixo.<br>
+                    Pos. 1 = foto grande à esquerda &nbsp;|&nbsp; 2 = superior esq. &nbsp;|&nbsp; 3 = superior dir. &nbsp;|&nbsp; 4 = inferior esq. &nbsp;|&nbsp; 5 = inferior dir.</p>
+                </div>
+            </div>
+            <div class="destaque-slots-grid">
+                <div class="destaque-slot slot-main" id="dslot-1">
+                    <img id="dslot-img-1" src="" alt="Posição 1">
+                    <div class="dslot-empty" id="dslot-empty-1"><span>📷</span><span>Pos. 1<br>(principal)</span></div>
+                    <div class="dslot-num">1</div>
+                    <button class="btn-limpar-dslot" title="Remover desta posição" onclick="limparDestaquePos(1)">✕</button>
+                </div>
+                <div class="destaque-slot" id="dslot-2">
+                    <img id="dslot-img-2" src="" alt="Posição 2">
+                    <div class="dslot-empty" id="dslot-empty-2"><span>📷</span><span>Pos. 2</span></div>
+                    <div class="dslot-num">2</div>
+                    <button class="btn-limpar-dslot" title="Remover desta posição" onclick="limparDestaquePos(2)">✕</button>
+                </div>
+                <div class="destaque-slot" id="dslot-3">
+                    <img id="dslot-img-3" src="" alt="Posição 3">
+                    <div class="dslot-empty" id="dslot-empty-3"><span>📷</span><span>Pos. 3</span></div>
+                    <div class="dslot-num">3</div>
+                    <button class="btn-limpar-dslot" title="Remover desta posição" onclick="limparDestaquePos(3)">✕</button>
+                </div>
+                <div class="destaque-slot" id="dslot-4">
+                    <img id="dslot-img-4" src="" alt="Posição 4">
+                    <div class="dslot-empty" id="dslot-empty-4"><span>📷</span><span>Pos. 4</span></div>
+                    <div class="dslot-num">4</div>
+                    <button class="btn-limpar-dslot" title="Remover desta posição" onclick="limparDestaquePos(4)">✕</button>
+                </div>
+                <div class="destaque-slot" id="dslot-5">
+                    <img id="dslot-img-5" src="" alt="Posição 5">
+                    <div class="dslot-empty" id="dslot-empty-5"><span>📷</span><span>Pos. 5</span></div>
+                    <div class="dslot-num">5</div>
+                    <button class="btn-limpar-dslot" title="Remover desta posição" onclick="limparDestaquePos(5)">✕</button>
+                </div>
+            </div>
+        </div>
+
         <!-- LISTA DE SEÇÕES -->
         <div id="lista-secoes">
 
@@ -517,6 +670,10 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
+let PROP_ID = null;
+// destaqueState[0] = url para posição 1, [1] = posição 2, ..., [4] = posição 5
+let destaqueState = [null, null, null, null, null];
+
 async function init() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { window.location.href = '../login.html'; return; }
@@ -534,6 +691,20 @@ async function init() {
     document.getElementById('sidebar-avatar').textContent = ini;
     document.getElementById('sidebar-nome').textContent = nome;
     document.getElementById('sidebar-handle').textContent = usu ? '@' + usu : '';
+
+    // Carrega o ID da propriedade do usuário
+    const { data: propData, error: propError } = await sb
+        .from('propriedades')
+        .select('id')
+        .eq('usuario_id', user.id)
+        .single();
+
+    PROP_ID = propData?.id || null;
+
+    if (!PROP_ID) {
+        document.getElementById('aviso-sem-prop').style.display = 'flex';
+        console.warn('Nenhuma propriedade encontrada para este usuário.');
+    }
 
     await carregarFotosSalvas();
 
@@ -692,13 +863,18 @@ async function handleFiles(files, secaoId) {
             return;
         }
         const userId = session.user.id;
-        const filePath = `${userId}/${secaoId}/${Date.now()}-${file.name}`;
+        // Sanitiza o nome do arquivo para evitar caracteres inválidos
+        const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const filePath = `${userId}/${secaoId}/${Date.now()}-${safeFileName}`;
         const BUCKET_NAME = 'fotos-dashboard';
 
-        const { error: uploadError } = await sb.storage.from(BUCKET_NAME).upload(filePath, file);
+        const { error: uploadError } = await sb.storage.from(BUCKET_NAME).upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+        });
 
         if (uploadError) {
-            console.error('Erro no upload para o Supabase:', uploadError);
+            console.error('Erro no upload para o Supabase:', uploadError.message, uploadError);
             errorCount++;
             continue; // Pula para o próximo arquivo
         }
@@ -737,6 +913,15 @@ function adicionarFotoNaSecao(src, secaoId, nome) {
     card.innerHTML = `
         <img src="${src}" alt="${nome || 'foto'}">
         <button class="btn-remover-foto" title="Remover foto" onclick="removerFoto(this, '${secaoId}')">✕</button>
+        <div class="badge-destaque-num"></div>
+        <div class="foto-destaque-bar">
+            <span class="bar-label">⭐ Destaque:</span>
+            <button class="btn-pos" data-pos="1" onclick="selecionarDestaque(event)">1</button>
+            <button class="btn-pos" data-pos="2" onclick="selecionarDestaque(event)">2</button>
+            <button class="btn-pos" data-pos="3" onclick="selecionarDestaque(event)">3</button>
+            <button class="btn-pos" data-pos="4" onclick="selecionarDestaque(event)">4</button>
+            <button class="btn-pos" data-pos="5" onclick="selecionarDestaque(event)">5</button>
+        </div>
     `;
 
     card.addEventListener('dragstart', e => {
@@ -748,6 +933,7 @@ function adicionarFotoNaSecao(src, secaoId, nome) {
 
     grid.appendChild(card);
     atualizarContador(secaoId);
+    atualizarBadgesDestaque();
 }
 
 function removerFoto(btn, secaoId) {
@@ -776,7 +962,17 @@ async function salvarTudo() {
     }
     const userId = session.user.id;
 
+    // Monta estrutura de seções com destaque embutido
     const secoesParaSalvar = [];
+
+    // Seção especial para persistir as posições de destaque
+    secoesParaSalvar.push({
+        titulo: '__destaque__',
+        fotos: destaqueState.slice(),
+        ordem: -1
+    });
+
+    // Seções regulares
     document.querySelectorAll('.secao-fotos').forEach((card, index) => {
         const titulo = card.querySelector('.secao-titulo-input').value.trim() || 'Sem título';
         const fotos = Array.from(card.querySelectorAll('.foto-card')).map(f => f.dataset.src);
@@ -791,12 +987,94 @@ async function salvarTudo() {
 
         if (error) throw error;
 
+        // Sincroniza com a tabela fotos_propriedade para exibição pública
+        if (PROP_ID) {
+            await sincronizarFotosPropriedade();
+        } else {
+            console.warn('PROP_ID não encontrado — fotos_propriedade não foi sincronizado.');
+        }
+
         mostrarToast('✅', 'Alterações salvas com sucesso!');
     } catch (err) {
         console.error('Erro ao salvar no Supabase:', err);
-        mostrarToast('❌', 'Erro ao salvar as alterações.');
+        mostrarToast('❌', 'Erro ao salvar. Verifique o console para detalhes.');
     } finally {
         btns.forEach(btn => { btn.disabled = false; btn.textContent = '💾 Salvar'; });
+    }
+}
+
+async function sincronizarFotosPropriedade() {
+    // Coleta todas as fotos das seções
+    const todasFotos = [];
+    document.querySelectorAll('.secao-fotos').forEach(card => {
+        const secaoTitulo = card.querySelector('.secao-titulo-input')?.value.trim() || '';
+        card.querySelectorAll('.foto-card').forEach(fcard => {
+            const src = fcard.dataset.src;
+            if (src) todasFotos.push({ src, titulo: secaoTitulo });
+        });
+    });
+
+    if (todasFotos.length === 0) return;
+
+    // Determina as 5 fotos de destaque (posições 1-5)
+    // Posições definidas pelo usuário têm prioridade; lacunas são preenchidas automaticamente
+    const destaqueUrls = new Set(destaqueState.filter(Boolean));
+    const fotosParaAutoFill = todasFotos.filter(f => !destaqueUrls.has(f.src));
+    let autoFillIdx = 0;
+
+    const fotosParaSalvar = [];
+
+    for (let i = 0; i < 5; i++) {
+        const pos = i + 1;
+        let url = destaqueState[i];
+        let titulo = '';
+
+        if (!url && autoFillIdx < fotosParaAutoFill.length) {
+            url = fotosParaAutoFill[autoFillIdx].src;
+            titulo = fotosParaAutoFill[autoFillIdx].titulo;
+            autoFillIdx++;
+        } else if (url) {
+            const found = todasFotos.find(f => f.src === url);
+            titulo = found?.titulo || '';
+        }
+
+        if (url) {
+            fotosParaSalvar.push({ propriedade_id: PROP_ID, url, titulo, ordem: pos });
+        }
+    }
+
+    // Adiciona as demais fotos (não destaque) com ordem > 5
+    const syncedUrls = new Set(fotosParaSalvar.map(f => f.url));
+    let ordemExtra = 6;
+    todasFotos.forEach(({ src, titulo }) => {
+        if (!syncedUrls.has(src)) {
+            fotosParaSalvar.push({ propriedade_id: PROP_ID, url: src, titulo, ordem: ordemExtra++ });
+            syncedUrls.add(src);
+        }
+    });
+
+    try {
+        // Remove fotos antigas desta propriedade
+        const { error: delErr } = await sb
+            .from('fotos_propriedade')
+            .delete()
+            .eq('propriedade_id', PROP_ID);
+
+        if (delErr) {
+            console.error('Erro ao limpar fotos_propriedade:', delErr);
+            return;
+        }
+
+        // Insere as novas fotos
+        const { error: insErr } = await sb
+            .from('fotos_propriedade')
+            .insert(fotosParaSalvar);
+
+        if (insErr) {
+            console.error('Erro ao inserir em fotos_propriedade:', insErr);
+        }
+    } catch (e) {
+        console.error('Erro na sincronização com fotos_propriedade:', e);
     }
 }
 
@@ -811,24 +1089,125 @@ async function carregarFotosSalvas() {
         .eq('usuario_id', userId)
         .single();
 
-    if (error || !data || !data.fotos_secoes || data.fotos_secoes.length === 0) {
+    const secoesSalvas = data?.fotos_secoes;
+
+    if (error || !secoesSalvas || secoesSalvas.length === 0) {
         console.log('Nenhuma estrutura de fotos salva. Criando exemplos.');
         criarSecao('Área Externa');
         criarSecao('Salão Principal');
         return;
     }
 
-    const secoesSalvas = data.fotos_secoes;
-    if (secoesSalvas && secoesSalvas.length > 0) {
-        secoesSalvas.sort((a, b) => a.ordem - b.ordem);
-        secoesSalvas.forEach(secao => {
-            const secaoId = criarSecao(secao.titulo);
-            if (secao.fotos && secao.fotos.length > 0) {
-                secao.fotos.forEach(fotoSrc => {
-                    adicionarFotoNaSecao(fotoSrc, secaoId, '');
-                });
-            }
+    // Extrai e restaura o estado de destaque da seção especial __destaque__
+    const destaqueSection = secoesSalvas.find(s => s.titulo === '__destaque__');
+    if (destaqueSection && Array.isArray(destaqueSection.fotos)) {
+        destaqueSection.fotos.forEach((src, i) => {
+            if (i < 5) destaqueState[i] = src || null;
         });
+        atualizarPainelDestaque();
+    }
+
+    // Renderiza apenas as seções regulares (filtra __destaque__)
+    const regularSections = secoesSalvas.filter(s => s.titulo !== '__destaque__');
+
+    if (regularSections.length === 0) {
+        criarSecao('Área Externa');
+        criarSecao('Salão Principal');
+        return;
+    }
+
+    regularSections.sort((a, b) => a.ordem - b.ordem);
+    regularSections.forEach(secao => {
+        const secaoId = criarSecao(secao.titulo);
+        if (secao.fotos && secao.fotos.length > 0) {
+            secao.fotos.forEach(fotoSrc => {
+                if (fotoSrc) adicionarFotoNaSecao(fotoSrc, secaoId, '');
+            });
+        }
+    });
+
+    // Aplica badges de destaque após todas as fotos serem renderizadas
+    atualizarBadgesDestaque();
+}
+
+/* ─────────────────────────────────────────
+   DESTAQUE — GALERIA PRINCIPAL
+───────────────────────────────────────── */
+function selecionarDestaque(event) {
+    event.stopPropagation();
+    const btn = event.currentTarget;
+    const pos = parseInt(btn.dataset.pos);
+    const card = btn.closest('.foto-card');
+    if (!card) return;
+    const src = card.dataset.src;
+
+    // Se já está nesta posição, remove
+    if (destaqueState[pos - 1] === src) {
+        destaqueState[pos - 1] = null;
+        mostrarToast('🔕', `Posição ${pos} liberada`);
+    } else {
+        // Remove este src de qualquer outra posição
+        destaqueState.forEach((s, i) => { if (s === src) destaqueState[i] = null; });
+        // Define na nova posição
+        destaqueState[pos - 1] = src;
+        mostrarToast('⭐', `Foto definida como posição ${pos}`);
+    }
+
+    atualizarBadgesDestaque();
+    atualizarPainelDestaque();
+}
+
+function limparDestaquePos(pos) {
+    destaqueState[pos - 1] = null;
+    atualizarBadgesDestaque();
+    atualizarPainelDestaque();
+}
+
+function atualizarBadgesDestaque() {
+    // Mapa inverso: url → posição
+    const srcToPos = {};
+    destaqueState.forEach((src, i) => { if (src) srcToPos[src] = i + 1; });
+
+    document.querySelectorAll('.foto-card').forEach(card => {
+        const src = card.dataset.src;
+        const badge = card.querySelector('.badge-destaque-num');
+        const btns = card.querySelectorAll('.btn-pos');
+        const pos = srcToPos[src];
+
+        if (badge) {
+            if (pos) {
+                badge.textContent = '⭐ ' + pos;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        btns.forEach(b => {
+            const bPos = parseInt(b.dataset.pos);
+            b.classList.toggle('ativo', destaqueState[bPos - 1] === src);
+        });
+    });
+}
+
+function atualizarPainelDestaque() {
+    for (let pos = 1; pos <= 5; pos++) {
+        const src = destaqueState[pos - 1];
+        const img   = document.getElementById('dslot-img-' + pos);
+        const empty = document.getElementById('dslot-empty-' + pos);
+        const slot  = document.getElementById('dslot-' + pos);
+        if (!img || !empty || !slot) continue;
+
+        if (src) {
+            img.src = src;
+            img.style.display = 'block';
+            empty.style.display = 'none';
+            slot.classList.add('preenchido');
+        } else {
+            img.style.display = 'none';
+            empty.style.display = 'flex';
+            slot.classList.remove('preenchido');
+        }
     }
 }
 
