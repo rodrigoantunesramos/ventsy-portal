@@ -683,8 +683,8 @@ const sb = createClient(SUPA_URL, SUPA_KEY);
 
 let PROP_ID = null;
 let PLANO_ATIVO = 'basico'; // 'basico' | 'pro' | 'ultra'
-// destaqueState[0] = url para posição 1, [1] = posição 2, ..., [4] = posição 5
 let destaqueState = [null, null, null, null, null];
+let fotosParaExcluirDoStorage = []; // caminhos a remover do bucket ao salvar
 
 async function init() {
     const { data: { session } } = await sb.auth.getSession();
@@ -900,7 +900,7 @@ async function handleFiles(files, secaoId) {
         return;
     }
 
-    // Enforce Básico: max 5 fotos/mídias total
+    // Enforce Básico: max 5 fotos total
     if (PLANO_ATIVO === 'basico') {
         const totalAtual = contarTotalMidias();
         const restantes = Math.max(0, 5 - totalAtual);
@@ -909,15 +909,19 @@ async function handleFiles(files, secaoId) {
             return;
         }
         if (fileArray.length > restantes) {
-            mostrarToast('⚠️', `Plano Básico: apenas mais ${restantes} foto(s) permitida(s). Restantes foram ignoradas.`);
+            mostrarToast('⚠️', `Plano Básico: apenas mais ${restantes} foto(s) permitida(s).`);
             fileArray = fileArray.slice(0, restantes);
         }
     }
 
-    mostrarToast('⏳', `Processando ${fileArray.length} arquivo(s)...`);
+    // Obtém sessão uma única vez
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { mostrarToast('❌', 'Sessão expirada. Faça login novamente.'); return; }
+    const userId = session.user.id;
+
     const dropZone = document.getElementById('drop-' + secaoId);
     const originalContent = dropZone.innerHTML;
-    dropZone.innerHTML = `<span class="drop-zone-icon">⏳</span><p>Processando, por favor aguarde...</p>`;
+    dropZone.innerHTML = `<span class="drop-zone-icon">⏳</span><p>Enviando ${fileArray.length} arquivo(s)...</p>`;
     dropZone.style.pointerEvents = 'none';
 
     let successCount = 0;
@@ -925,33 +929,35 @@ async function handleFiles(files, secaoId) {
 
     for (const file of fileArray) {
         try {
+            const timestamp = Date.now();
+            const safeBase = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.[^.]+$/, '');
+
+            let uploadBlob = file;
+            let contentType = file.type;
+            let ext = file.name.split('.').pop().toLowerCase();
+
             if (file.type.startsWith('image/')) {
-                // Imagens: comprime via Canvas e armazena como base64 (sem necessidade de bucket)
-                const dataUrl = await comprimirImagem(file, 1200, 0.82);
-                adicionarFotoNaSecao(dataUrl, secaoId, file.name);
-                successCount++;
-            } else if (file.type.startsWith('video/') && PLANO_ATIVO === 'ultra') {
-                // Vídeos: envia para Supabase Storage (bucket fotos-dashboard)
-                const { data: { session } } = await sb.auth.getSession();
-                if (!session) { mostrarToast('❌', 'Sessão expirada.'); break; }
-                const userId = session.user.id;
-                const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-                const filePath = `${userId}/${secaoId}/${Date.now()}-${safeFileName}`;
-                const { error: uploadError } = await sb.storage.from('fotos-dashboard').upload(filePath, file, {
-                    cacheControl: '3600', upsert: false
-                });
-                if (uploadError) {
-                    console.error('Erro no upload de vídeo:', uploadError.message);
-                    mostrarToast('❌', `Vídeo falhou: ${uploadError.message}`);
-                    errorCount++;
-                } else {
-                    const { data: urlData } = sb.storage.from('fotos-dashboard').getPublicUrl(filePath);
-                    adicionarFotoNaSecao(urlData.publicUrl, secaoId, file.name);
-                    successCount++;
-                }
+                // Canvas → Blob JPEG comprimido (máx 1200px)
+                uploadBlob = await comprimirParaBlob(file, 1200, 0.82);
+                contentType = 'image/jpeg';
+                ext = 'jpg';
             }
+
+            const filePath = `${userId}/${secaoId}/${timestamp}-${safeBase}.${ext}`;
+
+            const { error: uploadError } = await sb.storage
+                .from('fotos-dashboard')
+                .upload(filePath, uploadBlob, { contentType, cacheControl: '3600', upsert: false });
+
+            if (uploadError) throw new Error(uploadError.message);
+
+            const { data: urlData } = sb.storage.from('fotos-dashboard').getPublicUrl(filePath);
+            adicionarFotoNaSecao(urlData.publicUrl, secaoId, file.name);
+            successCount++;
+
         } catch (e) {
-            console.error('Erro ao processar arquivo:', e);
+            console.error('Erro ao enviar arquivo:', e.message || e);
+            mostrarToast('❌', `Erro: ${e.message}`);
             errorCount++;
         }
     }
@@ -959,11 +965,11 @@ async function handleFiles(files, secaoId) {
     dropZone.innerHTML = originalContent;
     dropZone.style.pointerEvents = 'auto';
 
-    if (successCount > 0) mostrarToast('✅', `${successCount} arquivo(s) adicionado(s)! Clique em Salvar.`);
-    if (errorCount > 0)   mostrarToast('❌', `${errorCount} arquivo(s) falharam.`);
+    if (successCount > 0) mostrarToast('✅', `${successCount} arquivo(s) enviado(s)! Clique em Salvar.`);
 }
 
-function comprimirImagem(file, maxPx, quality) {
+// Canvas → Blob JPEG (sem base64 no banco, apenas para redimensionar antes do upload)
+function comprimirParaBlob(file, maxPx, quality) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onerror = reject;
@@ -980,7 +986,9 @@ function comprimirImagem(file, maxPx, quality) {
                 const canvas = document.createElement('canvas');
                 canvas.width = width; canvas.height = height;
                 canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                resolve(canvas.toDataURL('image/jpeg', quality));
+                canvas.toBlob(blob => {
+                    blob ? resolve(blob) : reject(new Error('Falha ao gerar blob'));
+                }, 'image/jpeg', quality);
             };
             img.src = e.target.result;
         };
@@ -1030,6 +1038,14 @@ function adicionarFotoNaSecao(src, secaoId, nome) {
 
 function removerFoto(btn, secaoId) {
     const card = btn.parentElement;
+    const url = card.dataset.src;
+
+    // Marca arquivo do Storage para exclusão ao salvar
+    const storageBase = `${SUPA_URL}/storage/v1/object/public/fotos-dashboard/`;
+    if (url && url.startsWith(storageBase)) {
+        fotosParaExcluirDoStorage.push(url.replace(storageBase, ''));
+    }
+
     card.style.opacity = '0';
     card.style.transform = 'scale(0.85)';
     card.style.transition = 'all 0.2s';
@@ -1086,6 +1102,12 @@ async function salvarTudo() {
 }
 
 async function sincronizarFotosPropriedade() {
+    // Remove do Storage arquivos que o usuário excluiu da UI
+    if (fotosParaExcluirDoStorage.length > 0) {
+        await sb.storage.from('fotos-dashboard').remove(fotosParaExcluirDoStorage);
+        fotosParaExcluirDoStorage = [];
+    }
+
     // Coleta todas as fotos com seção e ordem
     const fotosParaSalvar = [];
     let ordemGlobal = 1;
