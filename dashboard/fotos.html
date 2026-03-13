@@ -694,11 +694,23 @@ function atualizarBadgeCapa(id) {
 ───────────────────────────────────────── */
 function handleFiles(files, secaoId) {
     Array.from(files).forEach(file => {
-        if (!file.type.startsWith('image/')) return;
-        const reader = new FileReader();
-        reader.onload = e => adicionarFotoNaSecao(e.target.result, secaoId, file.name);
-        reader.readAsDataURL(file);
-    });
+        if (!file.type.startsWith('image/')) continue;
+        const fileName = Date.now() + '-' + file.name;
+        const { data, error } = await supabase.storage
+            .from('fotos-dashboard') // nome do bucket
+            .upload(fileName, file);
+        if (error) {
+            console.error('Erro upload:', error);
+            return;
+        }
+
+        const { data: publicUrl } = supabase.storage
+            .from('fotos-eventos')
+            .getPublicUrl(fileName);
+
+        adicionarFotoNaSecao(publicUrl.publicUrl, secaoId, file.name);
+    }
+
 }
 
 function adicionarFotoNaSecao(src, secaoId, nome) {
