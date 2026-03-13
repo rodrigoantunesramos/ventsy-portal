@@ -784,17 +784,22 @@ async function init() {
             PLANO = ass?.plano_ativo || 'basico';
         } catch (_) { PLANO = 'basico'; }
 
-        // Busca dados do proprietário
+        // Dados do responsável (nome_responsavel tem prioridade sobre usuarios.nome)
         try {
             const { data: usr } = await sb.from('usuarios').select('nome, usuario, criado_em').eq('id', prop.user_id).single();
             if (usr) {
-                document.getElementById('anfitriao-nome').textContent = usr.nome || '—';
+                const nomeExibir = prop.nome_responsavel || usr.nome || '—';
+                document.getElementById('anfitriao-nome').textContent = nomeExibir;
                 const meses = Math.max(1, Math.round((new Date() - new Date(usr.criado_em)) / 2592000000));
                 document.getElementById('anfitriao-tempo').textContent = meses >= 12
                     ? Math.floor(meses/12) + ' ano(s)' : meses + ' meses';
-                const ini = (usr.nome || '?')[0].toUpperCase();
-                document.getElementById('avatar-anfitriao').innerHTML = `<div class="avatar-anfitriao-inicial">${ini}</div>`;
-                WPP_NUMBER = prop.whatsapp ? prop.whatsapp.replace(/\D/g,'') : WPP_NUMBER;
+                if (prop.foto_responsavel) {
+                    document.getElementById('avatar-anfitriao').innerHTML =
+                        `<img src="${prop.foto_responsavel}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+                } else {
+                    const ini = (nomeExibir || '?')[0].toUpperCase();
+                    document.getElementById('avatar-anfitriao').innerHTML = `<div class="avatar-anfitriao-inicial">${ini}</div>`;
+                }
             }
         } catch (_) {}
 
@@ -896,16 +901,19 @@ function renderPagina(p) {
     document.getElementById('prop-nota').innerHTML = `<span>★</span> ${nota || '—'}`;
     document.getElementById('prop-total-aval').textContent = TODAS_AVAL.length + ' avaliações';
     document.getElementById('prop-cidade').textContent = [p.cidade, p.estado].filter(Boolean).join(', ');
-    // categoria → coluna existente (tipo_evento não existe em propriedades)
-    document.getElementById('det-capacidade').textContent = '—';
+    document.getElementById('det-capacidade').textContent = p.capacidade ? p.capacidade + ' pessoas' : '—';
     document.getElementById('det-tipo').textContent = p.categoria || '—';
     document.getElementById('det-cidade').textContent = p.cidade || '—';
-    document.getElementById('mapa-endereco').textContent = [p.endereco, p.cidade, p.estado, 'Brasil'].filter(Boolean).join(', ');
+    const enderecoCompleto = [p.rua, p.numero, p.complemento, p.bairro, p.cidade, p.estado].filter(Boolean).join(', ');
+    document.getElementById('mapa-endereco').textContent = enderecoCompleto || [p.endereco, p.cidade, p.estado, 'Brasil'].filter(Boolean).join(', ');
     document.getElementById('aval-nota-num').textContent = nota || '—';
     document.getElementById('aval-total-txt').textContent = TODAS_AVAL.length + ' avaliações verificadas';
 
-    // Sobre (descricao não existe em propriedades — campo não preenchido ainda)
-    renderSobre('');
+    // WhatsApp
+    if (p.whatsapp) WPP_NUMBER = p.whatsapp.replace(/\D/g, '');
+
+    // Sobre
+    renderSobre(p.descricao || '');
 
     // Comodidades via tabela propriedadexcomodidades
     carregarComodidades(p.id);

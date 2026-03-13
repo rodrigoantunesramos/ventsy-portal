@@ -830,11 +830,23 @@
         if (prop) {
             PROP_ID = prop.id;
 
-            // Aba 1 — Contato (colunas existentes: nome)
-            setVal('nome-espaco', prop.nome);
+            // Aba 1 — Contato
+            setVal('nome-espaco',   prop.nome);
+            setVal('email-contato', prop.email_contato);
+            setVal('whatsapp',      prop.whatsapp);
+            setVal('telefone',      prop.telefone);
+            setVal('instagram',     prop.instagram);
+            setVal('site',          prop.site);
+            setVal('nome-resp',     prop.nome_responsavel);
+            setVal('bio-resp',      prop.bio_responsavel);
+            if (prop.capacidade) document.getElementById('capacidade').value = prop.capacidade;
+            if (prop.foto_responsavel) {
+                document.getElementById('avatar-preview').innerHTML =
+                    `<img src="${prop.foto_responsavel}" alt="Foto">`;
+            }
 
-            // Aba 2 — Sobre (sem colunas de descricao na tabela)
-            // Carrega comodidades via tabela propriedadexcomodidades
+            // Aba 2 — Sobre
+            setVal('descricao', prop.descricao);
             try {
                 const { data: juncao } = await sb
                     .from('propriedadexcomodidades')
@@ -848,20 +860,43 @@
                 }
             } catch (e) { console.warn('Comodidades não carregadas:', e.message); }
 
-            // Aba 3 — Valores (coluna existente: preco → valor por diária)
-            if (prop.preco) document.getElementById('valor-diaria').value = prop.preco;
+            // Aba 3 — Valores
+            if (prop.valor_hora)    document.getElementById('valor-hora').value    = prop.valor_hora;
+            if (prop.valor_periodo) document.getElementById('valor-periodo').value = prop.valor_periodo;
+            if (prop.preco)         document.getElementById('valor-diaria').value  = prop.preco;
+            setVal('regras-preco', prop.regras_preco);
 
-            // Aba 4 — Endereço (colunas existentes: endereco, cidade, estado)
-            setVal('cidade',  prop.cidade);
-            setVal('uf',      prop.estado);
-            // endereco concatenado → preenche campo rua (melhor esforço)
-            if (prop.endereco) setVal('rua', prop.endereco);
+            // Aba 4 — Endereço
+            setVal('cep',         prop.cep);
+            setVal('rua',         prop.rua);
+            setVal('numero',      prop.numero);
+            setVal('complemento', prop.complemento);
+            setVal('bairro',      prop.bairro);
+            setVal('cidade',      prop.cidade);
+            setVal('uf',          prop.estado);
 
-            // Aba 5 — Eventos (categoria da propriedade → pré-seleciona checkboxes)
+            // Aba 5 — Eventos
             if (prop.categoria) {
                 const cats = prop.categoria.split(',').map(t => t.trim().toLowerCase());
                 document.querySelectorAll('input[name="tipo_evento"]').forEach(cb => {
                     cb.checked = cats.some(c => c.includes(cb.value) || cb.value.includes(c));
+                });
+            }
+
+            // Aba 6 — FAQ
+            if (Array.isArray(prop.faq) && prop.faq.length) {
+                const lista = document.getElementById('lista-faq');
+                lista.innerHTML = '';
+                prop.faq.forEach(f => {
+                    const item = document.createElement('div');
+                    item.className = 'faq-item';
+                    item.innerHTML = `
+                        <div class="faq-inputs">
+                            <input type="text" placeholder="Pergunta..." value="${esc(f.pergunta)}">
+                            <textarea placeholder="Resposta...">${esc(f.resposta)}</textarea>
+                        </div>
+                        <button class="btn-remover-faq" onclick="this.parentElement.remove()">🗑️</button>`;
+                    lista.appendChild(item);
                 });
             }
 
@@ -988,17 +1023,32 @@
                 resposta: item.querySelector('textarea')?.value.trim() || ''
             })).filter(f => f.pergunta);
 
-            // Colunas que existem na tabela propriedades:
-            // id, categoria, preco, imagem_url, avaliacao, estado, cidade,
-            // latitude, longitude, endereco, criadoem, user_id, nome
             const dados = {
-                user_id:  userId,
-                nome:     nome    || null,
-                cidade:   cidade  || null,
-                estado:   uf      || null,
-                preco:    valorDiaria ? parseFloat(valorDiaria) : null,
-                endereco: endereco || null,
-                categoria: tipoEventoStr || null  // tipo principal de evento → categoria
+                user_id:          userId,
+                nome:             nome          || null,
+                whatsapp:         whatsapp      || null,
+                telefone:         telefone      || null,
+                email_contato:    emailContat   || null,
+                instagram:        instagram     || null,
+                site:             site          || null,
+                nome_responsavel: nomeResp      || null,
+                bio_responsavel:  bioResp       || null,
+                capacidade:       capVal        ? parseInt(capVal) : null,
+                descricao:        descricao     || null,
+                valor_hora:       valorHora     ? parseFloat(valorHora)   : null,
+                valor_periodo:    valorPer      ? parseFloat(valorPer)    : null,
+                preco:            valorDiaria   ? parseFloat(valorDiaria) : null,
+                regras_preco:     regrasPreco   || null,
+                cep:              cep           || null,
+                rua:              rua           || null,
+                numero:           numero        || null,
+                complemento:      complemento   || null,
+                bairro:           bairro        || null,
+                cidade:           cidade        || null,
+                estado:           uf            || null,
+                endereco:         endereco      || null,
+                categoria:        tipoEventoStr || null,
+                faq:              faq
             };
 
             // Verifica se já existe uma propriedade para este usuário
