@@ -716,15 +716,18 @@ async function handleFiles(files, secaoId) {
 
         const url = publicUrl.publicUrl;
 
-        // salvar no banco
-        await supabase
-        .from('fotos_imovel')
-        .insert({
-            propriedade_id: propriedadeId,
-            secao: secaoId,
-            url: url,
-            ordem: 0
-        });
+        const { error: dbError } = await supabase
+.from('fotos_imovel')
+.insert({
+    propriedade_id: propriedadeId,
+    secao: secaoId,
+    url: url,
+    ordem: 0
+});
+
+if (dbError) {
+    console.error("Erro ao salvar no banco:", dbError);
+}
 
         adicionarFotoNaSecao(url, secaoId, file.name);
     }
