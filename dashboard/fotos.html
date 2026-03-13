@@ -692,8 +692,8 @@ function atualizarBadgeCapa(id) {
 /* ─────────────────────────────────────────
    UPLOAD DE FOTOS
 ───────────────────────────────────────── */
-function handleFiles(files, secaoId) {
-    Array.from(files).forEach(file => {
+async function handleFiles(files, secaoId) {
+    for (const file of files) {
         if (!file.type.startsWith('image/')) continue;
         const fileName = Date.now() + '-' + file.name;
         const { data, error } = await supabase.storage
@@ -705,7 +705,7 @@ function handleFiles(files, secaoId) {
         }
 
         const { data: publicUrl } = supabase.storage
-            .from('fotos-eventos')
+            .from('fotos-dashboard')
             .getPublicUrl(fileName);
 
         adicionarFotoNaSecao(publicUrl.publicUrl, secaoId, file.name);
