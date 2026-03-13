@@ -680,6 +680,9 @@ async function handleFiles(files, secaoId) {
     dropZone.innerHTML = `<span class="drop-zone-icon">⏳</span><p>Enviando, por favor aguarde...</p>`;
     dropZone.style.pointerEvents = 'none';
 
+    let successCount = 0;
+    let errorCount = 0;
+
     for (const file of fileArray) {
         const { data: { session } } = await sb.auth.getSession();
         if (!session) {
@@ -695,21 +698,31 @@ async function handleFiles(files, secaoId) {
         const { error: uploadError } = await sb.storage.from(BUCKET_NAME).upload(filePath, file);
 
         if (uploadError) {
-            console.error('Erro no upload:', uploadError);
-            mostrarToast('❌', `Falha ao enviar ${file.name}.`);
-            continue;
+            console.error('Erro no upload para o Supabase:', uploadError);
+            errorCount++;
+            continue; // Pula para o próximo arquivo
         }
 
-        // Pega a URL pública do arquivo recém-enviado
+        // Se chegou aqui, o upload funcionou. Agora pega a URL.
         const { data: urlData } = sb.storage.from(BUCKET_NAME).getPublicUrl(filePath);
 
         if (urlData && urlData.publicUrl) {
             adicionarFotoNaSecao(urlData.publicUrl, secaoId, file.name);
+            successCount++;
+        } else {
+            console.error('Upload bem-sucedido, mas falha ao obter URL pública para:', filePath);
+            errorCount++;
         }
     }
     dropZone.innerHTML = originalContent;
     dropZone.style.pointerEvents = 'auto';
-    mostrarToast('✅', 'Fotos enviadas com sucesso!');
+    
+    if (successCount > 0) {
+        mostrarToast('✅', `${successCount} foto(s) enviada(s) com sucesso!`);
+    }
+    if (errorCount > 0) {
+        mostrarToast('❌', `${errorCount} foto(s) falharam. Verifique as permissões do bucket e o console do navegador.`);
+    }
 }
 
 function adicionarFotoNaSecao(src, secaoId, nome) {
