@@ -693,7 +693,7 @@ async function handleFiles(files, secaoId) {
         }
         const userId = session.user.id;
         const filePath = `${userId}/${secaoId}/${Date.now()}-${file.name}`;
-        const BUCKET_NAME = 'fotos-propriedades';
+        const BUCKET_NAME = 'fotos-dashboard';
 
         const { error: uploadError } = await sb.storage.from(BUCKET_NAME).upload(filePath, file);
 
