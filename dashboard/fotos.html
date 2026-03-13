@@ -693,14 +693,20 @@ function atualizarBadgeCapa(id) {
    UPLOAD DE FOTOS
 ───────────────────────────────────────── */
 async function handleFiles(files, secaoId) {
+
     for (const file of files) {
+
         if (!file.type.startsWith('image/')) continue;
+
         const fileName = Date.now() + '-' + file.name;
+
+        // upload storage
         const { data, error } = await supabase.storage
-            .from('fotos-dashboard') // nome do bucket
+            .from('fotos-dashboard')
             .upload(fileName, file);
+
         if (error) {
-            console.error('Erro upload:', error);
+            console.error(error);
             return;
         }
 
@@ -708,9 +714,20 @@ async function handleFiles(files, secaoId) {
             .from('fotos-dashboard')
             .getPublicUrl(fileName);
 
-        adicionarFotoNaSecao(publicUrl.publicUrl, secaoId, file.name);
-    }
+        const url = publicUrl.publicUrl;
 
+        // salvar no banco
+        await supabase
+        .from('fotos_imovel')
+        .insert({
+            propriedade_id: propriedadeId,
+            secao: secaoId,
+            url: url,
+            ordem: 0
+        });
+
+        adicionarFotoNaSecao(url, secaoId, file.name);
+    }
 }
 
 function adicionarFotoNaSecao(src, secaoId, nome) {
