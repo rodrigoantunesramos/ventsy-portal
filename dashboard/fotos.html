@@ -538,6 +538,8 @@ async function init() {
     document.getElementById('sidebar-nome').textContent   = nome;
     document.getElementById('sidebar-handle').textContent = usu ? '@' + usu : '';
 
+await carregarFotosSalvas();
+
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('main-content').style.display   = 'flex';
 }
@@ -772,104 +774,143 @@ function removerFoto(btn, secaoId) {
 /* ─────────────────────────────────────────
    Buscar foto
 ───────────────────────────────────────── */
+async function handleFiles(files, secaoId) {
+    const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (fileArray.length === 0) return;
 
-async function carregarFotos() {
+    mostrarToast('⏳', `Enviando ${fileArray.length} foto(s)...`);
+    const dropZone = document.getElementById('drop-' + secaoId);
+    const originalContent = dropZone.innerHTML;
+    dropZone.innerHTML = `<span class="drop-zone-icon">⏳</span><p>Enviando, por favor aguarde...</p>`;
+    dropZone.style.pointerEvents = 'none'; // Desativa cliques durante o upload
 
-    document.querySelectorAll('.grid-fotos').forEach(g => g.innerHTML = '');
+    for (const file of fileArray) {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) {
+            mostrarToast('❌', 'Sessão expirada. Faça login novamente.');
+            dropZone.innerHTML = originalContent;
+            dropZone.style.pointerEvents = 'auto';
+            return;
+        }
+        const userId = session.user.id;
+        const filePath = `${userId}/${secaoId}/${Date.now()}-${file.name}`;
 
-    const { data, error } = await supabase
-    .from('fotos_imovel')
-    .select('*')
-    .eq('propriedade_id', propriedadeId)
-    .order('ordem');
+        // IMPORTANTE: Substitua 'fotos-propriedades' pelo nome do seu bucket no Supabase.
+        const BUCKET_NAME = 'fotos-propriedades';
 
-    if (error) {
-        console.error(error);
-        return;
+        const { error: uploadError } = await sb.storage
+            .from(BUCKET_NAME)
+            .upload(filePath, file);
+
+        if (uploadError) {
+            console.error('Erro no upload:', uploadError);
+            mostrarToast('❌', `Falha ao enviar ${file.name}.`);
+            continue; // Pula para o próximo arquivo em caso de erro
+        }
+
+        const { data: { publicUrl } } = sb.storage
+            .from(BUCKET_NAME)
+            .getPublicUrl(filePath);
+
+        if (publicUrl) {
+            adicionarFotoNaSecao(publicUrl, secaoId, file.name);
+        }
     }
-
-    data.forEach(foto => {
-        adicionarFotoNaSecao(
-            foto.url,
-            foto.secao,
-            "foto"
-        );
-    });
+    dropZone.innerHTML = originalContent;
+    dropZone.style.pointerEvents = 'auto';
+    mostrarToast('✅', 'Fotos enviadas com sucesso!');
 }
 
-    document.addEventListener("DOMContentLoaded", () => {
-    carregarFotos();
-});
+function adicionarFotoNaSecao(src, secaoId, nome) {
 
-
-    
-/* ─────────────────────────────────────────
-   DRAG & DROP NA ZONA DE UPLOAD
-───────────────────────────────────────── */
-function onDragOver(e, id) {
-    e.preventDefault();
-    document.getElementById('drop-' + id)?.classList.add('dragover');
-}
-function onDragLeave(id) {
-    document.getElementById('drop-' + id)?.classList.remove('dragover');
-}
-function onDrop(e, id) {
-    e.preventDefault();
-    document.getElementById('drop-' + id)?.classList.remove('dragover');
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-        handleFiles(files, id);
-    }
-}
 
 /* ─────────────────────────────────────────
    SALVAR
 ───────────────────────────────────────── */
-function salvarTudo() {
-    // Coleta estado atual para persistência futura (Supabase Storage)
-    const secoes = [];
-    document.querySelectorAll('.secao-fotos').forEach(card => {
-        const titulo = card.querySelector('.secao-titulo-input').value.trim() || 'Sem título';
-        const fotos  = Array.from(card.querySelectorAll('.foto-card')).map(f => f.dataset.src);
-        secoes.push({ titulo, fotos });
+async function salvarTudo() {
+    const btns = document.querySelectorAll('.btn-salvar, .btn-salvar-tudo');
+    btns.forEach(btn => {
+        btn.disabled = true;
+        btn.textContent = '💾 Salvando...';
     });
 
-    // Por enquanto salva no localStorage como rascunho
-    localStorage.setItem('ventsy_fotos_secoes', JSON.stringify(
-        secoes.map(s => ({ titulo: s.titulo, total: s.fotos.length }))
-    ));
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+        mostrarToast('❌', 'Você não está logado. Faça o login novamente.');
+        btns.forEach(btn => { btn.disabled = false; btn.textContent = '💾 Salvar'; });
+        return;
+    }
+    const userId = session.user.id;
 
-    console.log('Seções para salvar no Supabase:', secoes.map(s => ({ titulo: s.titulo, fotos: s.fotos.length })));
-    mostrarToast('✅', 'Alterações salvas com sucesso!');
+    const secoesParaSalvar = [];
+    document.querySelectorAll('.secao-fotos').forEach((card, index) => {
+        const titulo = card.querySelector('.secao-titulo-input').value.trim() || 'Sem título';
+        const fotos  = Array.from(card.querySelectorAll('.foto-card')).map(f => f.dataset.src);
+
+        secoesParaSalvar.push({
+            titulo,
+            fotos,
+            ordem: index
+        });
+    });
+
+    try {
+        // Assumindo que você tem uma tabela 'propriedades' com uma coluna 'fotos_secoes' (tipo jsonb)
+        const { error } = await sb
+            .from('propriedades')
+            .update({ fotos_secoes: secoesParaSalvar })
+            .eq('usuario_id', userId);
+
+        if (error) throw error;
+
+        mostrarToast('✅', 'Alterações salvas com sucesso!');
+    } catch (err) {
+        console.error('Erro ao salvar no Supabase:', err);
+        mostrarToast('❌', 'Erro ao salvar as alterações.');
+    } finally {
+        btns.forEach(btn => { btn.disabled = false; btn.textContent = '💾 Salvar'; });
+    }
 }
-
-/* ─────────────────────────────────────────
-   TOAST
-───────────────────────────────────────── */
-function mostrarToast(icone, msg) {
-    document.getElementById('toast-icone').textContent = icone;
-    document.getElementById('toast-msg').textContent   = msg;
-    const t = document.getElementById('toast');
-    t.classList.add('visivel');
-    setTimeout(() => t.classList.remove('visivel'), 3500);
-}
-
 /* ─────────────────────────────────────────
    SEÇÕES DE EXEMPLO (pré-carregadas)
 ───────────────────────────────────────── */
-function carregarExemplos() {
-    // Cria seções de exemplo para o proprietário entender o conceito
-    const exemplos = [
-        'Área Externa',
-        'Salão Principal',
-    ];
-    exemplos.forEach(t => criarSecao(t));
+async function carregarFotosSalvas() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return;
+    const userId = session.user.id;
+
+    const { data, error } = await sb
+        .from('propriedades') // Nome da sua tabela de propriedades
+        .select('fotos_secoes')
+        .eq('usuario_id', userId)
+        .single();
+
+    if (error || !data || !data.fotos_secoes || data.fotos_secoes.length === 0) {
+        console.log('Nenhuma estrutura de fotos salva. Criando exemplos.');
+        // Se não houver nada salvo, cria seções de exemplo para guiar o usuário
+        criarSecao('Área Externa');
+        criarSecao('Salão Principal');
+        return;
+    }
+
+    const secoesSalvas = data.fotos_secoes;
+    if (secoesSalvas && secoesSalvas.length > 0) {
+        secoesSalvas.sort((a, b) => a.ordem - b.ordem); // Garante a ordem correta
+
+        secoesSalvas.forEach(secao => {
+            const secaoId = criarSecao(secao.titulo);
+            if (secao.fotos && secao.fotos.length > 0) {
+                secao.fotos.forEach(fotoSrc => {
+                    adicionarFotoNaSecao(fotoSrc, secaoId, ''); // O nome do arquivo não é crucial na recarga
+                });
+            }
+        });
+    }
 }
 
 /* Arranca */
 init();
-// Carrega exemplos apenas na primeira vez (sem fotos ainda)
-carregarExemplos();
+
 </script>
 
 </body>
