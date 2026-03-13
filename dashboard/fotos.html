@@ -700,10 +700,11 @@ async function handleFiles(files, secaoId) {
             continue;
         }
 
-        const { data: { publicUrl } } = sb.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+        // Pega a URL pública do arquivo recém-enviado
+        const { data: urlData } = sb.storage.from(BUCKET_NAME).getPublicUrl(filePath);
 
-        if (publicUrl) {
-            adicionarFotoNaSecao(publicUrl, secaoId, file.name);
+        if (urlData && urlData.publicUrl) {
+            adicionarFotoNaSecao(urlData.publicUrl, secaoId, file.name);
         }
     }
     dropZone.innerHTML = originalContent;
