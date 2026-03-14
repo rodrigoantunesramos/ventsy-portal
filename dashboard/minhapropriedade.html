@@ -944,13 +944,25 @@
             setVal('descricao', prop.descricao);
 
             // Aba 7 — Serviços inclusos (compara exato pelo value)
-            const comodsSalvas = Array.isArray(prop.comodidades) ? prop.comodidades : [];
+            // parseia tanto JS array quanto string PostgreSQL {a,b} ou JSON ["a","b"]
+            function parseArray(val) {
+                if (Array.isArray(val)) return val;
+                if (!val) return [];
+                if (typeof val === 'string') {
+                    if (val.startsWith('{')) return val.slice(1,-1).split(',').map(s => s.trim().replace(/^"|"$/g,'')).filter(Boolean);
+                    try { return JSON.parse(val); } catch(_) {}
+                }
+                return [];
+            }
+            const comodsSalvas = parseArray(prop.comodidades);
+            console.log('[LOAD] comodidades:', comodsSalvas);
             document.querySelectorAll('#servicos .amenidade-check input:not(.svc-extra)').forEach(cb => {
                 cb.checked = comodsSalvas.includes(cb.value);
             });
 
             // Aba 7 — Serviços extras (compara exato pelo value)
-            const extrasSalvos = Array.isArray(prop.servicos_extras) ? prop.servicos_extras : [];
+            const extrasSalvos = parseArray(prop.servicos_extras);
+            console.log('[LOAD] servicos_extras:', extrasSalvos);
             document.querySelectorAll('#servicos .svc-extra').forEach(cb => {
                 cb.checked = extrasSalvos.includes(cb.value);
             });
@@ -1001,6 +1013,24 @@
             atualizarBtnAnuncio();
             if (prop.cidade) setTimeout(atualizarMapa, 800);
         }
+
+        // Auto-save comodidades e servicos_extras ao marcar/desmarcar
+        document.querySelectorAll('#servicos .amenidade-check input').forEach(cb => {
+            cb.addEventListener('change', async () => {
+                if (!PROP_ID) return;
+                const comodidades = Array.from(
+                    document.querySelectorAll('#servicos .amenidade-check input:not(.svc-extra):checked')
+                ).map(c => c.value);
+                const servicosExtras = Array.from(
+                    document.querySelectorAll('#servicos .svc-extra:checked')
+                ).map(c => c.value);
+                const { error } = await sb.from('propriedades')
+                    .update({ comodidades, servicos_extras: servicosExtras })
+                    .eq('id', PROP_ID);
+                if (error) console.error('[AUTO-SAVE servicos] erro:', error);
+                else console.log('[AUTO-SAVE servicos] ok — comodidades:', comodidades, '| extras:', servicosExtras);
+            });
+        });
 
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('main-content').style.display   = 'flex';
@@ -1318,7 +1348,6 @@
 
 </body>
 </html>
-
 
 
 
