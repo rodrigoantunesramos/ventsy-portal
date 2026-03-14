@@ -943,20 +943,17 @@
             // Aba 2 — Sobre
             setVal('descricao', prop.descricao);
 
-            // Aba 7 — Serviços inclusos
-            if (Array.isArray(prop.comodidades) && prop.comodidades.length) {
-                const salvas = prop.comodidades.map(c => c.toLowerCase());
-                document.querySelectorAll('#servicos .amenidade-check input:not(.svc-extra)').forEach(cb => {
-                    cb.checked = salvas.some(s => s.includes(cb.value.toLowerCase()));
-                });
-            }
-            // Aba 7 — Serviços extras
-            if (Array.isArray(prop.servicos_extras) && prop.servicos_extras.length) {
-                const extras = prop.servicos_extras.map(c => c.toLowerCase());
-                document.querySelectorAll('#servicos .svc-extra').forEach(cb => {
-                    cb.checked = extras.some(s => s.includes(cb.value.toLowerCase()));
-                });
-            }
+            // Aba 7 — Serviços inclusos (compara exato pelo value)
+            const comodsSalvas = Array.isArray(prop.comodidades) ? prop.comodidades : [];
+            document.querySelectorAll('#servicos .amenidade-check input:not(.svc-extra)').forEach(cb => {
+                cb.checked = comodsSalvas.includes(cb.value);
+            });
+
+            // Aba 7 — Serviços extras (compara exato pelo value)
+            const extrasSalvos = Array.isArray(prop.servicos_extras) ? prop.servicos_extras : [];
+            document.querySelectorAll('#servicos .svc-extra').forEach(cb => {
+                cb.checked = extrasSalvos.includes(cb.value);
+            });
 
             // Aba 3 — Valores
             if (prop.valor_hora)     document.getElementById('valor-hora').value     = prop.valor_hora;
@@ -1099,15 +1096,15 @@
             // Coleta Aba 2
             const descricao   = document.getElementById('descricao').value.trim();
 
-            // Coleta Aba 7 — Serviços inclusos
+            // Coleta Aba 7 — Serviços inclusos (salva o value, não o label)
             const comodidades = Array.from(
                 document.querySelectorAll('#servicos .amenidade-check input:not(.svc-extra):checked')
-            ).map(cb => cb.closest('label').querySelector('.amenidade-label').textContent.trim());
+            ).map(cb => cb.value);
 
-            // Coleta Aba 7 — Serviços extras
+            // Coleta Aba 7 — Serviços extras (salva o value)
             const servicosExtras = Array.from(
                 document.querySelectorAll('#servicos .svc-extra:checked')
-            ).map(cb => cb.closest('label').querySelector('.amenidade-label').textContent.trim());
+            ).map(cb => cb.value);
 
             // Coleta Aba 3
             const valorHora   = document.getElementById('valor-hora').value;
@@ -1197,20 +1194,16 @@
 
             if (saveError) throw saveError;
 
-            // Sincroniza comodidades na tabela propriedadexcomodidades
-            if (PROP_ID && comodidades.length > 0) {
+            // Sincroniza junction table propriedadexcomodidades
+            // Sempre apaga primeiro (garante que desmarcar funcione)
+            if (PROP_ID) {
                 try {
-                    // Busca IDs das comodidades pelo nome
-                    const { data: comods } = await sb
-                        .from('comodidades')
-                        .select('id, nome')
-                        .in('nome', comodidades);
-                    if (comods && comods.length) {
-                        await sb.from('propriedadexcomodidades').delete().eq('propriedadeID', PROP_ID);
-                        const linhas = comods.map(c => ({ propriedadeID: PROP_ID, comodidadeID: c.id }));
+                    await sb.from('propriedadexcomodidades').delete().eq('propriedadeID', PROP_ID);
+                    if (comodidades.length > 0) {
+                        const linhas = comodidades.map(value => ({ propriedadeID: PROP_ID, comodidadeID: value }));
                         await sb.from('propriedadexcomodidades').insert(linhas);
                     }
-                } catch (e) { console.warn('Aviso: comodidades não sincronizadas:', e.message); }
+                } catch (e) { console.warn('Aviso: junction comodidades não sincronizada:', e.message); }
             }
 
             mostrarToast('✅', 'Alterações salvas com sucesso!');
