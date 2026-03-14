@@ -461,6 +461,41 @@
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+        /* ── ANALYTICS TABS ── */
+        .analytics-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+        }
+        .analytics-header h3 { margin: 0; }
+        .analytics-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 7px 14px; border-radius: 20px;
+            border: 1.5px solid #e8e8e8; background: none;
+            font-family: inherit; font-size: 0.78rem; font-weight: 600;
+            color: #888; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .tab-btn[data-tipo="view"].ativo       { background: #ff385c; border-color: #ff385c; color: #fff; }
+        .tab-btn[data-tipo="whatsapp"].ativo   { background: #25D366; border-color: #25D366; color: #fff; }
+        .tab-btn[data-tipo="formulario"].ativo { background: #1a73e8; border-color: #1a73e8; color: #fff; }
+        .tab-btn[data-tipo="nota"].ativo       { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+        .tab-btn[data-tipo="view"]:not(.ativo):hover       { border-color: #ff385c; color: #ff385c; }
+        .tab-btn[data-tipo="whatsapp"]:not(.ativo):hover   { border-color: #25D366; color: #25D366; }
+        .tab-btn[data-tipo="formulario"]:not(.ativo):hover { border-color: #1a73e8; color: #1a73e8; }
+        .tab-btn[data-tipo="nota"]:not(.ativo):hover       { border-color: #f59e0b; color: #f59e0b; }
+        .grafico-vazio {
+            display: none; text-align: center; padding: 16px 0 4px;
+            color: #bbb; font-size: 0.85rem;
+        }
+        /* Skeleton loader para métricas */
+        .card-metrica h3.loading {
+            color: transparent; background: #f0f0f0;
+            border-radius: 6px; animation: shimmer 1.4s ease infinite;
+        }
+        @keyframes shimmer {
+            0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+        }
+
     </style>
 </head>
 <body>
@@ -551,29 +586,38 @@
         <div class="grid-metricas">
             <div class="card-metrica">
                 <span class="icon">👁</span>
-                <div><p>Visualizações</p><h3>128</h3></div>
-            </div>
-            <div class="card-metrica">
-                <span class="icon">💬</span>
-                <div><p>Cliques em contato</p><h3>24</h3></div>
+                <div><p>Visualizações (30d)</p><h3 id="m-views" class="loading">—</h3></div>
             </div>
             <div class="card-metrica">
                 <span class="icon">📱</span>
-                <div><p>Cliques WhatsApp</p><h3>18</h3></div>
+                <div><p>Cliques WhatsApp (30d)</p><h3 id="m-whatsapp" class="loading">—</h3></div>
+            </div>
+            <div class="card-metrica">
+                <span class="icon">💬</span>
+                <div><p>Cliques Formulário (30d)</p><h3 id="m-formulario" class="loading">—</h3></div>
             </div>
             <div class="card-metrica">
                 <span class="icon">⭐</span>
-                <div><p>Avaliação Média</p><h3>4.8</h3></div>
+                <div><p>Avaliação Média</p><h3 id="m-nota" class="loading">—</h3></div>
             </div>
         </div>
 
         <!-- ── GRÁFICO + LATERAL ── -->
         <div class="container-duas-colunas">
             <div class="secao-dash">
-                <h3>Visitas nos últimos 30 dias</h3>
-                <div style="position:relative; height:300px; width:100%">
-                    <canvas id="graficoVisitas"></canvas>
+                <div class="analytics-header">
+                    <h3>Desempenho — últimos 30 dias</h3>
+                    <div class="analytics-tabs">
+                        <button class="tab-btn ativo" data-tipo="view"       onclick="mudarTab(this)">👁 Visualizações</button>
+                        <button class="tab-btn"        data-tipo="whatsapp"   onclick="mudarTab(this)">📱 WhatsApp</button>
+                        <button class="tab-btn"        data-tipo="formulario" onclick="mudarTab(this)">💬 Formulário</button>
+                        <button class="tab-btn"        data-tipo="nota"       onclick="mudarTab(this)">⭐ Avaliações</button>
+                    </div>
                 </div>
+                <div style="position:relative; height:300px; width:100%">
+                    <canvas id="graficoAnalytics"></canvas>
+                </div>
+                <p class="grafico-vazio" id="grafico-vazio">Ainda não há dados para este período.</p>
             </div>
 
             <div>
@@ -769,7 +813,24 @@
                 document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
             }
 
-            montarGrafico();
+            /* Busca ID da propriedade do usuário */
+            try {
+                const { data: prop } = await sb
+                    .from('propriedades').select('id')
+                    .eq('user_id', user.id).limit(1).single();
+                propIdDash = prop?.id || null;
+            } catch (_) {}
+
+            /* Carrega métricas e gráfico inicial */
+            if (propIdDash) {
+                carregarMetricas(propIdDash);
+            } else {
+                ['m-views','m-whatsapp','m-formulario','m-nota'].forEach(id => {
+                    const el = document.getElementById(id);
+                    el.textContent = '—'; el.classList.remove('loading');
+                });
+            }
+            buscarDados30Dias('view').then(dados => montarGrafico('view', dados));
 
         } catch (err) {
             console.error('Erro no init:', err);
@@ -872,32 +933,183 @@
         setTimeout(() => t.classList.remove('visivel'), 5000);
     }
 
-    /* ── Gráfico ── */
-    function montarGrafico() {
-        const ctx      = document.getElementById('graficoVisitas').getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(255, 56, 92, 0.2)');
-        gradient.addColorStop(1, 'rgba(255, 56, 92, 0)');
+    /* ── Analytics: variáveis globais ── */
+    let graficoInst  = null;
+    let dadosCache   = {};
+    let propIdDash   = null;
+    let tabAtiva     = 'view';
 
-        new Chart(ctx, {
+    const COR_CHART = {
+        view:       '#ff385c',
+        whatsapp:   '#25D366',
+        formulario: '#1a73e8',
+        nota:       '#f59e0b'
+    };
+    const LABEL_CHART = {
+        view:       'Visualizações',
+        whatsapp:   'Cliques WhatsApp',
+        formulario: 'Cliques Formulário',
+        nota:       'Avaliação média'
+    };
+
+    /* Gera labels e chaves ISO dos últimos 30 dias */
+    const { LABELS_30D, KEYS_30D } = (() => {
+        const LABELS_30D = [], KEYS_30D = [], hoje = new Date();
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(hoje);
+            d.setDate(hoje.getDate() - i);
+            LABELS_30D.push(`${d.getDate()}/${d.getMonth() + 1}`);
+            KEYS_30D.push(d.toISOString().split('T')[0]);
+        }
+        return { LABELS_30D, KEYS_30D };
+    })();
+
+    /* Dados demo (quando não há propriedade cadastrada) */
+    const DEMO_DADOS = {
+        view:       [8,12,18,10,22,28,20,35,40,18,30,45,38,52,48,25,35,42,38,55,60,45,42,55,62,70,55,65,72,80],
+        whatsapp:   [1, 2, 3, 1, 4, 5, 3, 6, 7, 3, 5, 8, 6, 9, 8, 4, 6, 7, 6, 9,10, 8, 7, 9,11,12,10,11,12,14],
+        formulario: [0, 1, 1, 0, 2, 2, 1, 3, 4, 1, 2, 4, 3, 5, 4, 2, 3, 4, 3, 5, 5, 4, 3, 5, 6, 7, 5, 6, 7, 8],
+        nota:       [null,null,null,null,4.5,null,null,null,null,null,4.8,null,null,null,null,null,null,null,5.0,null,null,null,null,null,null,4.7,null,null,null,null]
+    };
+
+    /* ── Carrega totais dos cards de métricas ── */
+    async function carregarMetricas(propId) {
+        const inicio = new Date();
+        inicio.setDate(inicio.getDate() - 30);
+        try {
+            const { data } = await sb
+                .from('analytics_eventos')
+                .select('evento_tipo')
+                .eq('propriedade_id', propId)
+                .gte('created_at', inicio.toISOString());
+
+            const c = { view: 0, whatsapp: 0, formulario: 0 };
+            (data || []).forEach(e => { if (c[e.evento_tipo] !== undefined) c[e.evento_tipo]++; });
+
+            ['views','whatsapp','formulario'].forEach(id => {
+                const el = document.getElementById('m-' + id);
+                el.textContent = c[id === 'views' ? 'view' : id];
+                el.classList.remove('loading');
+            });
+        } catch (_) {
+            ['m-views','m-whatsapp','m-formulario'].forEach(id => {
+                const el = document.getElementById(id);
+                el.textContent = '—'; el.classList.remove('loading');
+            });
+        }
+
+        /* Avaliação média — tenta coluna 'avaliacao' em propriedades */
+        try {
+            const { data: prop } = await sb
+                .from('propriedades').select('avaliacao').eq('id', propId).single();
+            const nota = prop?.avaliacao;
+            const el = document.getElementById('m-nota');
+            el.textContent = nota ? Number(nota).toFixed(1) : '—';
+            el.classList.remove('loading');
+        } catch (_) {
+            const el = document.getElementById('m-nota');
+            el.textContent = '—'; el.classList.remove('loading');
+        }
+    }
+
+    /* ── Busca 30 dias de um tipo de evento (com cache) ── */
+    async function buscarDados30Dias(tipo) {
+        if (dadosCache[tipo]) return dadosCache[tipo];
+        if (!propIdDash) { dadosCache[tipo] = DEMO_DADOS[tipo]; return DEMO_DADOS[tipo]; }
+
+        const inicio = new Date();
+        inicio.setDate(inicio.getDate() - 30);
+        let valores = new Array(30).fill(0);
+
+        try {
+            if (tipo === 'nota') {
+                const { data } = await sb
+                    .from('avaliacoes')
+                    .select('nota, criado_em')
+                    .eq('propriedade_id', propIdDash)
+                    .gte('criado_em', inicio.toISOString());
+
+                const cnt = {}, soma = {};
+                KEYS_30D.forEach(k => { cnt[k] = 0; soma[k] = 0; });
+                (data || []).forEach(a => {
+                    const k = a.criado_em?.split('T')[0];
+                    if (cnt[k] !== undefined) { cnt[k]++; soma[k] += Number(a.nota) || 0; }
+                });
+                valores = KEYS_30D.map(k => cnt[k] > 0 ? +(soma[k] / cnt[k]).toFixed(2) : null);
+            } else {
+                const { data } = await sb
+                    .from('analytics_eventos')
+                    .select('created_at')
+                    .eq('propriedade_id', propIdDash)
+                    .eq('evento_tipo', tipo)
+                    .gte('created_at', inicio.toISOString());
+
+                const cnt = {};
+                KEYS_30D.forEach(k => { cnt[k] = 0; });
+                (data || []).forEach(e => {
+                    const k = e.created_at?.split('T')[0];
+                    if (cnt[k] !== undefined) cnt[k]++;
+                });
+                valores = KEYS_30D.map(k => cnt[k]);
+            }
+        } catch (_) {}
+
+        dadosCache[tipo] = valores;
+        return valores;
+    }
+
+    /* ── Troca aba e atualiza gráfico ── */
+    async function mudarTab(btn) {
+        const tipo = btn.dataset.tipo;
+        if (tipo === tabAtiva) return;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo'));
+        btn.classList.add('ativo');
+        tabAtiva = tipo;
+        const dados = await buscarDados30Dias(tipo);
+        montarGrafico(tipo, dados);
+    }
+
+    /* ── Renderiza / atualiza o gráfico ── */
+    function montarGrafico(tipo, dados) {
+        const ctx = document.getElementById('graficoAnalytics').getContext('2d');
+        const cor = COR_CHART[tipo];
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, cor + '33');
+        gradient.addColorStop(1, cor + '00');
+
+        const temDados = dados.some(v => v !== null && v > 0);
+        document.getElementById('grafico-vazio').style.display = (!propIdDash || temDados) ? 'none' : 'block';
+
+        if (graficoInst) { graficoInst.destroy(); graficoInst = null; }
+
+        graficoInst = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Dia 01','Dia 05','Dia 10','Dia 15','Dia 20','Dia 25','Dia 30'],
+                labels: LABELS_30D,
                 datasets: [{
-                    label: 'Visitas',
-                    data: [45, 59, 80, 71, 102, 85, 128],
-                    borderColor: '#ff385c', borderWidth: 3,
+                    label: LABEL_CHART[tipo],
+                    data: dados,
+                    borderColor: cor, borderWidth: 2.5,
                     fill: true, backgroundColor: gradient,
-                    tension: 0.4, pointRadius: 4,
-                    pointBackgroundColor: '#ff385c'
+                    tension: 0.4,
+                    pointRadius: temDados ? 3 : 0,
+                    pointBackgroundColor: cor,
+                    spanGaps: tipo === 'nota'
                 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { color: '#999' } },
-                    x: { grid: { display: false },                      ticks: { color: '#999' } }
+                    y: {
+                        beginAtZero: tipo !== 'nota',
+                        min: tipo === 'nota' ? 0 : undefined,
+                        max: tipo === 'nota' ? 5 : undefined,
+                        grid: { color: '#f0f0f0' },
+                        ticks: { color: '#999', stepSize: tipo === 'nota' ? 1 : undefined }
+                    },
+                    x: { grid: { display: false }, ticks: { color: '#999', maxTicksLimit: 10 } }
                 }
             }
         });
