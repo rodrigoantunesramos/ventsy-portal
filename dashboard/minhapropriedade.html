@@ -611,10 +611,6 @@
                             <div class="input-moeda"><span>R$</span><input type="number" id="valor-hora" placeholder="0,00" min="0"></div>
                         </div>
                         <div class="campo">
-                            <label>Valor por Período (meio período)</label>
-                            <div class="input-moeda"><span>R$</span><input type="number" id="valor-periodo" placeholder="0,00" min="0"></div>
-                        </div>
-                        <div class="campo">
                             <label>Valor por Diária (dia completo)</label>
                             <div class="input-moeda"><span>R$</span><input type="number" id="valor-diaria" placeholder="0,00" min="0"></div>
                         </div>
@@ -980,7 +976,6 @@
 
             // Aba 3 — Valores
             if (prop.valor_hora)     document.getElementById('valor-hora').value     = prop.valor_hora;
-            if (prop.valor_periodo)  document.getElementById('valor-periodo').value  = prop.valor_periodo;
 
           
             setVal('regras-preco', prop.regras_preco);
@@ -1155,7 +1150,6 @@
 
             // Coleta Aba 3
             const valorHora   = document.getElementById('valor-hora').value;
-            const valorPer    = document.getElementById('valor-periodo').value;
             const valorDiaria = document.getElementById('valor-diaria').value;
             const regrasPreco = document.getElementById('regras-preco').value.trim();
 
@@ -1212,7 +1206,6 @@
                 foto_responsavel: fotoResp,
                 bio_responsavel:  bioResp     || null,
                 valor_hora:       valorHora   ? parseFloat(valorHora)   : null,
-                valor_periodo:    valorPer    ? parseFloat(valorPer)    : null,
                 regras_preco:     regrasPreco || null,
                 cep:              cep         || null,
                 rua:              rua         || null,
@@ -1387,5 +1380,4 @@
 
 </body>
 </html>
-
 
