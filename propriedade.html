@@ -824,10 +824,33 @@ const sb = createClient(SUPA_URL, SUPA_KEY);
 /* ────────────────────────────────────────────────────────
    DADOS GLOBAIS
 ──────────────────────────────────────────────────────── */
-let PROP       = null;   // dados da propriedade
-let PLANO      = 'basico'; // 'basico' | 'pro' | 'ultra'
-let FOTOS      = [];     // fotos do Supabase
-let VIDEOS     = [];     // vídeos do Supabase (ultra)
+let PROP       = null;
+let PLANO      = 'basico';
+let FOTOS      = [];
+let VIDEOS     = [];
+
+// Mapa value → label para comodidades (espelha os checkboxes do fotos.html)
+const COMODIDADES_MAP = {
+    'climatizado':'❄️ Climatizado','estacionamento':'🅿️ Estacionamento',
+    'seguranca':'🛡️ Segurança','espaco-aberto':'🌿 Espaço Aberto',
+    'cozinha':'🍽️ Cozinha Equipada','gerador':'⚡ Gerador',
+    'piscina':'🏊 Piscina','wifi':'📶 Wi-Fi','acessibilidade':'♿ Acessibilidade',
+    'hospedagem':'🛏️ Hospedagem','palco':'🎤 Palco / Som','decoracao':'🎀 Decoração',
+    'bar':'🍹 Bar / Chopeira','churrasqueira':'🔥 Churrasqueira',
+    'playground':'🛝 Playground','quadra':'⚽ Quadra Esportiva',
+    'camarim':'💄 Camarim','projetor':'📽️ Projetor / Telão',
+    'sauna':'🧖 Sauna','heliponto':'🚁 Heliponto'
+};
+const EXTRAS_MAP = {
+    'buffet':'🍽️ Buffet Completo','garcom':'🤵 Garçons / Staff',
+    'seguranca-extra':'🛡️ Equipe de Segurança','bar-open':'🍹 Bar Open Bar',
+    'mesa-cadeira':'🪑 Mesas e Cadeiras','decoracao-extra':'🎀 Decoração Completa',
+    'floricultura':'💐 Floricultura','dj':'🎧 DJ Profissional',
+    'foto-video':'📸 Foto & Vídeo','cerimonialista':'👑 Cerimonialista',
+    'valet':'🚗 Valet','limpeza':'🧹 Limpeza Pós-Evento',
+    'iluminacao':'💡 Iluminação Especial','locacao-tendas':'⛺ Tendas',
+    'transporte':'🚌 Transporte','hospedagem-extra':'🏠 Hospedagem para Convidados'
+};
 let TODAS_AVAL = [];     // avaliações verificadas
 let AVAL_VISIVEIS = 4;
 let AVAL_FILTRO_ATUAL = 'todas';
@@ -858,14 +881,14 @@ async function init() {
         try {
             const { data: ass } = await sb.from('assinaturas')
                 .select('plano_ativo')
-                .eq('usuario_id', prop.user_id)
+                .eq('usuario_id', prop.usuario_id)
                 .single();
             PLANO = ass?.plano_ativo || 'basico';
         } catch (_) { PLANO = 'basico'; }
 
         // Dados do responsável (nome_responsavel tem prioridade sobre usuarios.nome)
         try {
-            const { data: usr } = await sb.from('usuarios').select('nome, usuario, criado_em').eq('id', prop.user_id).single();
+            const { data: usr } = await sb.from('usuarios').select('nome, usuario, criado_em').eq('id', prop.usuario_id).single();
             if (usr) {
                 const nomeExibir = prop.nome_responsavel || usr.nome || '—';
                 document.getElementById('anfitriao-nome').textContent = nomeExibir;
@@ -1024,10 +1047,10 @@ function renderPagina(p) {
     // Comodidades
     carregarComodidades(p);
 
-    // Serviços extras
+    // Serviços extras — converte value ("dj") → label ("🎧 DJ Profissional")
     if (Array.isArray(p.servicos_extras) && p.servicos_extras.length) {
         const chips = document.getElementById('extras-chips');
-        chips.innerHTML = p.servicos_extras.map(s => `<span class="extra-chip">${s}</span>`).join('');
+        chips.innerHTML = p.servicos_extras.map(v => `<span class="extra-chip">${EXTRAS_MAP[v] || v}</span>`).join('');
         document.getElementById('secao-extras').style.display = 'block';
     }
 
@@ -1067,20 +1090,9 @@ function renderPagina(p) {
 
 /* ── Comodidades: junction table + fallback para array na coluna ── */
 async function carregarComodidades(prop) {
-    let lista = [];
-    try {
-        const { data } = await sb
-            .from('propriedadexcomodidades')
-            .select('comodidadeID, comodidades(nome)')
-            .eq('propriedadeID', prop.id);
-        lista = (data || []).map(r => r.comodidades?.nome).filter(Boolean);
-    } catch (_) {}
-    // fallback: campo comodidades[] direto na tabela
-    if (!lista.length && Array.isArray(prop.comodidades) && prop.comodidades.length) {
-        lista = prop.comodidades;
-    }
+    // Usa diretamente o array comodidades[] da propriedade (values como "climatizado", "piscina")
+    const lista = Array.isArray(prop.comodidades) ? prop.comodidades : [];
     renderComodidades(lista);
-    // Explore eventos (fotos agrupadas por seção)
     carregarExploreEventos(prop.id);
 }
 
@@ -1139,7 +1151,8 @@ function expandirSobre() {
 function renderComodidades(lista) {
     const grid = document.getElementById('comodidades-grid');
     if (!lista.length) { grid.innerHTML = '<p style="color:#aaa;font-size:.88rem">Não informado.</p>'; return; }
-    grid.innerHTML = lista.map(c => `<div class="comodidade">${c}</div>`).join('');
+    // Converte value ("climatizado") → label ("❄️ Climatizado") usando o mapa
+    grid.innerHTML = lista.map(v => `<div class="comodidade">${COMODIDADES_MAP[v] || v}</div>`).join('');
 }
 
 /* ────────────────────────────────────────────────────────
