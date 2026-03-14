@@ -1426,7 +1426,20 @@
             });
     }
 
-    init();
+    init().then(() => {
+        // Abre aba diretamente se vier com hash (ex: minhapropriedade.html#sobre)
+        const hash = window.location.hash.slice(1);
+        const abas = ['contato','sobre','valores','endereco','eventos','faq','servicos'];
+        if (abas.includes(hash)) {
+            document.querySelectorAll('.tab-content').forEach(t => { t.style.display = 'none'; t.classList.remove('active'); });
+            document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+            const tabEl = document.getElementById(hash);
+            if (tabEl) { tabEl.style.display = 'block'; tabEl.classList.add('active'); }
+            const tabBtn = [...document.querySelectorAll('.tab-link')].find(b => b.getAttribute('onclick')?.includes("'" + hash + "'"));
+            if (tabBtn) tabBtn.classList.add('active');
+            if (hash === 'endereco' && document.getElementById('cidade')?.value) setTimeout(atualizarMapa, 200);
+        }
+    });
 </script>
 
 </body>
