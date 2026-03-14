@@ -263,8 +263,21 @@
             box-shadow: 0 8px 30px rgba(0,0,0,.1);
         }
 
-        .preco-lateral { font-size: 1.4rem; font-weight: 700; color: var(--preto); margin-bottom: 16px; }
-        .preco-lateral span { font-size: .88rem; font-weight: 400; color: var(--texto-suave); }
+        .preco-lateral { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+        .preco-item {
+            flex: 1; min-width: 100px;
+            background: #f7f7f7; border: 1px solid var(--cinza-borda);
+            border-radius: 12px; padding: 12px 14px;
+            display: flex; flex-direction: column; gap: 2px;
+        }
+        .preco-item-label {
+            font-size: .68rem; font-weight: 700; color: #999;
+            text-transform: uppercase; letter-spacing: .07em;
+        }
+        .preco-item-valor {
+            font-size: 1.35rem; font-weight: 800; color: var(--preto); line-height: 1.1;
+        }
+        .preco-item-valor em { font-style: normal; font-size: .75rem; font-weight: 500; color: var(--texto-suave); }
 
         /* Botão WhatsApp direto */
         .btn-wpp {
@@ -1257,10 +1270,18 @@ function renderCardLateral() {
 
     // PRO e ULTRA: exibe preços hora/diária + botão WhatsApp + formulário sempre visível
     const precoItens = [];
-    if (VALOR_HORA   > 0) precoItens.push(`<span>R$ <strong>${VALOR_HORA.toLocaleString('pt-BR')}</strong> / hora</span>`);
-    if (VALOR_DIARIA > 0) precoItens.push(`<span>R$ <strong>${VALOR_DIARIA.toLocaleString('pt-BR')}</strong> / diária</span>`);
+    if (VALOR_HORA   > 0) precoItens.push(`
+        <div class="preco-item">
+            <span class="preco-item-label">Por hora</span>
+            <span class="preco-item-valor">R$ ${VALOR_HORA.toLocaleString('pt-BR')}<em>/h</em></span>
+        </div>`);
+    if (VALOR_DIARIA > 0) precoItens.push(`
+        <div class="preco-item">
+            <span class="preco-item-label">Por diária</span>
+            <span class="preco-item-valor">R$ ${VALOR_DIARIA.toLocaleString('pt-BR')}<em>/dia</em></span>
+        </div>`);
     const precoHtml = precoItens.length
-        ? `<div class="preco-lateral" style="display:flex;flex-direction:column;gap:4px">${precoItens.join('')}</div>`
+        ? `<div class="preco-lateral">${precoItens.join('')}</div>`
         : '';
 
     const botoesHtml = `
@@ -1337,11 +1358,18 @@ function renderCardLateral() {
                     oninput="calcularOrcamento(); validarForm()">
             </div>
 
-            <div id="campo-diaria" style="display:none" class="form-grupo">
-                <label>Data do evento</label>
-                <input type="date" id="f-data-evento" value="${(()=>{const p=new URLSearchParams(window.location.search);return p.get('checkin')||''})()}"
-                    oninput="calcularOrcamento()">
-                <div id="f-dias-info" style="font-size:.78rem;color:#aaa;margin-top:4px"></div>
+            <div id="campo-diaria" style="display:none">
+                <div class="form-duplo">
+                    <div class="form-grupo">
+                        <label>Data de início</label>
+                        <input type="date" id="f-data-inicio" oninput="calcularOrcamento()">
+                    </div>
+                    <div class="form-grupo">
+                        <label>Data de término</label>
+                        <input type="date" id="f-data-fim" oninput="calcularOrcamento()">
+                    </div>
+                </div>
+                <div id="f-dias-info" style="font-size:.8rem;color:var(--vermelho);font-weight:600;margin-top:6px;min-height:18px"></div>
             </div>
 
             <div class="form-grupo">
@@ -1380,17 +1408,26 @@ function renderCardLateral() {
 
     card.innerHTML = precoHtml + ultraExtra + botoesHtml + formHtml;
 
-    // Pré-seleciona modo se veio de busca com data
+    // Pré-seleciona modo; preenche datas se vieram da busca
     setTimeout(() => {
-        const checkin = new URLSearchParams(window.location.search).get('checkin');
+        const params  = new URLSearchParams(window.location.search);
+        const checkin = params.get('checkin');
+        const checkout = params.get('checkout');
         const radios  = document.querySelectorAll('input[name="f-modo"]');
+
         if (radios.length === 1) {
-            radios[0].checked = true; // só um disponível, seleciona automaticamente
+            radios[0].checked = true;
             alternarModoCobranca();
         } else if (checkin && VALOR_DIARIA > 0) {
             const r = document.querySelector('input[name="f-modo"][value="diaria"]');
             if (r) { r.checked = true; alternarModoCobranca(); }
         }
+
+        // Preenche campos de data se disponíveis na URL
+        if (checkin)  { const el = document.getElementById('f-data-inicio'); if (el) el.value = checkin; }
+        if (checkout) { const el = document.getElementById('f-data-fim');    if (el) el.value = checkout; }
+        if (checkin || checkout) calcularOrcamento();
+
         validarForm();
     }, 50);
 }
@@ -1447,16 +1484,20 @@ function calcularOrcamento() {
         const horas = parseInt(document.getElementById('f-horas')?.value || 1);
         base = VALOR_HORA * Math.max(1, horas);
     } else if (modo === 'diaria') {
-        const dataEvento = document.getElementById('f-data-evento')?.value;
-        const checkout   = new URLSearchParams(window.location.search).get('checkout');
-        let dias = 1;
-        if (dataEvento && checkout) {
-            const diff = (new Date(checkout) - new Date(dataEvento)) / 86400000;
-            if (diff > 0) dias = diff;
+        const inicio = document.getElementById('f-data-inicio')?.value;
+        const fim    = document.getElementById('f-data-fim')?.value;
+        const info   = document.getElementById('f-dias-info');
+        let dias = 0;
+        if (inicio && fim) {
+            const diff = (new Date(fim) - new Date(inicio)) / 86400000;
+            dias = diff > 0 ? Math.round(diff) : 0;
         }
-        base = VALOR_DIARIA * dias;
-        const info = document.getElementById('f-dias-info');
-        if (info) info.textContent = dias > 1 ? dias + ' diárias' : '1 diária';
+        base = VALOR_DIARIA * (dias || 1);
+        if (info) {
+            info.textContent = dias > 1
+                ? dias + ' diárias selecionadas'
+                : (dias === 1 ? '1 diária selecionada' : '');
+        }
     }
 
     let adicionais = 0;
@@ -1520,12 +1561,11 @@ function enviarParaWhatsapp() {
         const horas = document.getElementById('f-horas')?.value || '';
         dataBloco = `⏱ *Tipo de locação:* Por hora (${horas}h)`;
     } else if (modo === 'diaria') {
-        const dataEvento = document.getElementById('f-data-evento')?.value || '';
-        const diasInfo   = document.getElementById('f-dias-info')?.textContent || '';
-        const dataFmt = dataEvento
-            ? new Date(dataEvento + 'T12:00:00').toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'})
-            : 'A combinar';
-        dataBloco = `📅 *Data do evento:* ${dataFmt}${diasInfo ? ' (' + diasInfo + ')' : ''}`;
+        const inicio = document.getElementById('f-data-inicio')?.value || '';
+        const fim    = document.getElementById('f-data-fim')?.value || '';
+        const diasInfo = document.getElementById('f-dias-info')?.textContent || '';
+        const fmt = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'}) : 'A combinar';
+        dataBloco = `📅 *Período:* ${fmt(inicio)} até ${fmt(fim)}${diasInfo ? ' (' + diasInfo + ')' : ''}`;
     }
 
     // Extras selecionados
