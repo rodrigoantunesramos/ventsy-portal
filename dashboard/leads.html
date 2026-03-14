@@ -646,12 +646,11 @@ async function init() {
         document.getElementById('sidebar-handle').textContent = usuario ? '@' + usuario : '';
 
         try {
-            const { data: ass } = await sb.from('assinaturas').select('plano_ativo, data_expiracao, expira_em, valido_ate, validade').eq('usuario_id', user.id).single();
+            const { data: ass } = await sb.from('assinaturas').select('plano_ativo, status, fim_periodo').eq('usuario_id', user.id).single();
             const pl = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
             document.getElementById('sidebar-plano-chip').textContent = pl[ass?.plano_ativo] || '🏷️ Básico';
-            const dataExp = ass?.data_expiracao || ass?.expira_em || ass?.valido_ate || ass?.validade;
-            if (dataExp) {
-                const d = new Date(dataExp);
+            if (ass?.fim_periodo) {
+                const d = new Date(ass.fim_periodo);
                 document.getElementById('sidebar-validade').textContent = `Válido até ${d.toLocaleDateString('pt-BR')}`;
             }
         } catch (_) {
