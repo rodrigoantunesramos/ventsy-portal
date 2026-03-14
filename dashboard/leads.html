@@ -93,6 +93,7 @@
             background: rgba(255,56,92,0.08); border: 1px solid rgba(255,56,92,0.2);
             border-radius: 20px; padding: 3px 12px; font-size: 0.72rem; font-weight: 700; color: #ff385c;
         }
+        .plano-validade { font-size: 0.7rem; color: #aaa; margin-top: 2px; }
         .dash-menu { display: flex; flex-direction: column; }
         .menu-section-label {
             font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
@@ -404,6 +405,7 @@
             <h3 id="sidebar-nome">Carregando...</h3>
             <span class="handle" id="sidebar-handle"></span>
             <div class="plano-chip" id="sidebar-plano-chip">⭐ Carregando...</div>
+            <div class="plano-validade" id="sidebar-validade"></div>
         </div>
         <nav class="dash-menu">
             <a href="index.html">🏠 Dashboard</a>
@@ -644,9 +646,14 @@ async function init() {
         document.getElementById('sidebar-handle').textContent = usuario ? '@' + usuario : '';
 
         try {
-            const { data: ass } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', user.id).single();
+            const { data: ass } = await sb.from('assinaturas').select('plano_ativo, data_expiracao, expira_em, valido_ate, validade').eq('usuario_id', user.id).single();
             const pl = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
             document.getElementById('sidebar-plano-chip').textContent = pl[ass?.plano_ativo] || '🏷️ Básico';
+            const dataExp = ass?.data_expiracao || ass?.expira_em || ass?.valido_ate || ass?.validade;
+            if (dataExp) {
+                const d = new Date(dataExp);
+                document.getElementById('sidebar-validade').textContent = `Válido até ${d.toLocaleDateString('pt-BR')}`;
+            }
         } catch (_) {
             document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
         }
