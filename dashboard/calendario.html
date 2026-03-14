@@ -835,21 +835,6 @@ async function init() {
             }
 
 
-
-
-        
-        }
-
-        renderizarCalendario();
-
-    } catch (err) {
-        console.error('Erro no init:', err);
-    } finally {
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('main-content').style.display   = 'flex';
-    }
-}
-
 /* ── CHAVE DE DATA ── */
 function chave(ano, mes, dia) {
     return `${ano}-${String(mes + 1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
