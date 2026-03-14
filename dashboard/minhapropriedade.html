@@ -1198,18 +1198,6 @@
                 throw saveError;
             }
 
-            // Sincroniza junction table propriedadexcomodidades
-            // Sempre apaga primeiro (garante que desmarcar funcione)
-            if (PROP_ID) {
-                try {
-                    await sb.from('propriedadexcomodidades').delete().eq('propriedadeID', PROP_ID);
-                    if (comodidades.length > 0) {
-                        const linhas = comodidades.map(value => ({ propriedadeID: PROP_ID, comodidadeID: value }));
-                        await sb.from('propriedadexcomodidades').insert(linhas);
-                    }
-                } catch (e) { console.warn('Aviso: junction comodidades não sincronizada:', e.message); }
-            }
-
             mostrarToast('✅', 'Alterações salvas com sucesso!');
 
             atualizarBtnAnuncio();
