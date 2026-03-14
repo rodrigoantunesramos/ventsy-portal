@@ -316,6 +316,15 @@
             font-weight: 700; color: var(--preto); font-size: .96rem; margin-top: 8px;
         }
         .simulador-linha .aviso { font-size: .72rem; color: var(--texto-suave); margin-top: 4px; }
+        .modo-cobranca-wrap { display: flex; gap: 10px; flex-wrap: wrap; }
+        .modo-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            border: 1.5px solid #ddd; border-radius: 8px; padding: 8px 14px;
+            font-size: .84rem; font-weight: 600; cursor: pointer;
+            color: var(--preto); transition: border-color .2s, background .2s;
+        }
+        .modo-btn input { accent-color: var(--vermelho); }
+        .modo-btn:has(input:checked) { border-color: var(--vermelho); background: #fff0f2; }
 
         .check-adicional-sim {
             display: flex; align-items: center; gap: 8px;
@@ -911,7 +920,9 @@ let TODAS_AVAL = [];     // avaliações verificadas
 let AVAL_VISIVEIS = 4;
 let AVAL_FILTRO_ATUAL = 'todas';
 let WPP_NUMBER = '5521999999999'; // substituído ao carregar
-let VALOR_BASE = 3000;
+let VALOR_BASE  = 0;
+let VALOR_HORA  = 0;
+let VALOR_DIARIA = 0;
 let CAPACIDADE_MAX = 500;
 let CUSTOS_EXTRAS = [];   // [{nome, valor}] carregados do proprietário
 
@@ -1067,8 +1078,9 @@ Destaques do espaço: Campo de futebol com grama tapete. Piscina + Chuveirão. �
    RENDER PRINCIPAL POR PLANO
 ──────────────────────────────────────────────────────── */
 function renderPagina(p) {
-    // preco → coluna existente em propriedades (valor_base não existe)
-    VALOR_BASE = p.preco || p.valor_base || 3000;
+    VALOR_HORA   = parseFloat(p.valor_hora)   || 0;
+    VALOR_DIARIA = parseFloat(p.valor_base || p.preco) || 0;
+    VALOR_BASE   = VALOR_DIARIA || VALOR_HORA; // compatibilidade
     CAPACIDADE_MAX = parseInt(p.capacidade) || 500;
     CUSTOS_EXTRAS = parseArray(p.custos_extras).filter(x => x && x.nome && x.valor > 0);
 
@@ -1243,8 +1255,13 @@ function renderCardLateral() {
         return;
     }
 
-    // PRO e ULTRA: exibe preço + botão WhatsApp + formulário sempre visível
-    const precoHtml = `<div class="preco-lateral">A partir de <strong>R$ ${VALOR_BASE.toLocaleString('pt-BR')}</strong> <span>/ dia</span></div>`;
+    // PRO e ULTRA: exibe preços hora/diária + botão WhatsApp + formulário sempre visível
+    const precoItens = [];
+    if (VALOR_HORA   > 0) precoItens.push(`<span>R$ <strong>${VALOR_HORA.toLocaleString('pt-BR')}</strong> / hora</span>`);
+    if (VALOR_DIARIA > 0) precoItens.push(`<span>R$ <strong>${VALOR_DIARIA.toLocaleString('pt-BR')}</strong> / diária</span>`);
+    const precoHtml = precoItens.length
+        ? `<div class="preco-lateral" style="display:flex;flex-direction:column;gap:4px">${precoItens.join('')}</div>`
+        : '';
 
     const botoesHtml = `
         <button class="btn-wpp" onclick="irParaWhatsapp()">
@@ -1305,24 +1322,26 @@ function renderCardLateral() {
                 </select>
             </div>
 
-            <div class="form-duplo">
-                <div class="form-grupo">
-                    <label>Mês do evento</label>
-                    <select id="f-mes">
-                        <option value="">Mês</option>
-                        ${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
-                            .map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('')}
-                    </select>
+            <div class="form-grupo">
+                <label>Tipo de cobrança *</label>
+                <div class="modo-cobranca-wrap">
+                    ${VALOR_HORA > 0 ? `<label class="modo-btn"><input type="radio" name="f-modo" value="hora" onchange="alternarModoCobranca()"> Por hora</label>` : ''}
+                    ${VALOR_DIARIA > 0 ? `<label class="modo-btn"><input type="radio" name="f-modo" value="diaria" onchange="alternarModoCobranca()"> Por diária</label>` : ''}
+                    ${VALOR_HORA === 0 && VALOR_DIARIA === 0 ? `<span style="font-size:.82rem;color:#aaa">Valores não informados pelo proprietário.</span>` : ''}
                 </div>
-                <div class="form-grupo">
-                    <label>Ano</label>
-                    <select id="f-ano">
-                        <option value="">Ano</option>
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                        <option value="2028">2028</option>
-                    </select>
-                </div>
+            </div>
+
+            <div id="campo-horas" style="display:none" class="form-grupo">
+                <label>Quantidade de horas *</label>
+                <input type="number" id="f-horas" min="1" max="24" value="4" placeholder="Ex: 4"
+                    oninput="calcularOrcamento(); validarForm()">
+            </div>
+
+            <div id="campo-diaria" style="display:none" class="form-grupo">
+                <label>Data do evento</label>
+                <input type="date" id="f-data-evento" value="${(()=>{const p=new URLSearchParams(window.location.search);return p.get('checkin')||''})()}"
+                    oninput="calcularOrcamento()">
+                <div id="f-dias-info" style="font-size:.78rem;color:#aaa;margin-top:4px"></div>
             </div>
 
             <div class="form-grupo">
@@ -1361,8 +1380,19 @@ function renderCardLateral() {
 
     card.innerHTML = precoHtml + ultraExtra + botoesHtml + formHtml;
 
-    // Valida o form assim que renderiza
-    setTimeout(validarForm, 50);
+    // Pré-seleciona modo se veio de busca com data
+    setTimeout(() => {
+        const checkin = new URLSearchParams(window.location.search).get('checkin');
+        const radios  = document.querySelectorAll('input[name="f-modo"]');
+        if (radios.length === 1) {
+            radios[0].checked = true; // só um disponível, seleciona automaticamente
+            alternarModoCobranca();
+        } else if (checkin && VALOR_DIARIA > 0) {
+            const r = document.querySelector('input[name="f-modo"][value="diaria"]');
+            if (r) { r.checked = true; alternarModoCobranca(); }
+        }
+        validarForm();
+    }, 50);
 }
 
 /* ────────────────────────────────────────────────────────
@@ -1394,23 +1424,52 @@ function validarForm() {
     const tipo   = document.getElementById('f-tipo-evento')?.value || '';
     const pessoa = parseInt(document.getElementById('f-pessoas')?.value || 0);
 
-    const ok = nome.length >= 3 && tel.length >= 10 && tipo && pessoa >= 1;
+    const modo = document.querySelector('input[name="f-modo"]:checked')?.value || null;
+    const ok = nome.length >= 3 && tel.length >= 10 && tipo && pessoa >= 1 && !!modo;
 
     const btnEnviar = document.getElementById('btn-enviar-wpp');
     if (btnEnviar) btnEnviar.disabled = !ok;
 }
 
+function alternarModoCobranca() {
+    const modo = document.querySelector('input[name="f-modo"]:checked')?.value;
+    document.getElementById('campo-horas').style.display  = modo === 'hora'   ? 'flex' : 'none';
+    document.getElementById('campo-diaria').style.display = modo === 'diaria' ? 'flex' : 'none';
+    calcularOrcamento();
+    validarForm();
+}
+
 function calcularOrcamento() {
-    const pessoas = parseInt(document.getElementById('f-pessoas')?.value || 50);
+    const modo = document.querySelector('input[name="f-modo"]:checked')?.value;
+    let base = 0;
+
+    if (modo === 'hora') {
+        const horas = parseInt(document.getElementById('f-horas')?.value || 1);
+        base = VALOR_HORA * Math.max(1, horas);
+    } else if (modo === 'diaria') {
+        const dataEvento = document.getElementById('f-data-evento')?.value;
+        const checkout   = new URLSearchParams(window.location.search).get('checkout');
+        let dias = 1;
+        if (dataEvento && checkout) {
+            const diff = (new Date(checkout) - new Date(dataEvento)) / 86400000;
+            if (diff > 0) dias = diff;
+        }
+        base = VALOR_DIARIA * dias;
+        const info = document.getElementById('f-dias-info');
+        if (info) info.textContent = dias > 1 ? dias + ' diárias' : '1 diária';
+    }
 
     let adicionais = 0;
     document.querySelectorAll('#form-reserva .check-adicional-sim input:checked')
         .forEach(c => adicionais += parseFloat(c.value));
 
-    const total = VALOR_BASE + adicionais;
-
+    const total = base + adicionais;
     const el = document.getElementById('f-total');
-    if (el) el.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    if (el) {
+        el.textContent = total > 0
+            ? total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+            : 'A consultar';
+    }
 }
 
 /* ────────────────────────────────────────────────────────
@@ -1451,13 +1510,23 @@ function enviarParaWhatsapp() {
     const email   = document.getElementById('f-email')?.value?.trim() || '';
     const tipoSel = document.getElementById('f-tipo-evento');
     const tipoTxt = tipoSel?.options[tipoSel.selectedIndex]?.text || '';
-    const mes     = document.getElementById('f-mes')?.value || '';
-    const ano     = document.getElementById('f-ano')?.value || '';
     const pessoas = document.getElementById('f-pessoas-num')?.value || document.getElementById('f-pessoas')?.value || '';
     const total   = document.getElementById('f-total')?.textContent || '';
+    const modo    = document.querySelector('input[name="f-modo"]:checked')?.value || '';
 
-    const meses = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-    const data  = mes && ano ? `${meses[parseInt(mes)]} de ${ano}` : 'A combinar';
+    // Data/hora do evento
+    let dataBloco = '';
+    if (modo === 'hora') {
+        const horas = document.getElementById('f-horas')?.value || '';
+        dataBloco = `⏱ *Tipo de locação:* Por hora (${horas}h)`;
+    } else if (modo === 'diaria') {
+        const dataEvento = document.getElementById('f-data-evento')?.value || '';
+        const diasInfo   = document.getElementById('f-dias-info')?.textContent || '';
+        const dataFmt = dataEvento
+            ? new Date(dataEvento + 'T12:00:00').toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'})
+            : 'A combinar';
+        dataBloco = `📅 *Data do evento:* ${dataFmt}${diasInfo ? ' (' + diasInfo + ')' : ''}`;
+    }
 
     // Extras selecionados
     const extrasLinhas = [];
@@ -1473,7 +1542,7 @@ function enviarParaWhatsapp() {
 👤 *Nome:* ${nome}
 📞 *Telefone:* ${tel}${email ? `\n📧 *E-mail:* ${email}` : ''}
 🎉 *Tipo de evento:* ${tipoTxt}
-📅 *Data desejada:* ${data}
+${dataBloco}
 👥 *Convidados:* ${pessoas} pessoas${extrasBloco}
 💰 *Estimativa de orçamento:* ${total}
 
