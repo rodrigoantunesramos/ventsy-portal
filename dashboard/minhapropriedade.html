@@ -511,7 +511,7 @@
             <!-- ── ABA 1: CONTATO ── -->
             <div id="contato" class="tab-content active">
                 <div class="sessao-edit">
-                    <h3>Dados de Contato</h3>
+                    <h3>Dados da Propriedade</h3>
                     <p class="aviso-form">Essas informações serão exibidas no seu anúncio público.</p>
                     <div class="grid-form">
                         <div class="campo span-2">
@@ -537,6 +537,10 @@
                             </select>
                         </div>
                         <div class="campo">
+                            <label>Capacidade Máxima (pessoas)</label>
+                            <input type="number" id="capacidade" placeholder="Ex: 200" min="1">
+                        </div>
+                        <div class="campo">
                             <label>E-mail de Contato</label>
                             <input type="email" id="email-contato" placeholder="contato@seueespaco.com.br">
                         </div>
@@ -551,6 +555,22 @@
                         <div class="campo">
                             <label>Instagram</label>
                             <input type="text" id="instagram" placeholder="@seueespaco">
+                        </div>
+                        <div class="campo">
+                            <label>Facebook</label>
+                            <input type="text" id="facebook" placeholder="facebook.com/seueespaco">
+                        </div>
+                        <div class="campo">
+                            <label>TikTok</label>
+                            <input type="text" id="tiktok" placeholder="@seueespaco">
+                        </div>
+                        <div class="campo">
+                            <label>YouTube</label>
+                            <input type="text" id="youtube" placeholder="youtube.com/@seueespaco">
+                        </div>
+                        <div class="campo">
+                            <label>LinkedIn</label>
+                            <input type="text" id="linkedin" placeholder="linkedin.com/in/seueespaco">
                         </div>
                         <div class="campo">
                             <label>Site Externo</label>
@@ -573,14 +593,6 @@
                             <div class="campo">
                                 <label>Nome do Responsável</label>
                                 <input type="text" id="nome-resp" placeholder="Ex: Rodrigo Ramos">
-                            </div>
-                            <div class="campo">
-                                <label>Capacidade Máxima (pessoas)</label>
-                                <input type="number" id="capacidade" placeholder="Ex: 200" min="1">
-                            </div>
-                            <div class="campo">
-                                <label>Mini bio / apresentação</label>
-                                <textarea id="bio-resp" placeholder="Apresente brevemente a pessoa que atende os clientes..." style="min-height:90px"></textarea>
                             </div>
                         </div>
                     </div>
@@ -614,15 +626,6 @@
                             <label>Valor por Diária (dia completo)</label>
                             <div class="input-moeda"><span>R$</span><input type="number" id="valor-diaria" placeholder="0,00" min="0"></div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="sessao-edit">
-                    <h3>Regras de Cobrança</h3>
-                    <p class="aviso-form">Esclareça aos clientes como funciona a negociação e possíveis taxas extras.</p>
-                    <div class="campo">
-                        <label>Informações adicionais sobre preços</label>
-                        <textarea id="regras-preco" placeholder="Ex: Valor inclui 6 horas de uso. Para eventos com mais de 150 pessoas, consulte pacotes especiais..." style="min-height:120px"></textarea>
                     </div>
                 </div>
 
@@ -743,12 +746,16 @@
                         <p class="aviso-form">Ajude seus clientes respondendo às dúvidas mais comuns antes que eles entrem em contato.</p>
                     </div>
                     <div id="lista-faq" class="lista-faq">
-                        <div class="faq-item">
+                        <!-- Item fixo — título não pode ser alterado -->
+                        <div class="faq-item" data-fixo="true">
                             <div class="faq-inputs">
-                                <input type="text" placeholder="Pergunta (ex: O local possui gerador?)" value="O local possui gerador próprio?">
-                                <textarea placeholder="Resposta...">Sim, possuímos gerador que atende toda a área social e cozinha em caso de queda de energia.</textarea>
+                                <input type="text" value="Regras de Cobrança" readonly
+                                    style="background:#f5f5f5;color:#555;cursor:default;font-weight:600">
+                                <textarea id="regras-preco"
+                                    placeholder="Ex: Valor inclui 6 horas de uso. Mínimo de 4h. Para eventos com mais de 150 pessoas, consulte pacotes especiais..."
+                                    style="min-height:100px"></textarea>
                             </div>
-                            <button class="btn-remover-faq" onclick="this.parentElement.remove()">🗑️</button>
+                            <!-- sem botão de remover -->
                         </div>
                     </div>
                     <button class="btn-adicionar-faq" onclick="adicionarFAQ()">+ Adicionar Nova Pergunta</button>
@@ -975,10 +982,17 @@
             });
 
             // Aba 3 — Valores
-            if (prop.valor_hora)     document.getElementById('valor-hora').value     = prop.valor_hora;
+            if (prop.valor_hora)  document.getElementById('valor-hora').value  = prop.valor_hora;
+            if (prop.valor_base)  document.getElementById('valor-diaria').value = prop.valor_base;
 
-          
+            // Aba 6 — Regras de Cobrança (item fixo do FAQ)
             setVal('regras-preco', prop.regras_preco);
+
+            // Aba 1 — Redes sociais extras
+            setVal('facebook', prop.facebook);
+            setVal('tiktok',   prop.tiktok);
+            setVal('youtube',  prop.youtube);
+            setVal('linkedin', prop.linkedin);
 
             // Aba 4 — Endereço
             setVal('cep',         prop.cep);
@@ -1005,10 +1019,12 @@
                 custosExtrasCarregados.forEach(e => adicionarCustoExtra(e.nome || '', e.valor || ''));
             }
 
-            // Aba 6 — FAQ
+            // Aba 6 — FAQ (preserva o item fixo "Regras de Cobrança")
             if (Array.isArray(prop.faq) && prop.faq.length) {
                 const lista = document.getElementById('lista-faq');
+                const fixedItem = lista.querySelector('.faq-item[data-fixo]');
                 lista.innerHTML = '';
+                if (fixedItem) lista.appendChild(fixedItem);
                 prop.faq.forEach(f => {
                     const item = document.createElement('div');
                     item.className = 'faq-item';
@@ -1023,7 +1039,7 @@
             }
 
             atualizarBtnAnuncio();
-            if (prop.cidade) setTimeout(atualizarMapa, 800);
+            // Mapa carrega quando o usuário abre a aba Endereço (evita inicializar em container oculto)
         }
 
         // Auto-save comodidades e servicos_extras ao marcar/desmarcar
@@ -1106,7 +1122,10 @@
         const tab = document.getElementById(tabName);
         tab.style.display = 'block'; tab.classList.add('active');
         evt.currentTarget.classList.add('active');
-        if (tabName === 'endereco' && _mapa) setTimeout(() => _mapa.invalidateSize(), 150);
+        if (tabName === 'endereco') {
+            if (_mapa) setTimeout(() => _mapa.invalidateSize(), 150);
+            else if (document.getElementById('cidade')?.value) setTimeout(atualizarMapa, 200);
+        }
     }
 
     /* ── Salvar ── */
@@ -1127,10 +1146,13 @@
             const whatsapp    = document.getElementById('whatsapp').value.trim();
             const telefone    = document.getElementById('telefone').value.trim();
             const instagram   = document.getElementById('instagram').value.trim();
+            const facebook    = document.getElementById('facebook').value.trim();
+            const tiktok      = document.getElementById('tiktok').value.trim();
+            const youtube     = document.getElementById('youtube').value.trim();
+            const linkedin    = document.getElementById('linkedin').value.trim();
             const site        = document.getElementById('site').value.trim();
             const nomeResp    = document.getElementById('nome-resp').value.trim();
             const capVal      = document.getElementById('capacidade').value.trim();
-            const bioResp     = document.getElementById('bio-resp').value.trim();
 
             // Foto responsável
             const fotoResp = document.getElementById('foto-resp-data').value || null;
@@ -1151,7 +1173,9 @@
             // Coleta Aba 3
             const valorHora   = document.getElementById('valor-hora').value;
             const valorDiaria = document.getElementById('valor-diaria').value;
-            const regrasPreco = document.getElementById('regras-preco').value.trim();
+
+            // Coleta Aba 6 — item fixo Regras de Cobrança
+            const regrasPreco = document.getElementById('regras-preco')?.value.trim() || '';
 
             // Coleta Aba 4
             const cep         = document.getElementById('cep').value.trim();
@@ -1175,8 +1199,8 @@
                 return { nome: inputs[0]?.value.trim() || '', valor: parseFloat(inputs[1]?.value) || 0 };
             }).filter(e => e.nome && e.valor > 0);
 
-            // Coleta Aba 6
-            const faq = Array.from(document.querySelectorAll('#lista-faq .faq-item')).map(item => ({
+            // Coleta Aba 6 — FAQ (exclui item fixo de Regras de Cobrança)
+            const faq = Array.from(document.querySelectorAll('#lista-faq .faq-item:not([data-fixo])')).map(item => ({
                 pergunta: item.querySelector('input')?.value.trim() || '',
                 resposta: item.querySelector('textarea')?.value.trim() || ''
             })).filter(f => f.pergunta);
@@ -1201,10 +1225,13 @@
                 email_contato:    emailContat || null,
                 telefone:         telefone    || null,
                 instagram:        instagram   || null,
+                facebook:         facebook    || null,
+                tiktok:           tiktok      || null,
+                youtube:          youtube     || null,
+                linkedin:         linkedin    || null,
                 site:             site        || null,
                 nome_responsavel: nomeResp    || null,
                 foto_responsavel: fotoResp,
-                bio_responsavel:  bioResp     || null,
                 valor_hora:       valorHora   ? parseFloat(valorHora)   : null,
                 regras_preco:     regrasPreco || null,
                 cep:              cep         || null,
