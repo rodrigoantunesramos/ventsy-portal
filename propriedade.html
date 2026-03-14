@@ -149,15 +149,14 @@
             padding: 20px 0; border-bottom: 1px solid var(--cinza-borda); margin-bottom: 24px;
         }
         .avatar-anfitriao {
-            width: 60px; height: 60px; border-radius: 50%;
-            object-fit: cover; border: 2px solid var(--cinza-borda);
+            width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+            object-fit: cover; border: 2px solid var(--cinza-borda); overflow: hidden;
         }
         .avatar-anfitriao-inicial {
-            width: 60px; height: 60px; border-radius: 50%;
+            width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
             background: var(--vermelho); color: #fff;
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700;
-            flex-shrink: 0;
+            font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700;
         }
         .info-anfitriao h3 { font-size: 1rem; font-weight: 700; color: var(--preto); margin-bottom: 2px; }
         .info-anfitriao p { font-size: .84rem; color: var(--texto-suave); }
@@ -443,9 +442,43 @@
             flex: 1; overflow-y: auto; padding: 0 28px 28px;
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;
         }
-        .modal-foto-item { border-radius: 10px; overflow: hidden; }
-        .modal-foto-item img { width: 100%; height: 220px; object-fit: cover; display: block; }
+        .modal-foto-item { border-radius: 10px; overflow: hidden; cursor: pointer; position: relative; }
+        .modal-foto-item img { width: 100%; height: 220px; object-fit: cover; display: block; transition: transform 0.2s; }
+        .modal-foto-item:hover img { transform: scale(1.03); }
         .modal-foto-titulo { background: rgba(255,255,255,.08); color: #eee; font-size: .8rem; padding: 8px 12px; }
+
+        /* ── LIGHTBOX ── */
+        .lightbox {
+            display: none; position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,0.97);
+            align-items: center; justify-content: center;
+        }
+        .lightbox.aberto { display: flex; }
+        .lb-img-wrap { max-width: 90vw; max-height: 85vh; display: flex; align-items: center; justify-content: center; }
+        .lb-img-wrap img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 4px; display: block; }
+        .lb-close {
+            position: fixed; top: 20px; right: 24px;
+            background: rgba(255,255,255,0.12); border: none; color: #fff;
+            width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s; z-index: 1;
+        }
+        .lb-close:hover { background: rgba(255,255,255,0.28); }
+        .lb-nav {
+            position: fixed; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,0.12); border: none; color: #fff;
+            width: 48px; height: 48px; border-radius: 50%; font-size: 1.8rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s; line-height: 1; user-select: none;
+        }
+        .lb-nav:hover { background: rgba(255,255,255,0.28); }
+        .lb-prev { left: 16px; }
+        .lb-next { right: 16px; }
+        .lb-counter {
+            position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+            color: rgba(255,255,255,0.6); font-size: 0.82rem; letter-spacing: 0.06em;
+            background: rgba(0,0,0,0.4); padding: 4px 14px; border-radius: 20px;
+        }
 
         /* ── MODAL VÍDEOS ── */
         .modal-videos {
@@ -615,6 +648,17 @@
         <button class="btn-fechar-modal" onclick="fecharModalGaleria()">✕</button>
     </div>
     <div class="modal-galeria-grid" id="modal-galeria-grid"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="fecharLightbox()">
+    <button class="lb-close" onclick="fecharLightbox()">✕</button>
+    <button class="lb-nav lb-prev" onclick="event.stopPropagation();lightboxNavegar(-1)">‹</button>
+    <div class="lb-img-wrap" onclick="event.stopPropagation()">
+        <img id="lb-img" src="" alt="">
+    </div>
+    <button class="lb-nav lb-next" onclick="event.stopPropagation();lightboxNavegar(1)">›</button>
+    <div class="lb-counter" id="lb-counter"></div>
 </div>
 
 <!-- MODAL VÍDEOS (Ultra) -->
@@ -828,6 +872,8 @@ let PROP       = null;
 let PLANO      = 'basico';
 let FOTOS      = [];
 let VIDEOS     = [];
+let lightboxFotos = [];
+let lightboxIndex = 0;
 
 // Mapa value → label para comodidades (espelha os checkboxes do fotos.html)
 const COMODIDADES_MAP = {
@@ -1020,7 +1066,7 @@ function renderPagina(p) {
     document.getElementById('prop-total-aval').textContent = TODAS_AVAL.length + ' avaliações';
     document.getElementById('prop-cidade').textContent = [p.cidade, p.estado].filter(Boolean).join(', ');
     document.getElementById('det-capacidade').textContent = p.capacidade ? p.capacidade + ' pessoas' : '—';
-    document.getElementById('det-tipo').textContent = p.tipo_propriedade || p.categoria || p.tipo_evento || '—';
+    document.getElementById('det-tipo').textContent = p.tipo_propriedade || '—';
     document.getElementById('det-cidade').textContent = p.cidade || '—';
     document.getElementById('aval-nota-num').textContent = nota || '—';
     document.getElementById('aval-total-txt').textContent = TODAS_AVAL.length + ' avaliações verificadas';
@@ -1448,17 +1494,19 @@ function carregarMaisAval() {
 ──────────────────────────────────────────────────────── */
 function abrirModalGaleria() {
     const grid = document.getElementById('modal-galeria-grid');
-    // Mostra TODAS as fotos (sem limite por plano — o limite é no upload, não na visualização)
-    const fotos = FOTOS.filter(f => f.titulo !== '__destaque__');
-    const todas = FOTOS.length ? fotos : [];
+    // Inclui TODAS as fotos — incluindo as do grid destaque (sem filtrar __destaque__)
+    const todas = FOTOS.slice();
+    const urls  = todas.map(f => f.url);
 
     grid.innerHTML = '';
-    todas.forEach(f => {
-        grid.innerHTML += `
-            <div class="modal-foto-item">
-                <img src="${f.url}" alt="${f.titulo || ''}" loading="lazy">
-                ${f.titulo && f.titulo !== '__destaque__' ? `<div class="modal-foto-titulo">${f.titulo}</div>` : ''}
-            </div>`;
+    todas.forEach((f, i) => {
+        const item = document.createElement('div');
+        item.className = 'modal-foto-item';
+        item.onclick = () => abrirLightbox(urls, i);
+        item.innerHTML = `
+            <img src="${f.url}" alt="${f.titulo || ''}" loading="lazy">
+            ${f.titulo && f.titulo !== '__destaque__' ? `<div class="modal-foto-titulo">${f.titulo}</div>` : ''}`;
+        grid.appendChild(item);
     });
 
     document.getElementById('modal-galeria-titulo').textContent = `Todas as fotos (${todas.length})`;
@@ -1617,10 +1665,14 @@ async function carregarExploreEventos(propId) {
 
 function abrirGaleriaExplore(titulo, fotos) {
     const grid = document.getElementById('modal-galeria-grid');
-    grid.innerHTML = fotos.map(url => `
-        <div class="modal-foto-item">
-            <img src="${url}" alt="${titulo}" loading="lazy">
-        </div>`).join('');
+    grid.innerHTML = '';
+    fotos.forEach((url, i) => {
+        const item = document.createElement('div');
+        item.className = 'modal-foto-item';
+        item.onclick = () => abrirLightbox(fotos, i);
+        item.innerHTML = `<img src="${url}" alt="${titulo}" loading="lazy">`;
+        grid.appendChild(item);
+    });
     document.getElementById('modal-galeria-titulo').textContent = titulo;
     document.getElementById('modal-galeria').classList.add('aberto');
     document.body.style.overflow = 'hidden';
@@ -1664,8 +1716,41 @@ function toggleFavorito() {
     localStorage.setItem('ventsy_favs', JSON.stringify(favs));
 }
 
-/* ── Fecha modais com ESC ── */
+/* ────────────────────────────────────────────────────────
+   LIGHTBOX
+──────────────────────────────────────────────────────── */
+function abrirLightbox(fotos, index) {
+    lightboxFotos = fotos;
+    lightboxIndex = index;
+    _renderLightbox();
+    document.getElementById('lightbox').classList.add('aberto');
+    document.body.style.overflow = 'hidden';
+}
+function _renderLightbox() {
+    const url = lightboxFotos[lightboxIndex];
+    document.getElementById('lb-img').src = url;
+    document.getElementById('lb-counter').textContent = (lightboxIndex + 1) + ' / ' + lightboxFotos.length;
+    document.querySelector('.lb-prev').style.display = lightboxFotos.length > 1 ? 'flex' : 'none';
+    document.querySelector('.lb-next').style.display = lightboxFotos.length > 1 ? 'flex' : 'none';
+}
+function lightboxNavegar(dir) {
+    lightboxIndex = (lightboxIndex + dir + lightboxFotos.length) % lightboxFotos.length;
+    _renderLightbox();
+}
+function fecharLightbox() {
+    document.getElementById('lightbox').classList.remove('aberto');
+    document.body.style.overflow = '';
+}
+
+/* ── Fecha modais com ESC / navega lightbox com setas ── */
 document.addEventListener('keydown', e => {
+    const lb = document.getElementById('lightbox');
+    if (lb && lb.classList.contains('aberto')) {
+        if (e.key === 'Escape')     { fecharLightbox(); }
+        if (e.key === 'ArrowLeft')  { lightboxNavegar(-1); }
+        if (e.key === 'ArrowRight') { lightboxNavegar(1); }
+        return;
+    }
     if (e.key === 'Escape') { fecharModalGaleria(); fecharModalVideos(); }
 });
 
