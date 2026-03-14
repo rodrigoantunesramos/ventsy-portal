@@ -321,6 +321,8 @@
         .range-wrapper { display: flex; align-items: center; gap: 10px; }
         .range-wrapper input[type=range] { flex: 1; accent-color: var(--vermelho); }
         .range-valor { font-size: .84rem; font-weight: 700; color: var(--preto); white-space: nowrap; min-width: 60px; }
+        .range-num-input { width: 68px; padding: 4px 8px; border: 1.5px solid #ddd; border-radius: 8px; font-size: .85rem; font-weight: 700; text-align: center; color: var(--preto); outline: none; }
+        .range-num-input:focus { border-color: var(--vermelho); }
 
         /* Botão final do form */
         .btn-enviar-wpp {
@@ -902,6 +904,8 @@ let AVAL_VISIVEIS = 4;
 let AVAL_FILTRO_ATUAL = 'todas';
 let WPP_NUMBER = '5521999999999'; // substituído ao carregar
 let VALOR_BASE = 3000;
+let CAPACIDADE_MAX = 500;
+let CUSTOS_EXTRAS = [];   // [{nome, valor}] carregados do proprietário
 
 /* ────────────────────────────────────────────────────────
    INIT PRINCIPAL
@@ -1056,6 +1060,8 @@ Destaques do espaço: Campo de futebol com grama tapete. Piscina + Chuveirão. �
 function renderPagina(p) {
     // preco → coluna existente em propriedades (valor_base não existe)
     VALOR_BASE = p.preco || p.valor_base || 3000;
+    CAPACIDADE_MAX = parseInt(p.capacidade) || 500;
+    CUSTOS_EXTRAS = parseArray(p.custos_extras).filter(x => x && x.nome && x.valor > 0);
 
     // Título e meta
     document.getElementById('prop-nome').textContent = p.nome || '—';
@@ -1244,6 +1250,26 @@ function renderCardLateral() {
         </div>
     `;
 
+    // Opções de tipo de evento vindas do proprietário (campo tipo_evento = "casamento, corporativo, ...")
+    const tiposEvento = PROP?.tipo_evento
+        ? PROP.tipo_evento.split(',').map(t => t.trim()).filter(Boolean)
+        : [];
+    const tipoOptions = tiposEvento.length
+        ? tiposEvento.map(t => `<option value="${t}">${t.charAt(0).toUpperCase() + t.slice(1)}</option>`).join('')
+        : '<option value="outro">Outro</option>';
+
+    // Checkboxes de custos extras definidos pelo proprietário
+    const extrasSimHtml = CUSTOS_EXTRAS.length
+        ? CUSTOS_EXTRAS.map(e => `
+            <label class="check-adicional-sim">
+                <input type="checkbox" value="${e.valor}" onchange="calcularOrcamento()">
+                ${e.nome} (+R$ ${Number(e.valor).toLocaleString('pt-BR')})
+            </label>`).join('')
+        : '';
+
+    const capacMax = CAPACIDADE_MAX || 500;
+    const capacInicial = Math.min(50, capacMax);
+
     const formHtml = `
         <form class="form-reserva aberto" id="form-reserva" onsubmit="return false">
 
@@ -1266,9 +1292,7 @@ function renderCardLateral() {
                 <label>Tipo de Evento *</label>
                 <select id="f-tipo-evento" onchange="calcularOrcamento(); validarForm()" required>
                     <option value="">Selecione...</option>
-                    <option value="1">Aniversário / Confraternização</option>
-                    <option value="1.5">Casamento / Formatura</option>
-                    <option value="1.2">Evento Corporativo</option>
+                    ${tipoOptions}
                 </select>
             </div>
 
@@ -1293,27 +1317,19 @@ function renderCardLateral() {
             </div>
 
             <div class="form-grupo">
-                <label>Número de convidados *</label>
+                <label>Número de convidados * <span style="font-size:.75rem;color:#aaa;font-weight:400">(máx. ${capacMax})</span></label>
                 <div class="range-wrapper">
-                    <input type="range" id="f-pessoas" min="20" max="500" step="10" value="50" oninput="calcularOrcamento(); validarForm()">
-                    <span class="range-valor" id="f-pessoas-val">50 pessoas</span>
+                    <input type="range" id="f-pessoas" min="1" max="${capacMax}" step="1" value="${capacInicial}"
+                        oninput="syncPessoas('range'); calcularOrcamento(); validarForm()">
+                    <input type="number" class="range-num-input" id="f-pessoas-num" min="1" max="${capacMax}"
+                        value="${capacInicial}" oninput="syncPessoas('num'); calcularOrcamento(); validarForm()">
                 </div>
-            </div>
-
-            <div class="form-grupo">
-                <label>Mensagem *</label>
-                <textarea id="f-msg" rows="3" placeholder="Conte mais sobre o seu evento..." oninput="validarForm()" required></textarea>
             </div>
 
             <!-- Simulador integrado -->
             <div class="simulador-linha">
                 <div style="font-size:.8rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Estimativa de orçamento</div>
-                <label class="check-adicional-sim">
-                    <input type="checkbox" value="500" onchange="calcularOrcamento()"> Limpeza pós-evento (+R$ 500)
-                </label>
-                <label class="check-adicional-sim">
-                    <input type="checkbox" value="300" onchange="calcularOrcamento()"> Segurança (+R$ 300)
-                </label>
+                ${extrasSimHtml}
                 <div class="total-linha"><span>Total estimado:</span><span id="f-total">R$ ${VALOR_BASE.toLocaleString('pt-BR')},00</span></div>
                 <div class="aviso">*Valor estimado, sujeito a confirmação do proprietário.</div>
             </div>
@@ -1345,31 +1361,44 @@ function renderCardLateral() {
 ──────────────────────────────────────────────────────── */
 function toggleFormReserva() {} // mantido por compatibilidade
 
+function syncPessoas(origem) {
+    const slider = document.getElementById('f-pessoas');
+    const numInput = document.getElementById('f-pessoas-num');
+    if (!slider || !numInput) return;
+    const max = parseInt(slider.max) || 500;
+    if (origem === 'range') {
+        let v = parseInt(slider.value);
+        v = Math.max(1, Math.min(v, max));
+        numInput.value = v;
+    } else {
+        let v = parseInt(numInput.value);
+        if (isNaN(v) || v < 1) v = 1;
+        if (v > max) v = max;
+        numInput.value = v;
+        slider.value = v;
+    }
+}
+
 function validarForm() {
     const nome   = (document.getElementById('f-nome')?.value || '').trim();
     const tel    = (document.getElementById('f-tel')?.value || '').trim();
     const tipo   = document.getElementById('f-tipo-evento')?.value || '';
-    const msg    = (document.getElementById('f-msg')?.value || '').trim();
     const pessoa = parseInt(document.getElementById('f-pessoas')?.value || 0);
 
-    const ok = nome.length >= 3 && tel.length >= 10 && tipo && msg.length >= 10 && pessoa >= 20;
+    const ok = nome.length >= 3 && tel.length >= 10 && tipo && pessoa >= 1;
 
     const btnEnviar = document.getElementById('btn-enviar-wpp');
     if (btnEnviar) btnEnviar.disabled = !ok;
 }
 
 function calcularOrcamento() {
-    const tipo = parseFloat(document.getElementById('f-tipo-evento')?.value || 1);
     const pessoas = parseInt(document.getElementById('f-pessoas')?.value || 50);
-    const vVal = document.getElementById('f-pessoas-val');
-    if (vVal) vVal.textContent = pessoas + ' pessoas';
 
     let adicionais = 0;
     document.querySelectorAll('#form-reserva .check-adicional-sim input:checked')
         .forEach(c => adicionais += parseFloat(c.value));
 
-    let total = (VALOR_BASE * (isNaN(tipo) ? 1 : tipo)) + adicionais;
-    if (pessoas > 100) total += (pessoas - 100) * 5;
+    const total = VALOR_BASE + adicionais;
 
     const el = document.getElementById('f-total');
     if (el) el.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -1384,35 +1413,38 @@ function irParaWhatsapp() {
 }
 
 function enviarParaWhatsapp() {
-    const nome   = document.getElementById('f-nome')?.value?.trim() || '';
-    const tel    = document.getElementById('f-tel')?.value?.trim() || '';
-    const email  = document.getElementById('f-email')?.value?.trim() || '';
-    const tipo   = document.getElementById('f-tipo-evento');
-    const tipoTxt = tipo?.options[tipo.selectedIndex]?.text || '';
-    const mes    = document.getElementById('f-mes')?.value || '';
-    const ano    = document.getElementById('f-ano')?.value || '';
-    const pessoas = document.getElementById('f-pessoas')?.value || '';
-    const msg    = document.getElementById('f-msg')?.value?.trim() || '';
-    const total  = document.getElementById('f-total')?.textContent || '';
+    const nome    = document.getElementById('f-nome')?.value?.trim() || '';
+    const tel     = document.getElementById('f-tel')?.value?.trim() || '';
+    const email   = document.getElementById('f-email')?.value?.trim() || '';
+    const tipoSel = document.getElementById('f-tipo-evento');
+    const tipoTxt = tipoSel?.options[tipoSel.selectedIndex]?.text || '';
+    const mes     = document.getElementById('f-mes')?.value || '';
+    const ano     = document.getElementById('f-ano')?.value || '';
+    const pessoas = document.getElementById('f-pessoas-num')?.value || document.getElementById('f-pessoas')?.value || '';
+    const total   = document.getElementById('f-total')?.textContent || '';
 
-    const meses = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    const data  = mes && ano ? `${meses[parseInt(mes)]}/${ano}` : 'A combinar';
+    const meses = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const data  = mes && ano ? `${meses[parseInt(mes)]} de ${ano}` : 'A combinar';
 
-    const texto = `
-🏡 *Solicitação de Reserva — VENTSY*
+    // Extras selecionados
+    const extrasLinhas = [];
+    document.querySelectorAll('#form-reserva .check-adicional-sim input:checked').forEach(c => {
+        const label = c.parentElement.textContent.trim();
+        extrasLinhas.push(`   • ${label}`);
+    });
+    const extrasBloco = extrasLinhas.length ? `\n➕ *Serviços adicionais:*\n${extrasLinhas.join('\n')}` : '';
+
+    const texto = `Olá, tudo bem? Preenchi o formulário na Ventsy e gostaria de mais informações. Seguem os dados do meu evento:
 
 📍 *Espaço:* ${PROP?.nome || '—'}
 👤 *Nome:* ${nome}
 📞 *Telefone:* ${tel}${email ? `\n📧 *E-mail:* ${email}` : ''}
 🎉 *Tipo de evento:* ${tipoTxt}
 📅 *Data desejada:* ${data}
-👥 *Convidados:* ${pessoas} pessoas
-💰 *Estimativa:* ${total}
+👥 *Convidados:* ${pessoas} pessoas${extrasBloco}
+💰 *Estimativa de orçamento:* ${total}
 
-💬 *Mensagem:*
-${msg}
-
-_Enviado pelo portal VENTSY_`.trim();
+_Enviado pelo portal VENTSY_`;
 
     window.open(`https://wa.me/${WPP_NUMBER}?text=${encodeURIComponent(texto)}`, '_blank');
 }

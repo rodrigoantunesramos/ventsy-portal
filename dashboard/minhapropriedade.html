@@ -279,6 +279,13 @@
         .mapa-container p { font-size: 0.85rem; }
 
         /* ── FAQ ── */
+        .lista-custos-extras { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+        .custo-extra-item {
+            display: flex; gap: 10px; align-items: center;
+            background: #fdfdfd; padding: 12px 14px; border: 1px solid #eee; border-radius: 10px;
+        }
+        .custo-extra-item input[type=text] { flex: 2; }
+        .custo-extra-item input[type=number] { flex: 1; min-width: 80px; }
         .lista-faq { display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px; }
         .faq-item {
             display: flex; gap: 14px; background: #fdfdfd;
@@ -620,6 +627,13 @@
                         <label>Informações adicionais sobre preços</label>
                         <textarea id="regras-preco" placeholder="Ex: Valor inclui 6 horas de uso. Para eventos com mais de 150 pessoas, consulte pacotes especiais..." style="min-height:120px"></textarea>
                     </div>
+                </div>
+
+                <div class="sessao-edit">
+                    <h3>Custos Extras (opcionais para o cliente)</h3>
+                    <p class="aviso-form">Adicione serviços que o cliente pode contratar à parte. Eles aparecerão no simulador de orçamento do seu anúncio.</p>
+                    <div id="lista-custos-extras"></div>
+                    <button type="button" class="btn-add-faq" onclick="adicionarCustoExtra()">+ Adicionar item</button>
                 </div>
             </div>
 
@@ -993,6 +1007,12 @@
                 });
             }
 
+            // Aba 3 — Custos extras
+            const custosExtrasCarregados = parseArray(prop.custos_extras);
+            if (custosExtrasCarregados.length) {
+                custosExtrasCarregados.forEach(e => adicionarCustoExtra(e.nome || '', e.valor || ''));
+            }
+
             // Aba 6 — FAQ
             if (Array.isArray(prop.faq) && prop.faq.length) {
                 const lista = document.getElementById('lista-faq');
@@ -1158,6 +1178,12 @@
             ).map(cb => cb.value);
             const tipoEventoStr = tipos.join(', ');
 
+            // Coleta Aba 3 — custos extras
+            const custosExtras = Array.from(document.querySelectorAll('#lista-custos-extras .custo-extra-item')).map(item => {
+                const inputs = item.querySelectorAll('input');
+                return { nome: inputs[0]?.value.trim() || '', valor: parseFloat(inputs[1]?.value) || 0 };
+            }).filter(e => e.nome && e.valor > 0);
+
             // Coleta Aba 6
             const faq = Array.from(document.querySelectorAll('#lista-faq .faq-item')).map(item => ({
                 pergunta: item.querySelector('input')?.value.trim() || '',
@@ -1178,6 +1204,7 @@
                 whatsapp:         whatsapp    || null,
                 comodidades:      comodidades,
                 servicos_extras:  servicosExtras,
+                custos_extras:    custosExtras,
                 endereco:         endereco    || null,
                 // Campos extras (adicionados à tabela conforme necessidade)
                 email_contato:    emailContat || null,
@@ -1309,6 +1336,21 @@
     }
 
     /* ── FAQ ── */
+    function adicionarCustoExtra(nome = '', valor = '') {
+        const lista = document.getElementById('lista-custos-extras');
+        if (!lista) return;
+        lista.classList.add('lista-custos-extras');
+        const item = document.createElement('div');
+        item.className = 'custo-extra-item';
+        item.innerHTML = `
+            <input type="text" placeholder="Nome do serviço (ex: Limpeza pós-evento)" value="${nome}">
+            <input type="number" placeholder="R$ valor" min="0" value="${valor}">
+            <button class="btn-remover-faq" onclick="this.parentElement.remove()">🗑️</button>
+        `;
+        lista.appendChild(item);
+        item.querySelector('input').focus();
+    }
+
     function adicionarFAQ() {
         const lista = document.getElementById('lista-faq');
         const item = document.createElement('div');
