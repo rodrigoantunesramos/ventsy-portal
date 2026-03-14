@@ -1008,6 +1008,7 @@ async function init() {
         } catch (_) {}
 
         renderPagina(prop);
+        trackEvento('view');
 
     } catch (err) {
         console.error('Erro init:', err);
@@ -1421,7 +1422,31 @@ function calcularOrcamento() {
 /* ────────────────────────────────────────────────────────
    WHATSAPP
 ──────────────────────────────────────────────────────── */
+/* ────────────────────────────────────────────────────────
+   ANALYTICS — registra evento na tabela analytics_eventos
+   SQL para criar a tabela no Supabase:
+   CREATE TABLE analytics_eventos (
+     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+     propriedade_id text NOT NULL,
+     evento_tipo    text NOT NULL,  -- 'view' | 'whatsapp' | 'formulario'
+     created_at     timestamptz DEFAULT now()
+   );
+   ALTER TABLE analytics_eventos ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY "insert_publico" ON analytics_eventos FOR INSERT WITH CHECK (true);
+   CREATE POLICY "select_dono"    ON analytics_eventos FOR SELECT USING (
+     EXISTS (SELECT 1 FROM propriedades WHERE id::text = analytics_eventos.propriedade_id AND user_id = auth.uid())
+   );
+──────────────────────────────────────────────────────── */
+async function trackEvento(tipo) {
+    const propId = PROP?.id;
+    if (!propId || propId === 'demo') return;
+    try {
+        await sb.from('analytics_eventos').insert({ propriedade_id: propId, evento_tipo: tipo });
+    } catch (_) {}
+}
+
 function irParaWhatsapp() {
+    trackEvento('whatsapp');
     const msg = `Olá! Vi seu espaço "${PROP?.nome || 'no portal VENTSY'}" e gostaria de mais informações.`;
     window.open(`https://wa.me/${WPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
 }
@@ -1460,6 +1485,7 @@ function enviarParaWhatsapp() {
 
 _Enviado pelo portal VENTSY_`;
 
+    trackEvento('formulario');
     window.open(`https://wa.me/${WPP_NUMBER}?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
