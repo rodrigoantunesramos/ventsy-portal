@@ -823,10 +823,15 @@ async function init() {
                 const d = new Date(ass.fim_periodo);
                 document.getElementById('sidebar-validade').textContent = `Válido até ${d.toLocaleDateString('pt-BR')}`;
             }
+        } catch (_) {}
 
-        
-
-     
+    } catch (err) {
+        console.error('Erro no init calendario:', err);
+    } finally {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('main-content').style.display   = 'flex';
+        renderizarCalendario();
+    }
 }
 
 /* ── CHAVE DE DATA ── */
