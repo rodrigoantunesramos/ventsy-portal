@@ -812,21 +812,32 @@ async function init() {
             document.getElementById('sidebar-avatar').textContent = ini;
         }
 
-        // Plano ativo + validade
-        try {
-            const { data: ass } = await sb.from('assinaturas')
-                .select('plano_ativo, data_expiracao, expira_em, valido_ate, validade')
-                .eq('usuario_id', user.id).single();
-            const planosLabel = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
-            document.getElementById('sidebar-plano-chip').textContent = planosLabel[ass?.plano_ativo] || '🏷️ Básico';
-            const dataExp = ass?.data_expiracao || ass?.expira_em || ass?.valido_ate || ass?.validade;
-            if (dataExp) {
-                const d = new Date(dataExp);
-                const fmt = d.toLocaleDateString('pt-BR');
-                document.getElementById('sidebar-validade').textContent = `Válido até ${fmt}`;
+
+            // Plano
+            try {
+                const { data: ass } = await sb.from('assinaturas')
+                    .select('plano_ativo, status, fim_periodo')
+                    .eq('usuario_id', user.id).single();
+                const pl = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
+                const plNome = { basico: 'Básico', pro: 'Pro', ultra: 'Ultra' };
+                document.getElementById('sidebar-plano-chip').textContent = pl[ass?.plano_ativo] || '🏷️ Básico';
+                document.getElementById('card-plano-nome').textContent = plNome[ass?.plano_ativo] || 'Básico';
+                const dataExp = ass?.fim_periodo || ass?.status;
+                if (dataExp) {
+                    const d = new Date(dataExp);
+                    const dataFormatada = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    document.getElementById('sidebar-validade').textContent = `Válido até ${dataFormatada}`;
+                    document.getElementById('card-plano-validade').textContent = dataFormatada;
+                }
+            } catch (_) {
+                document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
+                document.getElementById('card-plano-nome').textContent = 'Básico';
             }
-        } catch (_) {
-            document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
+
+
+
+
+        
         }
 
         renderizarCalendario();
