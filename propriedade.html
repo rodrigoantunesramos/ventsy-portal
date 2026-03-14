@@ -882,14 +882,24 @@ async function init() {
             }
         } catch (_) {}
 
-        // Busca fotos (tabela: fotos_imovel)
+        // Busca fotos (tabela: fotos_imovel) — apenas fotos do espaço (tipo != 'evento')
         try {
             const { data: fotos } = await sb.from('fotos_imovel')
-                .select('url, secao, ordem')
+                .select('url, secao, ordem, tipo')
                 .eq('propriedade_id', propId)
+                .neq('tipo', 'evento')
                 .order('ordem');
             FOTOS = (fotos || []).map(f => ({ url: f.url, titulo: f.secao || '', ordem: f.ordem }));
-        } catch (_) {}
+        } catch (_) {
+            // fallback: sem coluna tipo (schema antigo)
+            try {
+                const { data: fotos } = await sb.from('fotos_imovel')
+                    .select('url, secao, ordem')
+                    .eq('propriedade_id', propId)
+                    .order('ordem');
+                FOTOS = (fotos || []).map(f => ({ url: f.url, titulo: f.secao || '', ordem: f.ordem }));
+            } catch (_) {}
+        }
 
         // Busca vídeos (apenas ultra)
         if (PLANO === 'ultra') {
@@ -1425,19 +1435,20 @@ function carregarMaisAval() {
 ──────────────────────────────────────────────────────── */
 function abrirModalGaleria() {
     const grid = document.getElementById('modal-galeria-grid');
-    const fotos = FOTOS.length ? FOTOS : Array.from({length:5},(_,i)=>({url:`https://picsum.photos/seed/demo${i}/800/600`,titulo:'Foto '+(i+1)}));
-    const limite = PLANO === 'basico' ? 5 : fotos.length;
+    // Mostra TODAS as fotos (sem limite por plano — o limite é no upload, não na visualização)
+    const fotos = FOTOS.filter(f => f.titulo !== '__destaque__');
+    const todas = FOTOS.length ? fotos : [];
 
     grid.innerHTML = '';
-    fotos.slice(0, limite).forEach(f => {
+    todas.forEach(f => {
         grid.innerHTML += `
             <div class="modal-foto-item">
                 <img src="${f.url}" alt="${f.titulo || ''}" loading="lazy">
-                ${f.titulo ? `<div class="modal-foto-titulo">${f.titulo}</div>` : ''}
+                ${f.titulo && f.titulo !== '__destaque__' ? `<div class="modal-foto-titulo">${f.titulo}</div>` : ''}
             </div>`;
     });
 
-    document.getElementById('modal-galeria-titulo').textContent = `Todas as fotos (${Math.min(limite, fotos.length)})`;
+    document.getElementById('modal-galeria-titulo').textContent = `Todas as fotos (${todas.length})`;
     document.getElementById('modal-galeria').classList.add('aberto');
     document.body.style.overflow = 'hidden';
 }
@@ -1552,9 +1563,11 @@ function toggleFaq(btn) {
 async function carregarExploreEventos(propId) {
     if (!propId || propId === 'demo') return;
     try {
+        // Carrega apenas fotos de eventos (tipo='evento') para o carrossel explore
         const { data: fotos } = await sb.from('fotos_imovel')
             .select('url, secao, ordem')
             .eq('propriedade_id', propId)
+            .eq('tipo', 'evento')
             .not('secao', 'is', null)
             .order('ordem');
         if (!fotos || !fotos.length) return;
@@ -1562,7 +1575,7 @@ async function carregarExploreEventos(propId) {
         // Agrupa por secao
         const grupos = {};
         fotos.forEach(f => {
-            if (!f.secao || f.secao.toLowerCase() === 'geral') return;
+            if (!f.secao || f.secao.startsWith('__')) return;
             if (!grupos[f.secao]) grupos[f.secao] = [];
             grupos[f.secao].push(f.url);
         });

@@ -138,6 +138,22 @@
         }
         .btn-salvar-tudo:hover { background: #333; }
 
+        /* ── TABS ── */
+        .tabs-fotos {
+            display: flex; gap: 6px; margin-bottom: 20px;
+            background: #fff; border-radius: 12px; padding: 6px;
+            border: 1px solid #eee; width: fit-content;
+        }
+        .tab-btn {
+            padding: 9px 20px; border-radius: 8px; border: none;
+            background: transparent; font-family: inherit; font-size: 0.88rem;
+            font-weight: 600; color: #888; cursor: pointer; transition: all 0.2s;
+        }
+        .tab-btn:hover:not(.active) { background: #f5f5f5; color: #333; }
+        .tab-btn.active { background: #ff385c; color: #fff; box-shadow: 0 2px 8px rgba(255,56,92,0.3); }
+        .aba-fotos { display: none; }
+        .aba-fotos.ativa { display: block; }
+
         /* ── AVISO INTRODUTÓRIO ── */
         .aviso-intro {
             background: #0d0d0d; border-radius: 14px; padding: 20px 24px;
@@ -149,7 +165,7 @@
         .aviso-intro-texto p { font-size: 0.8rem; color: #aaa; line-height: 1.5; }
 
         /* ── LISTA DE SEÇÕES ── */
-        #lista-secoes { display: flex; flex-direction: column; gap: 20px; }
+        .lista-secoes-wrap { display: flex; flex-direction: column; gap: 20px; }
 
         /* ── CARD DE SEÇÃO ── */
         .secao-fotos {
@@ -160,18 +176,13 @@
         }
         .secao-fotos:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
 
-        /* Cabeçalho da seção */
         .secao-header {
             display: flex; align-items: center; gap: 14px;
             padding: 18px 22px;
             border-bottom: 1px solid #f5f5f5;
         }
-        .secao-drag-handle {
-            color: #ccc; cursor: grab; font-size: 1.2rem;
-            flex-shrink: 0; user-select: none;
-        }
+        .secao-drag-handle { color: #ccc; cursor: grab; font-size: 1.2rem; flex-shrink: 0; user-select: none; }
         .secao-drag-handle:active { cursor: grabbing; }
-
         .secao-titulo-wrap { flex: 1; position: relative; }
         .secao-titulo-input {
             width: 100%; font-size: 1rem; font-weight: 700;
@@ -182,11 +193,7 @@
         }
         .secao-titulo-input:focus { border-bottom-color: #ff385c; }
         .secao-titulo-input::placeholder { color: #bbb; font-weight: 400; }
-
-        .secao-contador {
-            font-size: 0.75rem; color: #aaa; margin-top: 2px;
-        }
-
+        .secao-contador { font-size: 0.75rem; color: #aaa; margin-top: 2px; }
         .secao-acoes { display: flex; gap: 6px; flex-shrink: 0; }
         .btn-icon {
             width: 34px; height: 34px; border-radius: 8px;
@@ -198,33 +205,33 @@
         .btn-icon.danger:hover { background: #fff0f0; border-color: #ffcdd2; }
         .btn-icon.collapse-btn { font-size: 0.75rem; color: #999; }
 
-        /* Corpo da seção */
         .secao-body { padding: 20px 22px; }
         .secao-body.collapsed { display: none; }
 
-        /* Grid de fotos */
         .fotos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 12px;
-            margin-bottom: 14px;
-            min-height: 10px;
+            gap: 12px; margin-bottom: 14px; min-height: 10px;
         }
 
-        /* Card de foto */
+        /* ── FOTO CARD ── */
         .foto-card {
             position: relative; border-radius: 10px;
             overflow: hidden; aspect-ratio: 4/3;
-            border: 1px solid #eee;
-            background: #f8f8f8;
-            cursor: grab;
-            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eee; background: #f8f8f8;
+            cursor: grab; transition: transform 0.2s, box-shadow 0.2s;
         }
         .foto-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
         .foto-card:active { cursor: grabbing; }
         .foto-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-        /* Badge "Capa" na primeira foto */
+        /* Foto card quando um slot está aguardando seleção */
+        .foto-card.selecionavel { cursor: pointer; }
+        .foto-card.selecionavel:hover {
+            box-shadow: 0 0 0 3px #ff385c, 0 6px 18px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
         .badge-capa {
             position: absolute; top: 8px; left: 8px;
             background: #0d0d0d; color: #fff;
@@ -232,28 +239,30 @@
             padding: 3px 8px; border-radius: 6px;
             text-transform: uppercase; letter-spacing: 0.05em;
         }
-
+        .badge-destaque-num {
+            position: absolute; bottom: 6px; right: 6px;
+            background: #ff385c; color: #fff;
+            font-size: 0.6rem; font-weight: 700;
+            padding: 2px 6px; border-radius: 6px;
+            display: none; align-items: center; gap: 3px; z-index: 2;
+        }
         .btn-remover-foto {
             position: absolute; top: 6px; right: 6px;
             width: 26px; height: 26px; border-radius: 50%;
             background: rgba(0,0,0,0.55); color: #fff;
             border: none; cursor: pointer; font-size: 0.9rem;
             display: flex; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.2s;
+            opacity: 0; transition: opacity 0.2s; z-index: 3;
         }
         .foto-card:hover .btn-remover-foto { opacity: 1; }
 
-        /* Zona de upload dentro da seção */
+        /* ── DROP ZONE ── */
         .drop-zone {
             border: 2px dashed #e0e0e0; border-radius: 12px;
             padding: 24px 20px; text-align: center;
-            cursor: pointer; transition: all 0.25s;
-            background: #fdfdfd;
+            cursor: pointer; transition: all 0.25s; background: #fdfdfd;
         }
-        .drop-zone:hover, .drop-zone.dragover {
-            border-color: #ff385c;
-            background: rgba(255,56,92,0.03);
-        }
+        .drop-zone:hover, .drop-zone.dragover { border-color: #ff385c; background: rgba(255,56,92,0.03); }
         .drop-zone.dragover { transform: scale(1.01); }
         .drop-zone-icon { font-size: 2rem; margin-bottom: 6px; display: block; }
         .drop-zone p { font-size: 0.82rem; color: #888; margin-bottom: 10px; }
@@ -264,11 +273,8 @@
         }
         .btn-selecionar-fotos:hover { background: #333; }
 
-        /* ── PLACEHOLDER quando não há seções ── */
-        .placeholder-vazio {
-            text-align: center; padding: 60px 20px;
-            color: #bbb;
-        }
+        /* ── PLACEHOLDER ── */
+        .placeholder-vazio { text-align: center; padding: 60px 20px; color: #bbb; }
         .placeholder-vazio span { font-size: 3rem; display: block; margin-bottom: 14px; }
         .placeholder-vazio h3 { font-size: 1.1rem; font-weight: 700; color: #999; margin-bottom: 6px; }
         .placeholder-vazio p { font-size: 0.85rem; line-height: 1.6; }
@@ -311,38 +317,22 @@
         .footer-column ul li a:hover { text-decoration: underline; }
         .footer-bottom { max-width: 1200px; margin: 40px auto 0; padding: 25px 5% 0; border-top: 1px solid #ebebeb; color: #717171; font-size: 0.85rem; }
 
-        /* ── MOBILE SIDEBAR TOGGLE ── */
+        /* ── MOBILE ── */
         .btn-sidebar-toggle {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-            width: 40px; height: 40px;
-            background: none; border: 1px solid #eee;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            gap: 5px; width: 40px; height: 40px; background: none; border: 1px solid #eee;
             border-radius: 8px; cursor: pointer; padding: 8px;
         }
-        .btn-sidebar-toggle span {
-            display: block; width: 18px; height: 2px;
-            background: #444; border-radius: 2px;
-        }
-        .sidebar-overlay {
-            display: none;
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 9998;
-        }
+        .btn-sidebar-toggle span { display: block; width: 18px; height: 2px; background: #444; border-radius: 2px; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 9998; }
         .sidebar-overlay.ativo { display: block; }
 
         @media (max-width: 768px) {
             .btn-sidebar-toggle { display: flex; }
             .dash-sidebar {
-                display: flex !important;
-                position: fixed; top: 80px; left: 0;
-                width: 280px; height: calc(100vh - 80px);
-                z-index: 9999;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
+                display: flex !important; position: fixed; top: 80px; left: 0;
+                width: 280px; height: calc(100vh - 80px); z-index: 9999;
+                transform: translateX(-100%); transition: transform 0.3s ease;
                 box-shadow: 4px 0 20px rgba(0,0,0,0.15);
             }
             .dash-sidebar.aberta { transform: translateX(0); }
@@ -351,49 +341,35 @@
             .fotos-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
             .footer-container { flex-direction: column; gap: 36px; }
         }
-        @media (max-width: 480px) {
-            .logo { height: 44px; }
-            header { padding: 0 4%; }
-        }
+        @media (max-width: 480px) { .logo { height: 44px; } header { padding: 0 4%; } }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
         .secao-fotos { animation: slideDown 0.3s ease; }
 
         /* ── DESTAQUE PANEL ── */
         .destaque-panel {
-            background: #fff;
-            border: 2px solid rgba(255,56,92,0.2);
-            border-radius: 16px;
-            padding: 20px 22px;
-            margin-bottom: 24px;
+            background: #fff; border: 2px solid rgba(255,56,92,0.2);
+            border-radius: 16px; padding: 20px 22px; margin-bottom: 24px;
         }
         .destaque-panel-top {
-            display: flex; align-items: flex-start; justify-content: space-between;
-            margin-bottom: 14px;
+            display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px;
         }
         .destaque-panel-top h3 { font-size: 0.95rem; font-weight: 700; color: #0d0d0d; margin-bottom: 3px; }
         .destaque-panel-top p { font-size: 0.78rem; color: #888; line-height: 1.4; }
+
         .destaque-slots-grid {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr;
-            grid-template-rows: 90px 90px;
-            gap: 5px;
-            border-radius: 10px;
-            overflow: hidden;
+            grid-template-rows: 110px 110px;
+            gap: 6px; border-radius: 10px; overflow: hidden;
         }
         .destaque-slot {
-            position: relative;
-            background: #f5f5f5;
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-            overflow: hidden;
+            position: relative; background: #f5f5f5;
+            border: 2px dashed #ddd; border-radius: 8px; overflow: hidden;
             display: flex; align-items: center; justify-content: center;
-            cursor: default;
-            transition: border-color 0.2s;
+            cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;
         }
+        .destaque-slot:hover { border-color: #ff385c; }
         .destaque-slot.slot-main { grid-column: 1; grid-row: 1 / 3; }
         .destaque-slot img {
             width: 100%; height: 100%; object-fit: cover;
@@ -404,59 +380,39 @@
         .dslot-num {
             position: absolute; bottom: 5px; left: 5px;
             background: rgba(0,0,0,0.65); color: #fff;
-            font-size: 0.65rem; font-weight: 700;
-            width: 18px; height: 18px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 2;
+            font-size: 0.65rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; z-index: 2;
         }
         .dslot-empty {
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: 3px; color: #ccc; font-size: 0.65rem; text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 3px; color: #ccc; font-size: 0.6rem; text-align: center;
         }
-        .dslot-empty span:first-child { font-size: 1.1rem; }
+        .dslot-empty span:first-child { font-size: 1rem; }
         .btn-limpar-dslot {
             position: absolute; top: 4px; right: 4px;
             width: 18px; height: 18px; border-radius: 50%;
             background: rgba(0,0,0,0.55); color: #fff;
             border: none; cursor: pointer; font-size: 0.6rem;
-            display: none; align-items: center; justify-content: center;
-            z-index: 3;
+            display: none; align-items: center; justify-content: center; z-index: 3;
         }
         .destaque-slot.preenchido .btn-limpar-dslot { display: flex; }
 
-        /* ── BADGE E BARRA DE DESTAQUE NAS FOTOS ── */
-        .badge-destaque-num {
-            position: absolute; bottom: 6px; right: 6px;
-            background: #ff385c; color: #fff;
-            font-size: 0.6rem; font-weight: 700;
-            padding: 2px 6px; border-radius: 6px;
-            display: none; align-items: center; gap: 3px;
-            z-index: 2;
+        /* Slot aguardando seleção */
+        .destaque-slot.aguardando {
+            border-color: #ff385c !important; border-style: solid !important;
+            animation: pulseBorder 0.9s ease-in-out infinite;
         }
-        .foto-destaque-bar {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: rgba(0,0,0,0.82);
-            display: flex; align-items: center; padding: 5px 6px; gap: 3px;
-            transform: translateY(100%);
-            transition: transform 0.2s;
-            z-index: 3;
+        @keyframes pulseBorder {
+            0%,100% { box-shadow: 0 0 0 0 rgba(255,56,92,0.5); }
+            50% { box-shadow: 0 0 0 5px rgba(255,56,92,0); }
         }
-        .foto-card:hover .foto-destaque-bar { transform: translateY(0); }
-        .foto-destaque-bar .bar-label {
-            font-size: 0.58rem; color: #aaa; white-space: nowrap; flex-shrink: 0;
+        .slot-hint {
+            font-size: 0.8rem; color: #ff385c; font-weight: 600;
+            text-align: center; margin-top: 12px; min-height: 20px;
+            transition: opacity 0.3s;
         }
-        .btn-pos {
-            width: 20px; height: 20px; border-radius: 50%;
-            border: 1.5px solid rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.1);
-            color: #fff; font-size: 0.65rem; font-weight: 700;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; transition: background 0.15s;
-        }
-        .btn-pos:hover { background: rgba(255,56,92,0.65); border-color: #ff385c; }
-        .btn-pos.ativo { background: #ff385c; border-color: #ff385c; }
 
+        /* ── BANNER PLANO ── */
         .banner-plano {
             margin-bottom: 16px; padding: 12px 18px; border-radius: 10px;
             font-size: 0.85rem; display: flex; align-items: center; gap: 10px;
@@ -468,8 +424,7 @@
         .aviso-sem-propriedade {
             background: #fff3e0; border: 1px solid #ffe0b2;
             border-radius: 12px; padding: 14px 18px;
-            display: none; align-items: center; gap: 12px;
-            margin-bottom: 20px;
+            display: none; align-items: center; gap: 12px; margin-bottom: 20px;
         }
         .aviso-sem-propriedade p { font-size: 0.85rem; color: #e65100; }
         .aviso-sem-propriedade a { font-weight: 700; color: #e65100; text-decoration: underline; }
@@ -490,7 +445,6 @@
         <a href="../index.html"><img src="../logovents.png" alt="Logo VENTSY" class="logo"></a>
     </div>
     <div class="header-right">
-        <!-- Botão hamburguer mobile -->
         <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
             <span></span><span></span><span></span>
         </button>
@@ -514,10 +468,8 @@
     </div>
 </header>
 
-<!-- ── OVERLAY SIDEBAR MOBILE ── -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-<!-- LAYOUT -->
 <main class="dashboard-container" id="main-content" style="display:none;">
 
     <!-- SIDEBAR -->
@@ -530,16 +482,13 @@
         </div>
         <nav class="dash-menu">
             <a href="index.html">🏠 Dashboard</a>
-
             <span class="menu-section-label">Minha Propriedade</span>
             <a href="minhapropriedade.html">🏡 Dados do Espaço</a>
             <a href="fotos.html" class="active">📸 Fotos</a>
-
             <span class="menu-section-label">Gestão</span>
             <a href="leads.html">💬 Contatos / Leads</a>
             <a href="calendario.html">📅 Disponibilidade</a>
             <a href="relatorio.html">📊 Relatório</a>
-
             <span class="menu-section-label">Conta</span>
             <a href="indique.html">🎁 Programa de Indicação</a>
             <a href="planos2.html">💳 Planos Ventsy</a>
@@ -553,7 +502,7 @@
         <header class="dash-header-fixo">
             <div>
                 <h2>📸 Fotos do Espaço</h2>
-                <p>Organize as fotos por ambiente. A primeira foto de cada seção será o destaque daquele espaço.</p>
+                <p>Organize as fotos por ambiente e defina as 5 fotos em destaque.</p>
             </div>
             <div class="header-acoes">
                 <button class="btn-salvar-tudo" onclick="salvarTudo()">💾 Salvar</button>
@@ -561,78 +510,105 @@
             </div>
         </header>
 
-        <!-- AVISO -->
-        <div class="aviso-intro">
-            <span class="aviso-intro-icon">💡</span>
-            <div class="aviso-intro-texto">
-                <h4>Como organizar suas fotos</h4>
-                <p>Crie uma seção para cada ambiente do seu espaço — ex: <strong>Área Externa</strong>, <strong>Salão Principal</strong>, <strong>Lareira</strong>, <strong>Campo de Futebol</strong>. Arraste para reordenar. A primeira foto de cada seção aparecerá como capa daquele ambiente na galeria pública.</p>
-            </div>
-        </div>
-
-        <!-- AVISO: sem propriedade cadastrada -->
+        <!-- Avisos globais (fora das tabs) -->
         <div class="aviso-sem-propriedade" id="aviso-sem-prop">
             <span style="font-size:1.5rem">⚠️</span>
             <p>Você precisa cadastrar sua propriedade antes de adicionar fotos. <a href="minhapropriedade.html">Cadastrar agora →</a></p>
         </div>
-
-        <!-- BANNER LIMITE DO PLANO -->
         <div class="banner-plano" id="banner-plano" style="display:none"></div>
 
-        <!-- PAINEL FOTOS EM DESTAQUE -->
-        <div class="destaque-panel" id="destaque-panel">
-            <div class="destaque-panel-top">
-                <div>
-                    <h3>⭐ Galeria Principal — 5 Fotos em Destaque</h3>
-                    <p>Selecione quais fotos aparecem na página da sua propriedade. Clique no número desejado em cada foto abaixo.<br>
-                    Pos. 1 = foto grande à esquerda &nbsp;|&nbsp; 2 = superior esq. &nbsp;|&nbsp; 3 = superior dir. &nbsp;|&nbsp; 4 = inferior esq. &nbsp;|&nbsp; 5 = inferior dir.</p>
-                </div>
-            </div>
-            <div class="destaque-slots-grid">
-                <div class="destaque-slot slot-main" id="dslot-1">
-                    <img id="dslot-img-1" src="" alt="Posição 1">
-                    <div class="dslot-empty" id="dslot-empty-1"><span>📷</span><span>Pos. 1<br>(principal)</span></div>
-                    <div class="dslot-num">1</div>
-                    <button class="btn-limpar-dslot" title="Remover desta posição" onclick="limparDestaquePos(1)">✕</button>
-                </div>
-                <div class="destaque-slot" id="dslot-2">
-                    <img id="dslot-img-2" src="" alt="Posição 2">
-                    <div class="dslot-empty" id="dslot-empty-2"><span>📷</span><span>Pos. 2</span></div>
-                    <div class="dslot-num">2</div>
-                    <button class="btn-limpar-dslot" title="Remover desta posição" onclick="limparDestaquePos(2)">✕</button>
-                </div>
-                <div class="destaque-slot" id="dslot-3">
-                    <img id="dslot-img-3" src="" alt="Posição 3">
-                    <div class="dslot-empty" id="dslot-empty-3"><span>📷</span><span>Pos. 3</span></div>
-                    <div class="dslot-num">3</div>
-                    <button class="btn-limpar-dslot" title="Remover desta posição" onclick="limparDestaquePos(3)">✕</button>
-                </div>
-                <div class="destaque-slot" id="dslot-4">
-                    <img id="dslot-img-4" src="" alt="Posição 4">
-                    <div class="dslot-empty" id="dslot-empty-4"><span>📷</span><span>Pos. 4</span></div>
-                    <div class="dslot-num">4</div>
-                    <button class="btn-limpar-dslot" title="Remover desta posição" onclick="limparDestaquePos(4)">✕</button>
-                </div>
-                <div class="destaque-slot" id="dslot-5">
-                    <img id="dslot-img-5" src="" alt="Posição 5">
-                    <div class="dslot-empty" id="dslot-empty-5"><span>📷</span><span>Pos. 5</span></div>
-                    <div class="dslot-num">5</div>
-                    <button class="btn-limpar-dslot" title="Remover desta posição" onclick="limparDestaquePos(5)">✕</button>
-                </div>
-            </div>
+        <!-- TABS -->
+        <div class="tabs-fotos">
+            <button class="tab-btn active" id="tab-espaco" onclick="mudarAba('espaco')">📷 Fotos do Espaço</button>
+            <button class="tab-btn" id="tab-evento" onclick="mudarAba('evento')">🎉 Fotos de Eventos</button>
         </div>
 
-        <!-- LISTA DE SEÇÕES -->
-        <div id="lista-secoes">
+        <!-- ═══ ABA 1: FOTOS DO ESPAÇO ═══ -->
+        <div class="aba-fotos ativa" id="aba-espaco">
 
-            <!-- Placeholder inicial (some quando há seções) -->
-            <div class="placeholder-vazio" id="placeholder-vazio">
-                <span>🏗️</span>
-                <h3>Nenhuma seção criada ainda</h3>
-                <p>Clique em <strong>"+ Nova seção"</strong> para começar a organizar<br>as fotos do seu espaço por ambiente.</p>
+            <div class="aviso-intro">
+                <span class="aviso-intro-icon">💡</span>
+                <div class="aviso-intro-texto">
+                    <h4>Fotos do espaço em si</h4>
+                    <p>Crie uma seção para cada ambiente — ex: <strong>Área Externa</strong>, <strong>Salão Principal</strong>, <strong>Lareira</strong>. A primeira foto de cada seção será a capa daquele ambiente.</p>
+                </div>
             </div>
 
-        </div>
+            <!-- PAINEL DESTAQUE — slots clicáveis -->
+            <div class="destaque-panel">
+                <div class="destaque-panel-top">
+                    <div>
+                        <h3>⭐ 5 Fotos em Destaque — Galeria Principal</h3>
+                        <p>Clique em um slot para ativá-lo, depois clique na foto abaixo que deseja colocar nessa posição.<br>
+                        Pos. 1 = foto grande à esquerda &nbsp;|&nbsp; 2 = sup. esq. &nbsp;|&nbsp; 3 = sup. dir. &nbsp;|&nbsp; 4 = inf. esq. &nbsp;|&nbsp; 5 = inf. dir.</p>
+                    </div>
+                </div>
+                <div class="destaque-slots-grid">
+                    <div class="destaque-slot slot-main" id="dslot-1" onclick="ativarSlot(1)" title="Clique para selecionar foto — Posição 1 (principal)">
+                        <img id="dslot-img-1" src="" alt="Posição 1">
+                        <div class="dslot-empty" id="dslot-empty-1"><span>📷</span><span>Pos. 1<br><small>(principal)</small></span></div>
+                        <div class="dslot-num">1</div>
+                        <button class="btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); limparDestaquePos(1)">✕</button>
+                    </div>
+                    <div class="destaque-slot" id="dslot-2" onclick="ativarSlot(2)" title="Clique para selecionar foto — Posição 2">
+                        <img id="dslot-img-2" src="" alt="Posição 2">
+                        <div class="dslot-empty" id="dslot-empty-2"><span>📷</span><span>Pos. 2</span></div>
+                        <div class="dslot-num">2</div>
+                        <button class="btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); limparDestaquePos(2)">✕</button>
+                    </div>
+                    <div class="destaque-slot" id="dslot-3" onclick="ativarSlot(3)" title="Clique para selecionar foto — Posição 3">
+                        <img id="dslot-img-3" src="" alt="Posição 3">
+                        <div class="dslot-empty" id="dslot-empty-3"><span>📷</span><span>Pos. 3</span></div>
+                        <div class="dslot-num">3</div>
+                        <button class="btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); limparDestaquePos(3)">✕</button>
+                    </div>
+                    <div class="destaque-slot" id="dslot-4" onclick="ativarSlot(4)" title="Clique para selecionar foto — Posição 4">
+                        <img id="dslot-img-4" src="" alt="Posição 4">
+                        <div class="dslot-empty" id="dslot-empty-4"><span>📷</span><span>Pos. 4</span></div>
+                        <div class="dslot-num">4</div>
+                        <button class="btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); limparDestaquePos(4)">✕</button>
+                    </div>
+                    <div class="destaque-slot" id="dslot-5" onclick="ativarSlot(5)" title="Clique para selecionar foto — Posição 5">
+                        <img id="dslot-img-5" src="" alt="Posição 5">
+                        <div class="dslot-empty" id="dslot-empty-5"><span>📷</span><span>Pos. 5</span></div>
+                        <div class="dslot-num">5</div>
+                        <button class="btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); limparDestaquePos(5)">✕</button>
+                    </div>
+                </div>
+                <div class="slot-hint" id="slot-hint"></div>
+            </div>
+
+            <!-- SEÇÕES DO ESPAÇO -->
+            <div class="lista-secoes-wrap" id="lista-secoes">
+                <div class="placeholder-vazio" id="placeholder-vazio">
+                    <span>🏗️</span>
+                    <h3>Nenhuma seção criada ainda</h3>
+                    <p>Clique em <strong>"+ Nova seção"</strong> para começar a organizar as fotos por ambiente.</p>
+                </div>
+            </div>
+
+        </div><!-- /aba-espaco -->
+
+        <!-- ═══ ABA 2: FOTOS DE EVENTOS ═══ -->
+        <div class="aba-fotos" id="aba-evento">
+
+            <div class="aviso-intro" style="background: #1b3a5c">
+                <span class="aviso-intro-icon">🎉</span>
+                <div class="aviso-intro-texto">
+                    <h4>Como o espaço fica decorado nos eventos</h4>
+                    <p>Mostre fotos de casamentos, aniversários, corporativos, formaturas... Cada seção vira um card no carrossel <em>"Explore o que pode ser feito aqui"</em> na sua página pública.</p>
+                </div>
+            </div>
+
+            <div class="lista-secoes-wrap" id="lista-secoes-evento">
+                <div class="placeholder-vazio" id="placeholder-vazio-evento">
+                    <span>🎉</span>
+                    <h3>Nenhuma categoria criada ainda</h3>
+                    <p>Clique em <strong>"+ Nova seção"</strong> e dê um nome ao tipo de evento — ex: <strong>Casamento</strong>, <strong>Aniversário</strong>, <strong>Corporativo</strong>.</p>
+                </div>
+            </div>
+
+        </div><!-- /aba-evento -->
 
         <div class="footer-acoes">
             <button class="btn-salvar" onclick="salvarTudo()">💾 Salvar todas as alterações</button>
@@ -673,19 +649,21 @@
 </footer>
 
 <script>
-/* ─────────────────────────────────────────
-   SUPABASE
-───────────────────────────────────────── */
 const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
 let PROP_ID = null;
-let PLANO_ATIVO = 'basico'; // 'basico' | 'pro' | 'ultra'
+let PLANO_ATIVO = 'basico';
 let destaqueState = [null, null, null, null, null];
-let fotosParaExcluirDoStorage = []; // caminhos a remover do bucket ao salvar
+let fotosParaExcluirDoStorage = [];
+let abaAtiva = 'espaco';
+let destaqueSlotAtivo = null;
+let contadorSecao = 0;
+let contadorSecaoEvento = 0;
 
+/* ─── INIT ─────────────────────────────────────────────── */
 async function init() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { window.location.href = '../login.html'; return; }
@@ -694,8 +672,8 @@ async function init() {
     const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
 
     const nome = perfil?.nome || user.email;
-    const usu = perfil?.usuario || '';
-    const ini = nome.split(' ')[0][0]?.toUpperCase() || '?';
+    const usu  = perfil?.usuario || '';
+    const ini  = nome.split(' ')[0][0]?.toUpperCase() || '?';
 
     document.getElementById('avatar-inicial').textContent = ini;
     document.getElementById('drop-nome').textContent = nome;
@@ -704,28 +682,16 @@ async function init() {
     document.getElementById('sidebar-nome').textContent = nome;
     document.getElementById('sidebar-handle').textContent = usu ? '@' + usu : '';
 
-    // Carrega plano do usuário
-    const { data: assinatura } = await sb
-        .from('assinaturas')
-        .select('plano_ativo')
-        .eq('usuario_id', user.id)
-        .single();
+    // Carrega plano
+    const { data: assinatura } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', user.id).single();
     PLANO_ATIVO = (assinatura?.plano_ativo || 'basico').toLowerCase();
     const chipLabels = { basico: '🎯 Plano Básico', pro: '🚀 Plano Pro', ultra: '⭐ Plano Ultra' };
     document.getElementById('plano-chip').textContent = chipLabels[PLANO_ATIVO] || '🎯 Plano Básico';
-
-    // Mostra banner de limite conforme plano
     atualizarBannerPlano();
 
-    // Carrega o ID da propriedade do usuário (coluna correta: usuario_id)
-    const { data: propData } = await sb
-        .from('propriedades')
-        .select('id')
-        .eq('usuario_id', user.id)
-        .single();
-
+    // Carrega propriedade
+    const { data: propData } = await sb.from('propriedades').select('id').eq('usuario_id', user.id).single();
     PROP_ID = propData?.id || null;
-
     if (!PROP_ID) {
         document.getElementById('aviso-sem-prop').style.display = 'flex';
         console.warn('Nenhuma propriedade encontrada para este usuário.');
@@ -737,23 +703,19 @@ async function init() {
     document.getElementById('main-content').style.display = 'flex';
 }
 
+/* ─── UI HELPERS ────────────────────────────────────────── */
 function toggleSidebar() {
-    const sidebar = document.querySelector('.dash-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    sidebar.classList.toggle('aberta');
-    overlay.classList.toggle('ativo');
+    document.querySelector('.dash-sidebar').classList.toggle('aberta');
+    document.getElementById('sidebar-overlay').classList.toggle('ativo');
 }
-
 function toggleAvatar() {
     const m = document.getElementById('avatar-menu');
     m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
 }
-
 document.addEventListener('click', e => {
     const c = document.querySelector('.avatar-container');
     if (c && !c.contains(e.target)) document.getElementById('avatar-menu').style.display = 'none';
 });
-
 async function sair() {
     await sb.auth.signOut();
     window.location.href = '../login.html';
@@ -767,7 +729,7 @@ function atualizarBannerPlano() {
         el.innerHTML = '🔒 <strong>Plano Básico:</strong> máximo de 5 fotos. <a href="../planos.html" style="color:inherit;font-weight:700">Fazer upgrade →</a>';
         el.style.display = 'flex';
     } else if (PLANO_ATIVO === 'pro') {
-        el.innerHTML = '🚀 <strong>Plano Pro:</strong> fotos ilimitadas. Para adicionar vídeos, faça upgrade para o Plano Ultra. <a href="../planos.html" style="color:inherit;font-weight:700">Ver planos →</a>';
+        el.innerHTML = '🚀 <strong>Plano Pro:</strong> fotos ilimitadas. Para vídeos, faça upgrade para Ultra. <a href="../planos.html" style="color:inherit;font-weight:700">Ver planos →</a>';
         el.style.display = 'flex';
     } else {
         el.innerHTML = '⭐ <strong>Plano Ultra:</strong> fotos e vídeos ilimitados.';
@@ -775,46 +737,138 @@ function atualizarBannerPlano() {
     }
 }
 
-function contarTotalMidias() {
-    return document.querySelectorAll('.foto-card').length;
+function contarTotalFotos() {
+    return document.querySelectorAll('#lista-secoes .foto-card').length;
 }
 
-let contadorSecao = 0;
+/* ─── TABS ──────────────────────────────────────────────── */
+function mudarAba(tipo) {
+    abaAtiva = tipo;
+    document.querySelectorAll('.aba-fotos').forEach(a => a.classList.remove('ativa'));
+    document.getElementById('aba-' + tipo).classList.add('ativa');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tipo).classList.add('active');
+    // Cancela seleção de slot ao trocar aba
+    if (destaqueSlotAtivo !== null) desativarSlot();
+}
 
+/* ─── DESTAQUE — NOVO UX (click slot → click foto) ─────── */
+function ativarSlot(pos) {
+    if (destaqueSlotAtivo === pos) { desativarSlot(); return; }
+    destaqueSlotAtivo = pos;
+    document.querySelectorAll('.destaque-slot').forEach(s => s.classList.remove('aguardando'));
+    document.getElementById('dslot-' + pos).classList.add('aguardando');
+    document.getElementById('slot-hint').textContent =
+        `↓ Clique em uma foto abaixo para colocar na posição ${pos}`;
+    document.querySelectorAll('#lista-secoes .foto-card').forEach(c => c.classList.add('selecionavel'));
+}
+
+function desativarSlot() {
+    destaqueSlotAtivo = null;
+    document.querySelectorAll('.destaque-slot').forEach(s => s.classList.remove('aguardando'));
+    document.getElementById('slot-hint').textContent = '';
+    document.querySelectorAll('.foto-card').forEach(c => c.classList.remove('selecionavel'));
+}
+
+function atribuirFotoAoSlot(src, pos) {
+    destaqueState.forEach((s, i) => { if (s === src) destaqueState[i] = null; });
+    destaqueState[pos - 1] = src;
+    desativarSlot();
+    const hint = document.getElementById('slot-hint');
+    hint.textContent = `✓ Foto definida na posição ${pos}`;
+    setTimeout(() => { if (hint) hint.textContent = ''; }, 2200);
+    atualizarBadgesDestaque();
+    atualizarPainelDestaque();
+    mostrarToast('⭐', `Foto definida como posição ${pos}`);
+}
+
+function limparDestaquePos(pos) {
+    destaqueState[pos - 1] = null;
+    atualizarBadgesDestaque();
+    atualizarPainelDestaque();
+}
+
+function atualizarBadgesDestaque() {
+    const srcToPos = {};
+    destaqueState.forEach((src, i) => { if (src) srcToPos[src] = i + 1; });
+    document.querySelectorAll('.foto-card').forEach(card => {
+        const badge = card.querySelector('.badge-destaque-num');
+        const pos = srcToPos[card.dataset.src];
+        if (badge) {
+            if (pos) { badge.textContent = '⭐ ' + pos; badge.style.display = 'flex'; }
+            else { badge.style.display = 'none'; }
+        }
+    });
+}
+
+function atualizarPainelDestaque() {
+    for (let pos = 1; pos <= 5; pos++) {
+        const src   = destaqueState[pos - 1];
+        const img   = document.getElementById('dslot-img-' + pos);
+        const empty = document.getElementById('dslot-empty-' + pos);
+        const slot  = document.getElementById('dslot-' + pos);
+        if (!img || !empty || !slot) continue;
+        if (src) {
+            img.src = src; img.style.display = 'block';
+            empty.style.display = 'none'; slot.classList.add('preenchido');
+        } else {
+            img.style.display = 'none'; empty.style.display = 'flex'; slot.classList.remove('preenchido');
+        }
+    }
+}
+
+/* ─── SEÇÕES ────────────────────────────────────────────── */
 function criarSecao(titulo = '') {
-    contadorSecao++;
-    const id = 'secao-' + contadorSecao;
-    document.getElementById('placeholder-vazio').style.display = 'none';
-    const lista = document.getElementById('lista-secoes');
-    const card = document.createElement('div');
+    const isEvento  = abaAtiva === 'evento';
+    const prefix    = isEvento ? 'ev-secao-' : 'secao-';
+    const listId    = isEvento ? 'lista-secoes-evento' : 'lista-secoes';
+    const phId      = isEvento ? 'placeholder-vazio-evento' : 'placeholder-vazio';
+
+    if (isEvento) contadorSecaoEvento++; else contadorSecao++;
+    const id = prefix + (isEvento ? contadorSecaoEvento : contadorSecao);
+
+    document.getElementById(phId).style.display = 'none';
+    const lista = document.getElementById(listId);
+    const card  = document.createElement('div');
     card.className = 'secao-fotos';
     card.id = id;
-    card.dataset.id = id;
+    card.dataset.id   = id;
+    card.dataset.tipo = abaAtiva;
+
+    const acceptAttr  = PLANO_ATIVO === 'ultra' ? 'image/*,video/*' : 'image/*';
+    const btnLabel    = PLANO_ATIVO === 'ultra' ? 'Selecionar fotos/vídeos' : 'Selecionar fotos';
+    const dropIcon    = PLANO_ATIVO === 'ultra' ? '🎬' : '📷';
+    const dropText    = PLANO_ATIVO === 'ultra' ? 'Arraste fotos ou vídeos aqui' : 'Arraste as fotos aqui ou clique para selecionar';
+    const placeholder = isEvento
+        ? 'Ex: Casamento, Aniversário, Corporativo...'
+        : 'Ex: Área Externa, Lareira, Salão Principal...';
+
     card.innerHTML = `
         <div class="secao-header">
             <span class="secao-drag-handle" title="Arrastar para reordenar">⠿</span>
             <div class="secao-titulo-wrap">
-                <input type="text" class="secao-titulo-input" placeholder="Ex: Área Externa, Lareira, Salão Principal..." value="${titulo}" oninput="atualizarContador('${id}')">
-                <div class="secao-contador" id="contador-${id}">0 foto(s)</div>
+                <input type="text" class="secao-titulo-input" placeholder="${placeholder}" value="${titulo}" oninput="atualizarContador('${id}')">
+                <div class="secao-contador" id="contador-${id}">0 fotos</div>
             </div>
             <div class="secao-acoes">
-                <button class="btn-icon collapse-btn" title="Recolher / Expandir" onclick="toggleSecao('${id}')">▼</button>
+                <button class="btn-icon collapse-btn" title="Recolher" onclick="toggleSecao('${id}')">▼</button>
                 <button class="btn-icon danger" title="Excluir seção" onclick="excluirSecao('${id}')">🗑️</button>
             </div>
         </div>
         <div class="secao-body" id="body-${id}">
             <div class="fotos-grid" id="grid-${id}"></div>
-            <div class="drop-zone" id="drop-${id}" ondragover="onDragOver(event, '${id}')" ondragleave="onDragLeave('${id}')" ondrop="onDrop(event, '${id}')">
-                <span class="drop-zone-icon">${PLANO_ATIVO === 'ultra' ? '🎬' : '📷'}</span>
-                <p>${PLANO_ATIVO === 'ultra' ? 'Arraste fotos ou vídeos aqui ou clique para selecionar' : 'Arraste as fotos aqui ou clique para selecionar'}</p>
-                <button class="btn-selecionar-fotos" onclick="document.getElementById('file-${id}').click()">${PLANO_ATIVO === 'ultra' ? 'Selecionar fotos/vídeos' : 'Selecionar fotos'}</button>
-                <input type="file" id="file-${id}" multiple accept="${PLANO_ATIVO === 'ultra' ? 'image/*,video/*' : 'image/*'}" hidden onchange="handleFiles(this.files, '${id}')">
+            <div class="drop-zone" id="drop-${id}"
+                ondragover="onDragOver(event,'${id}')"
+                ondragleave="onDragLeave('${id}')"
+                ondrop="onDrop(event,'${id}')">
+                <span class="drop-zone-icon">${dropIcon}</span>
+                <p>${dropText}</p>
+                <button class="btn-selecionar-fotos" onclick="document.getElementById('file-${id}').click()">${btnLabel}</button>
+                <input type="file" id="file-${id}" multiple accept="${acceptAttr}" hidden onchange="handleFiles(this.files,'${id}')">
             </div>
         </div>`;
     lista.appendChild(card);
-    if (!titulo) {
-        setTimeout(() => card.querySelector('.secao-titulo-input').focus(), 100);
-    }
+    if (!titulo) setTimeout(() => card.querySelector('.secao-titulo-input').focus(), 100);
     atualizarContador(id);
     return id;
 }
@@ -825,26 +879,33 @@ function excluirSecao(id) {
     card.style.opacity = '0.4';
     card.style.transform = 'scale(0.97)';
     card.style.transition = 'all 0.25s';
+    const isEvento   = id.startsWith('ev-');
+    const listId     = isEvento ? 'lista-secoes-evento' : 'lista-secoes';
+    const phId       = isEvento ? 'placeholder-vazio-evento' : 'placeholder-vazio';
     setTimeout(() => {
+        // Marca arquivos do Storage para exclusão
+        card.querySelectorAll('.foto-card').forEach(fc => {
+            const url = fc.dataset.src;
+            const base = `${SUPA_URL}/storage/v1/object/public/fotos-dashboard/`;
+            if (url && url.startsWith(base)) fotosParaExcluirDoStorage.push(url.replace(base, ''));
+        });
         card.remove();
-        if (document.querySelectorAll('.secao-fotos').length === 0) {
-            document.getElementById('placeholder-vazio').style.display = 'block';
-        }
+        if (!document.querySelector(`#${listId} .secao-fotos`))
+            document.getElementById(phId).style.display = 'block';
         mostrarToast('🗑️', 'Seção removida.');
     }, 250);
 }
 
 function toggleSecao(id) {
     const body = document.getElementById('body-' + id);
-    const btn = document.querySelector(`#${id} .collapse-btn`);
-    const collapsed = body.classList.toggle('collapsed');
-    btn.textContent = collapsed ? '▶' : '▼';
+    const btn  = document.querySelector(`#${id} .collapse-btn`);
+    btn.textContent = body.classList.toggle('collapsed') ? '▶' : '▼';
 }
 
 function atualizarContador(id) {
-    const grid = document.getElementById('grid-' + id);
+    const grid  = document.getElementById('grid-' + id);
     const count = grid ? grid.querySelectorAll('.foto-card').length : 0;
-    const el = document.getElementById('contador-' + id);
+    const el    = document.getElementById('contador-' + id);
     if (el) el.textContent = count + (count === 1 ? ' foto' : ' fotos');
     atualizarBadgeCapa(id);
 }
@@ -852,40 +913,24 @@ function atualizarContador(id) {
 function atualizarBadgeCapa(id) {
     const grid = document.getElementById('grid-' + id);
     if (!grid) return;
-    const cards = grid.querySelectorAll('.foto-card');
-    cards.forEach((c, i) => {
+    grid.querySelectorAll('.foto-card').forEach((c, i) => {
         const badge = c.querySelector('.badge-capa');
         if (i === 0) {
-            if (!badge) {
-                const b = document.createElement('span');
-                b.className = 'badge-capa';
-                b.textContent = 'Capa';
-                c.appendChild(b);
-            }
-        } else {
-            if (badge) badge.remove();
-        }
+            if (!badge) { const b = document.createElement('span'); b.className = 'badge-capa'; b.textContent = 'Capa'; c.appendChild(b); }
+        } else { if (badge) badge.remove(); }
     });
 }
 
-function onDragOver(e, id) {
-    e.preventDefault();
-    document.getElementById('drop-' + id)?.classList.add('dragover');
-}
-
-function onDragLeave(id) {
-    document.getElementById('drop-' + id)?.classList.remove('dragover');
-}
-
+/* ─── DRAG & DROP ───────────────────────────────────────── */
+function onDragOver(e, id)  { e.preventDefault(); document.getElementById('drop-'+id)?.classList.add('dragover'); }
+function onDragLeave(id)    { document.getElementById('drop-'+id)?.classList.remove('dragover'); }
 function onDrop(e, id) {
     e.preventDefault();
-    document.getElementById('drop-' + id)?.classList.remove('dragover');
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-        handleFiles(files, id);
-    }
+    document.getElementById('drop-'+id)?.classList.remove('dragover');
+    if (e.dataTransfer.files?.length > 0) handleFiles(e.dataTransfer.files, id);
 }
 
+/* ─── UPLOAD ────────────────────────────────────────────── */
 async function handleFiles(files, secaoId) {
     let fileArray = Array.from(files).filter(f => {
         if (f.type.startsWith('image/')) return true;
@@ -894,27 +939,22 @@ async function handleFiles(files, secaoId) {
     });
 
     if (fileArray.length === 0) {
-        if (PLANO_ATIVO !== 'ultra' && Array.from(files).some(f => f.type.startsWith('video/'))) {
+        if (PLANO_ATIVO !== 'ultra' && Array.from(files).some(f => f.type.startsWith('video/')))
             mostrarToast('🔒', 'Vídeos disponíveis apenas no Plano Ultra.');
-        }
         return;
     }
 
-    // Enforce Básico: max 5 fotos total
-    if (PLANO_ATIVO === 'basico') {
-        const totalAtual = contarTotalMidias();
-        const restantes = Math.max(0, 5 - totalAtual);
-        if (restantes === 0) {
-            mostrarToast('🔒', 'Limite de 5 fotos atingido. Faça upgrade para adicionar mais.');
-            return;
-        }
+    // Limite Básico: apenas para seções do espaço
+    if (PLANO_ATIVO === 'basico' && !secaoId.startsWith('ev-')) {
+        const totalAtual = contarTotalFotos();
+        const restantes  = Math.max(0, 5 - totalAtual);
+        if (restantes === 0) { mostrarToast('🔒', 'Limite de 5 fotos atingido. Faça upgrade.'); return; }
         if (fileArray.length > restantes) {
             mostrarToast('⚠️', `Plano Básico: apenas mais ${restantes} foto(s) permitida(s).`);
             fileArray = fileArray.slice(0, restantes);
         }
     }
 
-    // Obtém sessão uma única vez
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { mostrarToast('❌', 'Sessão expirada. Faça login novamente.'); return; }
     const userId = session.user.id;
@@ -925,26 +965,20 @@ async function handleFiles(files, secaoId) {
     dropZone.style.pointerEvents = 'none';
 
     let successCount = 0;
-    let errorCount = 0;
 
     for (const file of fileArray) {
         try {
             const timestamp = Date.now();
-            const safeBase = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.[^.]+$/, '');
-
-            let uploadBlob = file;
-            let contentType = file.type;
-            let ext = file.name.split('.').pop().toLowerCase();
+            const safeBase  = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/\.[^.]+$/, '');
+            let uploadBlob = file, contentType = file.type, ext = file.name.split('.').pop().toLowerCase();
 
             if (file.type.startsWith('image/')) {
-                // Canvas → Blob JPEG comprimido (máx 1200px)
-                uploadBlob = await comprimirParaBlob(file, 1200, 0.82);
+                uploadBlob  = await comprimirParaBlob(file, 1200, 0.82);
                 contentType = 'image/jpeg';
-                ext = 'jpg';
+                ext         = 'jpg';
             }
 
             const filePath = `${userId}/${secaoId}/${timestamp}-${safeBase}.${ext}`;
-
             const { error: uploadError } = await sb.storage
                 .from('fotos-dashboard')
                 .upload(filePath, uploadBlob, { contentType, cacheControl: '3600', upsert: false });
@@ -954,21 +988,17 @@ async function handleFiles(files, secaoId) {
             const { data: urlData } = sb.storage.from('fotos-dashboard').getPublicUrl(filePath);
             adicionarFotoNaSecao(urlData.publicUrl, secaoId, file.name);
             successCount++;
-
         } catch (e) {
             console.error('Erro ao enviar arquivo:', e.message || e);
             mostrarToast('❌', `Erro: ${e.message}`);
-            errorCount++;
         }
     }
 
     dropZone.innerHTML = originalContent;
     dropZone.style.pointerEvents = 'auto';
-
     if (successCount > 0) mostrarToast('✅', `${successCount} arquivo(s) enviado(s)! Clique em Salvar.`);
 }
 
-// Canvas → Blob JPEG (sem base64 no banco, apenas para redimensionar antes do upload)
 function comprimirParaBlob(file, maxPx, quality) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -986,9 +1016,7 @@ function comprimirParaBlob(file, maxPx, quality) {
                 const canvas = document.createElement('canvas');
                 canvas.width = width; canvas.height = height;
                 canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                canvas.toBlob(blob => {
-                    blob ? resolve(blob) : reject(new Error('Falha ao gerar blob'));
-                }, 'image/jpeg', quality);
+                canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Falha ao gerar blob')), 'image/jpeg', quality);
             };
             img.src = e.target.result;
         };
@@ -996,13 +1024,14 @@ function comprimirParaBlob(file, maxPx, quality) {
     });
 }
 
+/* ─── FOTO CARD ─────────────────────────────────────────── */
 function adicionarFotoNaSecao(src, secaoId, nome) {
     const grid = document.getElementById('grid-' + secaoId);
     if (!grid) return;
 
     const card = document.createElement('div');
     card.className = 'foto-card';
-    card.draggable = true;
+    card.draggable  = true;
     card.dataset.src = src;
 
     const isVideo = src.match(/\.(mp4|webm|mov|avi|mkv)(\?|$)/i) || (nome && nome.match(/\.(mp4|webm|mov|avi|mkv)$/i));
@@ -1012,17 +1041,17 @@ function adicionarFotoNaSecao(src, secaoId, nome) {
 
     card.innerHTML = `
         ${mediaEl}
-        <button class="btn-remover-foto" title="Remover foto" onclick="removerFoto(this, '${secaoId}')">✕</button>
+        <button class="btn-remover-foto" title="Remover" onclick="removerFoto(this,'${secaoId}')">✕</button>
         <div class="badge-destaque-num"></div>
-        <div class="foto-destaque-bar">
-            <span class="bar-label">⭐ Destaque:</span>
-            <button class="btn-pos" data-pos="1" onclick="selecionarDestaque(event)">1</button>
-            <button class="btn-pos" data-pos="2" onclick="selecionarDestaque(event)">2</button>
-            <button class="btn-pos" data-pos="3" onclick="selecionarDestaque(event)">3</button>
-            <button class="btn-pos" data-pos="4" onclick="selecionarDestaque(event)">4</button>
-            <button class="btn-pos" data-pos="5" onclick="selecionarDestaque(event)">5</button>
-        </div>
     `;
+
+    // Clique para atribuir ao slot ativo (apenas fotos do espaço)
+    if (!secaoId.startsWith('ev-')) {
+        card.addEventListener('click', e => {
+            if (e.target.closest('.btn-remover-foto')) return;
+            if (destaqueSlotAtivo !== null) atribuirFotoAoSlot(src, destaqueSlotAtivo);
+        });
+    }
 
     card.addEventListener('dragstart', e => {
         e.dataTransfer.setData('foto-src', src);
@@ -1038,260 +1067,157 @@ function adicionarFotoNaSecao(src, secaoId, nome) {
 
 function removerFoto(btn, secaoId) {
     const card = btn.parentElement;
-    const url = card.dataset.src;
-
-    // Marca arquivo do Storage para exclusão ao salvar
-    const storageBase = `${SUPA_URL}/storage/v1/object/public/fotos-dashboard/`;
-    if (url && url.startsWith(storageBase)) {
-        fotosParaExcluirDoStorage.push(url.replace(storageBase, ''));
-    }
-
-    card.style.opacity = '0';
+    const url  = card.dataset.src;
+    const base = `${SUPA_URL}/storage/v1/object/public/fotos-dashboard/`;
+    if (url && url.startsWith(base)) fotosParaExcluirDoStorage.push(url.replace(base, ''));
+    card.style.opacity   = '0';
     card.style.transform = 'scale(0.85)';
     card.style.transition = 'all 0.2s';
-    setTimeout(() => {
-        card.remove();
-        atualizarContador(secaoId);
-    }, 200);
+    setTimeout(() => { card.remove(); atualizarContador(secaoId); }, 200);
 }
 
+/* ─── SALVAR ────────────────────────────────────────────── */
 async function salvarTudo() {
     const btns = document.querySelectorAll('.btn-salvar, .btn-salvar-tudo');
-    btns.forEach(btn => {
-        btn.disabled = true;
-        btn.textContent = '💾 Salvando...';
-    });
+    btns.forEach(b => { b.disabled = true; b.textContent = '💾 Salvando...'; });
 
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {
-        mostrarToast('❌', 'Você não está logado. Faça o login novamente.');
-        btns.forEach(btn => { btn.disabled = false; btn.textContent = '💾 Salvar'; });
+        mostrarToast('❌', 'Não está logado.');
+        btns.forEach(b => { b.disabled = false; b.textContent = '💾 Salvar'; });
         return;
     }
-    const userId = session.user.id;
-
-    // Monta estrutura de seções com destaque embutido
-    const secoesParaSalvar = [];
-
-    // Seção especial para persistir as posições de destaque
-    secoesParaSalvar.push({
-        titulo: '__destaque__',
-        fotos: destaqueState.slice(),
-        ordem: -1
-    });
-
-    // Seções regulares
-    document.querySelectorAll('.secao-fotos').forEach((card, index) => {
-        const titulo = card.querySelector('.secao-titulo-input').value.trim() || 'Sem título';
-        const fotos = Array.from(card.querySelectorAll('.foto-card')).map(f => f.dataset.src);
-        secoesParaSalvar.push({ titulo, fotos, ordem: index });
-    });
 
     try {
         if (!PROP_ID) throw new Error('Propriedade não encontrada. Preencha os dados em Minha Propriedade primeiro.');
-
         await sincronizarFotosPropriedade();
-
         mostrarToast('✅', 'Alterações salvas com sucesso!');
     } catch (err) {
-        console.error('Erro ao salvar no Supabase:', err);
-        mostrarToast('❌', err.message || 'Erro ao salvar. Verifique o console para detalhes.');
+        console.error('Erro ao salvar:', err);
+        mostrarToast('❌', err.message || 'Erro ao salvar.');
     } finally {
-        btns.forEach(btn => { btn.disabled = false; btn.textContent = '💾 Salvar'; });
+        btns.forEach(b => { b.disabled = false; b.textContent = '💾 Salvar'; });
     }
 }
 
 async function sincronizarFotosPropriedade() {
-    // Remove do Storage arquivos que o usuário excluiu da UI
+    // Exclui do Storage arquivos removidos da UI
     if (fotosParaExcluirDoStorage.length > 0) {
         await sb.storage.from('fotos-dashboard').remove(fotosParaExcluirDoStorage);
         fotosParaExcluirDoStorage = [];
     }
 
-    // Coleta todas as fotos com seção e ordem
     const fotosParaSalvar = [];
-    let ordemGlobal = 1;
+    let ordemGlobal = 6;
 
-    // Fotos de destaque (posições 1–5, seção = '__destaque__')
+    // Destaque (tipo='espaco', secao='__destaque__')
     destaqueState.forEach((url, i) => {
-        if (url) {
-            fotosParaSalvar.push({ propriedade_id: PROP_ID, url, secao: '__destaque__', ordem: i + 1 });
-        }
+        if (url) fotosParaSalvar.push({ propriedade_id: PROP_ID, url, secao: '__destaque__', ordem: i + 1, tipo: 'espaco' });
     });
 
-    // Demais fotos das seções regulares
+    // Seções regulares (espaco e evento)
     const destaqueUrls = new Set(destaqueState.filter(Boolean));
-    ordemGlobal = 6;
     document.querySelectorAll('.secao-fotos').forEach(card => {
+        const tipo  = card.dataset.tipo || 'espaco';
         const secao = card.querySelector('.secao-titulo-input')?.value.trim() || 'Sem título';
-        card.querySelectorAll('.foto-card').forEach(fcard => {
-            const url = fcard.dataset.src;
-            if (url && !destaqueUrls.has(url)) {
-                fotosParaSalvar.push({ propriedade_id: PROP_ID, url, secao, ordem: ordemGlobal++ });
+        card.querySelectorAll('.foto-card').forEach(fc => {
+            const url = fc.dataset.src;
+            // Fotos do espaço que são destaque já foram salvas acima — não duplicar
+            if (url && !(tipo === 'espaco' && destaqueUrls.has(url))) {
+                fotosParaSalvar.push({ propriedade_id: PROP_ID, url, secao, ordem: ordemGlobal++, tipo });
             }
         });
     });
 
-    // Remove fotos antigas e insere novas na tabela fotos_imovel
-    const { error: delErr } = await sb
-        .from('fotos_imovel')
-        .delete()
-        .eq('propriedade_id', PROP_ID);
+    const { error: delErr } = await sb.from('fotos_imovel').delete().eq('propriedade_id', PROP_ID);
     if (delErr) throw delErr;
 
     if (fotosParaSalvar.length > 0) {
-        const { error: insErr } = await sb
-            .from('fotos_imovel')
-            .insert(fotosParaSalvar);
+        const { error: insErr } = await sb.from('fotos_imovel').insert(fotosParaSalvar);
         if (insErr) throw insErr;
     }
 }
 
+/* ─── CARREGAR ──────────────────────────────────────────── */
 async function carregarFotosSalvas() {
     if (!PROP_ID) {
-        criarSecao('Área Externa');
-        criarSecao('Salão Principal');
+        _criarSecaoEmAba('Área Externa', 'espaco');
+        _criarSecaoEmAba('Salão Principal', 'espaco');
         return;
     }
 
-    // Carrega fotos da tabela fotos_imovel
     const { data: fotos, error } = await sb
         .from('fotos_imovel')
-        .select('url, secao, ordem')
+        .select('url, secao, ordem, tipo')
         .eq('propriedade_id', PROP_ID)
         .order('ordem');
 
     if (error || !fotos || fotos.length === 0) {
-        criarSecao('Área Externa');
-        criarSecao('Salão Principal');
+        _criarSecaoEmAba('Área Externa', 'espaco');
+        _criarSecaoEmAba('Salão Principal', 'espaco');
         return;
     }
 
-    // Restaura estado de destaque (seção '__destaque__')
-    const fotosDestaque = fotos.filter(f => f.secao === '__destaque__');
-    fotosDestaque.sort((a, b) => a.ordem - b.ordem);
+    const fotosEspaco = fotos.filter(f => f.tipo !== 'evento');
+    const fotosEvento = fotos.filter(f => f.tipo === 'evento');
+
+    // Restaura destaque
+    const fotosDestaque = fotosEspaco.filter(f => f.secao === '__destaque__').sort((a, b) => a.ordem - b.ordem);
     fotosDestaque.forEach(f => {
         const idx = f.ordem - 1;
         if (idx >= 0 && idx < 5) destaqueState[idx] = f.url;
     });
     if (fotosDestaque.length > 0) atualizarPainelDestaque();
 
-    // Agrupa fotos regulares por seção
-    const secaoMap = {};
-    fotos.filter(f => f.secao !== '__destaque__').forEach(f => {
+    // Seções do espaço
+    const mapaEspaco = {};
+    fotosEspaco.filter(f => f.secao !== '__destaque__').forEach(f => {
         const nome = f.secao || 'Geral';
-        if (!secaoMap[nome]) secaoMap[nome] = [];
-        secaoMap[nome].push(f.url);
+        (mapaEspaco[nome] = mapaEspaco[nome] || []).push(f.url);
     });
-
-    const secoes = Object.entries(secaoMap);
-    if (secoes.length === 0) {
-        criarSecao('Área Externa');
-        criarSecao('Salão Principal');
-        return;
-    }
-
-    secoes.forEach(([titulo, urls]) => {
-        const secaoId = criarSecao(titulo);
-        urls.forEach(url => { if (url) adicionarFotoNaSecao(url, secaoId, ''); });
-    });
-
-    // Aplica badges de destaque após todas as fotos serem renderizadas
-    atualizarBadgesDestaque();
-}
-
-/* ─────────────────────────────────────────
-   DESTAQUE — GALERIA PRINCIPAL
-───────────────────────────────────────── */
-function selecionarDestaque(event) {
-    event.stopPropagation();
-    const btn = event.currentTarget;
-    const pos = parseInt(btn.dataset.pos);
-    const card = btn.closest('.foto-card');
-    if (!card) return;
-    const src = card.dataset.src;
-
-    // Se já está nesta posição, remove
-    if (destaqueState[pos - 1] === src) {
-        destaqueState[pos - 1] = null;
-        mostrarToast('🔕', `Posição ${pos} liberada`);
+    if (Object.keys(mapaEspaco).length === 0) {
+        _criarSecaoEmAba('Área Externa', 'espaco');
+        _criarSecaoEmAba('Salão Principal', 'espaco');
     } else {
-        // Remove este src de qualquer outra posição
-        destaqueState.forEach((s, i) => { if (s === src) destaqueState[i] = null; });
-        // Define na nova posição
-        destaqueState[pos - 1] = src;
-        mostrarToast('⭐', `Foto definida como posição ${pos}`);
-    }
-
-    atualizarBadgesDestaque();
-    atualizarPainelDestaque();
-}
-
-function limparDestaquePos(pos) {
-    destaqueState[pos - 1] = null;
-    atualizarBadgesDestaque();
-    atualizarPainelDestaque();
-}
-
-function atualizarBadgesDestaque() {
-    // Mapa inverso: url → posição
-    const srcToPos = {};
-    destaqueState.forEach((src, i) => { if (src) srcToPos[src] = i + 1; });
-
-    document.querySelectorAll('.foto-card').forEach(card => {
-        const src = card.dataset.src;
-        const badge = card.querySelector('.badge-destaque-num');
-        const btns = card.querySelectorAll('.btn-pos');
-        const pos = srcToPos[src];
-
-        if (badge) {
-            if (pos) {
-                badge.textContent = '⭐ ' + pos;
-                badge.style.display = 'flex';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        btns.forEach(b => {
-            const bPos = parseInt(b.dataset.pos);
-            b.classList.toggle('ativo', destaqueState[bPos - 1] === src);
+        Object.entries(mapaEspaco).forEach(([titulo, urls]) => {
+            const id = _criarSecaoEmAba(titulo, 'espaco');
+            urls.forEach(url => { if (url) adicionarFotoNaSecao(url, id, ''); });
         });
-    });
-}
-
-function atualizarPainelDestaque() {
-    for (let pos = 1; pos <= 5; pos++) {
-        const src = destaqueState[pos - 1];
-        const img   = document.getElementById('dslot-img-' + pos);
-        const empty = document.getElementById('dslot-empty-' + pos);
-        const slot  = document.getElementById('dslot-' + pos);
-        if (!img || !empty || !slot) continue;
-
-        if (src) {
-            img.src = src;
-            img.style.display = 'block';
-            empty.style.display = 'none';
-            slot.classList.add('preenchido');
-        } else {
-            img.style.display = 'none';
-            empty.style.display = 'flex';
-            slot.classList.remove('preenchido');
-        }
     }
+
+    // Seções de evento
+    const mapaEvento = {};
+    fotosEvento.forEach(f => {
+        const nome = f.secao || 'Evento';
+        (mapaEvento[nome] = mapaEvento[nome] || []).push(f.url);
+    });
+    Object.entries(mapaEvento).forEach(([titulo, urls]) => {
+        const id = _criarSecaoEmAba(titulo, 'evento');
+        urls.forEach(url => { if (url) adicionarFotoNaSecao(url, id, ''); });
+    });
+
+    atualizarBadgesDestaque();
 }
 
+// Helper: cria seção na aba correta sem depender de abaAtiva global
+function _criarSecaoEmAba(titulo, tipo) {
+    const prev = abaAtiva;
+    abaAtiva = tipo;
+    const id = criarSecao(titulo);
+    abaAtiva = prev;
+    return id;
+}
+
+/* ─── TOAST ─────────────────────────────────────────────── */
 function mostrarToast(icone, msg) {
     document.getElementById('toast-icone').textContent = icone;
     document.getElementById('toast-msg').textContent = msg;
     const t = document.getElementById('toast');
     t.classList.add('visivel');
-    setTimeout(() => t.classList.remove('visivel'), 3000);
+    setTimeout(() => t.classList.remove('visivel'), 3200);
 }
 
-/* Arranca */
 init();
-
 </script>
 
 </body>
