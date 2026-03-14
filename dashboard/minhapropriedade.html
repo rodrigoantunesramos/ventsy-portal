@@ -83,9 +83,10 @@
 
         /* ── SIDEBAR ── */
         .dash-sidebar {
-            width: 350px; background: #fff; padding: 30px 20px;
+            width: 260px; background: #fff; padding: 30px 20px;
             border-right: 1px solid #eee; display: flex; flex-direction: column;
-            position: sticky; top: 80px; height: calc(100vh - 80px); overflow-y: auto;
+            position: fixed; top: 80px; left: 0; bottom: 0; overflow-y: auto;
+            z-index: 200;
         }
         .perfil-resumo { text-align: center; margin-bottom: 32px; }
         .sidebar-avatar {
@@ -116,7 +117,7 @@
         }
 
         /* ── CONTEÚDO ── */
-        .dash-content { overflow-y: visible; padding: 0 40px 60px 40px; width: 100%; }
+        .dash-content { overflow-y: visible; padding: 0 40px 60px 40px; width: 100%; margin-left: 260px; }
 
         .dash-header-fixo {
             position: sticky; top: 0; z-index: 100; background: #f0f2f5;
@@ -399,7 +400,7 @@
                 box-shadow: 4px 0 20px rgba(0,0,0,0.15);
             }
             .dash-sidebar.aberta { transform: translateX(0); }
-            .dash-content { padding: 0 16px 40px; }
+            .dash-content { padding: 0 16px 40px; margin-left: 0; }
             .dash-header-fixo h2 { font-size: 1.4rem; }
             .grid-form { grid-template-columns: 1fr; }
             .preco-grid { grid-template-columns: 1fr; }
