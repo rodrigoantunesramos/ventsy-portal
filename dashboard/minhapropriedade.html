@@ -1184,26 +1184,18 @@
                 PROP_ID = existing.id;
 
                 const res = await sb.from('propriedades').update(dados).eq('usuario_id', userId);
-
+                console.log('[SAVE] update result:', res);
                 saveError = res.error;
             } else {
                 const res = await sb.from('propriedades').insert(dados).select('id').single();
+                console.log('[SAVE] insert result:', res);
                 saveError = res.error;
                 if (res.data?.id) PROP_ID = res.data.id;
             }
 
-            if (saveError) throw saveError;
-
-            // Sincroniza junction table propriedadexcomodidades
-            // Sempre apaga primeiro (garante que desmarcar funcione)
-            if (PROP_ID) {
-                try {
-                    await sb.from('propriedadexcomodidades').delete().eq('propriedadeID', PROP_ID);
-                    if (comodidades.length > 0) {
-                        const linhas = comodidades.map(value => ({ propriedadeID: PROP_ID, comodidadeID: value }));
-                        await sb.from('propriedadexcomodidades').insert(linhas);
-                    }
-                } catch (e) { console.warn('Aviso: junction comodidades não sincronizada:', e.message); }
+            if (saveError) {
+                console.error('[SAVE] saveError:', saveError);
+                throw saveError;
             }
 
             mostrarToast('✅', 'Alterações salvas com sucesso!');
