@@ -184,7 +184,17 @@
             background: #0d0d0d; border-radius: 18px;
             padding: 30px 36px; margin-bottom: 26px;
             position: relative; overflow: hidden;
+            display: flex; align-items: center; gap: 24px;
         }
+        .bv-acao { position: relative; z-index: 1; flex-shrink: 0; }
+        .btn-ver-prop {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: transparent; border: 1.5px solid #ff385c;
+            color: #ff385c; font-size: .82rem; font-weight: 700;
+            padding: 10px 18px; border-radius: 10px; text-decoration: none;
+            white-space: nowrap; transition: background .2s, color .2s;
+        }
+        .btn-ver-prop:hover { background: #ff385c; color: #fff; }
         .boas-vindas::before {
             content: ''; position: absolute;
             width: 400px; height: 400px;
@@ -580,6 +590,12 @@
                 <h3>Bem-vindo(a), <em id="hero-nome">...</em>!</h3>
                 <p>Aqui você acompanha o desempenho da sua propriedade e gerencia tudo na VENTSY.</p>
             </div>
+            <div class="bv-acao">
+                <a id="btn-ver-prop" href="#" class="btn-ver-prop" style="display:none" target="_blank">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Ver minha propriedade
+                </a>
+            </div>
         </div>
 
         <!-- ── MÉTRICAS ── -->
@@ -820,6 +836,15 @@
                     .eq('user_id', user.id).limit(1).single();
                 propIdDash = prop?.id || null;
             } catch (_) {}
+
+            /* Botão "Ver minha propriedade" */
+            if (propIdDash) {
+                const btnVer = document.getElementById('btn-ver-prop');
+                if (btnVer) {
+                    btnVer.href = '../propriedade.html?id=' + propIdDash;
+                    btnVer.style.display = 'inline-flex';
+                }
+            }
 
             /* Carrega métricas e gráfico inicial */
             if (propIdDash) {
