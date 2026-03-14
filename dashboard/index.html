@@ -964,13 +964,8 @@
         return { LABELS_30D, KEYS_30D };
     })();
 
-    /* Dados demo (quando não há propriedade cadastrada) */
-    const DEMO_DADOS = {
-        view:       [8,12,18,10,22,28,20,35,40,18,30,45,38,52,48,25,35,42,38,55,60,45,42,55,62,70,55,65,72,80],
-        whatsapp:   [1, 2, 3, 1, 4, 5, 3, 6, 7, 3, 5, 8, 6, 9, 8, 4, 6, 7, 6, 9,10, 8, 7, 9,11,12,10,11,12,14],
-        formulario: [0, 1, 1, 0, 2, 2, 1, 3, 4, 1, 2, 4, 3, 5, 4, 2, 3, 4, 3, 5, 5, 4, 3, 5, 6, 7, 5, 6, 7, 8],
-        nota:       [null,null,null,null,4.5,null,null,null,null,null,4.8,null,null,null,null,null,null,null,5.0,null,null,null,null,null,null,4.7,null,null,null,null]
-    };
+    /* Array de zeros para quando não há dados reais */
+    const ZEROS_30D = new Array(30).fill(0);
 
     /* ── Carrega totais dos cards de métricas ── */
     async function carregarMetricas(propId) {
@@ -1015,7 +1010,7 @@
     /* ── Busca 30 dias de um tipo de evento (com cache) ── */
     async function buscarDados30Dias(tipo) {
         if (dadosCache[tipo]) return dadosCache[tipo];
-        if (!propIdDash) { dadosCache[tipo] = DEMO_DADOS[tipo]; return DEMO_DADOS[tipo]; }
+        if (!propIdDash) { dadosCache[tipo] = ZEROS_30D; return ZEROS_30D; }
 
         const inicio = new Date();
         inicio.setDate(inicio.getDate() - 30);
@@ -1079,7 +1074,7 @@
         gradient.addColorStop(1, cor + '00');
 
         const temDados = dados.some(v => v !== null && v > 0);
-        document.getElementById('grafico-vazio').style.display = (!propIdDash || temDados) ? 'none' : 'block';
+        document.getElementById('grafico-vazio').style.display = temDados ? 'none' : 'block';
 
         if (graficoInst) { graficoInst.destroy(); graficoInst = null; }
 
