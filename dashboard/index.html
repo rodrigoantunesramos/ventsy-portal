@@ -978,7 +978,7 @@
             }
 
             if (prop?.descricao?.trim())                                                              _marcarPasso(3);
-            if (prop?.cep && prop?.rua && prop?.numero && prop?.bairro && prop?.cidade && prop?.estado) _marcarPasso(4);
+            if (prop?.cep && prop?.endereco && prop?.numero && prop?.bairro && prop?.cidade && prop?.estado) _marcarPasso(4);
             if (prop?.nome && prop?.tipo_propriedade && prop?.capacidade && prop?.whatsapp && prop?.email_contato && prop?.nome_responsavel && prop?.foto_responsavel) _marcarPasso(5);
             if (prop?.valor_hora || prop?.valor_base)                                                 _marcarPasso(6);
             if (prop?.tipo_evento?.trim())                                                            _marcarPasso(7);
