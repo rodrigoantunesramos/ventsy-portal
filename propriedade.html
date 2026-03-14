@@ -943,7 +943,7 @@ async function init() {
                     ? Math.floor(meses/12) + ' ano(s)' : meses + ' meses';
                 if (prop.foto_responsavel) {
                     document.getElementById('avatar-anfitriao').innerHTML =
-                        `<img src="${prop.foto_responsavel}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+                        `<img src="${prop.foto_responsavel}" style="width:60px;height:60px;object-fit:cover;border-radius:50%">`;
                 } else {
                     const ini = (nomeExibir || '?')[0].toUpperCase();
                     document.getElementById('avatar-anfitriao').innerHTML = `<div class="avatar-anfitriao-inicial">${ini}</div>`;
