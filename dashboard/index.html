@@ -968,7 +968,7 @@
     async function verificarPassos(userId) {
         try {
             const { data: prop } = await sb.from('propriedades')
-                .select('id, descricao, cep, rua, numero, bairro, cidade, estado, nome, tipo_propriedade, capacidade, whatsapp, email_contato, nome_responsavel, foto_responsavel, valor_hora, valor_base, tipo_evento')
+                .select('id, descricao, cep, endereco, numero, bairro, cidade, estado, nome, tipo_propriedade, capacidade, whatsapp, email_contato, nome_responsavel, foto_responsavel, valor_hora, valor_base, tipo_evento')
                 .eq('usuario_id', userId).single();
 
             if (prop?.id) {
