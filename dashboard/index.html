@@ -858,7 +858,7 @@
             try {
                 const { data: prop } = await sb
                     .from('propriedades').select('id')
-                    .eq('user_id', user.id).limit(1).single();
+                    .eq('usuario_id', user.id).limit(1).maybeSingle();
                 propIdDash = prop?.id || null;
             } catch (_) {}
 
@@ -969,7 +969,7 @@
         try {
             const { data: prop } = await sb.from('propriedades')
                 .select('id, descricao, cep, rua, numero, bairro, cidade, estado, nome, tipo_propriedade, capacidade, whatsapp, email_contato, nome_responsavel, foto_responsavel, valor_hora, valor_base, tipo_evento')
-                .eq('usuario_id', userId).single();
+                .eq('usuario_id', userId).maybeSingle();
 
             if (prop?.id) {
                 const { data: fotos } = await sb.from('fotos_imovel')
@@ -977,11 +977,12 @@
                 if ((fotos || []).length >= 5) _marcarPasso(2);
             }
 
-            if (prop?.descricao?.trim())                                                              _marcarPasso(3);
-            if (prop?.cep && prop?.rua && prop?.numero && prop?.bairro && prop?.cidade && prop?.estado) _marcarPasso(4);
-            if (prop?.nome && prop?.tipo_propriedade && prop?.capacidade && prop?.whatsapp && prop?.email_contato && prop?.nome_responsavel && prop?.foto_responsavel) _marcarPasso(5);
-            if (prop?.valor_hora || prop?.valor_base)                                                 _marcarPasso(6);
-            if (prop?.tipo_evento?.trim())                                                            _marcarPasso(7);
+            const t = v => !!(v && String(v).trim());
+            if (t(prop?.descricao))  _marcarPasso(3);
+            if (t(prop?.cep) && t(prop?.rua) && t(prop?.numero) && t(prop?.bairro) && t(prop?.cidade) && t(prop?.estado)) _marcarPasso(4);
+            if (t(prop?.nome) && t(prop?.tipo_propriedade) && t(prop?.capacidade) && t(prop?.whatsapp) && t(prop?.email_contato) && t(prop?.nome_responsavel) && t(prop?.foto_responsavel)) _marcarPasso(5);
+            if (prop?.valor_hora || prop?.valor_base)  _marcarPasso(6);
+            if (t(prop?.tipo_evento))                  _marcarPasso(7);
         } catch (_) {}
         atualizarProgresso();
     }
