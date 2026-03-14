@@ -1094,9 +1094,10 @@ function renderPagina(p) {
     carregarComodidades(p);
 
     // Serviços extras — converte value ("dj") → label ("🎧 DJ Profissional")
-    if (Array.isArray(p.servicos_extras) && p.servicos_extras.length) {
+    const extrasLista = parseArray(p.servicos_extras);
+    if (extrasLista.length) {
         const chips = document.getElementById('extras-chips');
-        chips.innerHTML = p.servicos_extras.map(v => `<span class="extra-chip">${EXTRAS_MAP[v] || v}</span>`).join('');
+        chips.innerHTML = extrasLista.map(v => `<span class="extra-chip">${EXTRAS_MAP[v] || v}</span>`).join('');
         document.getElementById('secao-extras').style.display = 'block';
     }
 
@@ -1135,9 +1136,18 @@ function renderPagina(p) {
 }
 
 /* ── Comodidades: junction table + fallback para array na coluna ── */
+function parseArray(val) {
+    if (Array.isArray(val)) return val;
+    if (!val) return [];
+    if (typeof val === 'string') {
+        if (val.startsWith('{')) return val.slice(1,-1).split(',').map(s => s.trim().replace(/^"|"$/g,'')).filter(Boolean);
+        try { return JSON.parse(val); } catch(_) {}
+    }
+    return [];
+}
+
 async function carregarComodidades(prop) {
-    // Usa diretamente o array comodidades[] da propriedade (values como "climatizado", "piscina")
-    const lista = Array.isArray(prop.comodidades) ? prop.comodidades : [];
+    const lista = parseArray(prop.comodidades);
     renderComodidades(lista);
     carregarExploreEventos(prop.id);
 }
@@ -1242,15 +1252,14 @@ function renderCardLateral() {
                 <input type="text" id="f-nome" placeholder="Seu nome" oninput="validarForm()" required>
             </div>
 
-            <div class="form-duplo">
-                <div class="form-grupo">
-                    <label>Telefone *</label>
-                    <input type="tel" id="f-tel" placeholder="(21) 99999-9999" oninput="validarForm()" required>
-                </div>
-                <div class="form-grupo">
-                    <label>E-mail</label>
-                    <input type="email" id="f-email" placeholder="seu@email.com">
-                </div>
+            <div class="form-grupo">
+                <label>Telefone *</label>
+                <input type="tel" id="f-tel" placeholder="(21) 99999-9999" oninput="validarForm()" required>
+            </div>
+
+            <div class="form-grupo">
+                <label>E-mail</label>
+                <input type="email" id="f-email" placeholder="seu@email.com">
             </div>
 
             <div class="form-grupo">
