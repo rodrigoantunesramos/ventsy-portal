@@ -1184,15 +1184,19 @@
                 PROP_ID = existing.id;
 
                 const res = await sb.from('propriedades').update(dados).eq('usuario_id', userId);
-
+                console.log('[SAVE] update result:', res);
                 saveError = res.error;
             } else {
                 const res = await sb.from('propriedades').insert(dados).select('id').single();
+                console.log('[SAVE] insert result:', res);
                 saveError = res.error;
                 if (res.data?.id) PROP_ID = res.data.id;
             }
 
-            if (saveError) throw saveError;
+            if (saveError) {
+                console.error('[SAVE] saveError:', saveError);
+                throw saveError;
+            }
 
             // Sincroniza junction table propriedadexcomodidades
             // Sempre apaga primeiro (garante que desmarcar funcione)
