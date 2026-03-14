@@ -312,15 +312,6 @@
             display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;
         }
 
-        /* Botão "Marcar ✓" */
-        .btn-marcar {
-            padding: 5px 12px; border-radius: 6px; font-family: inherit;
-            font-size: 0.75rem; font-weight: 600; cursor: pointer;
-            border: 1px solid #ddd; background: #fff; color: #666;
-            transition: all 0.2s; white-space: nowrap;
-        }
-        .btn-marcar:hover { border-color: #0ca678; color: #0ca678; background: rgba(12,166,120,0.06); }
-
         /* Aviso de passos incompletos */
         .solicitar-aviso {
             background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px;
@@ -660,7 +651,7 @@
         </div>
 
         <!-- ── PASSO A PASSO ── -->
-        <p class="passos-titulo">📋 Complete seu perfil <span class="passos-progresso" id="passos-progresso">0 de 4 concluídos</span></p>
+        <p class="passos-titulo">📋 Complete seu perfil <span class="passos-progresso" id="passos-progresso">0 de 6 concluídos</span></p>
         <div class="passo-lista">
 
             <!-- Passo 1: sempre completo (conta criada) -->
@@ -673,56 +664,64 @@
                 <span class="passo-acao verde">✓ Concluído</span>
             </div>
 
-            <!-- Passo 2 -->
+            <!-- Passo 2: Fotos -->
             <div class="passo-item" id="passo-2">
-                <div class="passo-num passo-num-check">2</div>
+                <div class="passo-num">2</div>
                 <div class="passo-info">
                     <h4>Adicione as fotos da sua propriedade</h4>
-                    <p>Fotos de qualidade aumentam em até 3× as chances de receber contatos de clientes.</p>
+                    <p>Obrigatório: 5 fotos em destaque na galeria principal.</p>
                 </div>
-                <div class="passo-acoes-grupo">
-                    <a href="minhapropriedade.html" class="passo-acao vermelho">Adicionar fotos</a>
-                    <button class="btn-marcar" data-passo="2" onclick="marcarConcluido(2)" title="Marcar como concluído">Marcar ✓</button>
-                </div>
+                <a href="fotos.html" class="passo-acao vermelho">Adicionar fotos</a>
             </div>
 
-            <!-- Passo 3 -->
+            <!-- Passo 3: Sobre -->
             <div class="passo-item" id="passo-3">
-                <div class="passo-num passo-num-check">3</div>
+                <div class="passo-num">3</div>
                 <div class="passo-info">
                     <h4>Descreva seu espaço</h4>
-                    <p>Preencha capacidade, tipo de evento, diferenciais e valor de referência do aluguel.</p>
+                    <p>Preencha a aba "Sobre" com uma descrição do seu espaço.</p>
                 </div>
-                <div class="passo-acoes-grupo">
-                    <a href="minhapropriedade.html" class="passo-acao vermelho">Preencher dados</a>
-                    <button class="btn-marcar" data-passo="3" onclick="marcarConcluido(3)" title="Marcar como concluído">Marcar ✓</button>
-                </div>
+                <a href="minhapropriedade.html#sobre" class="passo-acao vermelho">Preencher descrição</a>
             </div>
 
-            <!-- Passo 4 -->
+            <!-- Passo 4: Endereço -->
             <div class="passo-item" id="passo-4">
-                <div class="passo-num passo-num-check">4</div>
+                <div class="passo-num">4</div>
                 <div class="passo-info">
                     <h4>Informe o endereço completo</h4>
-                    <p>Necessário para que sua propriedade apareça nas buscas por localização dos clientes.</p>
+                    <p>Obrigatório: CEP, rua, número, bairro, cidade e estado.</p>
                 </div>
-                <div class="passo-acoes-grupo">
-                    <a href="minhapropriedade.html" class="passo-acao vermelho">Adicionar endereço</a>
-                    <button class="btn-marcar" data-passo="4" onclick="marcarConcluido(4)" title="Marcar como concluído">Marcar ✓</button>
-                </div>
+                <a href="minhapropriedade.html#endereco" class="passo-acao vermelho">Adicionar endereço</a>
             </div>
 
-            <!-- Passo 5 -->
+            <!-- Passo 5: Contato -->
             <div class="passo-item" id="passo-5">
-                <div class="passo-num passo-num-check">5</div>
+                <div class="passo-num">5</div>
                 <div class="passo-info">
-                    <h4>Adicione WhatsApp e contato</h4>
-                    <p>Os clientes entram em contato diretamente com você. Mantenha o número atualizado.</p>
+                    <h4>Adicione as informações de contato</h4>
+                    <p>Obrigatório: nome, tipo, capacidade, WhatsApp, e-mail, responsável e foto.</p>
                 </div>
-                <div class="passo-acoes-grupo">
-                    <a href="configuracoes.html" class="passo-acao vermelho">Adicionar contato</a>
-                    <button class="btn-marcar" data-passo="5" onclick="marcarConcluido(5)" title="Marcar como concluído">Marcar ✓</button>
+                <a href="minhapropriedade.html#contato" class="passo-acao vermelho">Preencher contato</a>
+            </div>
+
+            <!-- Passo 6: Valores -->
+            <div class="passo-item" id="passo-6">
+                <div class="passo-num">6</div>
+                <div class="passo-info">
+                    <h4>Adicione os valores dos eventos</h4>
+                    <p>Obrigatório: pelo menos o valor por hora ou o valor de diária.</p>
                 </div>
+                <a href="minhapropriedade.html#valores" class="passo-acao vermelho">Adicionar valores</a>
+            </div>
+
+            <!-- Passo 7: Eventos -->
+            <div class="passo-item" id="passo-7">
+                <div class="passo-num">7</div>
+                <div class="passo-info">
+                    <h4>Selecione os tipos de eventos</h4>
+                    <p>Obrigatório: pelo menos 1 tipo de evento que a propriedade oferece.</p>
+                </div>
+                <a href="minhapropriedade.html#eventos" class="passo-acao vermelho">Selecionar eventos</a>
             </div>
 
         </div>
@@ -877,6 +876,9 @@
                 }
             }
 
+            /* Verifica passos de perfil */
+            verificarPassos(user.id);
+
             /* Carrega métricas e gráfico inicial */
             if (propIdDash) {
                 carregarMetricas(propIdDash);
@@ -939,41 +941,49 @@
         }, 1800);
     }
 
-    /* ── Marcar passo como concluído ── */
-    const passosConcluidos = new Set(); // passos 2,3,4,5 precisam ser marcados
+    /* ── Verificação automática dos passos ── */
+    let _passosCount = 0;
 
-    function marcarConcluido(num) {
-        if (passosConcluidos.has(num)) return; // já marcado, ignora
-
-        passosConcluidos.add(num);
-
+    function _marcarPasso(num) {
         const item = document.getElementById('passo-' + num);
+        if (!item || item.classList.contains('completo')) return;
         item.classList.add('completo');
-
-        // Atualiza número → check
         item.querySelector('.passo-num').textContent = '✓';
-
-        // Remove botão "Marcar" e link, coloca badge verde
-        const grupo = item.querySelector('.passo-acoes-grupo');
-        grupo.innerHTML = '<span class="passo-acao verde">✓ Concluído</span>';
-
-        atualizarProgresso();
+        const acao = item.querySelector('.passo-acao');
+        if (acao) acao.outerHTML = '<span class="passo-acao verde">✓ Concluído</span>';
+        _passosCount++;
     }
 
     function atualizarProgresso() {
-        const total     = 4; // passos 2,3,4,5
-        const concluidos = passosConcluidos.size;
+        const total = 6; // passos 2–7
+        const prog  = document.getElementById('passos-progresso');
+        prog.textContent = _passosCount + ' de ' + total + ' concluídos';
+        prog.classList.toggle('completo-total', _passosCount === total);
+        const btn   = document.getElementById('btn-solicitar');
+        const aviso = document.getElementById('solicitar-aviso');
+        btn.disabled = _passosCount < total;
+        aviso.classList.toggle('oculto', _passosCount >= total);
+    }
 
-        const prog = document.getElementById('passos-progresso');
-        prog.textContent = concluidos + ' de ' + total + ' concluídos';
-        prog.classList.toggle('completo-total', concluidos === total);
+    async function verificarPassos(userId) {
+        try {
+            const { data: prop } = await sb.from('propriedades')
+                .select('id, descricao, cep, rua, numero, bairro, cidade, estado, nome, tipo_propriedade, capacidade, whatsapp, email_contato, nome_responsavel, foto_responsavel, valor_hora, valor_base, tipo_evento')
+                .eq('usuario_id', userId).single();
 
-        const btn    = document.getElementById('btn-solicitar');
-        const aviso  = document.getElementById('solicitar-aviso');
-        const tudo   = concluidos === total;
+            if (prop?.id) {
+                const { data: fotos } = await sb.from('fotos_imovel')
+                    .select('id').eq('propriedade_id', prop.id).eq('secao', '__destaque__');
+                if ((fotos || []).length >= 5) _marcarPasso(2);
+            }
 
-        btn.disabled = !tudo;
-        aviso.classList.toggle('oculto', tudo);
+            if (prop?.descricao?.trim())                                                              _marcarPasso(3);
+            if (prop?.cep && prop?.rua && prop?.numero && prop?.bairro && prop?.cidade && prop?.estado) _marcarPasso(4);
+            if (prop?.nome && prop?.tipo_propriedade && prop?.capacidade && prop?.whatsapp && prop?.email_contato && prop?.nome_responsavel && prop?.foto_responsavel) _marcarPasso(5);
+            if (prop?.valor_hora || prop?.valor_base)                                                 _marcarPasso(6);
+            if (prop?.tipo_evento?.trim())                                                            _marcarPasso(7);
+        } catch (_) {}
+        atualizarProgresso();
     }
 
     // Inicializa botão como desabilitado
