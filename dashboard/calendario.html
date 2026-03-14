@@ -96,10 +96,12 @@
             background: #ff385c; color: #fff;
             font-size: 1.9rem; font-weight: 700;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 12px;
+            margin: 0 auto 12px; overflow: hidden;
         }
-        .perfil-resumo h3  { font-size: 1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 4px; }
-        .perfil-resumo .handle { font-size: 0.78rem; color: #717171; }
+        .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+        .perfil-resumo h3  { font-size: 1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 0; }
+        .perfil-resumo .handle { font-size: 0.78rem; color: #717171; display: block; margin-bottom: 2px; }
+        .plano-validade { font-size: 0.7rem; color: #aaa; margin-top: 2px; }
         .plano-chip {
             display: inline-flex; align-items: center; gap: 5px; margin-top: 10px;
             background: rgba(255,56,92,0.08); border: 1px solid rgba(255,56,92,0.2);
@@ -158,9 +160,9 @@
 
         .mes-controle {
             display: flex; justify-content: space-between;
-            align-items: center; margin-bottom: 28px;
+            align-items: center; margin-bottom: 28px; position: relative;
         }
-        .mes-controle h3 { font-size: 1.1rem; font-weight: 800; color: #0d0d0d; }
+        .mes-controle h3 { font-size: 1.1rem; font-weight: 800; color: #0d0d0d; display: flex; gap: 8px; }
         .btn-mes {
             width: 36px; height: 36px; border-radius: 50%;
             background: #f4f4f4; border: none; cursor: pointer;
@@ -168,6 +170,43 @@
             display: flex; align-items: center; justify-content: center;
         }
         .btn-mes:hover { background: #eee; }
+        /* Seletores clicáveis de mês e ano */
+        .sel-mes-label, .sel-ano-label {
+            cursor: pointer; border-bottom: 2px dashed #ddd; padding-bottom: 1px;
+            transition: color .15s, border-color .15s;
+        }
+        .sel-mes-label:hover, .sel-ano-label:hover { color: #ff385c; border-color: #ff385c; }
+        /* Popups de seleção */
+        .picker-overlay {
+            position: absolute; top: 44px; left: 50%; transform: translateX(-50%);
+            background: #fff; border: 1px solid #e5e7eb; border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.14); z-index: 500;
+            padding: 16px; display: none;
+        }
+        .picker-overlay.aberto { display: block; }
+        /* Grid 4×3 de meses */
+        .meses-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 260px;
+        }
+        .mes-opcao {
+            padding: 9px 4px; text-align: center; border-radius: 10px;
+            cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #444;
+            background: #f7f7f7; transition: background .15s, color .15s;
+        }
+        .mes-opcao:hover  { background: #ffe4e8; color: #ff385c; }
+        .mes-opcao.atual  { background: #ff385c; color: #fff; }
+        /* Lista de anos */
+        .anos-lista {
+            display: flex; flex-direction: column; gap: 2px;
+            max-height: 220px; overflow-y: auto; width: 110px;
+        }
+        .ano-opcao {
+            padding: 8px 16px; border-radius: 8px; cursor: pointer;
+            font-size: 0.88rem; font-weight: 600; color: #444;
+            transition: background .15s, color .15s; text-align: center;
+        }
+        .ano-opcao:hover { background: #ffe4e8; color: #ff385c; }
+        .ano-opcao.atual { background: #ff385c; color: #fff; }
 
         .calendario-grid {
             display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
@@ -488,6 +527,7 @@
             <h3 id="sidebar-nome">Carregando...</h3>
             <span class="handle" id="sidebar-handle"></span>
             <div class="plano-chip" id="sidebar-plano-chip">⭐ Carregando...</div>
+            <div class="plano-validade" id="sidebar-validade"></div>
         </div>
         <nav class="dash-menu">
             <a href="index.html">🏠 Dashboard</a>
@@ -526,8 +566,20 @@
             <div class="calendario-container">
                 <div class="mes-controle">
                     <button class="btn-mes" onclick="mudarMes(-1)">❮</button>
-                    <h3 id="titulo-mes">—</h3>
+                    <h3 id="titulo-mes">
+                        <span class="sel-mes-label" id="titulo-mes-label" onclick="abrirSeletorMes()">—</span>
+                        <span class="sel-ano-label" id="titulo-ano-label" onclick="abrirSeletorAno()">—</span>
+                    </h3>
                     <button class="btn-mes" onclick="mudarMes(1)">❯</button>
+
+                    <!-- Picker de mês -->
+                    <div class="picker-overlay" id="picker-mes">
+                        <div class="meses-grid" id="meses-grid"></div>
+                    </div>
+                    <!-- Picker de ano -->
+                    <div class="picker-overlay" id="picker-ano">
+                        <div class="anos-lista" id="anos-lista"></div>
+                    </div>
                 </div>
                 <div class="calendario-grid" id="calendario-grid">
                     <!-- gerado via JS -->
@@ -744,14 +796,35 @@ async function init() {
         document.getElementById('avatar-inicial').textContent  = ini;
         document.getElementById('drop-nome').textContent       = nome;
         document.getElementById('drop-email').textContent      = user.email;
-        document.getElementById('sidebar-avatar').textContent  = ini;
         document.getElementById('sidebar-nome').textContent    = nome;
         document.getElementById('sidebar-handle').textContent  = usuario ? '@' + usuario : '';
 
+        // Foto do responsável no avatar
         try {
-            const { data: ass } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', user.id).single();
+            const { data: prop } = await sb.from('propriedades').select('foto_responsavel').eq('usuario_id', user.id).single();
+            const avatarEl = document.getElementById('sidebar-avatar');
+            if (prop?.foto_responsavel) {
+                avatarEl.innerHTML = `<img src="${prop.foto_responsavel}" alt="Foto">`;
+            } else {
+                avatarEl.textContent = ini;
+            }
+        } catch (_) {
+            document.getElementById('sidebar-avatar').textContent = ini;
+        }
+
+        // Plano ativo + validade
+        try {
+            const { data: ass } = await sb.from('assinaturas')
+                .select('plano_ativo, data_expiracao, expira_em, valido_ate, validade')
+                .eq('usuario_id', user.id).single();
             const planosLabel = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
             document.getElementById('sidebar-plano-chip').textContent = planosLabel[ass?.plano_ativo] || '🏷️ Básico';
+            const dataExp = ass?.data_expiracao || ass?.expira_em || ass?.valido_ate || ass?.validade;
+            if (dataExp) {
+                const d = new Date(dataExp);
+                const fmt = d.toLocaleDateString('pt-BR');
+                document.getElementById('sidebar-validade').textContent = `Válido até ${fmt}`;
+            }
         } catch (_) {
             document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
         }
@@ -776,7 +849,8 @@ function renderizarCalendario() {
     const grid = document.getElementById('calendario-grid');
     grid.innerHTML = '';
 
-    document.getElementById('titulo-mes').textContent = `${MESES[mesAtual]} ${anoAtual}`;
+    document.getElementById('titulo-mes-label').textContent = MESES[mesAtual];
+    document.getElementById('titulo-ano-label').textContent = anoAtual;
 
     // Cabeçalho dias da semana
     SEMANA.forEach(d => {
@@ -1012,6 +1086,65 @@ function mudarMes(delta) {
     renderizarCalendario();
 }
 
+/* ── SELETOR DE MÊS ── */
+function abrirSeletorMes() {
+    const picker = document.getElementById('picker-mes');
+    const grid   = document.getElementById('meses-grid');
+    const jaAberto = picker.classList.contains('aberto');
+    fecharTodosPickers();
+    if (jaAberto) return;
+
+    grid.innerHTML = MESES.map((nome, i) => `
+        <div class="mes-opcao${i === mesAtual ? ' atual' : ''}" onclick="selecionarMes(${i})">
+            ${nome.substring(0,3)}
+        </div>`).join('');
+    picker.classList.add('aberto');
+}
+function selecionarMes(m) {
+    mesAtual = m;
+    fecharTodosPickers();
+    renderizarCalendario();
+}
+
+/* ── SELETOR DE ANO ── */
+function abrirSeletorAno() {
+    const picker = document.getElementById('picker-ano');
+    const lista  = document.getElementById('anos-lista');
+    const jaAberto = picker.classList.contains('aberto');
+    fecharTodosPickers();
+    if (jaAberto) return;
+
+    const anoInicio = 2026;
+    const anoFim    = new Date().getFullYear() + 10;
+    lista.innerHTML = '';
+    for (let a = anoInicio; a <= anoFim; a++) {
+        const el = document.createElement('div');
+        el.className = 'ano-opcao' + (a === anoAtual ? ' atual' : '');
+        el.textContent = a;
+        el.onclick = () => selecionarAno(a);
+        lista.appendChild(el);
+    }
+    picker.classList.add('aberto');
+    // Scroll até o ano atual
+    const atual = lista.querySelector('.atual');
+    if (atual) setTimeout(() => atual.scrollIntoView({ block: 'center' }), 50);
+}
+function selecionarAno(a) {
+    anoAtual = a;
+    fecharTodosPickers();
+    renderizarCalendario();
+}
+
+function fecharTodosPickers() {
+    document.getElementById('picker-mes')?.classList.remove('aberto');
+    document.getElementById('picker-ano')?.classList.remove('aberto');
+}
+
+// Fechar pickers ao clicar fora
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.mes-controle')) fecharTodosPickers();
+});
+
 /* ── MODAL (fechar todos) ── */
 function fecharModal() {
     document.getElementById('modal-bloqueio').classList.remove('aberto');
@@ -1071,7 +1204,6 @@ init();
 </script>
 </body>
 </html>
-
 
 
 
