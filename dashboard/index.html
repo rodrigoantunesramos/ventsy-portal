@@ -201,7 +201,7 @@
             background: radial-gradient(circle, rgba(255,56,92,0.18) 0%, transparent 65%);
             top: -120px; right: -60px; pointer-events: none;
         }
-        .bv-inner { position: relative; z-index: 1; }
+        .bv-inner { position: relative; z-index: 1; flex: 1; }
         .bv-tag {
             font-size: 0.68rem; font-weight: 700; color: #ff385c;
             text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;
@@ -591,9 +591,9 @@
                 <p>Aqui você acompanha o desempenho da sua propriedade e gerencia tudo na VENTSY.</p>
             </div>
             <div class="bv-acao">
-                <a id="btn-ver-prop" href="#" class="btn-ver-prop" style="display:none" target="_blank">
+                <a id="btn-ver-prop" href="minhapropriedade.html" class="btn-ver-prop" target="_blank">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    Ver minha propriedade
+                    <span id="btn-ver-prop-txt">Ver minha propriedade</span>
                 </a>
             </div>
         </div>
@@ -838,11 +838,16 @@
             } catch (_) {}
 
             /* Botão "Ver minha propriedade" */
-            if (propIdDash) {
-                const btnVer = document.getElementById('btn-ver-prop');
-                if (btnVer) {
+            const btnVer = document.getElementById('btn-ver-prop');
+            if (btnVer) {
+                if (propIdDash) {
                     btnVer.href = '../propriedade.html?id=' + propIdDash;
-                    btnVer.style.display = 'inline-flex';
+                    btnVer.target = '_blank';
+                } else {
+                    btnVer.href = 'minhapropriedade.html';
+                    btnVer.target = '_self';
+                    const txt = document.getElementById('btn-ver-prop-txt');
+                    if (txt) txt.textContent = 'Cadastrar propriedade';
                 }
             }
 
