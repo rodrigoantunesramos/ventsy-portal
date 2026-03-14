@@ -208,8 +208,12 @@
         /* ── COMODIDADES ── */
         .secao-comodidades { margin-bottom: 28px; border-bottom: 1px solid var(--cinza-borda); padding-bottom: 28px; }
         .secao-comodidades h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: var(--preto); margin-bottom: 16px; }
-        .comodidades-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .comodidade { font-size: .9rem; color: var(--texto); display: flex; align-items: center; gap: 8px; }
+        .comodidades-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .comodidade {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 14px; border: 1.5px solid var(--cinza-borda);
+            border-radius: 20px; font-size: .84rem; color: var(--texto); background: #fff;
+        }
 
         /* ── SERVIÇOS EXTRAS ── */
         .secao-extras { margin-bottom: 28px; border-bottom: 1px solid var(--cinza-borda); padding-bottom: 28px; }
