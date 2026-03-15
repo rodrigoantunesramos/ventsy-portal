@@ -230,11 +230,12 @@
         .card-metrica h3 { font-size: 1.5rem; font-weight: 700; margin: 5px 0 0; color: #222; }
 
         /* ─────────────────────────────────────────
-           DUAS COLUNAS: GRÁFICO + LATERAL
+           GRÁFICO (largura total)
         ───────────────────────────────────────── */
         .container-duas-colunas {
-            display: grid; grid-template-columns: 2fr 1fr;
-            gap: 20px; margin-bottom: 26px;
+            display: block;
+            width: 100%;
+            margin-bottom: 26px;
         }
         .secao-dash {
             background: #fff; padding: 25px; border-radius: 16px;
@@ -242,22 +243,7 @@
         }
         .secao-dash h3 { margin-top: 0; font-size: 1.05rem; font-weight: 700; margin-bottom: 20px; color: #222; }
 
-        .lista-atividades { list-style: none; padding: 0; }
-        .lista-atividades li {
-            display: flex; justify-content: space-between;
-            padding: 12px 0; border-bottom: 1px solid #f9f9f9; font-size: 0.9rem;
-        }
-        .lista-atividades li:last-child { border-bottom: none; }
-        .lista-atividades li span { color: #999; }
 
-        .info-plano p { margin: 10px 0; font-size: 0.95rem; }
-        .btn-upgrade {
-            width: 100%; background: #222; color: #fff; border: none;
-            padding: 10px; border-radius: 8px; margin-top: 10px;
-            cursor: pointer; font-family: inherit; font-weight: 600;
-            transition: background 0.2s;
-        }
-        .btn-upgrade:hover { background: #444; }
 
         /* ─────────────────────────────────────────
            PASSO A PASSO
@@ -428,7 +414,6 @@
 
         @media (max-width: 1100px) {
             .grid-metricas { grid-template-columns: repeat(2, 1fr); }
-            .container-duas-colunas { grid-template-columns: 1fr; }
         }
         @media (max-width: 768px) {
             .btn-sidebar-toggle { display: flex; }
@@ -630,24 +615,7 @@
                 <p class="grafico-vazio" id="grafico-vazio">Ainda não há dados para este período.</p>
             </div>
 
-            <div>
-                <div class="secao-dash">
-                    <h3>Atividade Recente</h3>
-                    <ul class="lista-atividades">
-                        <li><strong>📱 WhatsApp</strong><span>há 2 horas</span></li>
-                        <li><strong>📸 Instagram</strong><span>ontem</span></li>
-                        <li><strong>👁 Visualização</strong><span>5 minutos atrás</span></li>
-                    </ul>
-                </div>
-                <div class="secao-dash">
-                    <h3>Status do Plano</h3>
-                    <div class="info-plano">
-                        <p>Plano atual: <strong id="card-plano-nome">—</strong></p>
-                        <p>Válido até: <strong id="card-plano-validade">—</strong></p>
-                        <button class="btn-upgrade" onclick="window.location.href='planos2.html'">Ver planos disponíveis</button>
-                    </div>
-                </div>
-            </div>
+
         </div>
 
         <!-- ── PASSO A PASSO ── -->
@@ -842,16 +810,15 @@
                 const pl = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
                 const plNome = { basico: 'Básico', pro: 'Pro', ultra: 'Ultra' };
                 document.getElementById('sidebar-plano-chip').textContent = pl[ass?.plano_ativo] || '🏷️ Básico';
-                document.getElementById('card-plano-nome').textContent = plNome[ass?.plano_ativo] || 'Básico';
+
                 if (ass?.fim_periodo) {
                     const d = new Date(ass.fim_periodo);
                     const dataFormatada = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
                     document.getElementById('sidebar-validade').textContent = `Válido até ${dataFormatada}`;
-                    document.getElementById('card-plano-validade').textContent = dataFormatada;
                 }
             } catch (_) {
                 document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
-                document.getElementById('card-plano-nome').textContent = 'Básico';
+
             }
 
             /* Busca ID da propriedade do usuário */

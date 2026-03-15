@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VENTSY — Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #111118;
+      --bg3: #1a1a24;
+      --bg4: #222230;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --red: #ff385c;
+      --red-dim: rgba(255,56,92,0.12);
+      --red-glow: rgba(255,56,92,0.25);
+      --green: #0ca678;
+      --green-dim: rgba(12,166,120,0.12);
+      --yellow: #f59e0b;
+      --yellow-dim: rgba(245,158,11,0.12);
+      --blue: #3b82f6;
+      --blue-dim: rgba(59,130,246,0.12);
+      --purple: #8b5cf6;
+      --purple-dim: rgba(139,92,246,0.12);
+      --text: #f0f0f5;
+      --text2: #a0a0b8;
+      --text3: #5c5c78;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── LOADING ── */
+    #loading-screen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 20px;
+      z-index: 9999;
+    }
+    .load-logo {
+      font-family: var(--font-display);
+      font-size: 2.2rem; font-weight: 800;
+      letter-spacing: -1px; color: #fff;
+    }
+    .load-logo em { font-style: normal; color: var(--red); }
+    .load-bar {
+      width: 200px; height: 2px;
+      background: var(--bg4);
+      border-radius: 99px; overflow: hidden;
+    }
+    .load-bar-fill {
+      height: 100%; width: 0;
+      background: var(--red);
+      border-radius: 99px;
+      animation: loadbar 1.5s ease forwards;
+    }
+    @keyframes loadbar { to { width: 100%; } }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: none; align-items: center; justify-content: center;
+      z-index: 9998;
+    }
+    .login-card {
+      width: 400px;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 48px 40px;
+    }
+    .login-logo {
+      font-family: var(--font-display);
+      font-size: 1.8rem; font-weight: 800;
+      letter-spacing: -1px; margin-bottom: 6px;
+    }
+    .login-logo em { font-style: normal; color: var(--red); }
+    .login-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--red-dim);
+      border: 1px solid rgba(255,56,92,0.3);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: 0.7rem; font-weight: 600;
+      color: var(--red);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 32px;
+    }
+    .login-label {
+      font-size: 0.75rem; font-weight: 600; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .login-input {
+      width: 100%; padding: 12px 16px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 0.9rem; color: var(--text);
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    .login-input:focus { outline: none; border-color: var(--red); }
+    .login-btn {
+      width: 100%; padding: 14px;
+      background: var(--red);
+      border: none; border-radius: 10px;
+      font-family: var(--font-display);
+      font-size: 0.95rem; font-weight: 700;
+      color: #fff; cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-top: 8px;
+    }
+    .login-btn:hover { opacity: 0.9; transform: scale(1.01); }
+    .login-err {
+      color: var(--red); font-size: 0.82rem;
+      margin-top: 12px; display: none;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 260px; flex-shrink: 0;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0;
+      height: 100vh; z-index: 100;
+      padding: 28px 0;
+    }
+    .sidebar-logo {
+      padding: 0 24px 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .sidebar-logo-text {
+      font-family: var(--font-display);
+      font-size: 1.4rem; font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .sidebar-logo-text em { font-style: normal; color: var(--red); }
+    .sidebar-badge-admin {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--red-dim);
+      border: 1px solid rgba(255,56,92,0.2);
+      border-radius: 99px;
+      padding: 2px 10px;
+      font-size: 0.65rem; font-weight: 700;
+      color: var(--red);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-top: 6px;
+    }
+    .sidebar-section {
+      font-size: 0.62rem; font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.12em;
+      padding: 0 24px 8px;
+      margin-top: 16px;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 24px;
+      color: var(--text2); font-size: 0.88rem; font-weight: 500;
+      text-decoration: none;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .sidebar-link:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+    .sidebar-link.active {
+      color: var(--red);
+      background: var(--red-dim);
+    }
+    .sidebar-link.active::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--red);
+      border-radius: 0 3px 3px 0;
+    }
+    .sidebar-link .icon { font-size: 1.1rem; flex-shrink: 0; }
+    .sidebar-badge {
+      margin-left: auto;
+      background: var(--red);
+      color: #fff; font-size: 0.62rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 99px;
+      min-width: 20px; text-align: center;
+    }
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 0 24px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .sidebar-user-avatar {
+      width: 36px; height: 36px;
+      background: var(--red);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800; font-size: 0.85rem; color: #fff;
+      flex-shrink: 0;
+    }
+    .sidebar-user-name {
+      font-size: 0.82rem; font-weight: 600; color: var(--text);
+      line-height: 1.2;
+    }
+    .sidebar-user-role {
+      font-size: 0.7rem; color: var(--text3);
+    }
+    .sidebar-logout {
+      width: 100%;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px;
+      color: var(--text2); font-size: 0.82rem;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all 0.2s;
+    }
+    .sidebar-logout:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      min-height: 100vh;
+      display: none;
+      flex-direction: column;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(10,10,15,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem; font-weight: 700; color: var(--text);
+    }
+    .topbar-subtitle { font-size: 0.78rem; color: var(--text3); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-status {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--green-dim);
+      border: 1px solid rgba(12,166,120,0.25);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 0.75rem; font-weight: 600; color: var(--green);
+    }
+    .pulse {
+      width: 7px; height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      padding: 40px;
+      flex: 1;
+    }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── STAT CARDS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+    .stat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    }
+    .stat-card.red::before { background: linear-gradient(90deg, transparent, var(--red), transparent); }
+    .stat-card.green::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+    .stat-card.yellow::before { background: linear-gradient(90deg, transparent, var(--yellow), transparent); }
+    .stat-card.blue::before { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+    .stat-card.purple::before { background: linear-gradient(90deg, transparent, var(--purple), transparent); }
+    .stat-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+    }
+    .stat-icon.red { background: var(--red-dim); }
+    .stat-icon.green { background: var(--green-dim); }
+    .stat-icon.yellow { background: var(--yellow-dim); }
+    .stat-icon.blue { background: var(--blue-dim); }
+    .stat-icon.purple { background: var(--purple-dim); }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 2rem; font-weight: 800;
+      color: var(--text); line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-value.loading {
+      color: transparent;
+      background: var(--bg4);
+      border-radius: 6px;
+      animation: shimmer 1.2s ease infinite;
+    }
+    @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .stat-label {
+      font-size: 0.8rem; color: var(--text2); font-weight: 500;
+    }
+    .stat-sub {
+      font-size: 0.72rem; color: var(--text3);
+      margin-top: 4px;
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem; font-weight: 700; color: var(--text);
+    }
+    .section-count {
+      font-size: 0.75rem; color: var(--text3);
+      margin-top: 2px;
+    }
+
+    /* ── TABLES ── */
+    .table-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .table-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .table-search {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.82rem; color: var(--text2);
+    }
+    .table-search input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-size: 0.82rem;
+      font-family: var(--font-body);
+      width: 200px;
+    }
+    .table-search input::placeholder { color: var(--text3); }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 12px 24px;
+      font-size: 0.68rem; font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      text-align: left;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    tbody td {
+      padding: 14px 24px;
+      font-size: 0.85rem; color: var(--text2);
+    }
+    .td-name {
+      font-weight: 600; color: var(--text);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .td-avatar {
+      width: 32px; height: 32px;
+      background: var(--bg4);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: var(--text2);
+      flex-shrink: 0;
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 99px;
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(12,166,120,0.25); }
+    .badge-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,56,92,0.25); }
+    .badge-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,158,11,0.25); }
+    .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,130,246,0.25); }
+    .badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(139,92,246,0.25); }
+    .badge-gray { background: rgba(255,255,255,0.06); color: var(--text3); border: 1px solid var(--border); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: var(--red); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-ghost {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text2);
+    }
+    .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+    .btn-success { background: var(--green-dim); color: var(--green); border: 1px solid rgba(12,166,120,0.25); }
+    .btn-success:hover { background: rgba(12,166,120,0.2); }
+    .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,56,92,0.25); }
+    .btn-danger:hover { background: rgba(255,56,92,0.2); }
+    .btn-warn { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,158,11,0.25); }
+    .btn-warn:hover { background: rgba(245,158,11,0.2); }
+    .btn-sm { padding: 5px 12px; font-size: 0.75rem; }
+
+    /* ── CHARTS ── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .chart-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .chart-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem; font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .chart-sub { font-size: 0.75rem; color: var(--text3); margin-bottom: 20px; }
+
+    /* ── PENDING PROPERTIES ── */
+    .prop-pending-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex; align-items: center; gap: 16px;
+      transition: border-color 0.2s;
+    }
+    .prop-pending-card:hover { border-color: var(--border2); }
+    .prop-img {
+      width: 64px; height: 64px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: var(--bg4);
+      flex-shrink: 0;
+    }
+    .prop-info { flex: 1; min-width: 0; }
+    .prop-name {
+      font-weight: 600; color: var(--text);
+      font-size: 0.92rem; margin-bottom: 4px;
+    }
+    .prop-meta {
+      font-size: 0.78rem; color: var(--text3);
+    }
+    .prop-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%; max-width: 520px;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem; font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .modal-sub { font-size: 0.82rem; color: var(--text3); margin-bottom: 28px; }
+    .modal-close {
+      position: absolute; top: 20px; right: 20px;
+      background: none; border: none;
+      color: var(--text3); font-size: 1.2rem;
+      cursor: pointer; line-height: 1;
+    }
+    .modal-close:hover { color: var(--text); }
+    .form-label {
+      font-size: 0.72rem; font-weight: 700; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select {
+      width: 100%; padding: 11px 14px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.88rem; color: var(--text);
+      margin-bottom: 16px;
+    }
+    .form-input:focus, .form-select:focus { outline: none; border-color: var(--red); }
+    .form-select option { background: var(--bg3); }
+    .modal-footer {
+      display: flex; gap: 10px; justify-content: flex-end;
+      margin-top: 24px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── DETAIL GRID ── */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .detail-row {
+      background: var(--bg3);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .detail-key {
+      font-size: 0.68rem; font-weight: 700; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .detail-val { font-size: 0.88rem; color: var(--text); font-weight: 500; }
+
+    /* ── TOASTS ── */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .toast {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 0.85rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      animation: slideIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      min-width: 280px;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } }
+    .toast-icon { font-size: 1.1rem; }
+    .toast-text { color: var(--text); }
+    .toast.success { border-left: 3px solid var(--green); }
+    .toast.error { border-left: 3px solid var(--red); }
+    .toast.info { border-left: 3px solid var(--blue); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1200px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+      .main { margin-left: 0; }
+    }
+
+    /* ── ACTIVITY FEED ── */
+    .activity-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-top: 5px; flex-shrink: 0;
+    }
+    .activity-text { font-size: 0.84rem; color: var(--text2); flex: 1; }
+    .activity-text strong { color: var(--text); font-weight: 600; }
+    .activity-time { font-size: 0.72rem; color: var(--text3); }
+
+    /* ── PLANO PILL ── */
+    .plano-basico { background: rgba(255,255,255,0.05); color: var(--text3); border: 1px solid var(--border); }
+    .plano-pro { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,130,246,0.25); }
+    .plano-ultra { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(139,92,246,0.25); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text3);
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="load-logo"><em>VENTSY</em></div>
+  <div class="load-bar"><div class="load-bar-fill"></div></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo"><em>VENTSY</em></div>
+    <div class="login-badge">🔐 Painel Admin</div>
+    <div class="login-label">E-mail</div>
+    <input type="email" class="login-input" id="login-email" placeholder="admin@ventsy.com.br">
+    <div class="login-label">Senha</div>
+    <input type="password" class="login-input" id="login-password" placeholder="••••••••">
+    <button class="login-btn" onclick="doLogin()">Entrar como Admin</button>
+    <div class="login-err" id="login-err">E-mail ou senha incorretos.</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-text"><em>VENTSY</em></div>
+    <div class="sidebar-badge-admin">⚙️ Admin Central</div>
+  </div>
+
+  <div class="sidebar-section">Visão Geral</div>
+  <div class="sidebar-link active" onclick="showPage('dashboard')">
+    <span class="icon">📊</span> Dashboard
+  </div>
+  <div class="sidebar-link" onclick="showPage('analytics')">
+    <span class="icon">📈</span> Analytics
+  </div>
+
+  <div class="sidebar-section">Gestão</div>
+  <div class="sidebar-link" onclick="showPage('propriedades')">
+    <span class="icon">🏡</span> Propriedades
+    <span class="sidebar-badge" id="badge-pendentes">0</span>
+  </div>
+  <div class="sidebar-link" onclick="showPage('usuarios')">
+    <span class="icon">👥</span> Usuários
+  </div>
+  <div class="sidebar-link" onclick="showPage('assinaturas')">
+    <span class="icon">💳</span> Assinaturas
+  </div>
+
+  <div class="sidebar-section">Configurações</div>
+  <div class="sidebar-link" onclick="showPage('planos')">
+    <span class="icon">⭐</span> Planos
+  </div>
+  <div class="sidebar-link" onclick="showPage('config')">
+    <span class="icon">⚙️</span> Configurações
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar" id="admin-avatar">A</div>
+      <div>
+        <div class="sidebar-user-name" id="admin-name">Admin</div>
+        <div class="sidebar-user-role">Super Admin</div>
+      </div>
+    </div>
+    <button class="sidebar-logout" onclick="doLogout()">🚪 Sair</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main" id="main-content">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-subtitle" id="page-sub">Visão geral da plataforma</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-status">
+        <div class="pulse"></div>
+        Sistema online
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ═══════════ DASHBOARD ═══════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card red">
+          <div class="stat-icon red">👥</div>
+          <div class="stat-value loading" id="s-usuarios">—</div>
+          <div class="stat-label">Usuários cadastrados</div>
+          <div class="stat-sub" id="s-usuarios-sub">carregando...</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">🏡</div>
+          <div class="stat-value loading" id="s-props">—</div>
+          <div class="stat-label">Propriedades</div>
+          <div class="stat-sub" id="s-props-sub">carregando...</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-icon yellow">👁</div>
+          <div class="stat-value loading" id="s-views">—</div>
+          <div class="stat-label">Visualizações (30d)</div>
+          <div class="stat-sub">Todas as propriedades</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">💳</div>
+          <div class="stat-value loading" id="s-assinaturas">—</div>
+          <div class="stat-label">Assinaturas ativas</div>
+          <div class="stat-sub" id="s-assinaturas-sub">carregando...</div>
+        </div>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr); margin-top:-8px;">
+        <div class="stat-card purple">
+          <div class="stat-icon purple">📱</div>
+          <div class="stat-value loading" id="s-whatsapp">—</div>
+          <div class="stat-label">Cliques WhatsApp (30d)</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-icon yellow">💬</div>
+          <div class="stat-value loading" id="s-form">—</div>
+          <div class="stat-label">Cliques Formulário (30d)</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">⏳</div>
+          <div class="stat-value loading" id="s-pendentes">—</div>
+          <div class="stat-label">Aguardando liberação</div>
+          <div class="stat-sub">Revisão necessária</div>
+        </div>
+      </div>
+
+      <div class="charts-grid" style="margin-top:24px;">
+        <div class="chart-card">
+          <div class="chart-title">Atividade na plataforma — 30 dias</div>
+          <div class="chart-sub">Visualizações, WhatsApp e Formulários</div>
+          <div style="height:220px; position:relative;">
+            <canvas id="chart-atividade"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Distribuição de planos</div>
+          <div class="chart-sub">Assinaturas ativas</div>
+          <div style="height:220px; position:relative; display:flex; align-items:center; justify-content:center;">
+            <canvas id="chart-planos"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pendentes -->
+      <div class="section-header">
+        <div>
+          <div class="section-title">🏡 Propriedades pendentes de liberação</div>
+          <div class="section-count" id="pending-count">Carregando...</div>
+        </div>
+      </div>
+      <div id="pendentes-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:32px;">
+        <div class="empty-state"><div class="icon">⏳</div><p>Carregando...</p></div>
+      </div>
+
+      <!-- Últimos usuários -->
+      <div class="section-header">
+        <div>
+          <div class="section-title">👥 Usuários recentes</div>
+          <div class="section-count">Últimos cadastros</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('usuarios')">Ver todos →</button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr>
+            <th>Usuário</th><th>Plano</th><th>Status</th><th>Cadastrado</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="recent-users">
+            <tr><td colspan="5" class="empty-state" style="padding:40px; text-align:center; color:var(--text3);">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ ANALYTICS ═══════════ -->
+    <div class="page" id="page-analytics">
+      <div class="stats-grid" style="margin-bottom:24px;">
+        <div class="stat-card red">
+          <div class="stat-icon red">👁</div>
+          <div class="stat-value loading" id="an-total-views">—</div>
+          <div class="stat-label">Total Visualizações</div>
+          <div class="stat-sub">Histórico completo</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">📱</div>
+          <div class="stat-value loading" id="an-total-wa">—</div>
+          <div class="stat-label">Total Cliques WhatsApp</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">💬</div>
+          <div class="stat-value loading" id="an-total-form">—</div>
+          <div class="stat-label">Total Cliques Formulário</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-icon yellow">🏆</div>
+          <div class="stat-value loading" id="an-top-prop">—</div>
+          <div class="stat-label">Propriedade mais vista</div>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:24px;">
+        <div class="chart-title">Volume de eventos por tipo</div>
+        <div class="chart-sub">Distribuição histórica</div>
+        <div style="height:280px; position:relative;">
+          <canvas id="chart-eventos-tipo"></canvas>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">📊 Ranking de propriedades</div>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Propriedade</th><th>Visualizações</th><th>WhatsApp</th><th>Formulário</th><th>Total</th>
+          </tr></thead>
+          <tbody id="ranking-props"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ PROPRIEDADES ═══════════ -->
+    <div class="page" id="page-propriedades">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="section-title">Todas as propriedades</div>
+          <div class="table-search">
+            🔍 <input type="text" placeholder="Buscar propriedade..." id="search-props" oninput="filterProps()">
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Propriedade</th><th>Dono</th><th>Status</th><th>Plano</th><th>Localização</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="props-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ USUÁRIOS ═══════════ -->
+    <div class="page" id="page-usuarios">
+      <div class="table-card">
+        <div class="table-header">
+          <div class="section-title">Todos os usuários</div>
+          <div class="table-search">
+            🔍 <input type="text" placeholder="Buscar usuário..." id="search-users" oninput="filterUsers()">
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Usuário</th><th>Handle</th><th>Plano</th><th>Status Assinatura</th><th>Cadastrado</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ ASSINATURAS ═══════════ -->
+    <div class="page" id="page-assinaturas">
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:24px;">
+        <div class="stat-card green">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-value loading" id="ass-ativas">—</div>
+          <div class="stat-label">Assinaturas ativas</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-icon yellow">🎁</div>
+          <div class="stat-value loading" id="ass-trial">—</div>
+          <div class="stat-label">Em período trial</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon red">❌</div>
+          <div class="stat-value loading" id="ass-canc">—</div>
+          <div class="stat-label">Canceladas</div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div class="section-title">Todas as assinaturas</div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Usuário</th><th>Plano</th><th>Status</th><th>Início</th><th>Fim</th><th>Valor</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="ass-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ PLANOS ═══════════ -->
+    <div class="page" id="page-planos">
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px;">
+        <div class="stat-card gray" style="padding:28px;">
+          <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:6px;">Básico</div>
+          <div style="font-size:2rem; font-weight:800; color:var(--text3); font-family:var(--font-display); margin-bottom:16px;">Grátis</div>
+          <div style="font-size:0.8rem; color:var(--text3); line-height:1.8;">
+            ✓ 1 propriedade<br>✓ Listagem básica<br>✓ Suporte por email<br>✗ Analytics<br>✗ Destaque
+          </div>
+        </div>
+        <div class="stat-card blue" style="padding:28px; border-color:rgba(59,130,246,0.3);">
+          <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:6px; color:var(--blue);">Pro ⭐</div>
+          <div style="font-size:2rem; font-weight:800; color:var(--blue); font-family:var(--font-display); margin-bottom:16px;">R$99/mês</div>
+          <div style="font-size:0.8rem; color:var(--text2); line-height:1.8;">
+            ✓ 3 propriedades<br>✓ Analytics básico<br>✓ Suporte prioritário<br>✓ Destaque search<br>✗ API access
+          </div>
+        </div>
+        <div class="stat-card purple" style="padding:28px; border-color:rgba(139,92,246,0.3);">
+          <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:6px; color:var(--purple);">Ultra 🚀</div>
+          <div style="font-size:2rem; font-weight:800; color:var(--purple); font-family:var(--font-display); margin-bottom:16px;">R$249/mês</div>
+          <div style="font-size:0.8rem; color:var(--text2); line-height:1.8;">
+            ✓ Ilimitado<br>✓ Analytics completo<br>✓ Suporte 24/7<br>✓ Topo de busca<br>✓ API access
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:32px; padding:24px; background:var(--bg2); border:1px solid var(--border); border-radius:16px; color:var(--text3); font-size:0.85rem;">
+        💡 <strong style="color:var(--text);">Configuração de planos</strong> — Para editar preços e benefícios dos planos, acesse o painel Supabase diretamente na tabela <code style="color:var(--red);">planos_anunciantes</code>.
+      </div>
+    </div>
+
+    <!-- ═══════════ CONFIG ═══════════ -->
+    <div class="page" id="page-config">
+      <div style="max-width:600px;">
+        <div class="chart-card" style="margin-bottom:20px;">
+          <div class="chart-title" style="margin-bottom:16px;">🔐 Segurança do Admin</div>
+          <div class="detail-grid" style="margin-bottom:16px;">
+            <div class="detail-row">
+              <div class="detail-key">Admin atual</div>
+              <div class="detail-val" id="config-admin-email">—</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-key">Conexão Supabase</div>
+              <div class="detail-val"><span class="badge badge-green">✓ Ativa</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card" style="margin-bottom:20px;">
+          <div class="chart-title" style="margin-bottom:16px;">🗄️ Banco de Dados</div>
+          <div class="detail-grid">
+            <div class="detail-row">
+              <div class="detail-key">Supabase URL</div>
+              <div class="detail-val" style="font-size:0.75rem; word-break:break-all;">hxvlfalgrduitevbhqvq.supabase.co</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-key">Projeto ID</div>
+              <div class="detail-val">hxvlfalgrduitevbhqvq</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-key">Tabelas</div>
+              <div class="detail-val">usuarios, propriedades, assinaturas, analytics_eventos, fotos_imovel</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-key">Versão</div>
+              <div class="detail-val">Supabase JS v2</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title" style="margin-bottom:16px;">ℹ️ Sobre o Painel</div>
+          <div style="font-size:0.84rem; color:var(--text2); line-height:1.8;">
+            Este é o painel de administração central da <strong>VENTSY</strong>.<br><br>
+            Aqui você pode:<br>
+            • <strong>Liberar propriedades</strong> para aparecerem na plataforma<br>
+            • <strong>Gerenciar usuários</strong> e suas contas<br>
+            • <strong>Controlar assinaturas</strong> e planos<br>
+            • <strong>Visualizar analytics</strong> completo da plataforma<br><br>
+            <span style="color:var(--text3); font-size:0.75rem;">v1.0 — Ventsy Admin Central</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MODAL: DETALHES PROPRIEDADE -->
+<div class="modal-overlay" id="modal-prop">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-prop')">✕</button>
+    <div class="modal-title" id="mp-nome">Propriedade</div>
+    <div class="modal-sub" id="mp-sub">Detalhes e ações</div>
+    <div class="detail-grid" id="mp-details"></div>
+    <div class="modal-footer" id="mp-footer"></div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR USUÁRIO -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-user')">✕</button>
+    <div class="modal-title">✏️ Editar usuário</div>
+    <div class="modal-sub" id="mu-sub">Alterações salvas diretamente no banco</div>
+    <input type="hidden" id="mu-id">
+    <div class="form-label">Nome</div>
+    <input type="text" class="form-input" id="mu-nome" placeholder="Nome completo">
+    <div class="form-label">Usuário (@handle)</div>
+    <input type="text" class="form-input" id="mu-usuario" placeholder="handle">
+    <div class="form-label">Telefone</div>
+    <input type="text" class="form-input" id="mu-telefone" placeholder="(21) 99999-9999">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-user')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveUser()">💾 Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR ASSINATURA -->
+<div class="modal-overlay" id="modal-ass">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-ass')">✕</button>
+    <div class="modal-title">💳 Alterar assinatura</div>
+    <div class="modal-sub" id="mass-sub">Usuário</div>
+    <input type="hidden" id="mass-id">
+    <div class="form-label">Plano</div>
+    <select class="form-select" id="mass-plano">
+      <option value="basico">Básico</option>
+      <option value="pro">Pro</option>
+      <option value="ultra">Ultra</option>
+    </select>
+    <div class="form-label">Status</div>
+    <select class="form-select" id="mass-status">
+      <option value="ativa">Ativa</option>
+      <option value="trial">Trial</option>
+      <option value="cancelada">Cancelada</option>
+      <option value="expirada">Expirada</option>
+    </select>
+    <div class="form-label">Data fim do período</div>
+    <input type="date" class="form-input" id="mass-fim">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ass')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveAss()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div id="toast-container"></div>
+
+<script>
+const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+// ─── ESTADO GLOBAL ───
+let allUsers = [], allProps = [], allAss = [], allEvents = [];
+let adminEmail = '';
+let graficoAtividade = null, graficoPlanos = null, graficoTipos = null;
+
+// ─── TOAST ───
+function toast(msg, type='info') {
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-text">${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// ─── MODAL ───
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ─── LOGIN ───
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  document.getElementById('login-err').style.display = 'none';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    document.getElementById('login-err').style.display = 'block';
+    return;
+  }
+  adminEmail = email;
+  showApp();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  location.reload();
+}
+
+// ─── INIT ───
+async function init() {
+  await new Promise(r => setTimeout(r, 1800));
+  const { data: { session } } = await sb.auth.getSession();
+  document.getElementById('loading-screen').style.display = 'none';
+  if (!session) {
+    document.getElementById('login-screen').style.display = 'flex';
+    return;
+  }
+  adminEmail = session.user.email;
+  showApp();
+}
+
+async function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-content').style.display = 'flex';
+  // Admin info
+  const ini = adminEmail[0]?.toUpperCase() || 'A';
+  document.getElementById('admin-avatar').textContent = ini;
+  document.getElementById('admin-name').textContent = adminEmail.split('@')[0];
+  document.getElementById('config-admin-email').textContent = adminEmail;
+  // Load data
+  await loadAllData();
+  renderDashboard();
+}
+
+// ─── LOAD DATA ───
+async function loadAllData() {
+  const [r1, r2, r3, r4] = await Promise.all([
+    sb.from('usuarios').select('*').order('criado_em', { ascending: false }),
+    sb.from('propriedades').select('*').order('criadoem', { ascending: false }),
+    sb.from('assinaturas').select('*').order('criado_em', { ascending: false }),
+    sb.from('analytics_eventos').select('*').order('created_at', { ascending: false })
+  ]);
+  allUsers = r1.data || [];
+  allProps = r2.data || [];
+  allAss = r3.data || [];
+  allEvents = r4.data || [];
+}
+
+// ─── NAVEGAÇÃO ───
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  const links = document.querySelectorAll('.sidebar-link');
+  links.forEach(l => { if (l.onclick?.toString().includes(`'${page}'`)) l.classList.add('active'); });
+  const titles = {
+    dashboard: ['Dashboard', 'Visão geral da plataforma'],
+    analytics: ['Analytics', 'Métricas detalhadas da plataforma'],
+    propriedades: ['Propriedades', 'Gestão e liberação de propriedades'],
+    usuarios: ['Usuários', 'Gerenciar contas de usuários'],
+    assinaturas: ['Assinaturas', 'Controle de planos e pagamentos'],
+    planos: ['Planos', 'Configuração dos planos'],
+    config: ['Configurações', 'Configurações do painel admin']
+  };
+  const [t, s] = titles[page] || ['', ''];
+  document.getElementById('page-title').textContent = t;
+  document.getElementById('page-sub').textContent = s;
+  // Render specific page
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'analytics') renderAnalytics();
+  if (page === 'propriedades') renderPropriedades();
+  if (page === 'usuarios') renderUsuarios();
+  if (page === 'assinaturas') renderAssinaturas();
+}
+
+// ─── DASHBOARD ───
+function renderDashboard() {
+  // Stat: usuários
+  const totalU = allUsers.length;
+  setValue('s-usuarios', totalU);
+  const thisMonth = allUsers.filter(u => new Date(u.criado_em) > new Date(Date.now() - 30*864e5)).length;
+  document.getElementById('s-usuarios-sub').textContent = `+${thisMonth} este mês`;
+
+  // Stat: propriedades
+  setValue('s-props', allProps.length);
+  const pendentes = allProps.filter(p => !p.publicada && p.usuario_id && p.usuario_id !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890').length;
+  document.getElementById('s-props-sub').textContent = `${pendentes} pendentes de revisão`;
+  document.getElementById('badge-pendentes').textContent = pendentes;
+  setValue('s-pendentes', pendentes);
+  document.getElementById('pending-count').textContent = `${pendentes} propriedades aguardando liberação`;
+
+  // Stat: eventos 30d
+  const d30 = new Date(Date.now() - 30*864e5);
+  const e30 = allEvents.filter(e => new Date(e.created_at) >= d30);
+  const views = e30.filter(e => e.evento_tipo === 'view').length;
+  const wa = e30.filter(e => e.evento_tipo === 'whatsapp').length;
+  const form = e30.filter(e => e.evento_tipo === 'formulario').length;
+  setValue('s-views', views);
+  setValue('s-whatsapp', wa);
+  setValue('s-form', form);
+
+  // Stat: assinaturas
+  const assAtivas = allAss.filter(a => a.status === 'ativa' || a.status === 'trial').length;
+  setValue('s-assinaturas', assAtivas);
+  const ultra = allAss.filter(a => a.plano_ativo === 'ultra').length;
+  document.getElementById('s-assinaturas-sub').textContent = `${ultra} no plano Ultra`;
+
+  // Gráfico atividade
+  renderChartAtividade(e30);
+  // Gráfico planos
+  renderChartPlanos();
+  // Propriedades pendentes
+  renderPendentes();
+  // Últimos usuários
+  renderRecentUsers();
+}
+
+function setValue(id, val) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = val; el.classList.remove('loading'); }
+}
+
+function renderChartAtividade(events) {
+  const labels = [], keys = [];
+  const hoje = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(hoje); d.setDate(hoje.getDate() - i);
+    labels.push(`${d.getDate()}/${d.getMonth()+1}`);
+    keys.push(d.toISOString().split('T')[0]);
+  }
+  const cnt = (tipo) => keys.map(k => events.filter(e => e.evento_tipo === tipo && e.created_at?.startsWith(k)).length);
+  const ctx = document.getElementById('chart-atividade').getContext('2d');
+  if (graficoAtividade) graficoAtividade.destroy();
+  graficoAtividade = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Visualizações', data:cnt('view'), borderColor:'#ff385c', backgroundColor:'rgba(255,56,92,0.08)', tension:0.4, borderWidth:2, pointRadius:0 },
+        { label:'WhatsApp', data:cnt('whatsapp'), borderColor:'#25D366', backgroundColor:'rgba(37,211,102,0.08)', tension:0.4, borderWidth:2, pointRadius:0 },
+        { label:'Formulário', data:cnt('formulario'), borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.08)', tension:0.4, borderWidth:2, pointRadius:0 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: { legend:{ labels:{ color:'#a0a0b8', boxWidth:10, font:{size:11} } } },
+      scales: {
+        x: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#5c5c78', maxTicksLimit:8} },
+        y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#5c5c78'}, beginAtZero:true }
+      }
+    }
+  });
+}
+
+function renderChartPlanos() {
+  const basico = allAss.filter(a => a.plano_ativo === 'basico').length;
+  const pro = allAss.filter(a => a.plano_ativo === 'pro').length;
+  const ultra = allAss.filter(a => a.plano_ativo === 'ultra').length;
+  const ctx = document.getElementById('chart-planos').getContext('2d');
+  if (graficoPlanos) graficoPlanos.destroy();
+  graficoPlanos = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Básico', 'Pro', 'Ultra'],
+      datasets: [{ data:[basico,pro,ultra], backgroundColor:['rgba(255,255,255,0.1)','#3b82f6','#8b5cf6'], borderWidth:0 }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: { legend:{ position:'bottom', labels:{ color:'#a0a0b8', font:{size:11}, padding:16 } } },
+      cutout: '65%'
+    }
+  });
+}
+
+function renderPendentes() {
+  // Propriedades com usuario_id real (que não sejam seedadas)
+  const seedUsers = ['a1b2c3d4-e5f6-7890-abcd-ef1234567890'];
+  const pending = allProps.filter(p => !p.publicada && p.usuario_id && !seedUsers.includes(p.usuario_id));
+  const container = document.getElementById('pendentes-list');
+  if (!pending.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🎉</div><p>Nenhuma propriedade pendente de liberação</p></div>`;
+    return;
+  }
+  container.innerHTML = pending.map(p => {
+    const owner = allUsers.find(u => u.id === p.usuario_id);
+    return `
+    <div class="prop-pending-card">
+      <div style="width:64px;height:64px;border-radius:10px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🏡</div>
+      <div class="prop-info">
+        <div class="prop-name">${p.nome || 'Sem nome'}</div>
+        <div class="prop-meta">
+          👤 ${owner?.nome || 'Desconhecido'}
+          &nbsp;·&nbsp; 📍 ${p.cidade || '—'}, ${p.estado || '—'}
+          &nbsp;·&nbsp; 👥 ${p.capacidade || '—'} pessoas
+        </div>
+      </div>
+      <div class="prop-actions">
+        <button class="btn btn-success btn-sm" onclick="liberarProp('${p.id}')">✅ Liberar</button>
+        <button class="btn btn-ghost btn-sm" onclick="verProp('${p.id}')">👁 Ver</button>
+        <button class="btn btn-danger btn-sm" onclick="rejeitarProp('${p.id}')">❌ Rejeitar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderRecentUsers() {
+  const recent = allUsers.slice(0, 6);
+  const tbody = document.getElementById('recent-users');
+  if (!recent.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text3);">Nenhum usuário</td></tr>'; return; }
+  tbody.innerHTML = recent.map(u => {
+    const ass = allAss.find(a => a.usuario_id === u.id);
+    const plano = ass?.plano_ativo || 'basico';
+    const status = ass?.status || 'sem plano';
+    const dt = u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—';
+    return `<tr>
+      <td><div class="td-name"><div class="td-avatar">${(u.nome||'?')[0].toUpperCase()}</div>${u.nome||'Sem nome'}</div></td>
+      <td><span style="color:var(--text3)">@${u.usuario||'—'}</span></td>
+      <td><span class="badge plano-${plano}">${plano}</span></td>
+      <td>${badgeStatus(status)}</td>
+      <td style="color:var(--text3)">${dt}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="editUser('${u.id}')">✏️ Editar</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── ANALYTICS ───
+function renderAnalytics() {
+  const total = allEvents.length;
+  const totalV = allEvents.filter(e=>e.evento_tipo==='view').length;
+  const totalW = allEvents.filter(e=>e.evento_tipo==='whatsapp').length;
+  const totalF = allEvents.filter(e=>e.evento_tipo==='formulario').length;
+  setValue('an-total-views', totalV);
+  setValue('an-total-wa', totalW);
+  setValue('an-total-form', totalF);
+
+  // Top prop
+  const propCount = {};
+  allEvents.filter(e=>e.evento_tipo==='view').forEach(e => {
+    propCount[e.propriedade_id] = (propCount[e.propriedade_id]||0)+1;
+  });
+  const topId = Object.entries(propCount).sort((a,b)=>b[1]-a[1])[0]?.[0];
+  const topProp = allProps.find(p=>p.id==topId);
+  setValue('an-top-prop', topProp?.nome || `#${topId}`);
+
+  // Chart tipos
+  const ctx = document.getElementById('chart-eventos-tipo').getContext('2d');
+  if (graficoTipos) graficoTipos.destroy();
+  graficoTipos = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Visualizações','WhatsApp','Formulário'],
+      datasets: [{ data:[totalV,totalW,totalF], backgroundColor:['rgba(255,56,92,0.7)','rgba(37,211,102,0.7)','rgba(59,130,246,0.7)'], borderRadius:6 }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales: {
+        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#a0a0b8'} },
+        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#5c5c78'}, beginAtZero:true }
+      }
+    }
+  });
+
+  // Ranking
+  const tbody = document.getElementById('ranking-props');
+  const ranking = Object.entries(propCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if (!ranking.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text3);">Sem dados</td></tr>'; return; }
+  tbody.innerHTML = ranking.map(([pid, views], i) => {
+    const prop = allProps.find(p=>p.id==pid);
+    const waC = allEvents.filter(e=>e.propriedade_id==pid && e.evento_tipo==='whatsapp').length;
+    const fC = allEvents.filter(e=>e.propriedade_id==pid && e.evento_tipo==='formulario').length;
+    const medals = ['🥇','🥈','🥉'];
+    return `<tr>
+      <td style="font-weight:700;color:var(--text3)">${medals[i]||`#${i+1}`}</td>
+      <td><span style="font-weight:600;color:var(--text)">${prop?.nome||`ID #${pid}`}</span></td>
+      <td>${views}</td>
+      <td>${waC}</td>
+      <td>${fC}</td>
+      <td style="font-weight:700;color:var(--text)">${views+waC+fC}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── PROPRIEDADES ───
+function renderPropriedades(filter='') {
+  const tbody = document.getElementById('props-tbody');
+  let data = allProps;
+  if (filter) data = data.filter(p => (p.nome||'').toLowerCase().includes(filter.toLowerCase()) || (p.cidade||'').toLowerCase().includes(filter.toLowerCase()));
+  if (!data.length) { tbody.innerHTML = `<tr><td colspan="6" class="empty-state" style="padding:40px;">Nenhuma encontrada</td></tr>`; return; }
+  tbody.innerHTML = data.map(p => {
+    const owner = allUsers.find(u => u.id === p.usuario_id);
+    const ass = allAss.find(a => a.usuario_id === p.usuario_id);
+    const status = p.publicada ? '<span class="badge badge-green">✓ Ativa</span>' : '<span class="badge badge-yellow">⏳ Pendente</span>';
+    return `<tr>
+      <td><div class="td-name" style="gap:10px">
+        <div style="width:36px;height:36px;border-radius:8px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🏡</div>
+        <div><div style="font-weight:600;color:var(--text)">${p.nome||'Sem nome'}</div><div style="font-size:0.72rem;color:var(--text3)">${p.tipo_propriedade||p.categoria||'—'}</div></div>
+      </div></td>
+      <td style="color:var(--text2)">${owner?.nome||'Desconhecido'}</td>
+      <td>${status}</td>
+      <td><span class="badge plano-${ass?.plano_ativo||'basico'}">${ass?.plano_ativo||'básico'}</span></td>
+      <td style="color:var(--text3)">${p.cidade||'—'}, ${p.estado||'—'}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          ${!p.publicada ? `<button class="btn btn-success btn-sm" onclick="liberarProp('${p.id}')">✅ Liberar</button>` : `<button class="btn btn-warn btn-sm" onclick="suspenderProp('${p.id}')">⏸ Suspender</button>`}
+          <button class="btn btn-ghost btn-sm" onclick="verProp('${p.id}')">👁</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterProps() { renderPropriedades(document.getElementById('search-props').value); }
+
+// ─── USUÁRIOS ───
+function renderUsuarios(filter='') {
+  const tbody = document.getElementById('users-tbody');
+  let data = allUsers;
+  if (filter) data = data.filter(u => (u.nome||'').toLowerCase().includes(filter.toLowerCase()) || (u.usuario||'').toLowerCase().includes(filter.toLowerCase()));
+  if (!data.length) { tbody.innerHTML = `<tr><td colspan="6" class="empty-state" style="padding:40px;">Nenhum encontrado</td></tr>`; return; }
+  tbody.innerHTML = data.map(u => {
+    const ass = allAss.find(a => a.usuario_id === u.id);
+    const plano = ass?.plano_ativo || 'basico';
+    const status = ass?.status || 'sem plano';
+    const dt = u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—';
+    return `<tr>
+      <td><div class="td-name"><div class="td-avatar">${(u.nome||'?')[0].toUpperCase()}</div><div><div>${u.nome||'Sem nome'}</div></div></div></td>
+      <td style="color:var(--text3)">@${u.usuario||'—'}</td>
+      <td><span class="badge plano-${plano}">${plano}</span></td>
+      <td>${badgeStatus(status)}</td>
+      <td style="color:var(--text3)">${dt}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="editUser('${u.id}')">✏️ Editar</button>
+          <button class="btn btn-ghost btn-sm" onclick="editAss('${u.id}')">💳 Plano</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterUsers() { renderUsuarios(document.getElementById('search-users').value); }
+
+// ─── ASSINATURAS ───
+function renderAssinaturas() {
+  const ativas = allAss.filter(a => a.status === 'ativa').length;
+  const trial = allAss.filter(a => a.status === 'trial').length;
+  const canc = allAss.filter(a => a.status === 'cancelada' || a.status === 'expirada').length;
+  setValue('ass-ativas', ativas);
+  setValue('ass-trial', trial);
+  setValue('ass-canc', canc);
+
+  const tbody = document.getElementById('ass-tbody');
+  if (!allAss.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3);">Nenhuma assinatura</td></tr>'; return; }
+  tbody.innerHTML = allAss.map(a => {
+    const user = allUsers.find(u => u.id === a.usuario_id);
+    const ini = a.inicio_periodo ? new Date(a.inicio_periodo).toLocaleDateString('pt-BR') : '—';
+    const fim = a.fim_periodo ? new Date(a.fim_periodo).toLocaleDateString('pt-BR') : '—';
+    return `<tr>
+      <td><div class="td-name"><div class="td-avatar">${(user?.nome||'?')[0].toUpperCase()}</div>${user?.nome||'Desconhecido'}</div></td>
+      <td><span class="badge plano-${a.plano_ativo}">${a.plano_ativo||'—'}</span></td>
+      <td>${badgeStatus(a.status)}</td>
+      <td style="color:var(--text3)">${ini}</td>
+      <td style="color:var(--text3)">${fim}</td>
+      <td style="color:var(--text2)">R$ ${Number(a.valor_pago||0).toFixed(2)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="editAss('${a.usuario_id}')">✏️ Editar</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── HELPERS ───
+function badgeStatus(s) {
+  const map = {
+    ativa: 'badge-green', trial: 'badge-yellow', cancelada: 'badge-red',
+    expirada: 'badge-red', 'sem plano': 'badge-gray'
+  };
+  return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+}
+
+// ─── AÇÕES: PROPRIEDADES ───
+async function liberarProp(id) {
+  const { error } = await sb.from('propriedades').update({ publicada: true }).eq('id', id);
+  if (error) { toast('Erro ao liberar propriedade', 'error'); return; }
+  const p = allProps.find(p => p.id == id);
+  if (p) p.publicada = true;
+  toast('✅ Propriedade liberada com sucesso!', 'success');
+  document.getElementById('badge-pendentes').textContent = allProps.filter(p => !p.publicada && p.usuario_id && p.usuario_id !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890').length;
+  renderPendentes();
+  renderPropriedades();
+}
+
+async function suspenderProp(id) {
+  const { error } = await sb.from('propriedades').update({ publicada: false }).eq('id', id);
+  if (error) { toast('Erro ao suspender', 'error'); return; }
+  const p = allProps.find(p => p.id == id);
+  if (p) p.publicada = false;
+  toast('⏸ Propriedade suspensa', 'info');
+  renderPropriedades();
+  renderPendentes();
+}
+
+async function rejeitarProp(id) {
+  if (!confirm('Rejeitar esta propriedade? Ela será marcada como rejeitada.')) return;
+  const { error } = await sb.from('propriedades').update({ publicada: false, rejeitada: true }).eq('id', id);
+  if (error) { toast('Erro ao rejeitar', 'error'); return; }
+  toast('❌ Propriedade rejeitada', 'error');
+  await loadAllData();
+  renderPendentes();
+}
+
+function verProp(id) {
+  const p = allProps.find(p => p.id == id);
+  if (!p) return;
+  const owner = allUsers.find(u => u.id === p.usuario_id);
+  const ass = allAss.find(a => a.usuario_id === p.usuario_id);
+  document.getElementById('mp-nome').textContent = `🏡 ${p.nome || 'Sem nome'}`;
+  document.getElementById('mp-sub').textContent = `${p.tipo_propriedade || p.categoria || '—'} · ${p.cidade || '—'}, ${p.estado || '—'}`;
+  document.getElementById('mp-details').innerHTML = `
+    <div class="detail-row"><div class="detail-key">ID</div><div class="detail-val">#${p.id}</div></div>
+    <div class="detail-row"><div class="detail-key">Dono</div><div class="detail-val">${owner?.nome||'—'}</div></div>
+    <div class="detail-row"><div class="detail-key">Status</div><div class="detail-val">${p.publicada ? '✅ Ativa' : '⏳ Pendente'}</div></div>
+    <div class="detail-row"><div class="detail-key">Plano do dono</div><div class="detail-val">${ass?.plano_ativo||'básico'}</div></div>
+    <div class="detail-row"><div class="detail-key">Capacidade</div><div class="detail-val">${p.capacidade || '—'} pessoas</div></div>
+    <div class="detail-row"><div class="detail-key">Valor base</div><div class="detail-val">R$ ${p.valor_base || '—'}</div></div>
+    <div class="detail-row"><div class="detail-key">WhatsApp</div><div class="detail-val">${p.whatsapp || '—'}</div></div>
+    <div class="detail-row"><div class="detail-key">Email contato</div><div class="detail-val">${p.email_contato || '—'}</div></div>
+    <div class="detail-row"><div class="detail-key">CEP</div><div class="detail-val">${p.cep || '—'}</div></div>
+    <div class="detail-row"><div class="detail-key">Endereço</div><div class="detail-val">${p.rua ? `${p.rua}, ${p.numero||''} - ${p.bairro||''}` : p.endereco||'—'}</div></div>
+  `;
+  document.getElementById('mp-footer').innerHTML = !p.publicada
+    ? `<button class="btn btn-danger" onclick="closeModal('modal-prop')">Fechar</button>
+       <button class="btn btn-success" onclick="liberarProp('${p.id}');closeModal('modal-prop')">✅ Liberar esta propriedade</button>`
+    : `<button class="btn btn-ghost" onclick="closeModal('modal-prop')">Fechar</button>
+       <button class="btn btn-warn" onclick="suspenderProp('${p.id}');closeModal('modal-prop')">⏸ Suspender</button>`;
+  openModal('modal-prop');
+}
+
+// ─── AÇÕES: USUÁRIOS ───
+function editUser(id) {
+  const u = allUsers.find(u => u.id === id);
+  if (!u) return;
+  document.getElementById('mu-id').value = id;
+  document.getElementById('mu-nome').value = u.nome || '';
+  document.getElementById('mu-usuario').value = u.usuario || '';
+  document.getElementById('mu-telefone').value = u.telefone || '';
+  document.getElementById('mu-sub').textContent = u.email || id;
+  openModal('modal-user');
+}
+
+async function saveUser() {
+  const id = document.getElementById('mu-id').value;
+  const payload = {
+    nome: document.getElementById('mu-nome').value,
+    usuario: document.getElementById('mu-usuario').value,
+    telefone: document.getElementById('mu-telefone').value
+  };
+  const { error } = await sb.from('usuarios').update(payload).eq('id', id);
+  if (error) { toast('Erro ao salvar: ' + error.message, 'error'); return; }
+  const idx = allUsers.findIndex(u => u.id === id);
+  if (idx >= 0) Object.assign(allUsers[idx], payload);
+  closeModal('modal-user');
+  toast('✅ Usuário atualizado!', 'success');
+  renderUsuarios();
+  renderRecentUsers();
+}
+
+// ─── AÇÕES: ASSINATURAS ───
+function editAss(userId) {
+  const u = allUsers.find(u => u.id === userId);
+  const a = allAss.find(a => a.usuario_id === userId);
+  document.getElementById('mass-id').value = a?.id || '';
+  document.getElementById('mass-sub').textContent = u?.nome || userId;
+  document.getElementById('mass-plano').value = a?.plano_ativo || 'basico';
+  document.getElementById('mass-status').value = a?.status || 'ativa';
+  document.getElementById('mass-fim').value = a?.fim_periodo ? a.fim_periodo.substring(0,10) : '';
+  // Store userId for save
+  document.getElementById('mass-id').dataset.userId = userId;
+  openModal('modal-ass');
+}
+
+async function saveAss() {
+  const id = document.getElementById('mass-id').value;
+  const userId = document.getElementById('mass-id').dataset.userId;
+  const plano = document.getElementById('mass-plano').value;
+  const status = document.getElementById('mass-status').value;
+  const fim = document.getElementById('mass-fim').value;
+  const payload = { plano_ativo: plano, status, fim_periodo: fim || null, atualizado_em: new Date().toISOString() };
+  let error;
+  if (id) {
+    ({ error } = await sb.from('assinaturas').update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from('assinaturas').insert({ ...payload, usuario_id: userId, inicio_periodo: new Date().toISOString().substring(0,10), valor_pago: 0, moeda: 'BRL', criado_em: new Date().toISOString() }));
+  }
+  if (error) { toast('Erro: ' + error.message, 'error'); return; }
+  await loadAllData();
+  closeModal('modal-ass');
+  toast('💳 Assinatura atualizada!', 'success');
+  renderAssinaturas();
+  renderRecentUsers();
+}
+
+// ─── START ───
+init();
+</script>
+</body>
+</html>
