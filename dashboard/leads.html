@@ -1070,21 +1070,21 @@ function renderizarPainel(c) {
                 <div class="linha-dois">
                     <div class="campo-grupo">
                         <label class="campo-label">Nome do Evento</label>
-                        <input type="text" class="campo-input" value="${esc(c.nome_evento)}" oninput="atualizarCampo(${c.id}, 'nome_evento', this.value)" placeholder="Nome do evento">
+                        <input type="text" class="campo-input" value="${esc(c.nome_evento)}" oninput="atualizarCampo('${c.id}', 'nome_evento', this.value)" placeholder="Nome do evento">
                     </div>
                     <div class="campo-grupo">
                         <label class="campo-label">Quem Contratou</label>
-                        <input type="text" class="campo-input" value="${esc(c.quem_contratou)}" oninput="atualizarCampo(${c.id}, 'quem_contratou', this.value)" placeholder="Nome completo">
+                        <input type="text" class="campo-input" value="${esc(c.quem_contratou)}" oninput="atualizarCampo('${c.id}', 'quem_contratou', this.value)" placeholder="Nome completo">
                     </div>
                 </div>
                 <div class="linha-dois">
                     <div class="campo-grupo">
                         <label class="campo-label">Documento (CPF/CNPJ)</label>
-                        <input type="text" class="campo-input" value="${esc(c.documento)}" oninput="atualizarCampo(${c.id}, 'documento', this.value)" placeholder="000.000.000-00">
+                        <input type="text" class="campo-input" value="${esc(c.documento)}" oninput="atualizarCampo('${c.id}', 'documento', this.value)" placeholder="000.000.000-00">
                     </div>
                     <div class="campo-grupo">
                         <label class="campo-label">E-mail</label>
-                        <input type="email" class="campo-input" value="${esc(c.email)}" oninput="atualizarCampo(${c.id}, 'email', this.value)" placeholder="email@exemplo.com">
+                        <input type="email" class="campo-input" value="${esc(c.email)}" oninput="atualizarCampo('${c.id}', 'email', this.value)" placeholder="email@exemplo.com">
                     </div>
                 </div>
                 <div class="campo-grupo">
@@ -1092,21 +1092,21 @@ function renderizarPainel(c) {
                     <div class="fones-lista" id="fones-${c.id}">
                         ${fones.map((f, i) => `
                         <div class="fone-row">
-                            <input type="tel" class="campo-input" value="${esc(f)}" onchange="atualizarFone(${c.id}, ${i}, this.value)" placeholder="(00) 00000-0000">
+                            <input type="tel" class="campo-input" value="${esc(f)}" onchange="atualizarFone('${c.id}', ${i}, this.value)" placeholder="(00) 00000-0000">
                             ${i === 0
-                                ? `<button class="btn-add-fone" onclick="adicionarFone(${c.id})" title="Adicionar telefone">＋</button>`
-                                : `<button class="btn-rem-fone" onclick="removerFone(${c.id}, ${i})" title="Remover">✕</button>`
+                                ? `<button class="btn-add-fone" onclick="adicionarFone('${c.id}')" title="Adicionar telefone">＋</button>`
+                                : `<button class="btn-rem-fone" onclick="removerFone('${c.id}', ${i})" title="Remover">✕</button>`
                             }
                         </div>`).join('')}
                     </div>
                 </div>
                 <div class="campo-grupo">
                     <label class="campo-label">Contato de Emergência</label>
-                    <input type="text" class="campo-input" value="${esc(c.contato_emergencia)}" oninput="atualizarCampo(${c.id}, 'contato_emergencia', this.value)" placeholder="Nome e telefone de emergência">
+                    <input type="text" class="campo-input" value="${esc(c.contato_emergencia)}" oninput="atualizarCampo('${c.id}', 'contato_emergencia', this.value)" placeholder="Nome e telefone de emergência">
                 </div>
                 <div class="campo-grupo">
                     <label class="campo-label">Como Conheceu o Espaço</label>
-                    <select class="campo-input" onchange="atualizarCampo(${c.id}, 'como_conheceu', this.value)">
+                    <select class="campo-input" onchange="atualizarCampo('${c.id}', 'como_conheceu', this.value)">
                         ${['','Instagram','Facebook','Google','Site VENTSY','Indicação de amigo','Já conhecia','Outro'].map(o => `<option value="${o}" ${c.como_conheceu === o ? 'selected' : ''}>${o || 'Selecionar...'}</option>`).join('')}
                     </select>
                 </div>
@@ -1123,13 +1123,13 @@ function renderizarPainel(c) {
                 <div class="linha-dois">
                     <div class="campo-grupo">
                         <label class="campo-label">Tipo de Evento</label>
-                        <select class="campo-input" onchange="atualizarCampo(${c.id}, 'tipo_evento', this.value)">
+                        <select class="campo-input" onchange="atualizarCampo('${c.id}', 'tipo_evento', this.value)">
                             ${['Casamento','Aniversário','Corporativo','Formatura','Batizado','Outro'].map(o => `<option value="${o}" ${c.tipo_evento === o ? 'selected' : ''}>${o}</option>`).join('')}
                         </select>
                     </div>
                     <div class="campo-grupo">
                         <label class="campo-label">Formato da Recepção</label>
-                        <select class="campo-input" onchange="atualizarCampo(${c.id}, 'formato_recepcao', this.value)">
+                        <select class="campo-input" onchange="atualizarCampo('${c.id}', 'formato_recepcao', this.value)">
                             ${['','Coquetel','Jantar sentado','Buffet franco-americano','Churrasco','Misto'].map(o => `<option value="${o}" ${c.formato_recepcao === o ? 'selected' : ''}>${o || 'Selecionar...'}</option>`).join('')}
                         </select>
                     </div>
@@ -1139,52 +1139,52 @@ function renderizarPainel(c) {
                     <div class="datas-container">
                         <div class="campo-grupo">
                             <label class="campo-label" style="font-size:0.65rem;">Data Início</label>
-                            <input type="date" class="campo-input" value="${c.data_inicio || ''}" min="${hoje()}" onchange="atualizarCampo(${c.id}, 'data_inicio', this.value); validarDatas(${c.id})">
+                            <input type="date" class="campo-input" value="${c.data_inicio || ''}" min="${hoje()}" onchange="atualizarCampo('${c.id}', 'data_inicio', this.value); validarDatas('${c.id}')">
                         </div>
                         <div class="campo-grupo">
                             <label class="campo-label" style="font-size:0.65rem;">Data Fim</label>
-                            <input type="date" class="campo-input" value="${c.data_fim || ''}" min="${c.data_inicio || hoje()}" onchange="atualizarCampo(${c.id}, 'data_fim', this.value)">
+                            <input type="date" class="campo-input" value="${c.data_fim || ''}" min="${c.data_inicio || hoje()}" onchange="atualizarCampo('${c.id}', 'data_fim', this.value)">
                         </div>
                     </div>
                 </div>
                 <div class="linha-dois">
                     <div class="campo-grupo">
                         <label class="campo-label">Horário Início</label>
-                        <input type="time" class="campo-input" value="${c.horario_inicio || ''}" onchange="atualizarCampo(${c.id}, 'horario_inicio', this.value)">
+                        <input type="time" class="campo-input" value="${c.horario_inicio || ''}" onchange="atualizarCampo('${c.id}', 'horario_inicio', this.value)">
                     </div>
                     <div class="campo-grupo">
                         <label class="campo-label">Horário Fim</label>
-                        <input type="time" class="campo-input" value="${c.horario_fim || ''}" onchange="atualizarCampo(${c.id}, 'horario_fim', this.value)">
+                        <input type="time" class="campo-input" value="${c.horario_fim || ''}" onchange="atualizarCampo('${c.id}', 'horario_fim', this.value)">
                     </div>
                 </div>
                 <div class="linha-dois">
                     <div class="campo-grupo">
                         <label class="campo-label">Convidados Adultos</label>
-                        <input type="number" class="campo-input" value="${c.qtd_adultos || ''}" min="0" onchange="atualizarCampo(${c.id}, 'qtd_adultos', this.value)" placeholder="0">
+                        <input type="number" class="campo-input" value="${c.qtd_adultos || ''}" min="0" onchange="atualizarCampo('${c.id}', 'qtd_adultos', this.value)" placeholder="0">
                     </div>
                     <div class="campo-grupo">
                         <label class="campo-label">Convidados Crianças</label>
-                        <input type="number" class="campo-input" value="${c.qtd_criancas || ''}" min="0" onchange="atualizarCampo(${c.id}, 'qtd_criancas', this.value)" placeholder="0">
+                        <input type="number" class="campo-input" value="${c.qtd_criancas || ''}" min="0" onchange="atualizarCampo('${c.id}', 'qtd_criancas', this.value)" placeholder="0">
                     </div>
                 </div>
                 <div class="campo-grupo">
                     <label class="campo-label">Atrações / Nomes Principais</label>
-                    <textarea class="campo-input" rows="2" onchange="atualizarCampo(${c.id}, 'atracoes', this.value)" placeholder="Noivos, banda principal, homenageado...">${esc(c.atracoes)}</textarea>
+                    <textarea class="campo-input" rows="2" onchange="atualizarCampo('${c.id}', 'atracoes', this.value)" placeholder="Noivos, banda principal, homenageado...">${esc(c.atracoes)}</textarea>
                 </div>
                 <div class="linha-dois">
                     <div class="campo-grupo">
                         <label class="campo-label">Horário de Montagem</label>
-                        <input type="text" class="campo-input" value="${esc(c.horario_montagem)}" onchange="atualizarCampo(${c.id}, 'horario_montagem', this.value)" placeholder="Ex: 10h do dia anterior">
+                        <input type="text" class="campo-input" value="${esc(c.horario_montagem)}" onchange="atualizarCampo('${c.id}', 'horario_montagem', this.value)" placeholder="Ex: 10h do dia anterior">
                     </div>
                     <div class="campo-grupo">
                         <label class="campo-label">Horário de Desmontagem</label>
-                        <input type="text" class="campo-input" value="${esc(c.horario_desmontagem)}" onchange="atualizarCampo(${c.id}, 'horario_desmontagem', this.value)" placeholder="Ex: 09h do dia seguinte">
+                        <input type="text" class="campo-input" value="${esc(c.horario_desmontagem)}" onchange="atualizarCampo('${c.id}', 'horario_desmontagem', this.value)" placeholder="Ex: 09h do dia seguinte">
                     </div>
                 </div>
                 <div class="campo-grupo">
                     <label class="campo-label">Layout / Mapa de Mesas</label>
                     <div class="upload-area" onclick="document.getElementById('upload-layout-${c.id}').click()">
-                        <input type="file" id="upload-layout-${c.id}" accept=".pdf,.jpg,.jpeg,.png" onchange="registrarUpload(${c.id}, 'layout_mesas', this)">
+                        <input type="file" id="upload-layout-${c.id}" accept=".pdf,.jpg,.jpeg,.png" onchange="registrarUpload('${c.id}', 'layout_mesas', this)">
                         <span style="font-size:1.5rem;">📐</span>
                         <p>Clique para fazer upload do layout de mesas</p>
                         <p style="font-size:0.7rem;margin-top:2px;">(PDF, JPG ou PNG — máx. 5MB)</p>
@@ -1203,19 +1203,19 @@ function renderizarPainel(c) {
             <div class="secao-body">
                 <div class="campo-grupo">
                     <label class="campo-label">Serviços Contratados da Casa</label>
-                    <textarea class="campo-input" rows="2" onchange="atualizarCampo(${c.id}, 'servicos_casa', this.value)" placeholder="Som, iluminação, buffet próprio, segurança, limpeza...">${esc(c.servicos_casa)}</textarea>
+                    <textarea class="campo-input" rows="2" onchange="atualizarCampo('${c.id}', 'servicos_casa', this.value)" placeholder="Som, iluminação, buffet próprio, segurança, limpeza...">${esc(c.servicos_casa)}</textarea>
                 </div>
                 <div class="campo-grupo">
                     <label class="campo-label">Fornecedores Externos</label>
-                    <textarea class="campo-input" rows="2" onchange="atualizarCampo(${c.id}, 'fornecedores', this.value)" placeholder="Decorador, DJ, Banda, Buffet externo, Doces...">${esc(c.fornecedores)}</textarea>
+                    <textarea class="campo-input" rows="2" onchange="atualizarCampo('${c.id}', 'fornecedores', this.value)" placeholder="Decorador, DJ, Banda, Buffet externo, Doces...">${esc(c.fornecedores)}</textarea>
                 </div>
                 <div class="campo-grupo">
                     <label class="campo-label">Necessidades Técnicas</label>
-                    <textarea class="campo-input" rows="2" onchange="atualizarCampo(${c.id}, 'necessidades_tecnicas', this.value)" placeholder="Voltagem das tomadas, Wi-Fi, gerador, projetores...">${esc(c.necessidades_tecnicas)}</textarea>
+                    <textarea class="campo-input" rows="2" onchange="atualizarCampo('${c.id}', 'necessidades_tecnicas', this.value)" placeholder="Voltagem das tomadas, Wi-Fi, gerador, projetores...">${esc(c.necessidades_tecnicas)}</textarea>
                 </div>
                 <div class="campo-grupo">
                     <label class="campo-label">Check-in de Materiais do Cliente</label>
-                    <textarea class="campo-input" rows="2" onchange="atualizarCampo(${c.id}, 'checkin_materiais', this.value)" placeholder="Bebidas extras, lembrancinhas, topo de bolo...">${esc(c.checkin_materiais)}</textarea>
+                    <textarea class="campo-input" rows="2" onchange="atualizarCampo('${c.id}', 'checkin_materiais', this.value)" placeholder="Bebidas extras, lembrancinhas, topo de bolo...">${esc(c.checkin_materiais)}</textarea>
                 </div>
             </div>
         </div>
@@ -1230,11 +1230,11 @@ function renderizarPainel(c) {
                 <div class="linha-dois">
                     <div class="campo-grupo">
                         <label class="campo-label">Valor Total do Contrato</label>
-                        <input type="text" class="campo-input" value="${esc(c.valor_total)}" oninput="atualizarCampo(${c.id}, 'valor_total', this.value)" placeholder="R$ 0,00">
+                        <input type="text" class="campo-input" value="${esc(c.valor_total)}" oninput="atualizarCampo('${c.id}', 'valor_total', this.value)" placeholder="R$ 0,00">
                     </div>
                     <div class="campo-grupo">
                         <label class="campo-label">Forma de Pagamento</label>
-                        <select class="campo-input" onchange="atualizarCampo(${c.id}, 'forma_pagamento', this.value)">
+                        <select class="campo-input" onchange="atualizarCampo('${c.id}', 'forma_pagamento', this.value)">
                             ${['','Pix','Parcelamento','Cartão de crédito','Dinheiro','Misto'].map(o => `<option value="${o}" ${c.forma_pagamento === o ? 'selected' : ''}>${o || 'Selecionar...'}</option>`).join('')}
                         </select>
                     </div>
@@ -1244,11 +1244,11 @@ function renderizarPainel(c) {
                     <div class="parcelas-lista" id="parcelas-${c.id}">
                         ${renderizarParcelas(c)}
                     </div>
-                    <button class="btn-add-parcela" onclick="adicionarParcela(${c.id})">＋ Adicionar parcela</button>
+                    <button class="btn-add-parcela" onclick="adicionarParcela('${c.id}')">＋ Adicionar parcela</button>
                 </div>
                 <div class="campo-grupo">
                     <label class="campo-label">Taxas Extras</label>
-                    <textarea class="campo-input" rows="2" onchange="atualizarCampo(${c.id}, 'taxas_extras', this.value)" placeholder="ECAD, taxa de limpeza extra, quebra de materiais...">${esc(c.taxas_extras)}</textarea>
+                    <textarea class="campo-input" rows="2" onchange="atualizarCampo('${c.id}', 'taxas_extras', this.value)" placeholder="ECAD, taxa de limpeza extra, quebra de materiais...">${esc(c.taxas_extras)}</textarea>
                 </div>
             </div>
         </div>
@@ -1262,15 +1262,15 @@ function renderizarPainel(c) {
             <div class="secao-body">
                 <div class="campo-grupo">
                     <label class="campo-label">Restrições Alimentares</label>
-                    <textarea class="campo-input" rows="2" onchange="atualizarCampo(${c.id}, 'restricoes_alimentares', this.value)" placeholder="Alergias graves, vegetarianos, veganos...">${esc(c.restricoes_alimentares)}</textarea>
+                    <textarea class="campo-input" rows="2" onchange="atualizarCampo('${c.id}', 'restricoes_alimentares', this.value)" placeholder="Alergias graves, vegetarianos, veganos...">${esc(c.restricoes_alimentares)}</textarea>
                 </div>
                 <div class="campo-grupo">
                     <label class="campo-label">Lista de Convidados VIP / Autoridades</label>
-                    <textarea class="campo-input" rows="2" onchange="atualizarCampo(${c.id}, 'vip_autoridades', this.value)" placeholder="Nomes para protocolos específicos...">${esc(c.vip_autoridades)}</textarea>
+                    <textarea class="campo-input" rows="2" onchange="atualizarCampo('${c.id}', 'vip_autoridades', this.value)" placeholder="Nomes para protocolos específicos...">${esc(c.vip_autoridades)}</textarea>
                 </div>
                 <div class="campo-grupo">
                     <label class="campo-label">Observações Gerais</label>
-                    <textarea class="campo-input" rows="3" onchange="atualizarCampo(${c.id}, 'observacoes', this.value)" placeholder="Qualquer detalhe adicional importante...">${esc(c.observacoes)}</textarea>
+                    <textarea class="campo-input" rows="3" onchange="atualizarCampo('${c.id}', 'observacoes', this.value)" placeholder="Qualquer detalhe adicional importante...">${esc(c.observacoes)}</textarea>
                 </div>
             </div>
         </div>
@@ -1294,7 +1294,7 @@ function renderizarPainel(c) {
                         ['confirmacao',   'Confirmação final enviada ao cliente'],
                     ].map(([key, label]) => `
                     <label class="check-item">
-                        <input type="checkbox" ${checklist[key] ? 'checked' : ''} onchange="atualizarChecklist(${c.id}, '${key}', this.checked)">
+                        <input type="checkbox" ${checklist[key] ? 'checked' : ''} onchange="atualizarChecklist('${c.id}', '${key}', this.checked)">
                         <label>${label}</label>
                     </label>`).join('')}
                 </div>
@@ -1304,9 +1304,9 @@ function renderizarPainel(c) {
     </div>
 
     <div class="painel-acoes">
-        <button class="btn-outline" onclick="confirmarExcluir(${c.id})" style="color:#dc2626;border-color:#dc2626;">🗑️ Excluir</button>
-        <button class="btn-outline" onclick="exportarClientePDF(${c.id})">📄 Exportar PDF</button>
-        <button class="btn-primary" onclick="salvarCliente(${c.id})">💾 Salvar Alterações</button>
+        <button class="btn-outline" onclick="confirmarExcluir('${c.id}')" style="color:#dc2626;border-color:#dc2626;">🗑️ Excluir</button>
+        <button class="btn-outline" onclick="exportarClientePDF('${c.id}')">📄 Exportar PDF</button>
+        <button class="btn-primary" onclick="salvarCliente('${c.id}')">💾 Salvar Alterações</button>
     </div>`;
 }
 
@@ -1314,9 +1314,9 @@ function renderizarParcelas(c) {
     if (!c.parcelas || c.parcelas.length === 0) return '';
     return c.parcelas.map((p, i) => `
     <div class="parcela-row" id="parcela-${c.id}-${i}">
-        <input type="text" class="campo-input" value="${esc(p.desc || '')}" placeholder="Descrição (ex: 1ª parcela)" onchange="atualizarParcela(${c.id}, ${i}, 'desc', this.value)">
-        <input type="date" class="campo-input" value="${p.vencimento || ''}" onchange="atualizarParcela(${c.id}, ${i}, 'vencimento', this.value)">
-        <button class="btn-rem-fone" onclick="removerParcela(${c.id}, ${i})">✕</button>
+        <input type="text" class="campo-input" value="${esc(p.desc || '')}" placeholder="Descrição (ex: 1ª parcela)" onchange="atualizarParcela('${c.id}', ${i}, 'desc', this.value)">
+        <input type="date" class="campo-input" value="${p.vencimento || ''}" onchange="atualizarParcela('${c.id}', ${i}, 'vencimento', this.value)">
+        <button class="btn-rem-fone" onclick="removerParcela('${c.id}', ${i})">✕</button>
     </div>`).join('');
 }
 
