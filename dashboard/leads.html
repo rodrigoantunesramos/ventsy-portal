@@ -814,6 +814,7 @@
     <div class="footer-bottom"><p>© 2026 VENTSY. Todos os direitos reservados.</p></div>
 </footer>
 
+
 <script>
 /* ══════════════════════════════════════════
    SUPABASE
@@ -824,74 +825,17 @@ const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
 /* ══════════════════════════════════════════
-   DADOS MOCK (substituir pela tabela Supabase)
-══════════════════════════════════════════ */
-let _clientes = [
-    {
-        id: 1, nome_evento: 'Casamento Ana & Pedro', quem_contratou: 'Ana Lima',
-        data_inicio: '2026-06-15', data_fim: '2026-06-16', status: 'contratado',
-        tipo_evento: 'Casamento', telefones: ['(21) 99999-1234'],
-        email: 'ana.lima@email.com', documento: '123.456.789-00',
-        horario_inicio: '18:00', horario_fim: '04:00',
-        qtd_adultos: 250, qtd_criancas: 30,
-        formato_recepcao: 'Jantar sentado',
-        servicos_casa: 'Som, iluminação, segurança',
-        fornecedores: 'Buffet Delícia, DJ Marcos, Flor & Arte',
-        valor_total: 'R$ 28.000,00', forma_pagamento: 'Parcelamento',
-        como_conheceu: 'Instagram', contato_emergencia: 'Pedro (noivo): (21) 99888-5678',
-        atracoes: 'Ana Lima e Pedro Santos (noivos)',
-        necessidades_tecnicas: 'Gerador, 220V para a banda',
-        restricoes_alimentares: '15 veganos, 3 com alergia a glúten',
-        horario_montagem: '10:00 do dia 15/06',
-        horario_desmontagem: '09:00 do dia 17/06',
-        observacoes: '',
-        checklist: { contrato: true, sinal: true, visita: true, briefing: false, fornecedores: false, ecad: false, layout: false, confirmacao: false }
-    },
-    {
-        id: 2, nome_evento: 'Aniversário 50 anos João', quem_contratou: 'Maria Souza',
-        data_inicio: '2026-07-20', data_fim: '2026-07-20', status: 'negociacao',
-        tipo_evento: 'Aniversário', telefones: ['(21) 98888-4567'],
-        email: 'maria.souza@email.com', documento: '987.654.321-00',
-        horario_inicio: '19:00', horario_fim: '03:00',
-        qtd_adultos: 100, qtd_criancas: 0,
-        formato_recepcao: 'Coquetel',
-        servicos_casa: 'Som, iluminação',
-        fornecedores: 'DJ Família',
-        valor_total: 'R$ 12.000,00', forma_pagamento: 'Pix',
-        como_conheceu: 'Indicação de amigo',
-        contato_emergencia: '', atracoes: 'João Souza (aniversariante)',
-        necessidades_tecnicas: '', restricoes_alimentares: '',
-        horario_montagem: '', horario_desmontagem: '', observacoes: '',
-        checklist: { contrato: false, sinal: false, visita: true, briefing: false, fornecedores: false, ecad: false, layout: false, confirmacao: false }
-    },
-    {
-        id: 3, nome_evento: 'Formatura Medicina UFRJ', quem_contratou: 'Comissão de Formatura',
-        data_inicio: '2026-12-10', data_fim: '2026-12-10', status: 'lead',
-        tipo_evento: 'Formatura', telefones: ['(21) 97777-3456'],
-        email: 'formatura.med2026@email.com', documento: '',
-        horario_inicio: '20:00', horario_fim: '05:00',
-        qtd_adultos: 400, qtd_criancas: 0,
-        formato_recepcao: 'Buffet franco-americano',
-        servicos_casa: '', fornecedores: '',
-        valor_total: '', forma_pagamento: '',
-        como_conheceu: 'Site VENTSY',
-        contato_emergencia: '', atracoes: 'Turma de Medicina 2026',
-        necessidades_tecnicas: '', restricoes_alimentares: '',
-        horario_montagem: '', horario_desmontagem: '', observacoes: '',
-        checklist: { contrato: false, sinal: false, visita: false, briefing: false, fornecedores: false, ecad: false, layout: false, confirmacao: false }
-    }
-];
-
-/* ══════════════════════════════════════════
    ESTADO
 ══════════════════════════════════════════ */
-let _filtrados = [];
+let _clientes    = [];
+let _filtrados   = [];
 let _paginaAtual = 1;
-let _porPagina = 10;
-let _ordemCampo = 'nome_evento';
-let _ordemAsc = true;
+let _porPagina   = 10;
+let _ordemCampo  = 'nome_evento';
+let _ordemAsc    = true;
 let _clienteEditandoStatus = null;
-let _expandidos = new Set();
+let _expandidos  = new Set();
+let _usuarioId   = null;
 
 /* ══════════════════════════════════════════
    INIT
@@ -902,6 +846,7 @@ async function init() {
         if (!session) { window.location.href = '../login.html'; return; }
 
         const user = session.user;
+        _usuarioId = user.id;
         let nome = user.email, usuario = '';
 
         try {
@@ -929,15 +874,86 @@ async function init() {
             document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
         }
 
-        aplicarFiltros();
+        await carregarClientes();
 
     } catch (err) {
         console.error('Erro init:', err);
-        aplicarFiltros(); // mostrar mock mesmo sem login no dev
+        mostrarToast('❌', 'Erro ao inicializar. Tente recarregar.');
     } finally {
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('main-content').style.display   = 'flex';
     }
+}
+
+/* ══════════════════════════════════════════
+   CARREGAR DO SUPABASE
+══════════════════════════════════════════ */
+async function carregarClientes() {
+    try {
+        const { data, error } = await sb
+            .from('clientes_eventos')
+            .select('*')
+            .eq('usuario_id', _usuarioId)
+            .order('criado_em', { ascending: false });
+
+        if (error) throw error;
+
+        _clientes = (data || []).map(normalizar);
+        aplicarFiltros();
+    } catch (err) {
+        console.error('Erro ao carregar:', err);
+        mostrarToast('❌', 'Erro ao carregar dados do servidor.');
+        _clientes = [];
+        aplicarFiltros();
+    }
+}
+
+function normalizar(c) {
+    return {
+        ...c,
+        telefones: Array.isArray(c.telefones) ? c.telefones : [],
+        parcelas:  Array.isArray(c.parcelas)  ? c.parcelas  : [],
+        checklist: (c.checklist && typeof c.checklist === 'object') ? c.checklist : {},
+    };
+}
+
+function montarPayload(c) {
+    return {
+        usuario_id:             _usuarioId,
+        nome_evento:            c.nome_evento            || null,
+        quem_contratou:         c.quem_contratou         || null,
+        documento:              c.documento              || null,
+        email:                  c.email                  || null,
+        telefones:              c.telefones              || [],
+        contato_emergencia:     c.contato_emergencia     || null,
+        como_conheceu:          c.como_conheceu          || null,
+        tipo_evento:            c.tipo_evento            || null,
+        status:                 c.status                 || 'lead',
+        data_inicio:            c.data_inicio            || null,
+        data_fim:               c.data_fim               || null,
+        horario_inicio:         c.horario_inicio         || null,
+        horario_fim:            c.horario_fim            || null,
+        qtd_adultos:            c.qtd_adultos            ? parseInt(c.qtd_adultos)  : null,
+        qtd_criancas:           c.qtd_criancas           ? parseInt(c.qtd_criancas) : null,
+        formato_recepcao:       c.formato_recepcao       || null,
+        atracoes:               c.atracoes               || null,
+        horario_montagem:       c.horario_montagem       || null,
+        horario_desmontagem:    c.horario_desmontagem    || null,
+        layout_mesas:           c.layout_mesas           || null,
+        servicos_casa:          c.servicos_casa          || null,
+        fornecedores:           c.fornecedores           || null,
+        necessidades_tecnicas:  c.necessidades_tecnicas  || null,
+        checkin_materiais:      c.checkin_materiais      || null,
+        valor_total:            c.valor_total            || null,
+        forma_pagamento:        c.forma_pagamento        || null,
+        parcelas:               c.parcelas               || [],
+        taxas_extras:           c.taxas_extras           || null,
+        restricoes_alimentares: c.restricoes_alimentares || null,
+        vip_autoridades:        c.vip_autoridades        || null,
+        observacoes:            c.observacoes            || null,
+        motivo_descarte:        c.motivo_descarte        || null,
+        checklist:              c.checklist              || {},
+    };
 }
 
 /* ══════════════════════════════════════════
@@ -951,11 +967,10 @@ function aplicarFiltros() {
     _filtrados = _clientes.filter(c => {
         if (statusF && c.status !== statusF) return false;
         if (tipoF && c.tipo_evento !== tipoF) return false;
-        if (busca && !c.nome_evento.toLowerCase().includes(busca) && !c.quem_contratou.toLowerCase().includes(busca)) return false;
+        if (busca && !((c.nome_evento||'').toLowerCase().includes(busca) || (c.quem_contratou||'').toLowerCase().includes(busca))) return false;
         return true;
     });
 
-    // Ordenação
     _filtrados.sort((a, b) => {
         let va = a[_ordemCampo] || '', vb = b[_ordemCampo] || '';
         if (va < vb) return _ordemAsc ? -1 : 1;
@@ -993,9 +1008,9 @@ function mudarPorPagina() {
    RENDERIZAR
 ══════════════════════════════════════════ */
 function renderizar() {
-    const tbody   = document.getElementById('tabela-body');
-    const vazio   = document.getElementById('estado-vazio');
-    const total   = _filtrados.length;
+    const tbody = document.getElementById('tabela-body');
+    const vazio = document.getElementById('estado-vazio');
+    const total = _filtrados.length;
     document.getElementById('tabela-count').textContent = `${total} cliente${total !== 1 ? 's' : ''}`;
 
     if (total === 0) {
@@ -1014,14 +1029,14 @@ function renderizar() {
     tbody.innerHTML = pagina.map(c => {
         const expandido = _expandidos.has(c.id);
         return `
-        <tr class="linha-evento ${expandido ? 'expandida' : ''}" onclick="toggleExpandir(${c.id})" id="linha-${c.id}">
+        <tr class="linha-evento ${expandido ? 'expandida' : ''}" onclick="toggleExpandir('${c.id}')" id="linha-${c.id}">
             <td class="td-seta"><span class="seta-expand">▼</span></td>
-            <td class="nome-evento-cell">${c.nome_evento || '—'}</td>
-            <td class="quem-contratou-cell">${c.quem_contratou || '—'}</td>
+            <td class="nome-evento-cell">${esc(c.nome_evento) || '—'}</td>
+            <td class="quem-contratou-cell">${esc(c.quem_contratou) || '—'}</td>
             <td class="data-evento-cell">${formatarDataEvento(c.data_inicio, c.data_fim)}</td>
             <td>
                 <span class="badge-status ${classeStatus(c.status)}"
-                      onclick="event.stopPropagation(); abrirModalStatus(${c.id})">
+                      onclick="event.stopPropagation(); abrirModalStatus('${c.id}')">
                     ${labelStatus(c.status)}
                 </span>
             </td>
@@ -1038,9 +1053,6 @@ function renderizar() {
     renderizarPaginacao(total, inicio, fim);
 }
 
-/* ══════════════════════════════════════════
-   PAINEL EXPANDIDO
-══════════════════════════════════════════ */
 function renderizarPainel(c) {
     const fones = (c.telefones && c.telefones.length > 0) ? c.telefones : [''];
     const checklist = c.checklist || {};
@@ -1317,18 +1329,16 @@ function toggleExpandir(id) {
     } else {
         _expandidos.add(id);
     }
-    // Atualiza só as linhas afetadas sem re-renderizar tudo
-    const linha = document.getElementById('linha-' + id);
+    const linha  = document.getElementById('linha-' + id);
     const painel = document.getElementById('painel-' + id);
-    if (linha) linha.classList.toggle('expandida', _expandidos.has(id));
-    if (painel) painel.classList.toggle('aberto', _expandidos.has(id));
+    if (linha)  linha.classList.toggle('expandida', _expandidos.has(id));
+    if (painel) painel.classList.toggle('aberto',   _expandidos.has(id));
 }
 
 function atualizarCampo(id, campo, valor) {
     const c = _clientes.find(x => x.id === id);
     if (c) {
         c[campo] = valor;
-        // Atualiza também o título na linha da tabela
         if (campo === 'nome_evento') {
             const el = document.querySelector(`#linha-${id} .nome-evento-cell`);
             if (el) el.textContent = valor || '—';
@@ -1359,8 +1369,8 @@ function adicionarFone(id) {
         const div = document.createElement('div');
         div.className = 'fone-row';
         div.innerHTML = `
-            <input type="tel" class="campo-input" value="" onchange="atualizarFone(${id}, ${i}, this.value)" placeholder="(00) 00000-0000">
-            <button class="btn-rem-fone" onclick="removerFone(${id}, ${i})" title="Remover">✕</button>`;
+            <input type="tel" class="campo-input" value="" onchange="atualizarFone('${id}', ${i}, this.value)" placeholder="(00) 00000-0000">
+            <button class="btn-rem-fone" onclick="removerFone('${id}', ${i})" title="Remover">✕</button>`;
         container.appendChild(div);
     }
 }
@@ -1369,7 +1379,6 @@ function removerFone(id, idx) {
     const c = _clientes.find(x => x.id === id);
     if (c && c.telefones) {
         c.telefones.splice(idx, 1);
-        // Re-renderiza painel do cliente
         const painel = document.getElementById('painel-' + id);
         if (painel) painel.innerHTML = renderizarPainel(c);
     }
@@ -1386,9 +1395,9 @@ function adicionarParcela(id) {
         div.className = 'parcela-row';
         div.id = `parcela-${id}-${i}`;
         div.innerHTML = `
-            <input type="text" class="campo-input" value="" placeholder="Descrição" onchange="atualizarParcela(${id}, ${i}, 'desc', this.value)">
-            <input type="date" class="campo-input" value="" onchange="atualizarParcela(${id}, ${i}, 'vencimento', this.value)">
-            <button class="btn-rem-fone" onclick="removerParcela(${id}, ${i})">✕</button>`;
+            <input type="text" class="campo-input" value="" placeholder="Descrição" onchange="atualizarParcela('${id}', ${i}, 'desc', this.value)">
+            <input type="date" class="campo-input" value="" onchange="atualizarParcela('${id}', ${i}, 'vencimento', this.value)">
+            <button class="btn-rem-fone" onclick="removerParcela('${id}', ${i})">✕</button>`;
         container.appendChild(div);
     }
 }
@@ -1426,25 +1435,57 @@ function validarDatas(id) {
     if (c.data_fim < c.data_inicio) {
         c.data_fim = c.data_inicio;
         mostrarToast('⚠️', 'A data final foi ajustada para não ser anterior à data de início.');
-        // Re-renderiza painel
         const painel = document.getElementById('painel-' + id);
         if (painel) painel.innerHTML = renderizarPainel(c);
     }
 }
 
-function salvarCliente(id) {
+/* ── SALVAR NO SUPABASE ── */
+async function salvarCliente(id) {
     const c = _clientes.find(x => x.id === id);
-    // Aqui irá a chamada Supabase quando a tabela existir:
-    // await sb.from('clientes_eventos').upsert(c);
-    mostrarToast('✅', 'Dados salvos com sucesso!');
+    if (!c) return;
+
+    const btnSalvar = document.querySelector(`#painel-${id} .btn-primary`);
+    if (btnSalvar) { btnSalvar.disabled = true; btnSalvar.textContent = '⏳ Salvando...'; }
+
+    try {
+        const payload = montarPayload(c);
+        const { error } = await sb
+            .from('clientes_eventos')
+            .update(payload)
+            .eq('id', id)
+            .eq('usuario_id', _usuarioId);
+
+        if (error) throw error;
+        mostrarToast('✅', 'Dados salvos com sucesso!');
+    } catch (err) {
+        console.error('Erro ao salvar:', err);
+        mostrarToast('❌', 'Erro ao salvar. Tente novamente.');
+    } finally {
+        if (btnSalvar) { btnSalvar.disabled = false; btnSalvar.textContent = '💾 Salvar Alterações'; }
+    }
 }
 
-function confirmarExcluir(id) {
-    if (confirm('Tem certeza que deseja excluir este cliente/evento?')) {
+/* ── EXCLUIR DO SUPABASE ── */
+async function confirmarExcluir(id) {
+    if (!confirm('Tem certeza que deseja excluir este cliente/evento? Esta ação não pode ser desfeita.')) return;
+
+    try {
+        const { error } = await sb
+            .from('clientes_eventos')
+            .delete()
+            .eq('id', id)
+            .eq('usuario_id', _usuarioId);
+
+        if (error) throw error;
+
         _clientes = _clientes.filter(x => x.id !== id);
         _expandidos.delete(id);
         aplicarFiltros();
         mostrarToast('🗑️', 'Cliente removido.');
+    } catch (err) {
+        console.error('Erro ao excluir:', err);
+        mostrarToast('❌', 'Erro ao excluir. Tente novamente.');
     }
 }
 
@@ -1452,9 +1493,9 @@ function confirmarExcluir(id) {
    MODAL NOVO CLIENTE
 ══════════════════════════════════════════ */
 function abrirModalNovo() {
-    document.getElementById('novo-nome-evento').value = '';
+    document.getElementById('novo-nome-evento').value  = '';
     document.getElementById('novo-quem-contratou').value = '';
-    document.getElementById('novo-tipo').value = '';
+    document.getElementById('novo-tipo').value   = '';
     document.getElementById('novo-status').value = 'lead';
     document.getElementById('modal-novo').classList.add('aberto');
 }
@@ -1463,30 +1504,45 @@ function fecharModalNovo() {
     document.getElementById('modal-novo').classList.remove('aberto');
 }
 
-function criarClienteModal() {
+/* ── CRIAR NO SUPABASE ── */
+async function criarClienteModal() {
     const nome = document.getElementById('novo-nome-evento').value.trim();
     const quem = document.getElementById('novo-quem-contratou').value.trim();
     if (!nome || !quem) { mostrarToast('⚠️', 'Preencha o nome do evento e quem contratou.'); return; }
-    const novoId = Math.max(0, ..._clientes.map(x => x.id)) + 1;
-    _clientes.push({
-        id: novoId, nome_evento: nome, quem_contratou: quem,
-        tipo_evento: document.getElementById('novo-tipo').value,
-        status: document.getElementById('novo-status').value,
-        telefones: [''], email: '', documento: '',
-        data_inicio: '', data_fim: '', horario_inicio: '', horario_fim: '',
-        qtd_adultos: '', qtd_criancas: '', formato_recepcao: '',
-        servicos_casa: '', fornecedores: '', necessidades_tecnicas: '',
-        valor_total: '', forma_pagamento: '',
-        como_conheceu: '', contato_emergencia: '', atracoes: '',
-        restricoes_alimentares: '', vip_autoridades: '', observacoes: '',
-        horario_montagem: '', horario_desmontagem: '',
-        checkin_materiais: '', taxas_extras: '',
-        parcelas: [], layout_mesas: '',
-        checklist: {}
-    });
-    fecharModalNovo();
-    aplicarFiltros();
-    mostrarToast('✅', `"${nome}" criado com sucesso!`);
+
+    const btnCriar = document.querySelector('#modal-novo .btn-primary');
+    if (btnCriar) { btnCriar.disabled = true; btnCriar.textContent = '⏳ Criando...'; }
+
+    try {
+        const novoCliente = {
+            usuario_id:     _usuarioId,
+            nome_evento:    nome,
+            quem_contratou: quem,
+            tipo_evento:    document.getElementById('novo-tipo').value   || null,
+            status:         document.getElementById('novo-status').value || 'lead',
+            telefones:      [],
+            parcelas:       [],
+            checklist:      {},
+        };
+
+        const { data, error } = await sb
+            .from('clientes_eventos')
+            .insert(novoCliente)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        _clientes.unshift(normalizar(data));
+        fecharModalNovo();
+        aplicarFiltros();
+        mostrarToast('✅', `"${nome}" criado com sucesso!`);
+    } catch (err) {
+        console.error('Erro ao criar:', err);
+        mostrarToast('❌', 'Erro ao criar cliente. Tente novamente.');
+    } finally {
+        if (btnCriar) { btnCriar.disabled = false; btnCriar.textContent = 'Criar Cliente'; }
+    }
 }
 
 /* ══════════════════════════════════════════
@@ -1507,15 +1563,33 @@ function fecharModalStatus() {
     _clienteEditandoStatus = null;
 }
 
-function selecionarStatus(el) {
+/* ── ATUALIZA STATUS NO SUPABASE ── */
+async function selecionarStatus(el) {
     if (_clienteEditandoStatus === null) return;
+    const id = _clienteEditandoStatus;
     const novoStatus = el.dataset.status;
-    const c = _clientes.find(x => x.id === _clienteEditandoStatus);
-    if (c) c.status = novoStatus;
+    const c = _clientes.find(x => x.id === id);
+    if (!c) return;
+
     fecharModalStatus();
-    renderizar();
-    atualizarKPIs();
-    mostrarToast('✅', `Status: ${labelStatus(novoStatus)}`);
+
+    try {
+        const { error } = await sb
+            .from('clientes_eventos')
+            .update({ status: novoStatus })
+            .eq('id', id)
+            .eq('usuario_id', _usuarioId);
+
+        if (error) throw error;
+
+        c.status = novoStatus;
+        renderizar();
+        atualizarKPIs();
+        mostrarToast('✅', `Status: ${labelStatus(novoStatus)}`);
+    } catch (err) {
+        console.error('Erro ao atualizar status:', err);
+        mostrarToast('❌', 'Erro ao atualizar status.');
+    }
 }
 
 document.getElementById('modal-status').addEventListener('click', e => {
@@ -1528,9 +1602,6 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { fecharModalStatus(); fecharModalNovo(); }
 });
 
-/* ══════════════════════════════════════════
-   KPIs
-══════════════════════════════════════════ */
 function atualizarKPIs() {
     const todos = _clientes;
     const grupos = {
@@ -1797,6 +1868,7 @@ function mostrarToast(icone, msg) {
 /* ══════════════════════════════════════════
    START
 ══════════════════════════════════════════ */
+
 init();
 </script>
 </body>
