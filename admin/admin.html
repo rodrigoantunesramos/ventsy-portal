@@ -608,6 +608,97 @@
     .toast.error { border-left: 3px solid var(--red); }
     .toast.info { border-left: 3px solid var(--blue); }
 
+    /* ── TREND ── */
+    .trend { display:inline-flex; align-items:center; gap:3px; font-size:0.72rem; font-weight:700; }
+    .trend.up { color:var(--green); }
+    .trend.down { color:var(--red); }
+
+    /* ── QUALITY RING ── */
+    .quality-score-ring {
+      width:110px; height:110px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--font-display); font-size:1.9rem; font-weight:800;
+      flex-shrink:0; transition:all 0.6s;
+    }
+
+    /* ── LOG TIMELINE ── */
+    .log-item {
+      display:flex; gap:16px; align-items:flex-start;
+      padding:14px 24px; border-bottom:1px solid var(--border);
+    }
+    .log-item:last-child { border-bottom:none; }
+    .log-dot {
+      width:30px; height:30px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.9rem; flex-shrink:0;
+    }
+    .log-body { flex:1; }
+    .log-action { font-size:0.88rem; font-weight:600; color:var(--text); margin-bottom:2px; }
+    .log-meta { font-size:0.75rem; color:var(--text3); }
+    .log-time { font-size:0.72rem; color:var(--text3); flex-shrink:0; padding-top:4px; white-space:nowrap; }
+
+    /* ── COUPON CARD ── */
+    .coupon-card {
+      background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+      padding:18px 20px; display:flex; align-items:center; gap:16px;
+      transition:border-color 0.2s;
+    }
+    .coupon-card:hover { border-color:var(--border2); }
+    .coupon-code {
+      font-family:var(--font-display); font-size:0.95rem; font-weight:800; letter-spacing:2px;
+      color:var(--red); background:var(--red-dim); border:1px dashed rgba(255,56,92,0.4);
+      border-radius:8px; padding:8px 14px; flex-shrink:0;
+    }
+    .coupon-info { flex:1; }
+    .coupon-desc { font-size:0.88rem; font-weight:600; color:var(--text); margin-bottom:4px; }
+    .coupon-meta { font-size:0.75rem; color:var(--text3); }
+
+    /* ── COMPOSE FORM ── */
+    .compose-card {
+      background:var(--bg2); border:1px solid var(--border); border-radius:16px;
+      padding:28px; margin-bottom:20px;
+    }
+    .compose-textarea {
+      width:100%; min-height:120px; background:var(--bg3); border:1px solid var(--border);
+      border-radius:8px; padding:12px 14px; font-family:var(--font-body); font-size:0.88rem;
+      color:var(--text); resize:vertical; margin-bottom:16px;
+    }
+    .compose-textarea:focus { outline:none; border-color:var(--red); }
+
+    /* ── REVENUE BAR ── */
+    .revenue-bar { height:6px; background:var(--bg4); border-radius:99px; overflow:hidden; }
+    .revenue-bar-fill { height:100%; border-radius:99px; transition:width 0.5s; }
+
+    /* ── ALERT BANNER ── */
+    .alert-banner {
+      display:flex; align-items:center; gap:12px; padding:14px 18px;
+      border-radius:12px; margin-bottom:12px; font-size:0.85rem; font-weight:600;
+    }
+    .alert-banner.warn { background:var(--yellow-dim); border:1px solid rgba(245,158,11,0.25); color:var(--yellow); }
+    .alert-banner.danger { background:var(--red-dim); border:1px solid rgba(255,56,92,0.25); color:var(--red); }
+    .alert-banner.info { background:var(--blue-dim); border:1px solid rgba(59,130,246,0.25); color:var(--blue); }
+
+    /* ── INLINE SELECT ── */
+    .select-inline {
+      background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      padding:8px 12px; font-family:var(--font-body); font-size:0.82rem; color:var(--text);
+    }
+    .select-inline:focus { outline:none; border-color:var(--red); }
+    .select-inline option { background:var(--bg3); }
+
+    /* ── METRIC COMPARE ── */
+    .metric-compare {
+      display:flex; align-items:center; gap:8px;
+      font-size:0.75rem; color:var(--text3); margin-top:6px;
+    }
+
+    /* ── TWO COL ── */
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .two-col-asym { display:grid; grid-template-columns:1.2fr 1fr; gap:20px; align-items:start; }
+    @media (max-width:1100px) {
+      .two-col, .two-col-asym { grid-template-columns:1fr; }
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 1200px) {
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -704,6 +795,25 @@
   </div>
   <div class="sidebar-link" onclick="showPage('config')">
     <span class="icon">⚙️</span> Configurações
+  </div>
+
+  <div class="sidebar-section">Financeiro</div>
+  <div class="sidebar-link" onclick="showPage('financeiro')">
+    <span class="icon">💰</span> Receita & MRR
+  </div>
+  <div class="sidebar-link" onclick="showPage('cupons')">
+    <span class="icon">🎟️</span> Cupons
+  </div>
+
+  <div class="sidebar-section">Plataforma</div>
+  <div class="sidebar-link" onclick="showPage('qualidade')">
+    <span class="icon">✨</span> Qualidade
+  </div>
+  <div class="sidebar-link" onclick="showPage('comunicacao')">
+    <span class="icon">📣</span> Comunicação
+  </div>
+  <div class="sidebar-link" onclick="showPage('logs')">
+    <span class="icon">📋</span> Logs Admin
   </div>
 
   <div class="sidebar-bottom">
@@ -1033,6 +1143,311 @@
       </div>
     </div>
 
+    <!-- ═══════════ FINANCEIRO ═══════════ -->
+    <div class="page" id="page-financeiro">
+      <div id="fin-alerts"></div>
+
+      <!-- KPIs principais -->
+      <div class="stats-grid" style="margin-bottom:16px;">
+        <div class="stat-card green">
+          <div class="stat-icon green">💵</div>
+          <div class="stat-value loading" id="fin-mrr">—</div>
+          <div class="stat-label">MRR</div>
+          <div class="stat-sub">Receita Mensal Recorrente</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">📅</div>
+          <div class="stat-value loading" id="fin-arr">—</div>
+          <div class="stat-label">ARR</div>
+          <div class="stat-sub">Receita Anual Recorrente</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-icon purple">💳</div>
+          <div class="stat-value loading" id="fin-total">—</div>
+          <div class="stat-label">Receita Total</div>
+          <div class="stat-sub">Histórico de pagamentos</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-icon yellow">👤</div>
+          <div class="stat-value loading" id="fin-arpu">—</div>
+          <div class="stat-label">ARPU</div>
+          <div class="stat-sub">Receita por usuário ativo</div>
+        </div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+        <div class="stat-card red">
+          <div class="stat-icon red">📉</div>
+          <div class="stat-value loading" id="fin-churn">—</div>
+          <div class="stat-label">Taxa de Churn</div>
+          <div class="stat-sub">Cancelamentos / Total</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">🏆</div>
+          <div class="stat-value loading" id="fin-ltv">—</div>
+          <div class="stat-label">LTV Estimado</div>
+          <div class="stat-sub">Valor médio por cliente</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">⬆️</div>
+          <div class="stat-value loading" id="fin-novos-mrr">—</div>
+          <div class="stat-label">Novos MRR (30d)</div>
+          <div class="stat-sub">Assinaturas novas este mês</div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="charts-grid" style="margin-bottom:24px;">
+        <div class="chart-card">
+          <div class="chart-title">Evolução da receita — 6 meses</div>
+          <div class="chart-sub">Receita realizada por mês (valor_pago)</div>
+          <div style="height:240px;position:relative;">
+            <canvas id="chart-receita-mensal"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">MRR por plano</div>
+          <div class="chart-sub">Distribuição da receita recorrente atual</div>
+          <div style="height:240px;position:relative;display:flex;align-items:center;justify-content:center;">
+            <canvas id="chart-receita-planos"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Breakdown por plano -->
+      <div class="section-header" style="margin-bottom:16px;">
+        <div class="section-title">📊 Breakdown por plano</div>
+      </div>
+      <div class="table-card" style="margin-bottom:28px;">
+        <table>
+          <thead><tr>
+            <th>Plano</th><th>Assinantes ativos</th><th>Preço</th><th>MRR</th><th>% da receita</th>
+          </tr></thead>
+          <tbody id="fin-breakdown-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Vencimentos em 30 dias -->
+      <div class="section-header">
+        <div>
+          <div class="section-title">⏰ Vencimentos nos próximos 30 dias</div>
+          <div class="section-count" id="fin-venc-count">Carregando...</div>
+        </div>
+      </div>
+      <div class="table-card" style="margin-bottom:28px;">
+        <table>
+          <thead><tr>
+            <th>Usuário</th><th>Plano</th><th>Vence em</th><th>Dias restantes</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="fin-venc-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Histórico de pagamentos -->
+      <div class="section-header">
+        <div class="section-title">💳 Histórico de pagamentos</div>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr>
+            <th>Usuário</th><th>Plano</th><th>Valor</th><th>Início</th><th>Status</th>
+          </tr></thead>
+          <tbody id="fin-pagamentos-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ QUALIDADE ═══════════ -->
+    <div class="page" id="page-qualidade">
+      <!-- Score geral -->
+      <div class="chart-card" style="margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
+          <div class="quality-score-ring" id="quality-ring">—</div>
+          <div style="flex:1;min-width:200px;">
+            <div class="chart-title" style="margin-bottom:6px;">Score de Qualidade da Plataforma</div>
+            <div class="chart-sub" style="margin-bottom:12px;">Baseado em completude dos perfis de propriedades</div>
+            <div id="quality-desc" style="font-size:0.84rem;color:var(--text2);line-height:1.8;">Calculando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px;">
+        <div class="stat-card red">
+          <div class="stat-icon red">🖼️</div>
+          <div class="stat-value loading" id="q-sem-foto">—</div>
+          <div class="stat-label">Sem foto</div>
+          <div class="stat-sub">Propriedades sem imagem</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-icon yellow">📝</div>
+          <div class="stat-value loading" id="q-sem-desc">—</div>
+          <div class="stat-label">Sem descrição</div>
+          <div class="stat-sub">Perfil incompleto</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-icon yellow">📱</div>
+          <div class="stat-value loading" id="q-sem-wa">—</div>
+          <div class="stat-label">Sem WhatsApp</div>
+          <div class="stat-sub">Sem contato direto</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">😴</div>
+          <div class="stat-value loading" id="q-sem-prop">—</div>
+          <div class="stat-label">Sem propriedade</div>
+          <div class="stat-sub">Usuários inativos</div>
+        </div>
+      </div>
+
+      <!-- Propriedades com problemas -->
+      <div class="section-header">
+        <div>
+          <div class="section-title">🏡 Propriedades com perfil incompleto</div>
+          <div class="section-count">Requerem atenção para melhor conversão</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="exportQualidade()">⬇️ Exportar CSV</button>
+      </div>
+      <div class="table-card" style="margin-bottom:28px;">
+        <table>
+          <thead><tr>
+            <th>Propriedade</th><th>Dono</th><th>Problemas</th><th>Score</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="q-props-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Usuários sem propriedade -->
+      <div class="section-header">
+        <div>
+          <div class="section-title">👥 Usuários sem propriedade cadastrada</div>
+          <div class="section-count">Oportunidade de engajamento / ativação</div>
+        </div>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr>
+            <th>Usuário</th><th>Plano</th><th>Cadastrado em</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="q-users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ COMUNICAÇÃO ═══════════ -->
+    <div class="page" id="page-comunicacao">
+      <div class="two-col-asym">
+        <div>
+          <div class="compose-card">
+            <div class="section-title" style="margin-bottom:20px;">📝 Nova mensagem</div>
+            <div class="form-label">Destinatários</div>
+            <select class="form-select" id="com-destinatario" onchange="updateComCount()">
+              <option value="todos">Todos os usuários</option>
+              <option value="basico">Plano Básico</option>
+              <option value="pro">Plano Pro</option>
+              <option value="ultra">Plano Ultra</option>
+              <option value="trial">Em Trial</option>
+              <option value="sem_assinatura">Sem assinatura</option>
+            </select>
+            <div class="metric-compare" id="com-count" style="margin-top:-8px;margin-bottom:16px;">
+              👥 Afetará <strong id="com-count-num" style="color:var(--text);margin:0 3px;">0</strong> usuários
+            </div>
+            <div class="form-label">Tipo</div>
+            <select class="form-select" id="com-tipo">
+              <option value="info">ℹ️ Informação</option>
+              <option value="promo">🎁 Promoção</option>
+              <option value="alerta">⚠️ Alerta</option>
+              <option value="atualizacao">🔄 Atualização</option>
+            </select>
+            <div class="form-label">Título</div>
+            <input type="text" class="form-input" id="com-titulo" placeholder="Ex: Nova funcionalidade disponível!">
+            <div class="form-label">Mensagem</div>
+            <textarea class="compose-textarea" id="com-mensagem" placeholder="Escreva sua mensagem aqui..."></textarea>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+              <button class="btn btn-ghost" onclick="clearCompose()">🗑️ Limpar</button>
+              <button class="btn btn-primary" onclick="enviarMensagem()">📤 Enviar</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="chart-card" style="margin-bottom:20px;">
+            <div class="section-title" style="margin-bottom:16px;">📊 Alcance por segmento</div>
+            <div id="com-stats" style="display:flex;flex-direction:column;gap:0;"></div>
+          </div>
+          <div class="chart-card">
+            <div class="section-title" style="margin-bottom:16px;">📬 Últimas mensagens enviadas</div>
+            <div id="com-historico"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ CUPONS ═══════════ -->
+    <div class="page" id="page-cupons">
+      <div class="two-col-asym">
+        <div class="compose-card">
+          <div class="section-title" style="margin-bottom:20px;">➕ Criar cupom</div>
+          <div class="form-label">Código do cupom</div>
+          <input type="text" class="form-input" id="cup-codigo" placeholder="VENTSY30" style="text-transform:uppercase;letter-spacing:2px;font-weight:700;">
+          <div class="form-label">Valor do desconto</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <input type="number" class="form-input" id="cup-valor" placeholder="30" min="1" max="100" style="margin-bottom:0;">
+            <select class="form-select" id="cup-tipo" style="margin-bottom:0;">
+              <option value="percent">% Percentual</option>
+              <option value="fixo">R$ Fixo</option>
+            </select>
+          </div>
+          <div style="height:16px;"></div>
+          <div class="form-label">Plano aplicável</div>
+          <select class="form-select" id="cup-plano">
+            <option value="todos">Todos os planos</option>
+            <option value="pro">Apenas Pro</option>
+            <option value="ultra">Apenas Ultra</option>
+          </select>
+          <div class="form-label">Limite de usos</div>
+          <input type="number" class="form-input" id="cup-limite" placeholder="100 (deixe vazio para ilimitado)" min="1">
+          <div class="form-label">Validade</div>
+          <input type="date" class="form-input" id="cup-validade">
+          <div class="form-label">Descrição interna</div>
+          <input type="text" class="form-input" id="cup-descricao" placeholder="Ex: Desconto lançamento abril">
+          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="criarCupom()">✨ Criar cupom</button>
+          <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:8px;font-size:0.75rem;color:var(--text3);">
+            💡 Requer tabela <code style="color:var(--red);">cupons</code> no Supabase. Crie via SQL Editor se ainda não existir.
+          </div>
+        </div>
+        <div>
+          <div class="section-header" style="margin-bottom:16px;">
+            <div class="section-title">🎟️ Cupons ativos</div>
+            <div id="cup-count" style="font-size:0.75rem;color:var(--text3);">Carregando...</div>
+          </div>
+          <div id="cupons-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ LOGS ADMIN ═══════════ -->
+    <div class="page" id="page-logs">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div class="section-title">📋 Log de auditoria do admin</div>
+          <div class="section-count" id="logs-count">Carregando...</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <select class="select-inline" id="log-filter" onchange="renderLogs()">
+            <option value="">Todos os tipos</option>
+            <option value="propriedade">Propriedades</option>
+            <option value="usuario">Usuários</option>
+            <option value="assinatura">Assinaturas</option>
+            <option value="cupom">Cupons</option>
+            <option value="comunicacao">Comunicação</option>
+            <option value="sistema">Sistema</option>
+          </select>
+          <button class="btn btn-danger btn-sm" onclick="clearLogs()">🗑️ Limpar logs</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div id="logs-list"></div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -1164,6 +1579,7 @@ async function showApp() {
   document.getElementById('admin-avatar').textContent = ini;
   document.getElementById('admin-name').textContent = adminEmail.split('@')[0];
   document.getElementById('config-admin-email').textContent = adminEmail;
+  addLog('sistema', `Login efetuado`, adminEmail);
   // Load data
   await loadAllData();
   renderDashboard();
@@ -1181,6 +1597,7 @@ async function loadAllData() {
   allProps = r2.data || [];
   allAss = r3.data || [];
   allEvents = r4.data || [];
+  await loadCupons();
 }
 
 // ─── NAVEGAÇÃO ───
@@ -1197,7 +1614,12 @@ function showPage(page) {
     usuarios: ['Usuários', 'Gerenciar contas de usuários'],
     assinaturas: ['Assinaturas', 'Controle de planos e pagamentos'],
     planos: ['Planos', 'Configuração dos planos'],
-    config: ['Configurações', 'Configurações do painel admin']
+    config: ['Configurações', 'Configurações do painel admin'],
+    financeiro: ['Financeiro', 'Receita, MRR, ARR e métricas financeiras'],
+    cupons: ['Cupons & Promoções', 'Criar e gerenciar cupons de desconto'],
+    qualidade: ['Qualidade da Plataforma', 'Score e métricas de completude dos perfis'],
+    comunicacao: ['Comunicação', 'Enviar mensagens segmentadas para usuários'],
+    logs: ['Logs de Auditoria', 'Histórico de ações do administrador']
   };
   const [t, s] = titles[page] || ['', ''];
   document.getElementById('page-title').textContent = t;
@@ -1208,6 +1630,11 @@ function showPage(page) {
   if (page === 'propriedades') renderPropriedades();
   if (page === 'usuarios') renderUsuarios();
   if (page === 'assinaturas') renderAssinaturas();
+  if (page === 'financeiro') renderFinanceiro();
+  if (page === 'qualidade') renderQualidade();
+  if (page === 'comunicacao') { updateComCount(); renderComHistorico(); }
+  if (page === 'cupons') renderCupons();
+  if (page === 'logs') renderLogs();
 }
 
 // ─── DASHBOARD ───
@@ -1520,6 +1947,7 @@ async function liberarProp(id) {
   if (error) { toast('Erro ao liberar propriedade', 'error'); return; }
   const p = allProps.find(p => p.id == id);
   if (p) p.publicada = true;
+  addLog('propriedade', `Propriedade liberada: ${p?.nome || id}`, `ID #${id}`);
   toast('✅ Propriedade liberada com sucesso!', 'success');
   document.getElementById('badge-pendentes').textContent = allProps.filter(p => !p.publicada && p.usuario_id && p.usuario_id !== 'a1b2c3d4-e5f6-7890-abcd-ef1234567890').length;
   renderPendentes();
@@ -1531,6 +1959,7 @@ async function suspenderProp(id) {
   if (error) { toast('Erro ao suspender', 'error'); return; }
   const p = allProps.find(p => p.id == id);
   if (p) p.publicada = false;
+  addLog('propriedade', `Propriedade suspensa: ${p?.nome || id}`, `ID #${id}`);
   toast('⏸ Propriedade suspensa', 'info');
   renderPropriedades();
   renderPendentes();
@@ -1595,6 +2024,7 @@ async function saveUser() {
   if (error) { toast('Erro ao salvar: ' + error.message, 'error'); return; }
   const idx = allUsers.findIndex(u => u.id === id);
   if (idx >= 0) Object.assign(allUsers[idx], payload);
+  addLog('usuario', `Usuário editado: ${payload.nome}`, `@${payload.usuario}`);
   closeModal('modal-user');
   toast('✅ Usuário atualizado!', 'success');
   renderUsuarios();
@@ -1630,10 +2060,492 @@ async function saveAss() {
   }
   if (error) { toast('Erro: ' + error.message, 'error'); return; }
   await loadAllData();
+  const u2 = allUsers.find(u => u.id === userId);
+  addLog('assinatura', `Assinatura alterada: ${u2?.nome || userId}`, `Plano ${plano} · status ${status}`);
   closeModal('modal-ass');
   toast('💳 Assinatura atualizada!', 'success');
   renderAssinaturas();
   renderRecentUsers();
+}
+
+// ══════════════════════════════════════════════
+// ─── LOGS DE AUDITORIA (localStorage) ───
+// ══════════════════════════════════════════════
+function addLog(tipo, acao, detalhe = '') {
+  const logs = JSON.parse(localStorage.getItem('ventsy_admin_logs') || '[]');
+  logs.unshift({ id: Date.now(), tipo, acao, detalhe, admin: adminEmail, ts: new Date().toISOString() });
+  if (logs.length > 300) logs.splice(300);
+  localStorage.setItem('ventsy_admin_logs', JSON.stringify(logs));
+}
+
+function renderLogs() {
+  const filter = document.getElementById('log-filter')?.value || '';
+  let logs = JSON.parse(localStorage.getItem('ventsy_admin_logs') || '[]');
+  if (filter) logs = logs.filter(l => l.tipo === filter);
+  document.getElementById('logs-count').textContent = `${logs.length} registros`;
+  const container = document.getElementById('logs-list');
+  if (!logs.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Nenhum log registrado ainda. As ações do admin aparecem aqui automaticamente.</p></div>`;
+    return;
+  }
+  const icons = { propriedade:'🏡', usuario:'👤', assinatura:'💳', cupom:'🎟️', comunicacao:'📣', sistema:'⚙️' };
+  const colors = { propriedade:'var(--green)', usuario:'var(--blue)', assinatura:'var(--purple)', cupom:'var(--yellow)', comunicacao:'var(--red)', sistema:'var(--text3)' };
+  container.innerHTML = logs.map(l => {
+    const dt = new Date(l.ts).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    const bg = (colors[l.tipo] || 'var(--bg4)').replace('var(', '').replace(')', '');
+    return `<div class="log-item">
+      <div class="log-dot" style="background:${colors[l.tipo]||'var(--bg4)'}22;">${icons[l.tipo]||'•'}</div>
+      <div class="log-body">
+        <div class="log-action">${l.acao}</div>
+        ${l.detalhe ? `<div class="log-meta">${l.detalhe}</div>` : ''}
+        <div class="log-meta" style="margin-top:2px;">👤 ${l.admin || 'admin'}</div>
+      </div>
+      <div class="log-time">${dt}</div>
+    </div>`;
+  }).join('');
+}
+
+function clearLogs() {
+  if (!confirm('Limpar todos os logs de auditoria?')) return;
+  localStorage.removeItem('ventsy_admin_logs');
+  renderLogs();
+  toast('🗑️ Logs apagados', 'info');
+}
+
+// ══════════════════════════════════════════════
+// ─── FINANCEIRO ───
+// ══════════════════════════════════════════════
+const PLAN_PRICES = { basico: 0, pro: 99, ultra: 249 };
+
+function renderFinanceiro() {
+  const ativas = allAss.filter(a => a.status === 'ativa' || a.status === 'trial');
+
+  // MRR / ARR
+  const mrr = ativas.reduce((sum, a) => sum + (PLAN_PRICES[a.plano_ativo] || 0), 0);
+  setValue('fin-mrr', `R$${mrr.toLocaleString('pt-BR')}`);
+  setValue('fin-arr', `R$${(mrr * 12).toLocaleString('pt-BR')}`);
+
+  // Receita total histórica
+  const total = allAss.reduce((sum, a) => sum + Number(a.valor_pago || 0), 0);
+  setValue('fin-total', `R$${total.toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2})}`);
+
+  // ARPU
+  const arpu = ativas.length ? (mrr / ativas.length) : 0;
+  setValue('fin-arpu', `R$${arpu.toFixed(0)}`);
+
+  // Churn
+  const canceladas = allAss.filter(a => a.status === 'cancelada' || a.status === 'expirada').length;
+  const churnRate = allAss.length ? ((canceladas / allAss.length) * 100).toFixed(1) : 0;
+  setValue('fin-churn', `${churnRate}%`);
+
+  // LTV = ARPU / churn mensal estimado
+  const ltv = churnRate > 0 ? Math.round(arpu / (churnRate / 100)) : 0;
+  setValue('fin-ltv', ltv > 0 ? `R$${ltv.toLocaleString('pt-BR')}` : 'N/A');
+
+  // Novos MRR 30d
+  const d30 = new Date(Date.now() - 30 * 864e5);
+  const novos = allAss.filter(a => a.criado_em && new Date(a.criado_em) >= d30 && (a.status === 'ativa' || a.status === 'trial'));
+  const novosMrr = novos.reduce((sum, a) => sum + (PLAN_PRICES[a.plano_ativo] || 0), 0);
+  setValue('fin-novos-mrr', `R$${novosMrr.toLocaleString('pt-BR')}`);
+
+  // Alertas
+  const alertsEl = document.getElementById('fin-alerts');
+  let alerts = '';
+  if (Number(churnRate) > 20) alerts += `<div class="alert-banner danger">⚠️ Taxa de churn alta (${churnRate}%) — considere estratégias de retenção</div>`;
+  if (mrr === 0 && allAss.length > 0) alerts += `<div class="alert-banner warn">💡 MRR zerado — verifique se as assinaturas estão registradas com valor_pago</div>`;
+  const expirando = allAss.filter(a => { if (!a.fim_periodo) return false; const d = new Date(a.fim_periodo); return d >= new Date() && d <= new Date(Date.now()+7*864e5) && a.status !== 'cancelada'; }).length;
+  if (expirando > 0) alerts += `<div class="alert-banner info">🔔 ${expirando} assinatura${expirando>1?'s':''} vence${expirando>1?'m':''} em até 7 dias</div>`;
+  alertsEl.innerHTML = alerts;
+
+  renderChartReceitaMensal();
+  renderChartReceitaPlanos(mrr);
+  renderFinBreakdown(mrr);
+  renderFinVencimentos();
+  renderFinPagamentos();
+}
+
+function renderChartReceitaMensal() {
+  const labels = [], meses = [];
+  const hoje = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+    labels.push(d.toLocaleDateString('pt-BR', { month:'short', year:'2-digit' }));
+    meses.push({ y: d.getFullYear(), m: d.getMonth() });
+  }
+  const data = meses.map(({ y, m }) =>
+    allAss.filter(a => { if (!a.inicio_periodo) return false; const d = new Date(a.inicio_periodo); return d.getFullYear()===y && d.getMonth()===m; })
+          .reduce((sum, a) => sum + Number(a.valor_pago || 0), 0)
+  );
+  if (window._chartRecMensal) window._chartRecMensal.destroy();
+  window._chartRecMensal = new Chart(document.getElementById('chart-receita-mensal').getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label:'Receita (R$)', data, backgroundColor:'rgba(12,166,120,0.7)', borderRadius:6, borderSkipped:false }] },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales: {
+        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#a0a0b8'} },
+        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#5c5c78', callback:v=>`R$${v}`}, beginAtZero:true }
+      }
+    }
+  });
+}
+
+function renderChartReceitaPlanos(mrr) {
+  const pro  = allAss.filter(a => a.plano_ativo==='pro'  && (a.status==='ativa'||a.status==='trial')).length * 99;
+  const ultra= allAss.filter(a => a.plano_ativo==='ultra' && (a.status==='ativa'||a.status==='trial')).length * 249;
+  if (window._chartRecPlanos) window._chartRecPlanos.destroy();
+  window._chartRecPlanos = new Chart(document.getElementById('chart-receita-planos').getContext('2d'), {
+    type: 'doughnut',
+    data: { labels:['Pro (R$99)','Ultra (R$249)'], datasets:[{ data:[pro, ultra], backgroundColor:['#3b82f6','#8b5cf6'], borderWidth:0 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom', labels:{color:'#a0a0b8', font:{size:11}, padding:16}} }, cutout:'60%' }
+  });
+}
+
+function renderFinBreakdown(mrr) {
+  const plans = [
+    { key:'basico', label:'Básico', price:0 },
+    { key:'pro',    label:'Pro ⭐', price:99 },
+    { key:'ultra',  label:'Ultra 🚀', price:249 }
+  ];
+  const barColors = { basico:'#888', pro:'var(--blue)', ultra:'var(--purple)' };
+  document.getElementById('fin-breakdown-tbody').innerHTML = plans.map(p => {
+    const cnt = allAss.filter(a => a.plano_ativo===p.key && (a.status==='ativa'||a.status==='trial')).length;
+    const rev = cnt * p.price;
+    const pct = mrr > 0 ? ((rev/mrr)*100).toFixed(1) : 0;
+    return `<tr>
+      <td><span class="badge plano-${p.key}">${p.label}</span></td>
+      <td style="color:var(--text);font-weight:600;">${cnt}</td>
+      <td style="color:var(--text2);">R$${p.price}/mês</td>
+      <td style="color:var(--text);font-weight:700;">R$${rev.toLocaleString('pt-BR')}</td>
+      <td style="min-width:140px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="revenue-bar" style="flex:1;"><div class="revenue-bar-fill" style="width:${pct}%;background:${barColors[p.key]};"></div></div>
+          <span style="font-size:0.75rem;color:var(--text3);width:36px;text-align:right;">${pct}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderFinVencimentos() {
+  const hoje = new Date();
+  const em30 = new Date(Date.now() + 30*864e5);
+  const venc = allAss.filter(a => { if(!a.fim_periodo) return false; const f=new Date(a.fim_periodo); return f>=hoje && f<=em30 && a.status!=='cancelada'; })
+                     .sort((a,b) => new Date(a.fim_periodo)-new Date(b.fim_periodo));
+  document.getElementById('fin-venc-count').textContent = `${venc.length} assinaturas`;
+  const tbody = document.getElementById('fin-venc-tbody');
+  if (!venc.length) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3);">Nenhuma assinatura vence nos próximos 30 dias</td></tr>'; return; }
+  tbody.innerHTML = venc.map(a => {
+    const user = allUsers.find(u => u.id===a.usuario_id);
+    const fim = new Date(a.fim_periodo);
+    const dias = Math.ceil((fim-hoje)/864e5);
+    const cls = dias<=7?'badge-red':dias<=15?'badge-yellow':'badge-green';
+    return `<tr>
+      <td><div class="td-name"><div class="td-avatar">${(user?.nome||'?')[0].toUpperCase()}</div>${user?.nome||'Desconhecido'}</div></td>
+      <td><span class="badge plano-${a.plano_ativo}">${a.plano_ativo}</span></td>
+      <td style="color:var(--text2);">${fim.toLocaleDateString('pt-BR')}</td>
+      <td><span class="badge ${cls}">${dias} dias</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="editAss('${a.usuario_id}')">🔄 Renovar</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderFinPagamentos() {
+  const sorted = [...allAss].filter(a=>Number(a.valor_pago)>0)
+    .sort((a,b)=>new Date(b.criado_em||0)-new Date(a.criado_em||0)).slice(0,20);
+  const tbody = document.getElementById('fin-pagamentos-tbody');
+  if (!sorted.length) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3);">Nenhum pagamento registrado (valor_pago > 0)</td></tr>'; return; }
+  tbody.innerHTML = sorted.map(a => {
+    const user = allUsers.find(u=>u.id===a.usuario_id);
+    const dt = a.inicio_periodo ? new Date(a.inicio_periodo).toLocaleDateString('pt-BR') : '—';
+    return `<tr>
+      <td><div class="td-name"><div class="td-avatar">${(user?.nome||'?')[0].toUpperCase()}</div>${user?.nome||'Desconhecido'}</div></td>
+      <td><span class="badge plano-${a.plano_ativo}">${a.plano_ativo||'—'}</span></td>
+      <td style="color:var(--green);font-weight:700;">R$ ${Number(a.valor_pago).toFixed(2)}</td>
+      <td style="color:var(--text3);">${dt}</td>
+      <td>${badgeStatus(a.status)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// ─── QUALIDADE ───
+// ══════════════════════════════════════════════
+function renderQualidade() {
+  const pubProps = allProps.filter(p => p.publicada);
+  const semFoto = pubProps.filter(p => !p.foto_capa && !p.foto_principal).length;
+  const semDesc = pubProps.filter(p => !p.descricao?.trim()).length;
+  const semWa   = pubProps.filter(p => !p.whatsapp?.trim()).length;
+  const usersComProp = new Set(allProps.map(p => p.usuario_id));
+  const semProp = allUsers.filter(u => !usersComProp.has(u.id)).length;
+
+  setValue('q-sem-foto', semFoto);
+  setValue('q-sem-desc', semDesc);
+  setValue('q-sem-wa',   semWa);
+  setValue('q-sem-prop', semProp);
+
+  // Score de qualidade
+  let score = 100;
+  if (pubProps.length > 0) {
+    score -= (semFoto / pubProps.length) * 40;
+    score -= (semDesc / pubProps.length) * 30;
+    score -= (semWa   / pubProps.length) * 20;
+  }
+  score = Math.max(0, Math.round(score));
+  const color = score>=80 ? 'var(--green)' : score>=50 ? 'var(--yellow)' : 'var(--red)';
+  const ring = document.getElementById('quality-ring');
+  ring.style.background = `conic-gradient(${color} ${score}%, var(--bg4) ${score}%)`;
+  ring.style.color = color;
+  ring.style.boxShadow = `0 0 0 4px ${color}22`;
+  ring.textContent = score;
+
+  const grade = score>=80 ? '😃 Excelente' : score>=60 ? '😐 Regular' : '😟 Crítico';
+  const desc  = score>=80 ? 'Plataforma em ótimo estado! Continue assim.' :
+                score>=60 ? 'Alguns perfis precisam de atenção para melhorar conversão.' :
+                score>=40 ? 'Vários perfis incompletos — impacta diretamente a conversão.' :
+                            'Muitos perfis incompletos — ação urgente necessária!';
+  document.getElementById('quality-desc').innerHTML = `
+    <strong style="color:${color}">${grade}</strong> — ${desc}<br>
+    <span style="color:var(--text3);font-size:0.78rem;">
+      ${semFoto} sem foto · ${semDesc} sem descrição · ${semWa} sem WhatsApp · ${semProp} usuários sem propriedade
+    </span>`;
+
+  // Propriedades com problemas
+  const propsComProblemas = allProps.map(p => {
+    const issues = [];
+    if (!p.foto_capa && !p.foto_principal) issues.push('📷 Sem foto');
+    if (!p.descricao?.trim()) issues.push('📝 Sem descrição');
+    if (!p.whatsapp?.trim()) issues.push('📱 Sem WhatsApp');
+    if (!p.cidade?.trim()) issues.push('📍 Sem cidade');
+    const propScore = Math.round(100 - (issues.length / 4) * 100);
+    return { ...p, issues, propScore };
+  }).filter(p => p.issues.length > 0).sort((a,b) => a.propScore - b.propScore);
+
+  const tbody = document.getElementById('q-props-tbody');
+  if (!propsComProblemas.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--green);">✅ Todas as propriedades têm perfil completo!</td></tr>';
+  } else {
+    tbody.innerHTML = propsComProblemas.slice(0,25).map(p => {
+      const owner = allUsers.find(u=>u.id===p.usuario_id);
+      const sc = p.propScore;
+      const scColor = sc>=70?'var(--yellow)':sc>=40?'var(--red)':'var(--red)';
+      return `<tr>
+        <td><div class="td-name">
+          <div style="width:32px;height:32px;border-radius:7px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">🏡</div>
+          <span style="font-weight:600;color:var(--text)">${p.nome||'Sem nome'}</span>
+        </div></td>
+        <td style="color:var(--text2);">${owner?.nome||'—'}</td>
+        <td>${p.issues.map(i=>`<span class="badge badge-yellow" style="margin-right:4px;margin-bottom:2px;">${i}</span>`).join('')}</td>
+        <td><span style="font-weight:800;color:${scColor};font-family:var(--font-display)">${sc}%</span></td>
+        <td><div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="verProp('${p.id}')">👁 Ver</button>
+          ${!p.publicada ? `<button class="btn btn-success btn-sm" onclick="liberarProp('${p.id}')">✅</button>` : ''}
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Usuários sem propriedade
+  const semPropUsers = allUsers.filter(u => !usersComProp.has(u.id));
+  const tbody2 = document.getElementById('q-users-tbody');
+  if (!semPropUsers.length) {
+    tbody2.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--green);">✅ Todos os usuários têm propriedade</td></tr>';
+  } else {
+    tbody2.innerHTML = semPropUsers.slice(0,20).map(u => {
+      const ass = allAss.find(a=>a.usuario_id===u.id);
+      const dt = u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR') : '—';
+      return `<tr>
+        <td><div class="td-name"><div class="td-avatar">${(u.nome||'?')[0].toUpperCase()}</div>${u.nome||'Sem nome'}<span style="color:var(--text3);font-size:0.78rem;margin-left:4px;">@${u.usuario||'—'}</span></div></td>
+        <td><span class="badge plano-${ass?.plano_ativo||'basico'}">${ass?.plano_ativo||'básico'}</span></td>
+        <td style="color:var(--text3);">${dt}</td>
+        <td><div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="editUser('${u.id}')">✏️ Editar</button>
+          <button class="btn btn-ghost btn-sm" onclick="editAss('${u.id}')">💳 Plano</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function exportQualidade() {
+  const propsComProblemas = allProps.filter(p => {
+    const issues = [];
+    if (!p.foto_capa && !p.foto_principal) issues.push('Sem foto');
+    if (!p.descricao?.trim()) issues.push('Sem descrição');
+    if (!p.whatsapp?.trim()) issues.push('Sem WhatsApp');
+    return issues.length > 0;
+  });
+  const csv = ['Nome,Cidade,Estado,Status,Problemas']
+    .concat(propsComProblemas.map(p => {
+      const issues = [];
+      if (!p.foto_capa && !p.foto_principal) issues.push('Sem foto');
+      if (!p.descricao?.trim()) issues.push('Sem descrição');
+      if (!p.whatsapp?.trim()) issues.push('Sem WhatsApp');
+      return `"${p.nome||''}","${p.cidade||''}","${p.estado||''}","${p.publicada?'Ativa':'Pendente'}","${issues.join('; ')}"`;
+    })).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `qualidade-propriedades-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  addLog('sistema', 'Exportou relatório de qualidade', `${propsComProblemas.length} propriedades`);
+  toast('📊 CSV exportado!', 'success');
+}
+
+// ══════════════════════════════════════════════
+// ─── COMUNICAÇÃO ───
+// ══════════════════════════════════════════════
+function updateComCount() {
+  const dest = document.getElementById('com-destinatario')?.value || 'todos';
+  let count = 0;
+  if (dest === 'todos') count = allUsers.length;
+  else if (['basico','pro','ultra'].includes(dest)) count = allAss.filter(a=>a.plano_ativo===dest && (a.status==='ativa'||a.status==='trial')).length;
+  else if (dest === 'trial') count = allAss.filter(a=>a.status==='trial').length;
+  else if (dest === 'sem_assinatura') count = allUsers.filter(u=>!allAss.find(a=>a.usuario_id===u.id)).length;
+  const el = document.getElementById('com-count-num');
+  if (el) el.textContent = count;
+
+  const stats = [
+    { label:'👥 Todos os usuários', value:allUsers.length, color:'var(--text)' },
+    { label:'⚪ Básico', value:allAss.filter(a=>a.plano_ativo==='basico'&&(a.status==='ativa'||a.status==='trial')).length, color:'var(--text3)' },
+    { label:'⭐ Pro', value:allAss.filter(a=>a.plano_ativo==='pro'&&(a.status==='ativa'||a.status==='trial')).length, color:'var(--blue)' },
+    { label:'🚀 Ultra', value:allAss.filter(a=>a.plano_ativo==='ultra'&&(a.status==='ativa'||a.status==='trial')).length, color:'var(--purple)' },
+    { label:'🎁 Trial', value:allAss.filter(a=>a.status==='trial').length, color:'var(--yellow)' },
+    { label:'🔓 Sem assinatura', value:allUsers.filter(u=>!allAss.find(a=>a.usuario_id===u.id)).length, color:'var(--text3)' },
+  ];
+  const statsEl = document.getElementById('com-stats');
+  if (statsEl) statsEl.innerHTML = stats.map(s=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:0.84rem;color:var(--text2);">${s.label}</span>
+      <span style="font-family:var(--font-display);font-weight:800;color:${s.color};">${s.value}</span>
+    </div>`).join('');
+}
+
+function clearCompose() {
+  ['com-titulo','com-mensagem'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  const d = document.getElementById('com-destinatario'); if(d) d.value='todos';
+  const t = document.getElementById('com-tipo'); if(t) t.value='info';
+  updateComCount();
+}
+
+async function enviarMensagem() {
+  const dest   = document.getElementById('com-destinatario').value;
+  const tipo   = document.getElementById('com-tipo').value;
+  const titulo = document.getElementById('com-titulo').value.trim();
+  const msg    = document.getElementById('com-mensagem').value.trim();
+  if (!titulo || !msg) { toast('Preencha título e mensagem', 'error'); return; }
+  const count = Number(document.getElementById('com-count-num').textContent);
+  if (!confirm(`Registrar envio para ${count} usuário(s)?`)) return;
+
+  const hist = JSON.parse(localStorage.getItem('ventsy_com_historico') || '[]');
+  hist.unshift({ titulo, msg, dest, tipo, count, ts: new Date().toISOString() });
+  if (hist.length > 50) hist.splice(50);
+  localStorage.setItem('ventsy_com_historico', JSON.stringify(hist));
+
+  addLog('comunicacao', `Mensagem enviada: "${titulo}"`, `${count} destinatário(s) · segmento: ${dest}`);
+  toast(`📤 Mensagem registrada para ${count} usuário(s)!`, 'success');
+  clearCompose();
+  renderComHistorico();
+}
+
+function renderComHistorico() {
+  const hist = JSON.parse(localStorage.getItem('ventsy_com_historico') || '[]');
+  const container = document.getElementById('com-historico');
+  if (!container) return;
+  if (!hist.length) {
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3);font-size:0.82rem;">Nenhuma mensagem enviada ainda</div>';
+    return;
+  }
+  const tipoIcons = { info:'ℹ️', promo:'🎁', alerta:'⚠️', atualizacao:'🔄' };
+  container.innerHTML = hist.slice(0,6).map(h => {
+    const dt = new Date(h.ts).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    return `<div class="activity-item">
+      <div class="activity-dot" style="background:var(--blue);"></div>
+      <div class="activity-text">
+        <strong>${tipoIcons[h.tipo]||'📣'} ${h.titulo}</strong><br>
+        <span style="font-size:0.75rem;color:var(--text3);">${h.count} dest. · ${h.dest}</span>
+      </div>
+      <div class="activity-time">${dt}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// ─── CUPONS ───
+// ══════════════════════════════════════════════
+let allCupons = [];
+
+async function loadCupons() {
+  const { data, error } = await sb.from('cupons').select('*').order('criado_em', { ascending: false });
+  if (!error) allCupons = data || [];
+  // If table doesn't exist, silently ignore (error.code 42P01)
+}
+
+function renderCupons() {
+  document.getElementById('cup-count').textContent = `${allCupons.length} cupons`;
+  const container = document.getElementById('cupons-list');
+  if (!allCupons.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🎟️</div><p>Nenhum cupom criado ainda.<br><span style="font-size:0.78rem;">Crie a tabela <code style="color:var(--red);">cupons</code> no Supabase para ativar este módulo.</span></p></div>`;
+    return;
+  }
+  const hoje = new Date();
+  container.innerHTML = allCupons.map(c => {
+    const expirado = c.validade && new Date(c.validade) < hoje;
+    const validade = c.validade ? new Date(c.validade).toLocaleDateString('pt-BR') : '∞';
+    return `<div class="coupon-card">
+      <div class="coupon-code">${c.codigo}</div>
+      <div class="coupon-info">
+        <div class="coupon-desc">${c.descricao||'Sem descrição'}</div>
+        <div class="coupon-meta">
+          💰 ${c.tipo==='percent'?`${c.valor}% off`:`R$${c.valor} off`} &nbsp;·&nbsp;
+          🎯 ${c.plano==='todos'?'Todos':c.plano} &nbsp;·&nbsp;
+          📅 ${validade} &nbsp;·&nbsp;
+          🔢 ${c.usos_atual||0}/${c.limite||'∞'} usos
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
+        <span class="badge ${expirado?'badge-red':'badge-green'}">${expirado?'Expirado':'Ativo'}</span>
+        <button class="btn btn-danger btn-sm" onclick="deletarCupom('${c.id}')">🗑️ Excluir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function criarCupom() {
+  const codigo   = document.getElementById('cup-codigo').value.trim().toUpperCase();
+  const valor    = Number(document.getElementById('cup-valor').value);
+  const tipo     = document.getElementById('cup-tipo').value;
+  const plano    = document.getElementById('cup-plano').value;
+  const limite   = Number(document.getElementById('cup-limite').value) || null;
+  const validade = document.getElementById('cup-validade').value || null;
+  const descricao= document.getElementById('cup-descricao').value.trim();
+  if (!codigo || !valor) { toast('Preencha código e valor do desconto', 'error'); return; }
+
+  const { error } = await sb.from('cupons').insert({
+    codigo, valor, tipo, plano, limite, validade, descricao, usos_atual:0, criado_em: new Date().toISOString()
+  });
+  if (error) {
+    if (error.code === '42P01') toast('Tabela "cupons" não existe. Crie-a no Supabase SQL Editor primeiro.', 'error');
+    else toast('Erro: ' + error.message, 'error');
+    return;
+  }
+  addLog('cupom', `Cupom criado: ${codigo}`, `${valor}${tipo==='percent'?'%':'R$'} · plano ${plano}`);
+  toast(`🎟️ Cupom ${codigo} criado!`, 'success');
+  await loadCupons();
+  renderCupons();
+  ['cup-codigo','cup-valor','cup-limite','cup-validade','cup-descricao'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+}
+
+async function deletarCupom(id) {
+  const c = allCupons.find(x => x.id == id);
+  if (!confirm(`Excluir cupom ${c?.codigo}?`)) return;
+  const { error } = await sb.from('cupons').delete().eq('id', id);
+  if (error) { toast('Erro: ' + error.message, 'error'); return; }
+  addLog('cupom', `Cupom excluído: ${c?.codigo}`, '');
+  toast('🗑️ Cupom excluído', 'info');
+  await loadCupons();
+  renderCupons();
 }
 
 // ─── START ───
