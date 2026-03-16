@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Restaurante — VENTSY</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;background:#f0f2f5;display:flex;flex-direction:column}
+
+    #loading-screen{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:16px}
+    .loading-logo{font-size:2rem;font-weight:900;color:#0d0d0d;letter-spacing:-1px}
+    .loading-logo em{font-style:normal;color:#ff385c}
+    .loading-dots{display:flex;gap:6px}
+    .loading-dots span{width:8px;height:8px;background:#ff385c;border-radius:50%;animation:bounce 1.2s ease-in-out infinite}
+    .loading-dots span:nth-child(2){animation-delay:.2s}
+    .loading-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+    header.topbar{width:100%;height:72px;background:#fff;display:flex;align-items:center;padding:0 5%;box-shadow:0 2px 5px rgba(0,0,0,.08);position:fixed;top:0;z-index:9999;box-sizing:border-box}
+    .header-left,.header-right{flex:1;display:flex}
+    .header-right{align-items:center;gap:12px;justify-content:flex-end}
+    .logo{height:44px;width:auto;cursor:pointer}
+    .avatar-container{position:relative}
+    .avatar-btn{width:38px;height:38px;border-radius:50%;background:#ff385c;color:#fff;border:none;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .avatar-dropdown{position:absolute;top:50px;right:0;width:210px;background:#fff;border-radius:14px;box-shadow:0 6px 28px rgba(0,0,0,.13);display:none;flex-direction:column;padding:8px 0;z-index:1001;border:1px solid #f0f0f0}
+    .drop-header{padding:12px 16px 10px;border-bottom:1px solid #f0f0f0;margin-bottom:4px}
+    .drop-header strong{display:block;font-size:.9rem;color:#0d0d0d;margin-bottom:2px}
+    .drop-header span{font-size:.75rem;color:#999}
+    .avatar-dropdown a,.avatar-dropdown button{padding:10px 16px;text-decoration:none;color:#444;font-size:.86rem;display:flex;align-items:center;gap:8px;background:none;border:none;font-family:inherit;cursor:pointer;width:100%;text-align:left;transition:background .15s}
+    .avatar-dropdown a:hover,.avatar-dropdown button:hover{background:#f7f7f7}
+    .drop-sair{color:#ff385c!important;border-top:1px solid #f0f0f0;margin-top:4px}
+
+    .dashboard-container{display:flex;min-height:100vh;background:#f0f2f5;margin-top:72px}
+
+    .dash-sidebar{width:250px;background:#fff;padding:28px 18px;border-right:1px solid #eee;display:flex;flex-direction:column;position:fixed;top:72px;left:0;bottom:0;overflow-y:auto;z-index:200}
+    .perfil-resumo{text-align:center;margin-bottom:24px}
+    .sidebar-avatar{width:64px;height:64px;border-radius:50%;background:#ff385c;color:#fff;font-size:1.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;overflow:hidden}
+    .sidebar-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .perfil-resumo h3{font-size:.95rem;font-weight:700;color:#0d0d0d}
+    .perfil-resumo .rest-nome{font-size:.8rem;color:#ff385c;font-weight:600;margin-top:3px}
+    .status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:.7rem;font-weight:700;margin-top:6px}
+    .status-publicado{background:rgba(22,163,74,.1);color:#16a34a;border:1px solid rgba(22,163,74,.2)}
+    .status-pendente{background:rgba(245,158,11,.1);color:#d97706;border:1px solid rgba(245,158,11,.2)}
+    .status-rascunho{background:#f5f5f5;color:#888;border:1px solid #eee}
+    .menu-section-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;padding:12px 12px 4px}
+    .dash-menu{display:flex;flex-direction:column}
+    .dash-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;color:#666;text-decoration:none;border-radius:8px;margin-bottom:2px;font-size:.88rem;transition:all .2s}
+    .dash-menu a:hover{background:#f7f7f7;color:#0d0d0d}
+    .dash-menu a.active{background:rgba(255,56,92,.08);color:#ff385c;font-weight:600}
+    .dash-menu .badge-count{margin-left:auto;background:#ff385c;color:#fff;font-size:.62rem;font-weight:700;padding:1px 7px;border-radius:99px}
+
+    .dash-content{padding:0 36px 60px;width:100%;margin-left:250px}
+    .dash-header{padding:24px 0 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+    .dash-header h2{font-size:1.5rem;font-weight:700;color:#222}
+    .dash-header-sub{font-size:.82rem;color:#999;margin-top:2px}
+    .btn-ver-publico{background:#0d0d0d;color:#fff;border:none;padding:10px 18px;border-radius:10px;font-family:inherit;font-size:.86rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .2s;text-decoration:none}
+    .btn-ver-publico:hover{background:#333}
+
+    /* Termômetro */
+    .termometro-card{background:#fff;border-radius:16px;padding:20px 24px;margin-bottom:20px;border:1px solid #eee;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+    .termo-circle{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:Arial Black,sans-serif;font-size:1.1rem;font-weight:900;border:4px solid #f0f2f5}
+    .termo-bar-wrap{background:#f0f2f5;border-radius:99px;height:8px;flex:1;min-width:120px;overflow:hidden}
+    .termo-bar-fill{height:100%;border-radius:99px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+    .termo-msg{font-size:.82rem;color:#717171;margin-top:4px}
+
+    /* Stats grid */
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+    .stat-card{background:#fff;border-radius:14px;padding:20px;border:1px solid #eee;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
+    .stat-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.07)}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+    .stat-red::before{background:#ff385c}
+    .stat-green::before{background:#16a34a}
+    .stat-blue::before{background:#2563eb}
+    .stat-amber::before{background:#d97706}
+    .stat-purple::before{background:#7c3aed}
+    .stat-icon{font-size:1.4rem;margin-bottom:10px}
+    .stat-value{font-size:1.8rem;font-weight:900;color:#0d0d0d;line-height:1;margin-bottom:4px;font-family:Arial Black,sans-serif}
+    .stat-label{font-size:.78rem;color:#717171;font-weight:500}
+    .stat-sub{font-size:.72rem;color:#bbb;margin-top:3px}
+
+    /* Atalhos rápidos */
+    .atalhos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+    .atalho-card{background:#fff;border-radius:14px;padding:18px 14px;border:1px solid #eee;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;transition:all .2s;cursor:pointer}
+    .atalho-card:hover{border-color:#ff385c;background:rgba(255,56,92,.02);transform:translateY(-2px)}
+    .atalho-icon{font-size:1.6rem}
+    .atalho-nome{font-size:.82rem;font-weight:600;color:#0d0d0d}
+    .atalho-desc{font-size:.72rem;color:#999;line-height:1.4}
+
+    /* Dois painéis */
+    .two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:20px}
+    .painel{background:#fff;border-radius:14px;padding:20px;border:1px solid #eee}
+    .painel h3{font-size:.92rem;font-weight:700;color:#0d0d0d;margin-bottom:4px}
+    .painel .sub{font-size:.75rem;color:#999;margin-bottom:16px}
+
+    /* Reservas próximas */
+    .reserva-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f5f5f5}
+    .reserva-item:last-child{border-bottom:none}
+    .reserva-data{width:44px;height:44px;border-radius:10px;background:rgba(255,56,92,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+    .reserva-dia{font-size:1rem;font-weight:900;color:#ff385c;line-height:1}
+    .reserva-mes{font-size:.6rem;font-weight:700;color:#ff385c;text-transform:uppercase}
+    .reserva-info{flex:1}
+    .reserva-nome{font-size:.88rem;font-weight:600;color:#0d0d0d}
+    .reserva-det{font-size:.75rem;color:#999;margin-top:2px}
+    .reserva-badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px}
+    .rb-aniversario{background:rgba(124,58,237,.1);color:#7c3aed}
+    .rb-grupo{background:rgba(37,99,235,.1);color:#2563eb}
+    .rb-corporativo{background:rgba(245,158,11,.1);color:#d97706}
+
+    /* Promoções ativas */
+    .promo-item{padding:10px 12px;border-radius:10px;background:#f8f9fa;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+    .promo-item:last-child{margin-bottom:0}
+    .promo-emoji{font-size:1.2rem;flex-shrink:0}
+    .promo-info{flex:1}
+    .promo-titulo{font-size:.86rem;font-weight:600;color:#0d0d0d}
+    .promo-det{font-size:.74rem;color:#999;margin-top:2px}
+    .promo-badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:rgba(22,163,74,.1);color:#16a34a;flex-shrink:0}
+
+    /* Avaliações resumo */
+    .nota-geral{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid #f0f0f0;margin-bottom:14px}
+    .nota-num{font-size:2.5rem;font-weight:900;color:#0d0d0d;line-height:1;font-family:Arial Black,sans-serif}
+    .nota-stars{color:#f59e0b;font-size:1.1rem;margin-bottom:2px}
+    .nota-total{font-size:.75rem;color:#999}
+    .nota-bars{flex:1}
+    .nota-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:.72rem;color:#666}
+    .nota-bar-track{flex:1;height:6px;background:#f0f2f5;border-radius:99px;overflow:hidden}
+    .nota-bar-fill{height:100%;background:#f59e0b;border-radius:99px}
+
+    /* Toast */
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#0d0d0d;color:#fff;padding:13px 24px;border-radius:12px;font-size:.86rem;font-weight:500;box-shadow:0 8px 28px rgba(0,0,0,.22);z-index:9999;display:flex;align-items:center;gap:10px;opacity:0;transition:transform .38s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+    .toast.visivel{transform:translateX(-50%) translateY(0);opacity:1}
+
+    @media(max-width:900px){
+      .stats-grid{grid-template-columns:1fr 1fr}
+      .atalhos-grid{grid-template-columns:repeat(2,1fr)}
+      .two-col{grid-template-columns:1fr}
+      .dash-sidebar{display:none}
+      .dash-content{margin-left:0;padding:0 16px 60px}
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="loading-logo">VENT<em>SY</em></div>
+  <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<header class="topbar">
+  <div class="header-left">
+    <a href="index.html"><img src="logovents.png" alt="Ventsy" class="logo"></a>
+  </div>
+  <div class="header-right">
+    <div class="avatar-container">
+      <button class="avatar-btn" id="avatar-btn" onclick="toggleAvatar()">
+        <span id="avatar-inicial">?</span>
+      </button>
+      <div class="avatar-dropdown" id="avatar-menu">
+        <div class="drop-header">
+          <strong id="drop-nome">...</strong>
+          <span id="drop-email"></span>
+        </div>
+        <a href="dashboard-restaurante.html">🍽️ Dashboard Restaurante</a>
+        <a href="minhapropriedade.html">🎉 Minha Propriedade</a>
+        <a href="configuracoes.html">⚙️ Configurações</a>
+        <button class="drop-sair" onclick="sair()">🚪 Sair</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="dashboard-container" id="main-content" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <aside class="dash-sidebar">
+    <div class="perfil-resumo">
+      <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+      <h3 id="sidebar-nome">...</h3>
+      <div class="rest-nome" id="sidebar-rest-nome">Carregando...</div>
+      <div id="sidebar-status"></div>
+    </div>
+    <nav class="dash-menu">
+      <a href="dashboard-restaurante.html" class="active">🏠 Dashboard</a>
+
+      <span class="menu-section-label">Gestão</span>
+      <a href="meurestaurante.html">📋 Dados e Cardápio</a>
+      <a href="calendario-restaurante.html">📅 Calendário e Reservas <span class="badge-count" id="badge-reservas">0</span></a>
+      <a href="relatorio-restaurante.html">📊 Relatório</a>
+
+      <span class="menu-section-label">Financeiro</span>
+      <a href="financeiro-restaurante.html">💰 Financeiro</a>
+      <a href="equipe-restaurante.html">👥 Equipe</a>
+      <a href="promocoes-restaurante.html">🎟️ Promoções</a>
+
+      <span class="menu-section-label">Relacionamento</span>
+      <a href="avaliacoes-restaurante.html">⭐ Avaliações <span class="badge-count" id="badge-avals">0</span></a>
+      <a href="documentos-restaurante.html">📁 Documentos</a>
+
+      <span class="menu-section-label">Conta</span>
+      <a href="indique.html">🎁 Indicar e Ganhar</a>
+      <a href="planos-restaurante.html">💳 Planos</a>
+      <a href="configuracoes.html">⚙️ Configurações</a>
+
+      <span class="menu-section-label">Módulo Eventos</span>
+      <a href="minhapropriedade.html">🎉 Minha Propriedade</a>
+    </nav>
+  </aside>
+
+  <!-- CONTEÚDO -->
+  <section class="dash-content">
+
+    <div class="dash-header">
+      <div>
+        <h2 id="dash-titulo">Olá! 👋</h2>
+        <div class="dash-header-sub" id="dash-sub">Bem-vindo ao painel do seu restaurante</div>
+      </div>
+      <a href="restaurante.html" id="btn-ver-publico" class="btn-ver-publico" target="_blank">👁 Ver página pública</a>
+    </div>
+
+    <!-- TERMÔMETRO -->
+    <div class="termometro-card" id="termometro-card">
+      <div class="termo-circle" id="termo-circle" style="color:#ff385c;border-color:rgba(255,56,92,.2);">0%</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:.88rem;font-weight:700;color:#0d0d0d;">🌡️ Força do anúncio</span>
+          <a href="meurestaurante.html" style="font-size:.75rem;color:#ff385c;font-weight:600;text-decoration:none;">Completar →</a>
+        </div>
+        <div class="termo-bar-wrap">
+          <div class="termo-bar-fill" id="termo-bar" style="width:0%;background:#ff385c;"></div>
+        </div>
+        <div class="termo-msg" id="termo-msg">Calculando...</div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card stat-red">
+        <div class="stat-icon">👁</div>
+        <div class="stat-value" id="s-views">—</div>
+        <div class="stat-label">Visualizações</div>
+        <div class="stat-sub">Últimos 30 dias</div>
+      </div>
+      <div class="stat-card stat-green">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value" id="s-wpp">—</div>
+        <div class="stat-label">Cliques WhatsApp</div>
+        <div class="stat-sub">Últimos 30 dias</div>
+      </div>
+      <div class="stat-card stat-blue">
+        <div class="stat-icon">📋</div>
+        <div class="stat-value" id="s-cardapio">—</div>
+        <div class="stat-label">Acessos ao cardápio</div>
+        <div class="stat-sub">Últimos 30 dias</div>
+      </div>
+      <div class="stat-card stat-amber">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value" id="s-reservas">—</div>
+        <div class="stat-label">Reservas este mês</div>
+        <div class="stat-sub">Mesas especiais</div>
+      </div>
+    </div>
+
+    <!-- ATALHOS -->
+    <div class="atalhos-grid">
+      <a href="meurestaurante.html" class="atalho-card">
+        <div class="atalho-icon">📋</div>
+        <div class="atalho-nome">Dados e Cardápio</div>
+        <div class="atalho-desc">Editar informações e pratos</div>
+      </a>
+      <a href="calendario-restaurante.html" class="atalho-card">
+        <div class="atalho-icon">📅</div>
+        <div class="atalho-nome">Calendário</div>
+        <div class="atalho-desc">Reservas e disponibilidade</div>
+      </a>
+      <a href="promocoes-restaurante.html" class="atalho-card">
+        <div class="atalho-icon">🎟️</div>
+        <div class="atalho-nome">Promoções</div>
+        <div class="atalho-desc">Criar ofertas e cupons</div>
+      </a>
+      <a href="avaliacoes-restaurante.html" class="atalho-card">
+        <div class="atalho-icon">⭐</div>
+        <div class="atalho-nome">Avaliações</div>
+        <div class="atalho-desc">Ver e responder clientes</div>
+      </a>
+      <a href="financeiro-restaurante.html" class="atalho-card">
+        <div class="atalho-icon">💰</div>
+        <div class="atalho-nome">Financeiro</div>
+        <div class="atalho-desc">Receitas e despesas</div>
+      </a>
+      <a href="equipe-restaurante.html" class="atalho-card">
+        <div class="atalho-icon">👥</div>
+        <div class="atalho-nome">Equipe</div>
+        <div class="atalho-desc">Funcionários e folha</div>
+      </a>
+      <a href="documentos-restaurante.html" class="atalho-card">
+        <div class="atalho-icon">📁</div>
+        <div class="atalho-nome">Documentos</div>
+        <div class="atalho-desc">Alvarás e licenças</div>
+      </a>
+      <a href="indique.html" class="atalho-card">
+        <div class="atalho-icon">🎁</div>
+        <div class="atalho-nome">Indicar e Ganhar</div>
+        <div class="atalho-desc">Mensalidade grátis</div>
+      </a>
+    </div>
+
+    <!-- PAINÉIS DUPLOS -->
+    <div class="two-col">
+
+      <!-- Próximas reservas -->
+      <div class="painel">
+        <h3>📅 Próximas reservas especiais</h3>
+        <p class="sub">Mesas de aniversário, grupos e corporativos</p>
+        <div id="proximas-reservas">
+          <div style="text-align:center;padding:24px;color:#bbb;font-size:.84rem;">Nenhuma reserva próxima</div>
+        </div>
+        <a href="calendario-restaurante.html" style="display:block;text-align:center;margin-top:14px;font-size:.8rem;color:#ff385c;font-weight:600;text-decoration:none;">Ver calendário completo →</a>
+      </div>
+
+      <!-- Painel direito -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- Promoções ativas -->
+        <div class="painel">
+          <h3>🎟️ Promoções ativas</h3>
+          <p class="sub">Ofertas que estão rodando agora</p>
+          <div id="promocoes-ativas">
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:.84rem;">Nenhuma promoção ativa</div>
+          </div>
+          <a href="promocoes-restaurante.html" style="display:block;text-align:center;margin-top:12px;font-size:.8rem;color:#ff385c;font-weight:600;text-decoration:none;">Criar promoção →</a>
+        </div>
+
+        <!-- Avaliação geral -->
+        <div class="painel">
+          <h3>⭐ Avaliação geral</h3>
+          <p class="sub">Média das avaliações públicas</p>
+          <div class="nota-geral" id="nota-geral">
+            <div>
+              <div class="nota-num" id="nota-num">—</div>
+              <div class="nota-stars" id="nota-stars">☆☆☆☆☆</div>
+              <div class="nota-total" id="nota-total">sem avaliações</div>
+            </div>
+            <div class="nota-bars" id="nota-bars"></div>
+          </div>
+          <a href="avaliacoes-restaurante.html" style="display:block;text-align:center;font-size:.8rem;color:#ff385c;font-weight:600;text-decoration:none;">Ver avaliações →</a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Alerta documentos vencendo -->
+    <div id="alerta-docs"></div>
+
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL='https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+let REST_ID=null, restData=null;
+
+function toggleAvatar(){const m=document.getElementById('avatar-menu');m.style.display=m.style.display==='flex'?'none':'flex'}
+document.addEventListener('click',e=>{const c=document.querySelector('.avatar-container');if(c&&!c.contains(e.target))document.getElementById('avatar-menu').style.display='none'});
+async function sair(){await sb.auth.signOut();window.location.href='login.html'}
+function toast(msg,ok=true){const el=document.getElementById('toast');el.innerHTML=(ok?'✅':'❌')+' '+msg;el.classList.add('visivel');setTimeout(()=>el.classList.remove('visivel'),3000)}
+
+async function init(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.href='login.html';return}
+  const uid=session.user.id;
+  const {data:perfil}=await sb.from('usuarios').select('*').eq('id',uid).single();
+  const nome=perfil?.nome||session.user.email;
+  const inicial=nome[0]?.toUpperCase()||'?';
+
+  document.getElementById('avatar-inicial').textContent=inicial;
+  document.getElementById('drop-nome').textContent=nome;
+  document.getElementById('drop-email').textContent=session.user.email;
+  document.getElementById('sidebar-avatar').textContent=inicial;
+  document.getElementById('sidebar-nome').textContent=nome;
+
+  const hora=new Date().getHours();
+  const saud=hora<12?'Bom dia':hora<18?'Boa tarde':'Boa noite';
+  document.getElementById('dash-titulo').textContent=`${saud}, ${nome.split(' ')[0]}! 👋`;
+
+  // Restaurante
+  const {data:rest,error:restErr}=await sb.from('restaurantes').select('*').eq('usuario_id',uid).single();
+
+  if(restErr||!rest){
+    document.getElementById('sidebar-rest-nome').textContent='Sem restaurante';
+    document.getElementById('sidebar-status').innerHTML='<a href="meurestaurante.html" style="font-size:.75rem;color:#ff385c;font-weight:600;text-decoration:none;">+ Cadastrar restaurante</a>';
+    document.getElementById('dash-sub').textContent='Cadastre seu restaurante para começar';
+    document.getElementById('btn-ver-publico').style.display='none';
+    document.getElementById('loading-screen').style.display='none';
+    document.getElementById('main-content').style.display='flex';
+    calcularTermometro(null);
+    renderStats(null);
+    return;
+  }
+
+  REST_ID=rest.id; restData=rest;
+  document.getElementById('sidebar-rest-nome').textContent=rest.nome;
+  document.getElementById('dash-sub').textContent=rest.nome+' · '+rest.tipo_culinaria;
+  document.getElementById('btn-ver-publico').href='restaurante.html?id='+REST_ID;
+
+  const statusEl=document.getElementById('sidebar-status');
+  if(rest.publicado) statusEl.innerHTML='<div class="status-badge status-publicado">✅ Publicado</div>';
+  else statusEl.innerHTML='<div class="status-badge status-pendente">⏳ Aguardando aprovação</div>';
+
+  // Foto capa no avatar
+  if(rest.foto_capa){
+    const av=document.getElementById('sidebar-avatar');
+    av.innerHTML=`<img src="${rest.foto_capa}" alt="">`;
+  }
+
+  await Promise.all([
+    calcularTermometro(rest),
+    renderStats(rest),
+    carregarReservas(REST_ID),
+    carregarPromocoes(REST_ID),
+    carregarAvaliacoes(REST_ID),
+    carregarDocumentos(REST_ID),
+  ]);
+
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('main-content').style.display='flex';
+}
+
+async function calcularTermometro(rest){
+  if(!rest){
+    document.getElementById('termo-circle').textContent='0%';
+    document.getElementById('termo-bar').style.width='0%';
+    document.getElementById('termo-msg').textContent='Cadastre seu restaurante para começar.';
+    return;
+  }
+  let numFotos=0;
+  try{const {count}=await sb.from('fotos_restaurante').select('id',{count:'exact',head:true}).eq('restaurante_id',rest.id);numFotos=count||0}catch(_){}
+  let numPratos=0;
+  try{const {count}=await sb.from('cardapio_itens').select('id',{count:'exact',head:true}).eq('restaurante_id',rest.id);numPratos=count||0}catch(_){}
+
+  const criterios=[
+    {ok:!!(rest.nome&&rest.tipo_culinaria&&rest.descricao),pts:20},
+    {ok:numFotos>=3,pts:25},
+    {ok:numPratos>=5,pts:25},
+    {ok:!!(rest.whatsapp||rest.telefone),pts:15},
+    {ok:!!(rest.cidade&&rest.estado),pts:10},
+    {ok:!!(rest.horario&&rest.horario.length),pts:5},
+  ];
+  const score=criterios.reduce((a,c)=>a+(c.ok?c.pts:0),0);
+  const cor=score>=80?'#16a34a':score>=50?'#d97706':'#ff385c';
+  const msg=score>=80?'🎉 Anúncio forte! Continue assim.':score>=50?'🚀 Bom! Complete os itens restantes para mais visibilidade.':'⚡ Complete seu perfil para atrair mais clientes.';
+
+  const circle=document.getElementById('termo-circle');
+  circle.textContent=score+'%';
+  circle.style.color=cor;
+  circle.style.borderColor=cor+'33';
+  document.getElementById('termo-msg').textContent=msg;
+  const bar=document.getElementById('termo-bar');
+  bar.style.background=cor;
+  setTimeout(()=>{bar.style.width=score+'%'},100);
+}
+
+async function renderStats(rest){
+  if(!rest||!REST_ID){
+    ['s-views','s-wpp','s-cardapio','s-reservas'].forEach(id=>document.getElementById(id).textContent='0');
+    return;
+  }
+  const d30=new Date(Date.now()-30*864e5).toISOString();
+  try{
+    const {data:events}=await sb.from('analytics_restaurante').select('evento_tipo').eq('restaurante_id',REST_ID).gte('created_at',d30);
+    const ev=events||[];
+    document.getElementById('s-views').textContent=ev.filter(e=>e.evento_tipo==='view').length;
+    document.getElementById('s-wpp').textContent=ev.filter(e=>e.evento_tipo==='whatsapp').length;
+    document.getElementById('s-cardapio').textContent=ev.filter(e=>e.evento_tipo==='cardapio').length;
+  }catch(_){['s-views','s-wpp','s-cardapio'].forEach(id=>document.getElementById(id).textContent='0')}
+
+  try{
+    const mes=new Date().toISOString().substring(0,7);
+    const {count}=await sb.from('reservas_mesas').select('id',{count:'exact',head:true}).eq('restaurante_id',REST_ID).like('data',mes+'%');
+    document.getElementById('s-reservas').textContent=count||0;
+    document.getElementById('badge-reservas').textContent=count||0;
+  }catch(_){document.getElementById('s-reservas').textContent='0'}
+}
+
+async function carregarReservas(rid){
+  try{
+    const hoje=new Date().toISOString().split('T')[0];
+    const fim=new Date(Date.now()+14*864e5).toISOString().split('T')[0];
+    const {data}=await sb.from('reservas_mesas').select('*').eq('restaurante_id',rid).gte('data',hoje).lte('data',fim).neq('status','cancelada').order('data').limit(4);
+    const el=document.getElementById('proximas-reservas');
+    if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:24px;color:#bbb;font-size:.84rem;">Nenhuma reserva nos próximos 14 dias</div>';return}
+    const badgeMap={aniversario:'rb-aniversario',grupo:'rb-grupo',corporativo:'rb-corporativo'};
+    el.innerHTML=data.map(r=>{
+      const dt=new Date(r.data+'T12:00:00');
+      return`<div class="reserva-item">
+        <div class="reserva-data"><div class="reserva-dia">${dt.getDate()}</div><div class="reserva-mes">${dt.toLocaleString('pt-BR',{month:'short'})}</div></div>
+        <div class="reserva-info"><div class="reserva-nome">${r.nome_cliente}</div><div class="reserva-det">${r.num_pessoas} pessoas${r.horario?' · '+r.horario:''}</div></div>
+        <span class="reserva-badge ${badgeMap[r.tipo]||'rb-grupo'}">${r.tipo}</span>
+      </div>`}).join('');
+  }catch(_){}
+}
+
+async function carregarPromocoes(rid){
+  try{
+    const hoje=new Date().toISOString().split('T')[0];
+    const {data}=await sb.from('promocoes_restaurante').select('*').eq('restaurante_id',rid).eq('ativa',true).limit(3);
+    const el=document.getElementById('promocoes-ativas');
+    if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:14px;color:#bbb;font-size:.84rem;">Nenhuma promoção ativa</div>';return}
+    el.innerHTML=data.map(p=>`
+      <div class="promo-item">
+        <div class="promo-emoji">🎟️</div>
+        <div class="promo-info"><div class="promo-titulo">${p.titulo}</div><div class="promo-det">${p.descricao||''}</div></div>
+        <span class="promo-badge">Ativa</span>
+      </div>`).join('');
+  }catch(_){}
+}
+
+async function carregarAvaliacoes(rid){
+  try{
+    const {data}=await sb.from('avaliacoes_restaurante').select('nota').eq('restaurante_id',rid).eq('aprovada',true).eq('removida',false);
+    const el=document.getElementById('nota-geral');
+    if(!data||!data.length){document.getElementById('nota-num').textContent='—';return}
+    const media=(data.reduce((a,r)=>a+r.nota,0)/data.length).toFixed(1);
+    const stars='★'.repeat(Math.round(media))+'☆'.repeat(5-Math.round(media));
+    document.getElementById('nota-num').textContent=media;
+    document.getElementById('nota-stars').textContent=stars;
+    document.getElementById('nota-total').textContent=`${data.length} avaliação${data.length>1?'s':''}`;
+    document.getElementById('badge-avals').textContent=data.length;
+    // Barras
+    const bars=document.getElementById('nota-bars');
+    bars.innerHTML=[5,4,3,2,1].map(n=>{
+      const cnt=data.filter(r=>r.nota===n).length;
+      const pct=data.length?Math.round(cnt/data.length*100):0;
+      return`<div class="nota-bar-row"><span style="width:8px">${n}</span><div class="nota-bar-track"><div class="nota-bar-fill" style="width:${pct}%"></div></div><span style="width:24px;text-align:right">${cnt}</span></div>`;
+    }).join('');
+  }catch(_){}
+}
+
+async function carregarDocumentos(rid){
+  try{
+    const hoje=new Date();
+    const em30=new Date(Date.now()+30*864e5).toISOString().split('T')[0];
+    const {data}=await sb.from('documentos_restaurante').select('*').eq('restaurante_id',rid).lte('validade',em30).gte('validade',hoje.toISOString().split('T')[0]);
+    if(!data||!data.length)return;
+    document.getElementById('alerta-docs').innerHTML=`
+      <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:1.2rem;">⚠️</span>
+        <div style="flex:1"><strong style="color:#d97706;font-size:.88rem;">${data.length} documento${data.length>1?'s':''} vencendo em 30 dias</strong><div style="font-size:.78rem;color:#999;margin-top:2px;">${data.map(d=>d.nome).join(', ')}</div></div>
+        <a href="documentos-restaurante.html" style="font-size:.78rem;color:#d97706;font-weight:700;text-decoration:none;">Ver →</a>
+      </div>`;
+  }catch(_){}
+}
+
+init();
+</script>
+</body>
+</html>
