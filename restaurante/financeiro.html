@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financeiro — VENTSY</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;background:#f0f2f5}
+    #loading-screen{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:16px}
+    .loading-logo{font-size:2rem;font-weight:900;color:#0d0d0d;letter-spacing:-1px}
+    .loading-logo em{font-style:normal;color:#ff385c}
+    .loading-dots{display:flex;gap:6px}
+    .loading-dots span{width:8px;height:8px;background:#ff385c;border-radius:50%;animation:bounce 1.2s ease-in-out infinite}
+    .loading-dots span:nth-child(2){animation-delay:.2s}
+    .loading-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+    header.topbar{width:100%;height:72px;background:#fff;display:flex;align-items:center;padding:0 5%;box-shadow:0 2px 5px rgba(0,0,0,.08);position:fixed;top:0;z-index:9999;box-sizing:border-box}
+    .header-left,.header-right{flex:1;display:flex}
+    .header-right{align-items:center;gap:12px;justify-content:flex-end}
+    .logo{height:44px;cursor:pointer}
+    .btn-back{display:flex;align-items:center;gap:6px;color:#444;text-decoration:none;font-size:.88rem;font-weight:600;padding:7px 14px;border-radius:8px;transition:background .15s}
+    .btn-back:hover{background:#f5f5f5}
+    .dash-container{display:flex;min-height:100vh;margin-top:72px}
+    .dash-sidebar{width:250px;background:#fff;padding:24px 18px;border-right:1px solid #eee;position:fixed;top:72px;left:0;bottom:0;overflow-y:auto;z-index:200}
+    .menu-section-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;padding:12px 12px 4px}
+    .dash-menu{display:flex;flex-direction:column}
+    .dash-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;color:#666;text-decoration:none;border-radius:8px;margin-bottom:2px;font-size:.88rem;transition:all .2s}
+    .dash-menu a:hover{background:#f7f7f7;color:#0d0d0d}
+    .dash-menu a.active{background:rgba(255,56,92,.08);color:#ff385c;font-weight:600}
+    .dash-content{padding:0 32px 80px;width:100%;margin-left:250px}
+    .page-header{padding:22px 0 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .page-header h2{font-size:1.4rem;font-weight:700;color:#222}
+    .btn-primary{background:#ff385c;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .2s}
+    .btn-primary:hover{background:#e0304f}
+
+    /* KPIs */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+    .kpi-card{background:#fff;border-radius:14px;padding:20px;border:1px solid #eee;position:relative;overflow:hidden}
+    .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+    .kpi-green::before{background:#16a34a}
+    .kpi-red::before{background:#ef4444}
+    .kpi-blue::before{background:#2563eb}
+    .kpi-amber::before{background:#d97706}
+    .kpi-icon{font-size:1.3rem;margin-bottom:8px}
+    .kpi-valor{font-size:1.6rem;font-weight:900;color:#0d0d0d;line-height:1;margin-bottom:4px;font-family:Arial Black,sans-serif}
+    .kpi-label{font-size:.76rem;color:#717171;font-weight:500}
+
+    /* Filtros */
+    .filtros-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+    .filtro-select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:.84rem;color:#444;outline:none;background:#fff;cursor:pointer}
+    .filtro-select:focus{border-color:#ff385c}
+    .tab-tipo{padding:8px 16px;border-radius:99px;border:1.5px solid #eee;background:#fff;font-family:inherit;font-size:.82rem;font-weight:600;color:#666;cursor:pointer;transition:all .15s}
+    .tab-tipo:hover{border-color:#aaa}
+    .tab-tipo.ativo-receita{background:#16a34a;color:#fff;border-color:#16a34a}
+    .tab-tipo.ativo-despesa{background:#ef4444;color:#fff;border-color:#ef4444}
+    .tab-tipo.ativo-todos{background:#0d0d0d;color:#fff;border-color:#0d0d0d}
+
+    /* Layout 2 colunas */
+    .fin-layout{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+
+    /* Tabela lançamentos */
+    .tabela-card{background:#fff;border-radius:14px;border:1px solid #eee;overflow:hidden}
+    .tabela-header{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+    .tabela-header h3{font-size:.92rem;font-weight:700;color:#0d0d0d}
+    table{width:100%;border-collapse:collapse}
+    thead th{padding:10px 16px;font-size:.7rem;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.08em;text-align:left;background:#f8f9fa;border-bottom:1px solid #f0f0f0}
+    tbody tr{border-bottom:1px solid #f5f5f5;transition:background .15s}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:#fafafa}
+    tbody td{padding:12px 16px;font-size:.84rem;color:#444}
+    .td-receita{color:#16a34a;font-weight:700}
+    .td-despesa{color:#ef4444;font-weight:700}
+    .cat-pill{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:#f0f2f5;color:#666}
+    .btn-del-row{background:none;border:none;color:#bbb;cursor:pointer;font-size:.85rem;transition:color .15s;padding:2px 6px}
+    .btn-del-row:hover{color:#ef4444}
+
+    /* Formulário novo lançamento */
+    .form-card{background:#fff;border-radius:14px;border:1px solid #eee;padding:20px;position:sticky;top:90px}
+    .form-card h3{font-size:.92rem;font-weight:700;color:#0d0d0d;margin-bottom:16px}
+    .form-label{font-size:.75rem;font-weight:700;color:#444;margin-bottom:5px;display:block}
+    .form-input,.form-select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-family:inherit;font-size:.88rem;color:#222;outline:none;transition:border-color .2s;background:#fdfdfd;margin-bottom:12px}
+    .form-input:focus,.form-select:focus{border-color:#ff385c}
+    .tipo-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+    .tipo-btn{padding:10px;border-radius:10px;border:1.5px solid #eee;background:#fff;font-family:inherit;font-size:.84rem;font-weight:600;cursor:pointer;text-align:center;transition:all .15s}
+    .tipo-btn:hover{border-color:#aaa}
+    .tipo-btn.sel-receita{background:rgba(22,163,74,.1);color:#16a34a;border-color:#16a34a}
+    .tipo-btn.sel-despesa{background:rgba(239,68,68,.1);color:#ef4444;border-color:#ef4444}
+
+    /* Gráfico */
+    .grafico-card{background:#fff;border-radius:14px;border:1px solid #eee;padding:20px;margin-bottom:20px}
+    .grafico-card h3{font-size:.92rem;font-weight:700;color:#0d0d0d;margin-bottom:4px}
+    .grafico-sub{font-size:.75rem;color:#999;margin-bottom:16px}
+
+    /* Resumo categorias */
+    .cat-resumo{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .cat-row{display:flex;align-items:center;gap:10px}
+    .cat-nome{font-size:.82rem;color:#444;width:110px;flex-shrink:0}
+    .cat-bar-track{flex:1;height:6px;background:#f0f2f5;border-radius:99px;overflow:hidden}
+    .cat-bar-fill{height:100%;border-radius:99px;background:#ff385c;transition:width .6s}
+    .cat-valor{font-size:.78rem;font-weight:700;color:#0d0d0d;width:70px;text-align:right;flex-shrink:0}
+
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#0d0d0d;color:#fff;padding:13px 24px;border-radius:12px;font-size:.86rem;box-shadow:0 8px 28px rgba(0,0,0,.22);z-index:9999;display:flex;align-items:center;gap:10px;opacity:0;transition:transform .38s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+    .toast.visivel{transform:translateX(-50%) translateY(0);opacity:1}
+
+    @media(max-width:1000px){.fin-layout{grid-template-columns:1fr}.dash-sidebar{display:none}.dash-content{margin-left:0;padding:0 16px 80px}.kpi-grid{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+<div id="loading-screen"><div class="loading-logo">VENT<em>SY</em></div><div class="loading-dots"><span></span><span></span><span></span></div></div>
+
+<header class="topbar">
+  <div class="header-left"><a href="index.html"><img src="logovents.png" alt="Ventsy" class="logo"></a></div>
+  <div class="header-right"><a href="dashboard-restaurante.html" class="btn-back">← Dashboard</a></div>
+</header>
+
+<div class="dash-container" id="main-content" style="display:none;">
+  <aside class="dash-sidebar">
+    <nav class="dash-menu">
+      <a href="dashboard-restaurante.html">🏠 Dashboard</a>
+      <span class="menu-section-label">Gestão</span>
+      <a href="meurestaurante.html">📋 Dados e Cardápio</a>
+      <a href="calendario-restaurante.html">📅 Calendário</a>
+      <a href="relatorio-restaurante.html">📊 Relatório</a>
+      <span class="menu-section-label">Financeiro</span>
+      <a href="financeiro-restaurante.html" class="active">💰 Financeiro</a>
+      <a href="equipe-restaurante.html">👥 Equipe</a>
+      <a href="promocoes-restaurante.html">🎟️ Promoções</a>
+      <span class="menu-section-label">Relacionamento</span>
+      <a href="avaliacoes-restaurante.html">⭐ Avaliações</a>
+      <a href="documentos-restaurante.html">📁 Documentos</a>
+    </nav>
+  </aside>
+
+  <section class="dash-content">
+    <div class="page-header">
+      <div>
+        <h2>💰 Financeiro</h2>
+        <div style="font-size:.82rem;color:#999;margin-top:2px;">Controle interno de receitas e despesas</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <select class="filtro-select" id="filtro-mes" onchange="carregarLancamentos()">
+          <!-- preenchido via JS -->
+        </select>
+        <button class="btn-primary" onclick="exportarCSV()">⬇️ Exportar CSV</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-green"><div class="kpi-icon">📈</div><div class="kpi-valor" id="kpi-receita">R$ 0</div><div class="kpi-label">Receita do mês</div></div>
+      <div class="kpi-card kpi-red"><div class="kpi-icon">📉</div><div class="kpi-valor" id="kpi-despesa">R$ 0</div><div class="kpi-label">Despesas do mês</div></div>
+      <div class="kpi-card kpi-blue"><div class="kpi-icon">💼</div><div class="kpi-valor" id="kpi-saldo">R$ 0</div><div class="kpi-label">Saldo líquido</div></div>
+      <div class="kpi-card kpi-amber"><div class="kpi-icon">📊</div><div class="kpi-valor" id="kpi-lancamentos">0</div><div class="kpi-label">Lançamentos</div></div>
+    </div>
+
+    <!-- Gráfico mensal -->
+    <div class="grafico-card">
+      <h3>Receitas × Despesas — últimos 6 meses</h3>
+      <div class="grafico-sub" id="grafico-periodo">Carregando...</div>
+      <div style="height:220px;position:relative;"><canvas id="chart-fin"></canvas></div>
+    </div>
+
+    <!-- Layout tabela + formulário -->
+    <div class="fin-layout">
+
+      <!-- Tabela -->
+      <div>
+        <!-- Filtros tipo -->
+        <div class="filtros-bar">
+          <button class="tab-tipo ativo-todos" onclick="filtrarTipo('todos',this)">Todos</button>
+          <button class="tab-tipo" onclick="filtrarTipo('receita',this)">📈 Receitas</button>
+          <button class="tab-tipo" onclick="filtrarTipo('despesa',this)">📉 Despesas</button>
+          <select class="filtro-select" id="filtro-categoria" onchange="renderTabela()">
+            <option value="">Todas as categorias</option>
+            <option value="vendas">Vendas</option>
+            <option value="fornecedor">Fornecedores</option>
+            <option value="salario">Salários</option>
+            <option value="aluguel">Aluguel</option>
+            <option value="manutencao">Manutenção</option>
+            <option value="marketing">Marketing</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+
+        <div class="tabela-card">
+          <div class="tabela-header">
+            <h3 id="tabela-titulo">Todos os lançamentos</h3>
+            <span style="font-size:.78rem;color:#999;" id="tabela-count">0 registros</span>
+          </div>
+          <table>
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th></th></tr></thead>
+            <tbody id="tabela-tbody"><tr><td colspan="5" style="text-align:center;padding:30px;color:#bbb;">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+
+        <!-- Resumo por categoria -->
+        <div class="grafico-card" style="margin-top:16px;">
+          <h3>Despesas por categoria</h3>
+          <div class="grafico-sub">Distribuição do mês atual</div>
+          <div class="cat-resumo" id="cat-resumo"></div>
+        </div>
+      </div>
+
+      <!-- Formulário -->
+      <div class="form-card">
+        <h3>➕ Novo lançamento</h3>
+        <div class="tipo-toggle">
+          <button class="tipo-btn sel-receita" id="btn-tipo-receita" onclick="setTipoForm('receita')">📈 Receita</button>
+          <button class="tipo-btn" id="btn-tipo-despesa" onclick="setTipoForm('despesa')">📉 Despesa</button>
+        </div>
+        <input type="hidden" id="form-tipo" value="receita">
+        <div class="form-label">Descrição *</div>
+        <input type="text" class="form-input" id="form-desc" placeholder="Ex: Vendas do almoço, Conta de energia...">
+        <div class="form-label">Valor (R$) *</div>
+        <input type="number" class="form-input" id="form-valor" placeholder="0,00" step="0.01" min="0">
+        <div class="form-label">Categoria</div>
+        <select class="form-select" id="form-cat">
+          <option value="vendas">Vendas</option>
+          <option value="fornecedor">Fornecedores</option>
+          <option value="salario">Salários</option>
+          <option value="aluguel">Aluguel</option>
+          <option value="manutencao">Manutenção</option>
+          <option value="marketing">Marketing</option>
+          <option value="outro">Outro</option>
+        </select>
+        <div class="form-label">Data</div>
+        <input type="date" class="form-input" id="form-data">
+        <button class="btn-primary" style="width:100%;justify-content:center;" onclick="adicionarLancamento()">✅ Adicionar lançamento</button>
+        <div style="margin-top:12px;padding:10px 12px;background:#f8f9fa;border-radius:8px;font-size:.74rem;color:#999;line-height:1.5;">
+          💡 Este é um controle interno. Os valores são inseridos manualmente por você e não se conectam a nenhum sistema de pagamento externo.
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL='https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+let REST_ID=null, todosLancamentos=[], filtroTipoAtual='todos', graficoFin=null;
+
+function toast(msg,ok=true){const el=document.getElementById('toast');el.innerHTML=(ok?'✅':'❌')+' '+msg;el.classList.add('visivel');setTimeout(()=>el.classList.remove('visivel'),3000)}
+function fmt(v){return'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}
+function setTipoForm(t){
+  document.getElementById('form-tipo').value=t;
+  document.getElementById('btn-tipo-receita').className='tipo-btn'+(t==='receita'?' sel-receita':'');
+  document.getElementById('btn-tipo-despesa').className='tipo-btn'+(t==='despesa'?' sel-despesa':'');
+  document.getElementById('form-cat').value=t==='receita'?'vendas':'fornecedor';
+}
+
+function filtrarTipo(t,btn){
+  filtroTipoAtual=t;
+  document.querySelectorAll('.tab-tipo').forEach(b=>b.className='tab-tipo');
+  btn.className=`tab-tipo ativo-${t}`;
+  renderTabela();
+}
+
+// Preenche select de meses
+function popularMeses(){
+  const sel=document.getElementById('filtro-mes');
+  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const hoje=new Date();
+  for(let i=0;i<12;i++){
+    const d=new Date(hoje.getFullYear(),hoje.getMonth()-i,1);
+    const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const opt=document.createElement('option');
+    opt.value=val; opt.textContent=`${meses[d.getMonth()]} ${d.getFullYear()}`;
+    if(i===0) opt.selected=true;
+    sel.appendChild(opt);
+  }
+}
+
+async function init(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.href='login.html';return}
+  const {data:rest}=await sb.from('restaurantes').select('id').eq('usuario_id',session.user.id).single();
+  if(!rest){window.location.href='dashboard-restaurante.html';return}
+  REST_ID=rest.id;
+  popularMeses();
+  document.getElementById('form-data').value=new Date().toISOString().split('T')[0];
+  await carregarLancamentos();
+  await renderGrafico6Meses();
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('main-content').style.display='flex';
+}
+
+async function carregarLancamentos(){
+  const mes=document.getElementById('filtro-mes').value;
+  try{
+    const {data,error}=await sb.from('financeiro_restaurante').select('*').eq('restaurante_id',REST_ID).like('data_lancamento',mes+'%').order('data_lancamento',{ascending:false});
+    if(error&&error.code==='42P01'){todosLancamentos=[];renderTabela();atualizarKPIs();return}
+    todosLancamentos=data||[];
+    renderTabela();
+    atualizarKPIs();
+    renderCatResumo();
+  }catch(_){todosLancamentos=[];renderTabela();atualizarKPIs()}
+}
+
+function renderTabela(){
+  const tbody=document.getElementById('tabela-tbody');
+  const catFiltro=document.getElementById('filtro-categoria').value;
+  let lista=todosLancamentos;
+  if(filtroTipoAtual!=='todos') lista=lista.filter(l=>l.tipo===filtroTipoAtual);
+  if(catFiltro) lista=lista.filter(l=>l.categoria===catFiltro);
+  document.getElementById('tabela-count').textContent=`${lista.length} registro${lista.length!==1?'s':''}`;
+  if(!lista.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:28px;color:#bbb;font-size:.84rem;">Nenhum lançamento encontrado</td></tr>';return}
+  tbody.innerHTML=lista.map(l=>{
+    const dt=new Date(l.data_lancamento+'T12:00:00').toLocaleDateString('pt-BR');
+    const isRec=l.tipo==='receita';
+    return`<tr>
+      <td style="color:#999;white-space:nowrap;">${dt}</td>
+      <td style="font-weight:500;color:#0d0d0d;">${l.descricao}</td>
+      <td><span class="cat-pill">${l.categoria||'outro'}</span></td>
+      <td class="${isRec?'td-receita':'td-despesa'}">${isRec?'+':'-'}${fmt(l.valor)}</td>
+      <td><button class="btn-del-row" onclick="deletarLancamento('${l.id}')">🗑️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function atualizarKPIs(){
+  const receitas=todosLancamentos.filter(l=>l.tipo==='receita').reduce((a,l)=>a+Number(l.valor),0);
+  const despesas=todosLancamentos.filter(l=>l.tipo==='despesa').reduce((a,l)=>a+Number(l.valor),0);
+  const saldo=receitas-despesas;
+  document.getElementById('kpi-receita').textContent=fmt(receitas);
+  document.getElementById('kpi-despesa').textContent=fmt(despesas);
+  const saldoEl=document.getElementById('kpi-saldo');
+  saldoEl.textContent=fmt(Math.abs(saldo));
+  saldoEl.style.color=saldo>=0?'#16a34a':'#ef4444';
+  document.getElementById('kpi-lancamentos').textContent=todosLancamentos.length;
+}
+
+function renderCatResumo(){
+  const despesas=todosLancamentos.filter(l=>l.tipo==='despesa');
+  const porCat={};
+  despesas.forEach(l=>{ porCat[l.categoria||'outro']=(porCat[l.categoria||'outro']||0)+Number(l.valor); });
+  const sorted=Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
+  const total=sorted.reduce((a,c)=>a+c[1],0)||1;
+  const catEmoji={vendas:'💰',fornecedor:'🚚',salario:'👥',aluguel:'🏠',manutencao:'🔧',marketing:'📣',outro:'📌'};
+  document.getElementById('cat-resumo').innerHTML=sorted.length?sorted.map(([cat,val])=>`
+    <div class="cat-row">
+      <span class="cat-nome">${catEmoji[cat]||'📌'} ${cat}</span>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${Math.round(val/total*100)}%"></div></div>
+      <span class="cat-valor">${fmt(val)}</span>
+    </div>`)
+    .join(''):'<div style="color:#bbb;font-size:.82rem;text-align:center;padding:12px;">Nenhuma despesa neste mês</div>';
+}
+
+async function renderGrafico6Meses(){
+  const meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const hoje=new Date(); const labels=[]; const receitas=[]; const despesas=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(hoje.getFullYear(),hoje.getMonth()-i,1);
+    const mes=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    labels.push(`${meses[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`);
+    try{
+      const {data}=await sb.from('financeiro_restaurante').select('tipo,valor').eq('restaurante_id',REST_ID).like('data_lancamento',mes+'%');
+      receitas.push((data||[]).filter(l=>l.tipo==='receita').reduce((a,l)=>a+Number(l.valor),0));
+      despesas.push((data||[]).filter(l=>l.tipo==='despesa').reduce((a,l)=>a+Number(l.valor),0));
+    }catch(_){receitas.push(0);despesas.push(0)}
+  }
+  document.getElementById('grafico-periodo').textContent=`${labels[0]} a ${labels[5]}`;
+  const ctx=document.getElementById('chart-fin').getContext('2d');
+  if(graficoFin) graficoFin.destroy();
+  graficoFin=new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Receitas',data:receitas,backgroundColor:'rgba(22,163,74,.7)',borderRadius:6},
+      {label:'Despesas',data:despesas,backgroundColor:'rgba(239,68,68,.7)',borderRadius:6}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11},boxWidth:10}}},scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{color:'#999'}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{color:'#999',callback:v=>'R$'+v.toLocaleString('pt-BR')},beginAtZero:true}}}
+  });
+}
+
+async function adicionarLancamento(){
+  const tipo=document.getElementById('form-tipo').value;
+  const desc=document.getElementById('form-desc').value.trim();
+  const valor=parseFloat(document.getElementById('form-valor').value);
+  const cat=document.getElementById('form-cat').value;
+  const data=document.getElementById('form-data').value;
+  if(!desc||!valor||valor<=0){toast('Preencha descrição e valor',false);return}
+  const btn=document.querySelector('.form-card .btn-primary');
+  btn.textContent='⏳ Salvando...'; btn.disabled=true;
+  const {error}=await sb.from('financeiro_restaurante').insert({restaurante_id:REST_ID,tipo,descricao:desc,valor,categoria:cat,data_lancamento:data});
+  btn.textContent='✅ Adicionar lançamento'; btn.disabled=false;
+  if(error){toast('Erro: '+error.message,false);return}
+  toast(`${tipo==='receita'?'📈 Receita':'📉 Despesa'} adicionada!`);
+  document.getElementById('form-desc').value='';
+  document.getElementById('form-valor').value='';
+  await carregarLancamentos();
+  await renderGrafico6Meses();
+}
+
+async function deletarLancamento(id){
+  if(!confirm('Excluir este lançamento?'))return;
+  await sb.from('financeiro_restaurante').delete().eq('id',id);
+  await carregarLancamentos();
+  toast('Lançamento excluído.');
+}
+
+function exportarCSV(){
+  if(!todosLancamentos.length){toast('Sem dados para exportar',false);return}
+  const csv=['Data,Tipo,Descrição,Categoria,Valor'].concat(todosLancamentos.map(l=>`"${l.data_lancamento}","${l.tipo}","${l.descricao}","${l.categoria||''}","${l.valor}"`)).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`financeiro-${document.getElementById('filtro-mes').value}.csv`;
+  a.click(); toast('📊 CSV exportado!');
+}
+
+init();
+</script>
+</body>
+</html>
