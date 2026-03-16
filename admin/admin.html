@@ -2927,9 +2927,9 @@ async function renderIncompletos() {
 }
 
 async function recarregarIncompletos() {
-  // Busca registros da tabela perfis onde cadastro_completo = false OU nome é null
+  // Busca registros da tabela usuarios onde cadastro_completo = false OU nome é null
   const { data, error } = await sb
-    .from('perfis')
+    .from('usuarios')
     .select('id, email, criado_em, cadastro_completo, nome')
     .or('cadastro_completo.eq.false,nome.is.null')
     .order('criado_em', { ascending: false });
