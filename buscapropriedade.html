@@ -2367,12 +2367,13 @@ input:checked + .slider-round:before { transform: translateX(20px); }
         const { data: todos, error: erroTodos } = await _supabase
             .from('propriedades')
             .select('nome, estado')
+            .eq('publicada', true)
             .limit(5);
 
         console.log('📦 Primeiras 5 propriedades no banco:', todos);
         console.log('❌ Erro geral:', erroTodos);
 
-        let query = _supabase.from('propriedades').select('*');
+        let query = _supabase.from('propriedades').select('*').eq('publicada', true);
         if (estadoBuscado) query = query.eq('estado', estadoBuscado);
         if (tipoBuscado)   query = query.eq(`evento_${tipoBuscado}`, true);
         if (convBuscados)  query = query.gte('capacidade', convBuscados);
@@ -2521,7 +2522,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
 
             grid.innerHTML = '<p style="color:#aaa;padding:20px">Filtrando...</p>';
 
-            let query = _supabase.from('propriedades').select('*');
+            let query = _supabase.from('propriedades').select('*').eq('publicada', true);
 
             // Estado: usa o do filtro se selecionado, senão usa o da URL
             const estadoFiltro = filtros.estado || estadoBuscado;
@@ -2637,6 +2638,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                 .from('propriedades')
                 .select('cidade')
                 .eq('estado', estado)
+                .eq('publicada', true)
                 .not('cidade', 'is', null);
 
             selectCidade.innerHTML = '<option value="">Todas as cidades</option>';
@@ -2990,6 +2992,7 @@ function toggleFaq(elemento) {
         const { data: todas, error } = await _supabase
             .from('propriedades')
             .select('*')
+            .eq('publicada', true)
             .not('latitude', 'is', null)
             .not('longitude', 'is', null);
 
