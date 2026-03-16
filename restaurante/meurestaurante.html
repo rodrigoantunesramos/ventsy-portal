@@ -284,6 +284,22 @@
     .btn-salvar:hover { background: #e0304f; transform: scale(1.02); }
     .btn-salvar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
+    /* ── VIPs ── */
+    .vip-item { display:flex;gap:14px;align-items:flex-start;padding:14px;background:#fff;border:1px solid #eee;border-radius:12px;transition:box-shadow .2s; }
+    .vip-item:hover { box-shadow:0 4px 14px rgba(0,0,0,.06); }
+    .vip-foto-thumb { width:72px;height:72px;border-radius:12px;object-fit:cover;flex-shrink:0;background:#f5f5f5;border:2px dashed #ddd;display:flex;align-items:center;justify-content:center;font-size:1.6rem;cursor:pointer;overflow:hidden; }
+    .vip-foto-thumb img { width:100%;height:100%;object-fit:cover; }
+    .vip-info { flex:1;display:flex;flex-direction:column;gap:8px; }
+    .vip-row { display:flex;gap:10px;align-items:center; }
+    .vip-nome-input { flex:1;font-weight:700; }
+
+    /* ── FORNECEDORES ── */
+    .forn-item { display:flex;gap:14px;align-items:center;padding:14px;background:#fff;border:1px solid #eee;border-radius:12px; }
+    .forn-cat-badge { font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#f0f2f5;color:#666;flex-shrink:0; }
+    .forn-info { flex:1; }
+    .forn-nome { font-size:.9rem;font-weight:600;color:#0d0d0d; }
+    .forn-det { font-size:.76rem;color:#999;margin-top:2px; }
+
     /* ── TOAST ── */
     .toast {
       position: fixed; bottom: 28px; left: 50%;
@@ -349,14 +365,22 @@
       <div class="plano-chip" id="sidebar-plano">🏷️ Básico</div>
     </div>
     <nav class="dash-menu">
-      <a href="index.html">🏠 Dashboard</a>
+      <a href="dashboard-restaurante.html">🏠 Dashboard</a>
       <span class="menu-section-label">Meu Restaurante</span>
-      <a href="meurestaurante.html" class="active">🍽️ Dados e Cardápio</a>
-      <span class="menu-section-label">Espaço para Eventos</span>
+      <a href="meurestaurante.html" class="active">📋 Dados e Cardápio</a>
+      <a href="calendario-restaurante.html">📅 Calendário e Reservas</a>
+      <a href="relatorio-restaurante.html">📊 Relatório</a>
+      <span class="menu-section-label">Financeiro</span>
+      <a href="financeiro-restaurante.html">💰 Financeiro</a>
+      <a href="equipe-restaurante.html">👥 Equipe</a>
+      <a href="promocoes-restaurante.html">🎟️ Promoções</a>
+      <span class="menu-section-label">Relacionamento</span>
+      <a href="avaliacoes-restaurante.html">⭐ Avaliações</a>
+      <a href="documentos-restaurante.html">📁 Documentos</a>
+      <span class="menu-section-label">Módulo Eventos</span>
       <a href="minhapropriedade.html">🎉 Minha Propriedade</a>
       <span class="menu-section-label">Conta</span>
-      <a href="relatorio.html">📊 Relatório</a>
-      <a href="planos2.html">💳 Planos Ventsy</a>
+      <a href="planos-restaurante.html">💳 Planos</a>
       <a href="configuracoes.html">⚙️ Configurações</a>
     </nav>
   </aside>
@@ -377,7 +401,9 @@
       <button class="tab-link active" onclick="openTab(event,'dados')">1. Dados Gerais</button>
       <button class="tab-link" onclick="openTab(event,'horarios')">2. Horários</button>
       <button class="tab-link" onclick="openTab(event,'fotos')">3. Fotos</button>
-      <button class="tab-link" onclick="openTab(event,'cardapio')">4. Cardápio</button>
+      <button class="tab-link" onclick="openTab(event,'vips')">4. VIPs e Visitas</button>
+      <button class="tab-link" onclick="openTab(event,'cardapio')">5. Cardápio</button>
+      <button class="tab-link" onclick="openTab(event,'fornecedores')">6. Fornecedores</button>
     </nav>
 
     <!-- ═══ ABA 1: DADOS GERAIS ═══ -->
@@ -559,6 +585,58 @@
       </div>
     </div>
 
+    <!-- ═══ ABA 4: VIPs e VISITAS ═══ -->
+    <div id="vips" class="tab-content">
+      <div class="sessao">
+        <h3>🌟 Celebridades e pessoas importantes</h3>
+        <p class="dica">Destaque famosos, influencers e personalidades que já visitaram seu restaurante. Isso gera credibilidade e atrai novos clientes.</p>
+        <div id="vips-lista" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
+        <button class="btn-add-ghost" onclick="addVip()">➕ Adicionar VIP ou visita especial</button>
+      </div>
+
+      <div class="sessao" style="margin-top:16px;">
+        <h3>📸 Fotos de comidas e pratos especiais</h3>
+        <p class="dica">Galeria separada exclusivamente para fotos dos pratos. Aparecem em destaque na página pública.</p>
+        <div class="galeria-grid" id="galeria-pratos-grid"></div>
+        <div class="upload-area" onclick="document.getElementById('input-fotos-pratos').click()">
+          <span>🍽️</span>
+          <p>Clique para adicionar fotos dos pratos</p>
+        </div>
+        <input type="file" id="input-fotos-pratos" accept="image/*" multiple hidden onchange="uploadFotosPratos(this)">
+      </div>
+
+      <div class="footer-acoes">
+        <button class="btn-salvar" onclick="salvarVips()">💾 Salvar VIPs</button>
+      </div>
+    </div>
+
+    <!-- ═══ ABA 6: FORNECEDORES ═══ -->
+    <div id="fornecedores" class="tab-content">
+      <div class="sessao">
+        <div class="cardapio-header">
+          <div>
+            <h3>🤝 Fornecedores parceiros</h3>
+            <p class="dica">Cadastre seus fornecedores para ter o contato sempre à mão. Visível apenas para você.</p>
+          </div>
+          <button class="btn-add" onclick="addFornecedor()">+ Novo fornecedor</button>
+        </div>
+
+        <!-- Filtro por categoria -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="forn-filtros">
+          <button class="cat-chip ativa" onclick="filtrarFornecedores('',this)">Todos</button>
+          <button class="cat-chip" onclick="filtrarFornecedores('bebidas',this)">🍺 Bebidas</button>
+          <button class="cat-chip" onclick="filtrarFornecedores('carnes',this)">🥩 Carnes</button>
+          <button class="cat-chip" onclick="filtrarFornecedores('hortifruti',this)">🥦 Hortifruti</button>
+          <button class="cat-chip" onclick="filtrarFornecedores('embalagens',this)">📦 Embalagens</button>
+          <button class="cat-chip" onclick="filtrarFornecedores('limpeza',this)">🧼 Limpeza</button>
+          <button class="cat-chip" onclick="filtrarFornecedores('equipamentos',this)">⚙️ Equipamentos</button>
+          <button class="cat-chip" onclick="filtrarFornecedores('outro',this)">📌 Outro</button>
+        </div>
+
+        <div id="fornecedores-lista" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+    </div>
+
   </section>
 </main>
 
@@ -617,6 +695,187 @@ function verPublico() {
 }
 
 // ── INIT ──
+// ── VIPs ──
+let vipsData = [];
+
+async function carregarVips() {
+  try {
+    const { data } = await sb.from('fotos_restaurante').select('*').eq('restaurante_id', REST_ID).eq('secao', 'vip').order('ordem');
+    vipsData = data || [];
+    renderVips();
+  } catch(_) {}
+}
+
+function renderVips() {
+  const el = document.getElementById('vips-lista');
+  if (!vipsData.length) { el.innerHTML = '<p style="color:#bbb;font-size:.82rem;">Nenhum VIP cadastrado ainda. Adicione abaixo.</p>'; return; }
+  el.innerHTML = vipsData.map((v, i) => `
+    <div class="vip-item" id="vip-${v.id||'new'+i}">
+      <div class="vip-foto-thumb" onclick="uploadFotoVip('${v.id||''}',this)">
+        ${v.url ? `<img src="${v.url}" alt="">` : '🌟'}
+      </div>
+      <div class="vip-info">
+        <div class="vip-row">
+          <input type="text" class="vip-nome-input" placeholder="Nome da pessoa / celebridade *" value="${esc(v.legenda||'')}" data-vip-id="${v.id||''}">
+        </div>
+        <input type="text" style="width:100%;" placeholder="Descrição (ex: Ator global, visitou em março 2024)" value="" data-vip-desc="${v.id||''}">
+      </div>
+      <button class="btn-prato-del" onclick="deletarVip('${v.id||''}',${i})" title="Remover">🗑️</button>
+    </div>`).join('');
+}
+
+function addVip() {
+  if (!REST_ID) { toast('Salve os dados gerais primeiro.', false); return; }
+  vipsData.push({ id: '', url: '', legenda: '', ordem: vipsData.length });
+  renderVips();
+}
+
+async function deletarVip(id, idx) {
+  if (!confirm('Remover este VIP?')) return;
+  if (id) await sb.from('fotos_restaurante').delete().eq('id', id);
+  vipsData.splice(idx, 1);
+  renderVips();
+  toast('VIP removido.');
+}
+
+async function uploadFotoVip(vipId, thumbEl) {
+  const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+  input.onchange = async () => {
+    if (!input.files[0] || !REST_ID) return;
+    toast('Enviando foto...');
+    const file = input.files[0]; const ext = file.name.split('.').pop();
+    const path = `vips/${REST_ID}/${Date.now()}.${ext}`;
+    const { error } = await sb.storage.from('fotos-restaurantes').upload(path, file);
+    if (error) { toast('Erro: ' + error.message, false); return; }
+    const { data: { publicUrl } } = sb.storage.from('fotos-restaurantes').getPublicUrl(path);
+    thumbEl.innerHTML = `<img src="${publicUrl}" alt="">`;
+    thumbEl.dataset.fotoUrl = publicUrl;
+    if (vipId) await sb.from('fotos_restaurante').update({ url: publicUrl }).eq('id', vipId);
+    toast('Foto do VIP salva!');
+  };
+  input.click();
+}
+
+async function salvarVips() {
+  if (!REST_ID) { toast('Salve os dados gerais primeiro.', false); return; }
+  const btn = document.querySelector('#vips .btn-salvar');
+  btn.textContent = '⏳ Salvando...'; btn.disabled = true;
+  const items = document.querySelectorAll('#vips-lista .vip-item');
+  for (const item of items) {
+    const id = item.querySelector('[data-vip-id]')?.dataset.vipId || '';
+    const legenda = item.querySelector('[data-vip-id]')?.value.trim() || '';
+    const thumbEl = item.querySelector('.vip-foto-thumb');
+    const url = thumbEl?.dataset.fotoUrl || vipsData.find(v => v.id === id)?.url || '';
+    if (!legenda) continue;
+    if (id) { await sb.from('fotos_restaurante').update({ legenda, url }).eq('id', id); }
+    else { await sb.from('fotos_restaurante').insert({ restaurante_id: REST_ID, url, legenda, secao: 'vip', ordem: 0 }); }
+  }
+  await carregarVips();
+  btn.textContent = '💾 Salvar VIPs'; btn.disabled = false;
+  toast('VIPs salvos!');
+}
+
+// ── FOTOS PRATOS ──
+async function carregarFotosPratos() {
+  try {
+    const { data } = await sb.from('fotos_restaurante').select('*').eq('restaurante_id', REST_ID).eq('secao', 'prato').order('ordem');
+    renderGaleriaPratos(data || []);
+  } catch(_) {}
+}
+
+function renderGaleriaPratos(fotos) {
+  const grid = document.getElementById('galeria-pratos-grid');
+  grid.innerHTML = fotos.map(f => `
+    <div class="galeria-item">
+      <img src="${f.url}" alt="">
+      <button class="btn-remove-foto" onclick="removerFotoPrato('${f.id}')">✕</button>
+    </div>`).join('');
+}
+
+async function uploadFotosPratos(input) {
+  if (!REST_ID) { toast('Salve os dados gerais primeiro.', false); return; }
+  const files = [...input.files]; toast(`Enviando ${files.length} foto(s) de pratos...`);
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i]; const ext = file.name.split('.').pop();
+    const path = `pratos-galeria/${REST_ID}/${Date.now()}_${i}.${ext}`;
+    const { error } = await sb.storage.from('fotos-restaurantes').upload(path, file);
+    if (error) continue;
+    const { data: { publicUrl } } = sb.storage.from('fotos-restaurantes').getPublicUrl(path);
+    await sb.from('fotos_restaurante').insert({ restaurante_id: REST_ID, url: publicUrl, secao: 'prato', ordem: i });
+  }
+  await carregarFotosPratos();
+  toast('Fotos de pratos adicionadas!'); input.value = '';
+}
+
+async function removerFotoPrato(id) {
+  if (!confirm('Remover esta foto?')) return;
+  await sb.from('fotos_restaurante').delete().eq('id', id);
+  await carregarFotosPratos();
+}
+
+// ── FORNECEDORES ──
+let fornData = [], fornFiltro = '';
+
+async function carregarFornecedores() {
+  try {
+    const { data } = await sb.from('fornecedores_restaurante').select('*').eq('restaurante_id', REST_ID).order('nome');
+    fornData = data || [];
+    renderFornecedores();
+  } catch(_) { fornData = []; renderFornecedores(); }
+}
+
+function filtrarFornecedores(cat, btn) {
+  document.querySelectorAll('#forn-filtros .cat-chip').forEach(b => b.classList.remove('ativa'));
+  btn.classList.add('ativa');
+  fornFiltro = cat;
+  renderFornecedores();
+}
+
+function renderFornecedores() {
+  const el = document.getElementById('fornecedores-lista');
+  const lista = fornFiltro ? fornData.filter(f => f.categoria === fornFiltro) : fornData;
+  if (!lista.length) {
+    el.innerHTML = '<p style="color:#bbb;font-size:.82rem;">Nenhum fornecedor encontrado.</p>';
+    return;
+  }
+  const catEmoji = { bebidas:'🍺', carnes:'🥩', hortifruti:'🥦', embalagens:'📦', limpeza:'🧼', equipamentos:'⚙️', outro:'📌' };
+  el.innerHTML = lista.map(f => `
+    <div class="forn-item">
+      <span class="forn-cat-badge">${catEmoji[f.categoria]||'📌'} ${f.categoria||'outro'}</span>
+      <div class="forn-info">
+        <div class="forn-nome">${f.nome}</div>
+        <div class="forn-det">${[f.contato, f.whatsapp, f.email].filter(Boolean).join(' · ')||'Sem contato cadastrado'}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        ${f.whatsapp ? `<a href="https://wa.me/55${f.whatsapp.replace(/\D/g,'')}" target="_blank" class="btn-add" style="padding:6px 12px;font-size:.72rem;">💬</a>` : ''}
+        <button class="btn-prato-del" onclick="deletarFornecedor('${f.id}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function addFornecedor() {
+  if (!REST_ID) { toast('Salve os dados gerais primeiro.', false); return; }
+  const nome = prompt('Nome do fornecedor:');
+  if (!nome?.trim()) return;
+  const cat = prompt('Categoria (bebidas / carnes / hortifruti / embalagens / limpeza / equipamentos / outro):') || 'outro';
+  const contato = prompt('Contato (nome da pessoa):') || '';
+  const whatsapp = prompt('WhatsApp:') || '';
+  const email = prompt('E-mail:') || '';
+  sb.from('fornecedores_restaurante').insert({ restaurante_id: REST_ID, nome: nome.trim(), categoria: cat.trim(), contato, whatsapp, email, ativo: true })
+    .then(({ error }) => {
+      if (error) { toast('Erro: ' + error.message, false); return; }
+      toast(`Fornecedor "${nome}" adicionado!`);
+      carregarFornecedores();
+    });
+}
+
+async function deletarFornecedor(id) {
+  if (!confirm('Remover este fornecedor?')) return;
+  await sb.from('fornecedores_restaurante').delete().eq('id', id);
+  await carregarFornecedores();
+  toast('Fornecedor removido.');
+}
+
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { window.location.href = 'login.html'; return; }
@@ -641,7 +900,16 @@ async function init() {
   } catch(_) {}
 
   // Carrega restaurante do usuário
-  const { data: rest } = await sb.from('restaurantes').select('*').eq('usuario_id', USER_ID).single();
+  const { data: rest, error: restErr } = await sb.from('restaurantes').select('*').eq('usuario_id', USER_ID).single();
+
+  // Tabela não existe ainda — avisa mas deixa a página funcionar para criar
+  if (restErr && restErr.code === '42P01') {
+    document.getElementById('status-rest').innerHTML = '<span class="status-badge rascunho" style="background:rgba(255,56,92,0.1);color:#ff385c;border-color:rgba(255,56,92,0.2);">⚠️ Execute o SQL no Supabase para ativar este módulo</span>';
+    preencherHorarios([]);
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('main-content').style.display   = 'flex';
+    return;
+  }
 
   if (rest) {
     REST_ID = rest.id;
@@ -649,11 +917,13 @@ async function init() {
     preencherHorarios(rest.horario || []);
     await carregarFotos();
     await carregarCardapio();
+    await carregarVips();
+    await carregarFotosPratos();
+    await carregarFornecedores();
 
     const statusMap = { true: '<span class="status-badge publicado">✅ Publicado</span>', false: '<span class="status-badge pendente">⏳ Aguardando aprovação</span>' };
     document.getElementById('status-rest').innerHTML = rest.publicado ? statusMap.true : statusMap.false;
   } else {
-    // Novo — renderiza horários em branco
     preencherHorarios([]);
     document.getElementById('status-rest').innerHTML = '<span class="status-badge rascunho">📝 Rascunho</span>';
   }
