@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Restaurante — VENTSY</title>
+  <title>Meu Restaurante — VENTSY</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #fff; color: #0d0d0d; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; flex-direction: column; }
 
     /* ── LOADING ── */
     #loading-screen {
@@ -17,7 +15,7 @@
       display: flex; align-items: center; justify-content: center;
       z-index: 99999; flex-direction: column; gap: 16px;
     }
-    .loading-logo { font-size: 2rem; font-weight: 900; letter-spacing: -1px; }
+    .loading-logo { font-size: 2rem; font-weight: 900; color: #0d0d0d; letter-spacing: -1px; }
     .loading-logo em { font-style: normal; color: #ff385c; }
     .loading-dots { display: flex; gap: 6px; }
     .loading-dots span { width: 8px; height: 8px; background: #ff385c; border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
@@ -26,215 +24,284 @@
     @keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:.4} 40%{transform:scale(1);opacity:1} }
 
     /* ── HEADER ── */
-    header {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
-      background: #fff; border-bottom: 1px solid #eee;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 5%; height: 64px;
-      transition: box-shadow 0.3s;
+    header.topbar {
+      width: 100%; height: 72px; background: #fff;
+      display: flex; align-items: center; padding: 0 5%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+      position: fixed; top: 0; z-index: 9999; box-sizing: border-box;
     }
-    header.scrolled { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    .logo { height: 40px; cursor: pointer; }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-    .btn-voltar {
-      display: flex; align-items: center; gap: 6px;
-      color: #444; text-decoration: none; font-size: 0.88rem; font-weight: 600;
-      padding: 7px 14px; border-radius: 8px; transition: background 0.15s;
-    }
-    .btn-voltar:hover { background: #f5f5f5; }
-
-    /* ── GALERIA HERO ── */
-    .galeria-hero {
-      margin-top: 64px; display: grid;
-      grid-template-columns: 1.6fr 1fr;
-      grid-template-rows: 280px 280px;
-      gap: 6px; height: 566px; overflow: hidden;
-    }
-    .galeria-hero .foto-principal { grid-row: 1 / 3; }
-    .galeria-foto {
-      overflow: hidden; cursor: pointer; position: relative;
-      background: #f0f2f5;
-    }
-    .galeria-foto:first-child { border-radius: 0; }
-    .galeria-foto img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform 0.4s;
-    }
-    .galeria-foto:hover img { transform: scale(1.04); }
-    .galeria-placeholder {
-      width: 100%; height: 100%;
-      background: linear-gradient(135deg, #f8d7da, #fce4ec);
+    .header-left, .header-right { flex: 1; display: flex; }
+    .header-right { align-items: center; gap: 12px; justify-content: flex-end; }
+    .logo { height: 44px; width: auto; cursor: pointer; }
+    .avatar-container { position: relative; }
+    .avatar-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #ff385c; color: #fff; border: none;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-size: 4rem;
     }
-    .btn-ver-fotos {
-      position: absolute; bottom: 16px; right: 16px;
-      background: #fff; border: 1.5px solid #ddd; border-radius: 8px;
-      padding: 8px 16px; font-size: 0.82rem; font-weight: 700;
-      cursor: pointer; display: flex; align-items: center; gap: 6px;
-      transition: box-shadow 0.2s;
+    .avatar-dropdown {
+      position: absolute; top: 50px; right: 0; width: 200px;
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.13);
+      display: none; flex-direction: column;
+      padding: 8px 0; z-index: 1001; border: 1px solid #f0f0f0;
     }
-    .btn-ver-fotos:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .drop-header { padding: 12px 16px 10px; border-bottom: 1px solid #f0f0f0; margin-bottom: 4px; }
+    .drop-header strong { display: block; font-size: 0.9rem; color: #0d0d0d; margin-bottom: 2px; }
+    .drop-header span { font-size: 0.75rem; color: #999; }
+    .avatar-dropdown a, .avatar-dropdown button {
+      padding: 10px 16px; text-decoration: none; color: #444; font-size: 0.86rem;
+      display: flex; align-items: center; gap: 8px;
+      background: none; border: none; font-family: inherit;
+      cursor: pointer; width: 100%; text-align: left; transition: background 0.15s;
+    }
+    .avatar-dropdown a:hover, .avatar-dropdown button:hover { background: #f7f7f7; }
+    .drop-sair { color: #ff385c !important; border-top: 1px solid #f0f0f0; margin-top: 4px; }
 
-    /* ── LAYOUT PRINCIPAL ── */
-    .main-layout {
-      max-width: 1100px; margin: 0 auto;
-      padding: 40px 5% 80px;
-      display: grid; grid-template-columns: 1fr 360px;
-      gap: 48px; align-items: start;
-    }
+    /* ── LAYOUT ── */
+    .dashboard-container { display: flex; min-height: 100vh; background: #f0f2f5; margin-top: 72px; }
 
-    /* ── COLUNA ESQUERDA ── */
-    .col-esq h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; }
-    .rest-meta {
-      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-      margin-bottom: 16px; font-size: 0.88rem; color: #717171;
+    /* ── SIDEBAR ── */
+    .dash-sidebar {
+      width: 250px; background: #fff; padding: 28px 18px;
+      border-right: 1px solid #eee; display: flex; flex-direction: column;
+      position: fixed; top: 72px; left: 0; bottom: 0; overflow-y: auto; z-index: 200;
     }
-    .rest-meta strong { color: #0d0d0d; }
-    .badge-culinaria {
-      background: #f7f7f7; border: 1px solid #eee; border-radius: 99px;
-      padding: 3px 12px; font-size: 0.78rem; font-weight: 600; color: #444;
+    .perfil-resumo { text-align: center; margin-bottom: 28px; }
+    .sidebar-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: #ff385c; color: #fff; font-size: 1.6rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; overflow: hidden;
     }
-    .badge-preco {
-      background: rgba(255,56,92,0.08); color: #ff385c;
-      border: 1px solid rgba(255,56,92,0.2); border-radius: 99px;
-      padding: 3px 12px; font-size: 0.78rem; font-weight: 700;
+    .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .perfil-resumo h3 { font-size: 0.95rem; font-weight: 700; color: #0d0d0d; }
+    .perfil-resumo .handle { font-size: 0.72rem; color: #aaa; display: block; }
+    .plano-chip {
+      display: inline-flex; align-items: center; gap: 5px; margin-top: 8px;
+      background: rgba(255,56,92,0.08); border: 1px solid rgba(255,56,92,0.2);
+      border-radius: 20px; padding: 3px 12px; font-size: 0.7rem; font-weight: 700; color: #ff385c;
     }
-    .badge-aberto { background: rgba(22,163,74,0.1); color: #16a34a; border: 1px solid rgba(22,163,74,0.2); border-radius: 99px; padding: 3px 12px; font-size: 0.78rem; font-weight: 700; }
-    .badge-fechado { background: #f5f5f5; color: #888; border: 1px solid #eee; border-radius: 99px; padding: 3px 12px; font-size: 0.78rem; font-weight: 700; }
+    .menu-section-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #bbb; padding: 12px 12px 4px; }
+    .dash-menu { display: flex; flex-direction: column; }
+    .dash-menu a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; color: #666; text-decoration: none;
+      border-radius: 8px; margin-bottom: 2px; font-size: 0.88rem; transition: all 0.2s;
+    }
+    .dash-menu a:hover { background: #f7f7f7; color: #0d0d0d; }
+    .dash-menu a.active { background: rgba(255,56,92,0.08); color: #ff385c; font-weight: 600; }
 
-    .divider { height: 1px; background: #f0f0f0; margin: 28px 0; }
-
-    /* Descrição */
-    .rest-descricao { font-size: 0.95rem; color: #444; line-height: 1.8; }
-    .rest-descricao.truncado { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
-    .btn-mais {
-      background: none; border: none; color: #ff385c;
-      font-size: 0.88rem; font-weight: 700; cursor: pointer;
-      margin-top: 8px; padding: 0; display: block;
+    /* ── STATUS BADGE ── */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 99px; font-size: 0.72rem; font-weight: 700;
     }
+    .status-badge.publicado { background: rgba(22,163,74,0.1); color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
+    .status-badge.pendente { background: rgba(245,158,11,0.1); color: #d97706; border: 1px solid rgba(245,158,11,0.2); }
+    .status-badge.rascunho { background: #f5f5f5; color: #888; border: 1px solid #eee; }
+
+    /* ── CONTEÚDO ── */
+    .dash-content { padding: 0 36px 60px; width: 100%; margin-left: 250px; }
+    .dash-header-fixo {
+      position: sticky; top: 0; z-index: 100; background: #f0f2f5;
+      display: flex; padding: 22px 0 18px;
+      justify-content: space-between; align-items: center; margin-bottom: 4px;
+    }
+    .dash-header-fixo h2 { font-size: 1.5rem; font-weight: 700; color: #222; }
+    .btn-ver-publico {
+      background: #0d0d0d; color: #fff; border: none;
+      padding: 10px 18px; border-radius: 10px; font-family: inherit;
+      font-size: 0.86rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .btn-ver-publico:hover { background: #333; }
+
+    /* ── ABAS ── */
+    .sub-menu {
+      display: flex; gap: 4px; border-bottom: 2px solid #eee;
+      margin-bottom: 24px; overflow-x: auto; padding-bottom: 0;
+    }
+    .tab-link {
+      background: none; border: none; border-bottom: 2px solid transparent;
+      padding: 10px 16px; cursor: pointer; color: #666;
+      font-weight: 500; font-size: 0.86rem; white-space: nowrap;
+      transition: all 0.2s; margin-bottom: -2px; font-family: inherit;
+    }
+    .tab-link:hover { color: #0d0d0d; }
+    .tab-link.active { color: #ff385c; border-bottom-color: #ff385c; font-weight: 700; }
+    .tab-content { display: none; animation: fadeIn 0.25s; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── SESSÃO ── */
+    .sessao {
+      background: #fff; padding: 24px; border-radius: 14px;
+      border: 1px solid #eee; margin-bottom: 16px;
+    }
+    .sessao h3 { font-size: 0.95rem; font-weight: 700; color: #0d0d0d; margin-bottom: 4px; }
+    .sessao p.dica { font-size: 0.78rem; color: #999; margin-bottom: 16px; }
+
+    /* ── INPUTS ── */
+    .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .span-2 { grid-column: span 2; }
+    .campo { display: flex; flex-direction: column; gap: 5px; }
+    .campo label { font-size: 0.78rem; font-weight: 700; color: #444; }
+    input[type="text"], input[type="email"], input[type="tel"],
+    input[type="number"], input[type="time"], input[type="url"],
+    textarea, select {
+      width: 100%; padding: 11px 13px;
+      border: 1px solid #ddd; border-radius: 10px;
+      font-size: 0.9rem; font-family: inherit;
+      color: #222; outline: none; transition: border-color 0.2s; background: #fdfdfd;
+    }
+    input:focus, textarea:focus, select:focus { border-color: #ff385c; background: #fff; }
+    textarea { resize: vertical; min-height: 100px; }
+
+    /* ── FOTO CAPA ── */
+    .foto-capa-wrap { position: relative; width: 100%; height: 200px; border-radius: 12px; overflow: hidden; background: #f5f5f5; border: 2px dashed #ddd; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; cursor: pointer; transition: border-color 0.2s; }
+    .foto-capa-wrap:hover { border-color: #ff385c; }
+    .foto-capa-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .foto-capa-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.88rem; }
+    .foto-capa-wrap:hover .foto-capa-overlay { display: flex; }
+    .foto-capa-placeholder { color: #bbb; font-size: 0.85rem; text-align: center; }
+    .foto-capa-placeholder span { font-size: 2.5rem; display: block; margin-bottom: 6px; }
+
+    /* ── FOTOS GALERIA ── */
+    .galeria-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .galeria-item { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #f5f5f5; }
+    .galeria-item img { width: 100%; height: 100%; object-fit: cover; }
+    .galeria-item .btn-remove-foto {
+      position: absolute; top: 5px; right: 5px;
+      background: rgba(0,0,0,0.6); color: #fff; border: none;
+      width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+      font-size: 0.7rem; display: flex; align-items: center; justify-content: center;
+    }
+    .upload-area {
+      border: 2px dashed #ddd; border-radius: 10px;
+      padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s;
+    }
+    .upload-area:hover { border-color: #ff385c; }
+    .upload-area span { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+    .upload-area p { font-size: 0.82rem; color: #999; }
 
     /* ── HORÁRIOS ── */
-    .section-titulo { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; }
-    .horarios-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .horario-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 8px 12px; border-radius: 8px; background: #f8f9fa;
-      font-size: 0.85rem;
+    .horarios-lista { display: flex; flex-direction: column; gap: 10px; }
+    .horario-dia {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; background: #f8f9fa; border-radius: 10px;
     }
-    .horario-row .dia { font-weight: 600; color: #0d0d0d; text-transform: capitalize; }
-    .horario-row .hora { color: #444; }
-    .horario-row.hoje { background: rgba(255,56,92,0.06); border: 1px solid rgba(255,56,92,0.15); }
-    .horario-row.hoje .dia { color: #ff385c; }
-    .horario-row.fechado { opacity: 0.5; }
+    .horario-dia .dia-nome { width: 110px; font-size: 0.88rem; font-weight: 600; color: #0d0d0d; flex-shrink: 0; }
+    .toggle-fechado { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
+    .toggle-fechado input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0; background: #ddd; border-radius: 99px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-fechado input:checked + .toggle-track { background: #ff385c; }
+    .toggle-knob {
+      position: absolute; top: 3px; left: 3px;
+      width: 16px; height: 16px; background: #fff;
+      border-radius: 50%; transition: transform 0.2s; pointer-events: none;
+    }
+    .toggle-fechado input:checked ~ .toggle-knob { transform: translateX(16px); }
+    .horario-times { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .horario-times input { width: 100px; padding: 8px 10px; font-size: 0.85rem; }
+    .horario-times span { color: #999; font-size: 0.85rem; flex-shrink: 0; }
+    .fechado-label { font-size: 0.8rem; color: #bbb; }
 
     /* ── CARDÁPIO ── */
-    .cardapio-nav {
-      display: flex; gap: 8px; flex-wrap: wrap;
-      margin-bottom: 24px; padding-bottom: 16px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .cardapio-cat-btn {
-      padding: 6px 16px; border-radius: 99px; border: 1.5px solid #eee;
-      background: #fff; font-size: 0.82rem; font-weight: 600; color: #444;
+    .cardapio-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .cardapio-cats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .cat-chip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 14px; border-radius: 99px; background: #f7f7f7;
+      border: 1.5px solid #eee; font-size: 0.82rem; font-weight: 600; color: #444;
       cursor: pointer; transition: all 0.15s;
     }
-    .cardapio-cat-btn:hover { border-color: #ff385c; color: #ff385c; }
-    .cardapio-cat-btn.ativo { background: #ff385c; color: #fff; border-color: #ff385c; }
+    .cat-chip:hover, .cat-chip.ativa { background: #ff385c; color: #fff; border-color: #ff385c; }
+    .cat-chip .btn-del-cat { font-size: 0.7rem; opacity: 0.7; }
 
-    .cardapio-secao { margin-bottom: 36px; }
-    .cardapio-secao-titulo { font-size: 1rem; font-weight: 800; margin-bottom: 16px; color: #0d0d0d; padding-bottom: 8px; border-bottom: 1.5px solid #f0f0f0; }
-
-    .cardapio-grid { display: flex; flex-direction: column; gap: 12px; }
-    .prato-card {
+    .pratos-lista { display: flex; flex-direction: column; gap: 10px; }
+    .prato-item {
       display: flex; gap: 14px; align-items: flex-start;
-      padding: 14px; border-radius: 12px; background: #fff;
-      border: 1px solid #f0f0f0; transition: box-shadow 0.2s;
+      padding: 14px; background: #fff; border: 1px solid #eee;
+      border-radius: 12px; transition: box-shadow 0.2s;
     }
-    .prato-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
-    .prato-card.destaque { border-color: rgba(255,56,92,0.25); background: rgba(255,56,92,0.02); }
-    .prato-info { flex: 1; }
-    .prato-nome { font-size: 0.95rem; font-weight: 700; color: #0d0d0d; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-    .prato-badge-dest { background: #ff385c; color: #fff; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
-    .prato-desc { font-size: 0.82rem; color: #717171; line-height: 1.5; margin-bottom: 6px; }
-    .prato-preco { font-size: 0.95rem; font-weight: 800; color: #0d0d0d; }
-    .prato-indisponivel { opacity: 0.5; }
-    .prato-indisponivel .prato-preco::after { content: ' · Indisponível'; font-size: 0.75rem; color: #999; font-weight: 400; }
-    .prato-foto {
-      width: 90px; height: 90px; border-radius: 10px;
-      object-fit: cover; flex-shrink: 0;
+    .prato-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    .prato-foto-thumb {
+      width: 80px; height: 80px; border-radius: 10px;
+      object-fit: cover; flex-shrink: 0; background: #f5f5f5;
+      border: 2px dashed #ddd; display: flex; align-items: center;
+      justify-content: center; font-size: 1.5rem; cursor: pointer; overflow: hidden;
     }
-    .prato-foto-placeholder {
-      width: 90px; height: 90px; border-radius: 10px;
-      background: #f5f5f5; display: flex; align-items: center; justify-content: center;
-      font-size: 1.8rem; flex-shrink: 0;
+    .prato-foto-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .prato-info { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .prato-row { display: flex; gap: 10px; align-items: center; }
+    .prato-nome-input { flex: 1; font-weight: 700; }
+    .prato-preco-input { width: 110px; }
+    .prato-desc-input { font-size: 0.85rem; min-height: 54px; }
+    .prato-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .btn-prato-del {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #fff0f0; color: #ff385c; border: 1px solid #ffe0e0;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; transition: 0.2s;
     }
+    .btn-prato-del:hover { background: #ff385c; color: #fff; }
+    .toggle-disponivel { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #666; }
 
-    /* ── COLUNA DIREITA (sticky) ── */
-    .col-dir { position: sticky; top: 84px; }
-
-    .contato-card {
-      background: #fff; border: 1.5px solid #eee; border-radius: 20px;
-      padding: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-      margin-bottom: 20px;
+    /* ── BOTÕES GERAIS ── */
+    .btn-add {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: #fff; color: #ff385c; border: 1.5px solid #ff385c;
+      padding: 9px 18px; border-radius: 10px; font-weight: 700;
+      cursor: pointer; font-family: inherit; font-size: 0.86rem;
+      transition: background 0.2s, color 0.2s;
     }
-    .contato-card-titulo { font-size: 0.78rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
-
-    .btn-contato {
-      width: 100%; padding: 14px; border-radius: 12px;
-      font-size: 0.95rem; font-weight: 700; cursor: pointer;
-      border: none; display: flex; align-items: center; justify-content: center;
-      gap: 10px; text-decoration: none; margin-bottom: 10px;
-      transition: opacity 0.2s, transform 0.15s;
+    .btn-add:hover { background: #ff385c; color: #fff; }
+    .btn-add-ghost {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      border: 2px dashed #ddd; border-radius: 10px;
+      padding: 14px; width: 100%; cursor: pointer;
+      background: none; font-family: inherit; font-size: 0.88rem;
+      color: #999; font-weight: 600; transition: 0.2s;
     }
-    .btn-contato:last-child { margin-bottom: 0; }
-    .btn-contato:hover { opacity: 0.88; transform: scale(1.01); }
-    .btn-wpp { background: #25D366; color: #fff; }
-    .btn-reserva { background: #ff385c; color: #fff; }
-    .btn-tel { background: #f7f7f7; color: #0d0d0d; border: 1.5px solid #eee; }
-    .btn-site { background: #f7f7f7; color: #0d0d0d; border: 1.5px solid #eee; }
+    .btn-add-ghost:hover { border-color: #ff385c; color: #ff385c; }
 
-    /* Infos rápidas */
-    .info-rapida { display: flex; flex-direction: column; gap: 10px; }
-    .info-item {
-      display: flex; align-items: flex-start; gap: 10px;
-      font-size: 0.85rem; color: #444; padding: 10px 12px;
-      background: #f8f9fa; border-radius: 8px;
+    /* ── FOOTER AÇÕES ── */
+    .footer-acoes {
+      position: sticky; bottom: 0; z-index: 50;
+      padding: 14px 0; background: linear-gradient(to top, #f0f2f5 70%, transparent);
+      margin-top: 10px; display: flex; justify-content: flex-end; gap: 10px;
     }
-    .info-item .icon { font-size: 1.1rem; flex-shrink: 0; }
-    .info-item strong { display: block; font-weight: 600; color: #0d0d0d; margin-bottom: 1px; }
+    .btn-salvar {
+      background: #ff385c; color: #fff; border: none;
+      padding: 12px 26px; border-radius: 10px; font-family: inherit;
+      font-size: 0.92rem; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(255,56,92,0.25); transition: background 0.2s, transform 0.15s;
+    }
+    .btn-salvar:hover { background: #e0304f; transform: scale(1.02); }
+    .btn-salvar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-    /* Mapa mini */
-    #mapa-mini { height: 200px; border-radius: 14px; overflow: hidden; margin-top: 20px; }
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #0d0d0d; color: #fff; padding: 13px 24px;
+      border-radius: 12px; font-size: 0.86rem; font-weight: 500;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.22); z-index: 9999;
+      display: flex; align-items: center; gap: 10px; opacity: 0;
+      transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+    }
+    .toast.visivel { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    /* ── LIGHTBOX FOTOS ── */
-    #lightbox {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.92);
-      z-index: 9999; display: none; align-items: center; justify-content: center;
-    }
-    #lightbox.aberto { display: flex; }
-    #lightbox img { max-width: 90vw; max-height: 88vh; border-radius: 12px; object-fit: contain; }
-    .lb-close {
-      position: absolute; top: 20px; right: 24px;
-      color: #fff; font-size: 2rem; cursor: pointer; background: none; border: none;
-    }
-    .lb-nav {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      color: #fff; font-size: 2.5rem; cursor: pointer; background: none; border: none;
-      padding: 0 20px; opacity: 0.8; transition: opacity 0.15s;
-    }
-    .lb-nav:hover { opacity: 1; }
-    .lb-prev { left: 0; }
-    .lb-next { right: 0; }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 900px) {
-      .main-layout { grid-template-columns: 1fr; gap: 28px; }
-      .col-dir { position: static; }
-      .galeria-hero { grid-template-columns: 1fr; grid-template-rows: 280px; height: 280px; }
-      .galeria-hero .foto-principal { grid-row: 1; }
-      .galeria-hero .galeria-foto:not(.foto-principal) { display: none; }
-      .horarios-grid { grid-template-columns: 1fr; }
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      .dash-sidebar { display: none; }
+      .dash-content { margin-left: 0; padding: 0 16px 60px; }
+      .grid-form { grid-template-columns: 1fr; }
+      .span-2 { grid-column: span 1; }
     }
   </style>
 </head>
@@ -246,360 +313,720 @@
   <div class="loading-dots"><span></span><span></span><span></span></div>
 </div>
 
-<!-- LIGHTBOX -->
-<div id="lightbox">
-  <button class="lb-close" onclick="fecharLightbox()">✕</button>
-  <button class="lb-nav lb-prev" onclick="lightboxNav(-1)">‹</button>
-  <img id="lb-img" src="" alt="">
-  <button class="lb-nav lb-next" onclick="lightboxNav(1)">›</button>
-</div>
-
 <!-- HEADER -->
-<header id="header">
-  <a href="index.html"><img src="logovents.png" alt="Ventsy" class="logo"></a>
+<header class="topbar">
+  <div class="header-left">
+    <a href="index.html"><img src="logovents.png" alt="Ventsy" class="logo"></a>
+  </div>
   <div class="header-right">
-    <a href="buscarestaurante.html" class="btn-voltar">← Voltar aos restaurantes</a>
+    <div class="avatar-container">
+      <button class="avatar-btn" id="avatar-btn" onclick="toggleAvatar()">
+        <span id="avatar-inicial">?</span>
+      </button>
+      <div class="avatar-dropdown" id="avatar-menu">
+        <div class="drop-header">
+          <strong id="drop-nome">...</strong>
+          <span id="drop-email"></span>
+        </div>
+        <a href="minhapropriedade.html">🎉 Espaço para Eventos</a>
+        <a href="meurestaurante.html">🍽️ Meu Restaurante</a>
+        <a href="configuracoes.html">⚙️ Configurações</a>
+        <button class="drop-sair" onclick="sair()">🚪 Sair</button>
+      </div>
+    </div>
   </div>
 </header>
 
-<!-- GALERIA HERO -->
-<div class="galeria-hero" id="galeria-hero">
-  <div class="loading-dots" style="grid-column:1/-1;justify-self:center;align-self:center;"><span></span><span></span><span></span></div>
-</div>
+<!-- LAYOUT -->
+<main class="dashboard-container" id="main-content" style="display:none;">
 
-<!-- CONTEÚDO PRINCIPAL -->
-<div class="main-layout" id="main-content" style="display:none;">
+  <!-- SIDEBAR -->
+  <aside class="dash-sidebar">
+    <div class="perfil-resumo">
+      <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+      <h3 id="sidebar-nome">Carregando...</h3>
+      <span class="handle" id="sidebar-handle"></span>
+      <div class="plano-chip" id="sidebar-plano">🏷️ Básico</div>
+    </div>
+    <nav class="dash-menu">
+      <a href="index.html">🏠 Dashboard</a>
+      <span class="menu-section-label">Meu Restaurante</span>
+      <a href="meurestaurante.html" class="active">🍽️ Dados e Cardápio</a>
+      <span class="menu-section-label">Espaço para Eventos</span>
+      <a href="minhapropriedade.html">🎉 Minha Propriedade</a>
+      <span class="menu-section-label">Conta</span>
+      <a href="relatorio.html">📊 Relatório</a>
+      <a href="planos2.html">💳 Planos Ventsy</a>
+      <a href="configuracoes.html">⚙️ Configurações</a>
+    </nav>
+  </aside>
 
-  <!-- COLUNA ESQUERDA -->
-  <div class="col-esq">
+  <!-- CONTEÚDO -->
+  <section class="dash-content">
 
-    <h1 id="rest-nome">Carregando...</h1>
-    <div class="rest-meta" id="rest-meta"></div>
-    <div id="rest-desc-wrap">
-      <p class="rest-descricao truncado" id="rest-descricao"></p>
-      <button class="btn-mais" id="btn-mais" onclick="expandirDesc()" style="display:none;">Mostrar mais ↓</button>
+    <div class="dash-header-fixo">
+      <div>
+        <h2>Meu Restaurante</h2>
+        <div id="status-rest" style="margin-top:4px;"></div>
+      </div>
+      <button class="btn-ver-publico" id="btn-ver-publico" onclick="verPublico()">👁 Ver página pública</button>
     </div>
 
-    <div class="divider"></div>
+    <!-- ABAS -->
+    <nav class="sub-menu">
+      <button class="tab-link active" onclick="openTab(event,'dados')">1. Dados Gerais</button>
+      <button class="tab-link" onclick="openTab(event,'horarios')">2. Horários</button>
+      <button class="tab-link" onclick="openTab(event,'fotos')">3. Fotos</button>
+      <button class="tab-link" onclick="openTab(event,'cardapio')">4. Cardápio</button>
+    </nav>
 
-    <!-- HORÁRIOS -->
-    <div id="secao-horarios" style="display:none;">
-      <div class="section-titulo">🕐 Horário de funcionamento</div>
-      <div class="horarios-grid" id="horarios-grid"></div>
-      <div class="divider"></div>
-    </div>
+    <!-- ═══ ABA 1: DADOS GERAIS ═══ -->
+    <div id="dados" class="tab-content active">
 
-    <!-- CARDÁPIO -->
-    <div id="secao-cardapio">
-      <div class="section-titulo">🍽️ Cardápio</div>
-      <div class="cardapio-nav" id="cardapio-nav"></div>
-      <div id="cardapio-conteudo">
-        <div style="text-align:center;padding:40px;color:#bbb;">Carregando cardápio...</div>
+      <div class="sessao">
+        <h3>Informações do restaurante</h3>
+        <p class="dica">Essas informações aparecem na sua página pública.</p>
+        <div class="grid-form">
+          <div class="campo span-2">
+            <label>Nome do restaurante *</label>
+            <input type="text" id="nome" placeholder="Ex: Sabores da Serra">
+          </div>
+          <div class="campo">
+            <label>Tipo de culinária *</label>
+            <select id="tipo_culinaria">
+              <option value="">Selecione...</option>
+              <option>Brasileira</option><option>Italiana</option><option>Japonesa</option>
+              <option>Árabe</option><option>Portuguesa</option><option>Churrascaria</option>
+              <option>Frutos do Mar</option><option>Vegetariana</option><option>Fast Food</option>
+              <option>Pizzaria</option><option>Cafeteria</option><option>Padaria</option>
+              <option>Sorveteria</option><option>Mexicana</option><option>Chinesa</option>
+              <option>Outra</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Faixa de preço por pessoa</label>
+            <select id="preco_medio">
+              <option value="">Não informar</option>
+              <option value="$">$ — Até R$ 30</option>
+              <option value="$$">$$ — R$ 30 a R$ 80</option>
+              <option value="$$$">$$$ — R$ 80 a R$ 150</option>
+              <option value="$$$$">$$$$ — Acima de R$ 150</option>
+            </select>
+          </div>
+          <div class="campo span-2">
+            <label>Descrição</label>
+            <textarea id="descricao" placeholder="Fale sobre o ambiente, especialidades, história do restaurante..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="sessao">
+        <h3>Contato e links</h3>
+        <p class="dica">Formas de contato que aparecem na sua página.</p>
+        <div class="grid-form">
+          <div class="campo">
+            <label>WhatsApp</label>
+            <input type="tel" id="whatsapp" placeholder="(21) 99999-0000">
+          </div>
+          <div class="campo">
+            <label>Telefone fixo</label>
+            <input type="tel" id="telefone" placeholder="(21) 3333-0000">
+          </div>
+          <div class="campo">
+            <label>Link para reserva (iFood, Google, site...)</label>
+            <input type="url" id="link_reserva" placeholder="https://...">
+          </div>
+          <div class="campo">
+            <label>Site próprio</label>
+            <input type="url" id="site" placeholder="https://seurestaurante.com.br">
+          </div>
+          <div class="campo">
+            <label>Instagram</label>
+            <input type="text" id="instagram" placeholder="@seurestaurante">
+          </div>
+          <div class="campo">
+            <label>Facebook</label>
+            <input type="text" id="facebook" placeholder="facebook.com/seurestaurante">
+          </div>
+        </div>
+      </div>
+
+      <div class="sessao">
+        <h3>Endereço</h3>
+        <div class="grid-form">
+          <div class="campo">
+            <label>CEP</label>
+            <input type="text" id="cep" placeholder="00000-000" oninput="buscarCep(this.value)">
+          </div>
+          <div class="campo">
+            <label>Cidade *</label>
+            <input type="text" id="cidade" placeholder="Rio de Janeiro">
+          </div>
+          <div class="campo">
+            <label>Estado (UF)</label>
+            <input type="text" id="estado" placeholder="RJ" maxlength="2" style="text-transform:uppercase;">
+          </div>
+          <div class="campo">
+            <label>Bairro</label>
+            <input type="text" id="bairro" placeholder="Centro">
+          </div>
+          <div class="campo span-2">
+            <label>Endereço completo</label>
+            <input type="text" id="endereco" placeholder="Rua, número, complemento">
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-acoes">
+        <button class="btn-salvar" onclick="salvarDados()">💾 Salvar dados gerais</button>
       </div>
     </div>
 
-  </div>
-
-  <!-- COLUNA DIREITA -->
-  <div class="col-dir">
-
-    <!-- BOTÕES DE CONTATO -->
-    <div class="contato-card" id="contato-card">
-      <div class="contato-card-titulo">Entrar em contato</div>
-      <div id="btns-contato"></div>
+    <!-- ═══ ABA 2: HORÁRIOS ═══ -->
+    <div id="horarios" class="tab-content">
+      <div class="sessao">
+        <h3>Horário de funcionamento</h3>
+        <p class="dica">Ative os dias que funcionam e defina o horário de abertura e fechamento.</p>
+        <div class="horarios-lista" id="horarios-lista"></div>
+      </div>
+      <div class="footer-acoes">
+        <button class="btn-salvar" onclick="salvarHorarios()">💾 Salvar horários</button>
+      </div>
     </div>
 
-    <!-- INFOS RÁPIDAS -->
-    <div class="contato-card">
-      <div class="contato-card-titulo">Informações</div>
-      <div class="info-rapida" id="info-rapida"></div>
+    <!-- ═══ ABA 3: FOTOS ═══ -->
+    <div id="fotos" class="tab-content">
+
+      <div class="sessao">
+        <h3>Foto de capa</h3>
+        <p class="dica">Imagem principal que aparece nos cards de busca. Resolução recomendada: 1200×800px.</p>
+        <div class="foto-capa-wrap" id="foto-capa-wrap" onclick="document.getElementById('input-foto-capa').click()">
+          <div class="foto-capa-placeholder" id="capa-placeholder">
+            <span>📷</span>
+            <p>Clique para enviar a foto de capa</p>
+          </div>
+          <div class="foto-capa-overlay">🔄 Trocar foto</div>
+        </div>
+        <input type="file" id="input-foto-capa" accept="image/*" hidden onchange="uploadFotoCapa(this)">
+        <input type="hidden" id="foto_capa">
+      </div>
+
+      <div class="sessao">
+        <h3>Galeria de fotos</h3>
+        <p class="dica">Fotos do ambiente, salão, área externa. Adicione pelo menos 3 fotos para melhorar seu anúncio.</p>
+        <div class="galeria-grid" id="galeria-grid"></div>
+        <div class="upload-area" onclick="document.getElementById('input-fotos-galeria').click()">
+          <span>➕</span>
+          <p>Clique para adicionar fotos</p>
+        </div>
+        <input type="file" id="input-fotos-galeria" accept="image/*" multiple hidden onchange="uploadFotosGaleria(this)">
+      </div>
     </div>
 
-    <!-- MAPA -->
-    <div id="mapa-mini"></div>
+    <!-- ═══ ABA 4: CARDÁPIO ═══ -->
+    <div id="cardapio" class="tab-content">
 
-  </div>
-</div>
+      <!-- Categorias -->
+      <div class="sessao">
+        <div class="cardapio-header">
+          <div>
+            <h3>Categorias do cardápio</h3>
+            <p class="dica">Ex: Entradas, Pratos Principais, Sobremesas, Bebidas.</p>
+          </div>
+          <button class="btn-add" onclick="addCategoria()">+ Nova categoria</button>
+        </div>
+        <div class="cardapio-cats" id="cardapio-cats">
+          <span style="color:#bbb;font-size:0.82rem;">Nenhuma categoria ainda. Crie uma acima.</span>
+        </div>
+      </div>
+
+      <!-- Pratos -->
+      <div class="sessao">
+        <div class="cardapio-header">
+          <div>
+            <h3>Pratos</h3>
+            <p class="dica">Adicione nome, foto, descrição e preço de cada item.</p>
+          </div>
+          <button class="btn-add" onclick="addPrato()">+ Novo prato</button>
+        </div>
+        <div class="pratos-lista" id="pratos-lista">
+          <p style="color:#bbb;font-size:0.82rem;">Crie uma categoria primeiro, depois adicione os pratos.</p>
+        </div>
+      </div>
+
+      <div class="footer-acoes">
+        <button class="btn-salvar" onclick="salvarCardapio()">💾 Salvar cardápio</button>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
 
 <script>
 const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-const restId = new URLSearchParams(window.location.search).get('id');
-let todasFotos = [];
-let lbIndex = 0;
-let cardapioData = [];
-let catAtiva = null;
+let REST_ID = null;
+let USER_ID = null;
+let categorias = [];
+let pratos = [];
 
-// ── HEADER SCROLL ──
-window.addEventListener('scroll', () => {
-  document.getElementById('header').classList.toggle('scrolled', window.scrollY > 10);
+const DIAS = [
+  { id:'segunda', label:'Segunda-feira' }, { id:'terca',  label:'Terça-feira' },
+  { id:'quarta',  label:'Quarta-feira' },  { id:'quinta', label:'Quinta-feira' },
+  { id:'sexta',   label:'Sexta-feira' },   { id:'sabado', label:'Sábado' },
+  { id:'domingo', label:'Domingo' }
+];
+
+// ── TOAST ──
+function toast(msg, ok=true) {
+  const el = document.getElementById('toast');
+  el.innerHTML = `${ok?'✅':'❌'} ${msg}`;
+  el.classList.add('visivel');
+  setTimeout(() => el.classList.remove('visivel'), 3200);
+}
+
+// ── TABS ──
+function openTab(e, id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-link').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  e.currentTarget.classList.add('active');
+}
+
+// ── AVATAR ──
+function toggleAvatar() {
+  const m = document.getElementById('avatar-menu');
+  m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+}
+document.addEventListener('click', e => {
+  const c = document.querySelector('.avatar-container');
+  if (c && !c.contains(e.target)) document.getElementById('avatar-menu').style.display = 'none';
 });
+
+// ── SAIR ──
+async function sair() { await sb.auth.signOut(); window.location.href = 'login.html'; }
+
+// ── VER PÚBLICO ──
+function verPublico() {
+  if (REST_ID) window.open(`restaurante.html?id=${REST_ID}`, '_blank');
+  else toast('Salve os dados primeiro para visualizar a página pública.', false);
+}
 
 // ── INIT ──
-window.addEventListener('DOMContentLoaded', async () => {
-  if (!restId) { window.location.href = 'buscarestaurante.html'; return; }
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
 
-  // Busca restaurante + fotos + cardápio em paralelo
-  const [restRes, fotosRes, catRes] = await Promise.all([
-    sb.from('restaurantes').select('*').eq('id', restId).single(),
-    sb.from('fotos_restaurante').select('*').eq('restaurante_id', restId).order('ordem'),
-    sb.from('cardapio_categorias').select('*').eq('restaurante_id', restId).order('ordem')
-  ]);
+  USER_ID = session.user.id;
+  const { data: perfil } = await sb.from('usuarios').select('*').eq('id', USER_ID).single();
+  const nome = perfil?.nome || session.user.email;
+  const inicial = nome[0]?.toUpperCase() || '?';
 
-  const rest = restRes.data;
-  if (!rest) { window.location.href = 'buscarestaurante.html'; return; }
+  document.getElementById('avatar-inicial').textContent = inicial;
+  document.getElementById('drop-nome').textContent = nome;
+  document.getElementById('drop-email').textContent = session.user.email;
+  document.getElementById('sidebar-avatar').textContent = inicial;
+  document.getElementById('sidebar-nome').textContent = nome;
+  document.getElementById('sidebar-handle').textContent = perfil?.usuario ? '@' + perfil.usuario : '';
 
-  // Atualiza title/meta
-  document.title = `${rest.nome} — VENTSY`;
+  // Plano
+  try {
+    const { data: ass } = await sb.from('assinaturas').select('plano_ativo').eq('usuario_id', USER_ID).single();
+    const pl = { basico:'🏷️ Básico', pro:'⭐ Pro', ultra:'🚀 Ultra' };
+    document.getElementById('sidebar-plano').textContent = pl[ass?.plano_ativo] || '🏷️ Básico';
+  } catch(_) {}
 
-  // Render galeria
-  renderGaleria(rest, fotosRes.data || []);
+  // Carrega restaurante do usuário
+  const { data: rest } = await sb.from('restaurantes').select('*').eq('usuario_id', USER_ID).single();
 
-  // Render info principal
-  renderInfo(rest);
+  if (rest) {
+    REST_ID = rest.id;
+    preencherDados(rest);
+    preencherHorarios(rest.horario || []);
+    await carregarFotos();
+    await carregarCardapio();
 
-  // Render horários
-  renderHorarios(rest.horario);
-
-  // Render contatos
-  renderContatos(rest);
-
-  // Render infos rápidas
-  renderInfoRapida(rest);
-
-  // Cardápio
-  await renderCardapio(catRes.data || [], rest.id);
-
-  // Mapa
-  if (rest.latitude && rest.longitude) renderMapa(rest);
+    const statusMap = { true: '<span class="status-badge publicado">✅ Publicado</span>', false: '<span class="status-badge pendente">⏳ Aguardando aprovação</span>' };
+    document.getElementById('status-rest').innerHTML = rest.publicado ? statusMap.true : statusMap.false;
+  } else {
+    // Novo — renderiza horários em branco
+    preencherHorarios([]);
+    document.getElementById('status-rest').innerHTML = '<span class="status-badge rascunho">📝 Rascunho</span>';
+  }
 
   document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('main-content').style.display   = 'grid';
-});
-
-// ── GALERIA ──
-function renderGaleria(rest, fotos) {
-  todasFotos = [];
-  if (rest.foto_capa) todasFotos.push(rest.foto_capa);
-  fotos.forEach(f => { if (f.url && !todasFotos.includes(f.url)) todasFotos.push(f.url); });
-
-  const hero = document.getElementById('galeria-hero');
-
-  if (!todasFotos.length) {
-    hero.innerHTML = `<div class="galeria-foto foto-principal" style="border-radius:0;"><div class="galeria-placeholder">🍽️</div></div>`;
-    return;
-  }
-
-  const fotosHtml = todasFotos.slice(0, 3).map((url, i) => `
-    <div class="galeria-foto${i === 0 ? ' foto-principal' : ''}" onclick="abrirLightbox(${i})">
-      <img src="${url}" alt="Foto ${i+1}" loading="lazy">
-      ${i === 2 && todasFotos.length > 3 ? `<button class="btn-ver-fotos">🖼 Ver todas as fotos (${todasFotos.length})</button>` : ''}
-    </div>`).join('');
-
-  hero.innerHTML = fotosHtml;
+  document.getElementById('main-content').style.display   = 'flex';
 }
 
-// ── INFO PRINCIPAL ──
-function renderInfo(rest) {
-  document.getElementById('rest-nome').textContent = rest.nome;
+// ── PREENCHER DADOS ──
+function preencherDados(rest) {
+  const campos = ['nome','tipo_culinaria','preco_medio','descricao','whatsapp','telefone','link_reserva','site','instagram','facebook','cep','cidade','estado','bairro','endereco','foto_capa'];
+  campos.forEach(c => {
+    const el = document.getElementById(c);
+    if (el && rest[c] != null) el.value = rest[c];
+  });
 
-  const aberto = estaAberto(rest.horario);
-  const statusHtml = aberto === null ? '' :
-    aberto ? '<span class="badge-aberto">🟢 Aberto agora</span>' :
-             '<span class="badge-fechado">🔴 Fechado</span>';
+  if (rest.foto_capa) {
+    const wrap = document.getElementById('foto-capa-wrap');
+    document.getElementById('capa-placeholder').style.display = 'none';
+    const img = document.createElement('img');
+    img.src = rest.foto_capa;
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+    wrap.appendChild(img);
+  }
+}
 
-  const precoHtml = rest.preco_medio ? `<span class="badge-preco">${rest.preco_medio}</span>` : '';
-  const culHtml = rest.tipo_culinaria ? `<span class="badge-culinaria">${rest.tipo_culinaria}</span>` : '';
-  const locHtml = rest.cidade ? `<span>📍 ${rest.cidade}${rest.estado ? ', ' + rest.estado : ''}</span>` : '';
+// ── SALVAR DADOS ──
+async function salvarDados() {
+  const btn = document.querySelector('#dados .btn-salvar');
+  btn.textContent = '⏳ Salvando...'; btn.disabled = true;
 
-  document.getElementById('rest-meta').innerHTML = `${culHtml}${precoHtml}${statusHtml}${locHtml}`;
+  const payload = {
+    usuario_id: USER_ID,
+    nome:         document.getElementById('nome').value.trim(),
+    tipo_culinaria: document.getElementById('tipo_culinaria').value,
+    preco_medio:  document.getElementById('preco_medio').value,
+    descricao:    document.getElementById('descricao').value.trim(),
+    whatsapp:     document.getElementById('whatsapp').value.trim(),
+    telefone:     document.getElementById('telefone').value.trim(),
+    link_reserva: document.getElementById('link_reserva').value.trim(),
+    site:         document.getElementById('site').value.trim(),
+    instagram:    document.getElementById('instagram').value.trim(),
+    facebook:     document.getElementById('facebook').value.trim(),
+    cep:          document.getElementById('cep').value.trim(),
+    cidade:       document.getElementById('cidade').value.trim(),
+    estado:       document.getElementById('estado').value.trim().toUpperCase(),
+    bairro:       document.getElementById('bairro').value.trim(),
+    endereco:     document.getElementById('endereco').value.trim(),
+    foto_capa:    document.getElementById('foto_capa').value || null,
+  };
 
-  if (rest.descricao) {
-    document.getElementById('rest-descricao').textContent = rest.descricao;
-    if (rest.descricao.length > 280) document.getElementById('btn-mais').style.display = 'block';
+  if (!payload.nome) { toast('O nome do restaurante é obrigatório.', false); btn.textContent = '💾 Salvar dados gerais'; btn.disabled = false; return; }
+
+  let error;
+  if (REST_ID) {
+    ({ error } = await sb.from('restaurantes').update(payload).eq('id', REST_ID));
   } else {
-    document.getElementById('rest-desc-wrap').style.display = 'none';
+    const { data, error: e } = await sb.from('restaurantes').insert(payload).select().single();
+    error = e;
+    if (data) REST_ID = data.id;
   }
-}
 
-function expandirDesc() {
-  document.getElementById('rest-descricao').classList.remove('truncado');
-  document.getElementById('btn-mais').style.display = 'none';
+  btn.textContent = '💾 Salvar dados gerais'; btn.disabled = false;
+  if (error) { toast('Erro: ' + error.message, false); return; }
+  toast('Dados salvos com sucesso!');
 }
 
 // ── HORÁRIOS ──
-function renderHorarios(horario) {
-  if (!horario || !horario.length) return;
-  document.getElementById('secao-horarios').style.display = 'block';
-
-  const diasLabel = { segunda:'Segunda-feira', terca:'Terça-feira', quarta:'Quarta-feira',
-    quinta:'Quinta-feira', sexta:'Sexta-feira', sabado:'Sábado', domingo:'Domingo' };
-  const diasOrdem = ['segunda','terca','quarta','quinta','sexta','sabado','domingo'];
-  const hojeNome = ['domingo','segunda','terca','quarta','quinta','sexta','sabado'][new Date().getDay()];
-
-  const grid = document.getElementById('horarios-grid');
-  grid.innerHTML = diasOrdem.map(dia => {
-    const h = horario.find(d => d.dia === dia);
-    const hoje = dia === hojeNome;
-    if (!h || h.fechado) return `<div class="horario-row fechado${hoje ? ' hoje' : ''}"><span class="dia">${diasLabel[dia]}</span><span class="hora">Fechado</span></div>`;
-    return `<div class="horario-row${hoje ? ' hoje' : ''}"><span class="dia">${diasLabel[dia]}${hoje ? ' 📍' : ''}</span><span class="hora">${h.abertura || '—'} – ${h.fechamento || '—'}</span></div>`;
-  }).join('');
-}
-
-// ── CONTATOS ──
-function renderContatos(rest) {
-  const btns = [];
-  if (rest.whatsapp) {
-    const num = rest.whatsapp.replace(/\D/g, '');
-    btns.push(`<a class="btn-contato btn-wpp" href="https://wa.me/55${num}?text=Olá! Vi o ${encodeURIComponent(rest.nome)} na Ventsy e gostaria de mais informações." target="_blank">💬 WhatsApp</a>`);
-  }
-  if (rest.link_reserva) {
-    btns.push(`<a class="btn-contato btn-reserva" href="${rest.link_reserva}" target="_blank">📅 Fazer Reserva</a>`);
-  }
-  if (rest.telefone) {
-    btns.push(`<a class="btn-contato btn-tel" href="tel:${rest.telefone.replace(/\D/g,'')}">📞 ${rest.telefone}</a>`);
-  }
-  if (rest.site) {
-    btns.push(`<a class="btn-contato btn-site" href="${rest.site}" target="_blank">🌐 Acessar Site</a>`);
-  }
-
-  if (!btns.length) {
-    document.getElementById('contato-card').style.display = 'none';
-    return;
-  }
-  document.getElementById('btns-contato').innerHTML = btns.join('');
-}
-
-// ── INFOS RÁPIDAS ──
-function renderInfoRapida(rest) {
-  const items = [];
-  if (rest.endereco) items.push(`<div class="info-item"><span class="icon">📍</span><div><strong>Endereço</strong>${rest.endereco}${rest.cidade ? ', ' + rest.cidade : ''}</div></div>`);
-  if (rest.tipo_culinaria) items.push(`<div class="info-item"><span class="icon">🍴</span><div><strong>Culinária</strong>${rest.tipo_culinaria}</div></div>`);
-  if (rest.preco_medio) items.push(`<div class="info-item"><span class="icon">💰</span><div><strong>Preço médio</strong>${rest.preco_medio} por pessoa</div></div>`);
-  if (rest.instagram) items.push(`<div class="info-item"><span class="icon">📸</span><div><strong>Instagram</strong><a href="https://instagram.com/${rest.instagram.replace('@','')}" target="_blank" style="color:#ff385c;">${rest.instagram}</a></div></div>`);
-
-  document.getElementById('info-rapida').innerHTML = items.join('') || '<div style="color:#bbb;font-size:0.85rem;">Informações em breve</div>';
-}
-
-// ── CARDÁPIO ──
-async function renderCardapio(categorias, restId) {
-  if (!categorias.length) {
-    document.getElementById('secao-cardapio').style.display = 'none';
-    return;
-  }
-
-  // Busca todos os itens do cardápio
-  const { data: itens } = await sb
-    .from('cardapio_itens')
-    .select('*')
-    .eq('restaurante_id', restId)
-    .order('ordem');
-
-  cardapioData = { categorias, itens: itens || [] };
-  catAtiva = categorias[0]?.id || null;
-
-  // Nav de categorias
-  const nav = document.getElementById('cardapio-nav');
-  nav.innerHTML = [
-    `<button class="cardapio-cat-btn ativo" onclick="filtrarCat(null, this)">Tudo</button>`,
-    ...categorias.map(c => `<button class="cardapio-cat-btn" onclick="filtrarCat('${c.id}', this)">${c.nome}</button>`)
-  ].join('');
-
-  renderItensCat(null);
-}
-
-function filtrarCat(catId, btn) {
-  document.querySelectorAll('.cardapio-cat-btn').forEach(b => b.classList.remove('ativo'));
-  btn.classList.add('ativo');
-  catAtiva = catId;
-  renderItensCat(catId);
-}
-
-function renderItensCat(catId) {
-  const { categorias, itens } = cardapioData;
-  const conteudo = document.getElementById('cardapio-conteudo');
-
-  const catsParaRender = catId ? categorias.filter(c => c.id === catId) : categorias;
-
-  if (!itens.length) {
-    conteudo.innerHTML = `<div style="text-align:center;padding:40px;color:#bbb;"><div style="font-size:2rem;margin-bottom:12px;">🍽️</div><p>Cardápio sendo atualizado...</p></div>`;
-    return;
-  }
-
-  conteudo.innerHTML = catsParaRender.map(cat => {
-    const itensCat = itens.filter(i => i.categoria_id === cat.id);
-    if (!itensCat.length) return '';
+function preencherHorarios(horario) {
+  const lista = document.getElementById('horarios-lista');
+  lista.innerHTML = DIAS.map(d => {
+    const h = horario.find(x => x.dia === d.id) || { dia: d.id, fechado: false, abertura: '11:00', fechamento: '23:00' };
+    const aberto = !h.fechado;
     return `
-      <div class="cardapio-secao">
-        <div class="cardapio-secao-titulo">${cat.nome}</div>
-        <div class="cardapio-grid">
-          ${itensCat.map(item => `
-            <div class="prato-card${item.destaque ? ' destaque' : ''}${!item.disponivel ? ' prato-indisponivel' : ''}">
-              <div class="prato-info">
-                <div class="prato-nome">
-                  ${item.nome}
-                  ${item.destaque ? '<span class="prato-badge-dest">⭐ Destaque</span>' : ''}
-                </div>
-                ${item.descricao ? `<div class="prato-desc">${item.descricao}</div>` : ''}
-                <div class="prato-preco">${item.preco ? 'R$ ' + Number(item.preco).toFixed(2).replace('.',',') : ''}</div>
-              </div>
-              ${item.foto_url
-                ? `<img class="prato-foto" src="${item.foto_url}" alt="${item.nome}" loading="lazy">`
-                : `<div class="prato-foto-placeholder">🍴</div>`
-              }
-            </div>`).join('')}
+      <div class="horario-dia" id="hrow-${d.id}">
+        <span class="dia-nome">${d.label}</span>
+        <label class="toggle-fechado" title="${aberto ? 'Aberto' : 'Fechado'}">
+          <input type="checkbox" id="hativo-${d.id}" ${aberto ? 'checked' : ''} onchange="toggleDia('${d.id}')">
+          <span class="toggle-track"></span>
+          <span class="toggle-knob"></span>
+        </label>
+        <div class="horario-times" id="htimes-${d.id}" style="${aberto ? '' : 'opacity:0.4;pointer-events:none;'}">
+          <input type="time" id="hab-${d.id}" value="${h.abertura || '11:00'}">
+          <span>às</span>
+          <input type="time" id="hfe-${d.id}" value="${h.fechamento || '23:00'}">
         </div>
+        <span class="fechado-label" id="hlabel-${d.id}">${aberto ? '' : 'Fechado'}</span>
       </div>`;
   }).join('');
 }
 
-// ── MAPA ──
-function renderMapa(rest) {
-  const mapa = L.map('mapa-mini', { zoomControl: false, dragging: false, scrollWheelZoom: false })
-    .setView([rest.latitude, rest.longitude], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
-  L.marker([rest.latitude, rest.longitude])
-    .addTo(mapa)
-    .bindPopup(rest.nome);
+function toggleDia(dia) {
+  const ativo = document.getElementById(`hativo-${dia}`).checked;
+  document.getElementById(`htimes-${dia}`).style.cssText = ativo ? '' : 'opacity:0.4;pointer-events:none;';
+  document.getElementById(`hlabel-${dia}`).textContent = ativo ? '' : 'Fechado';
+}
 
-  document.getElementById('mapa-mini').style.cursor = 'pointer';
-  document.getElementById('mapa-mini').onclick = () => {
-    window.open(`https://www.google.com/maps?q=${rest.latitude},${rest.longitude}`, '_blank');
+async function salvarHorarios() {
+  if (!REST_ID) { toast('Salve os dados gerais primeiro.', false); return; }
+  const btn = document.querySelector('#horarios .btn-salvar');
+  btn.textContent = '⏳ Salvando...'; btn.disabled = true;
+
+  const horario = DIAS.map(d => ({
+    dia:       d.id,
+    fechado:   !document.getElementById(`hativo-${d.id}`).checked,
+    abertura:  document.getElementById(`hab-${d.id}`).value,
+    fechamento: document.getElementById(`hfe-${d.id}`).value,
+  }));
+
+  const { error } = await sb.from('restaurantes').update({ horario }).eq('id', REST_ID);
+  btn.textContent = '💾 Salvar horários'; btn.disabled = false;
+  if (error) { toast('Erro: ' + error.message, false); return; }
+  toast('Horários salvos!');
+}
+
+// ── UPLOAD FOTO CAPA ──
+async function uploadFotoCapa(input) {
+  if (!input.files[0]) return;
+  toast('Enviando foto de capa...', true);
+  const file = input.files[0];
+  const ext = file.name.split('.').pop();
+  const path = `capas/${USER_ID}_${Date.now()}.${ext}`;
+
+  const { error } = await sb.storage.from('fotos-restaurantes').upload(path, file, { upsert: true });
+  if (error) { toast('Erro no upload: ' + error.message, false); return; }
+
+  const { data: { publicUrl } } = sb.storage.from('fotos-restaurantes').getPublicUrl(path);
+  document.getElementById('foto_capa').value = publicUrl;
+
+  // Preview
+  const wrap = document.getElementById('foto-capa-wrap');
+  document.getElementById('capa-placeholder').style.display = 'none';
+  wrap.querySelectorAll('img').forEach(i => i.remove());
+  const img = document.createElement('img');
+  img.src = publicUrl;
+  img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;';
+  wrap.appendChild(img);
+
+  // Se já tem restaurante, salva imediatamente
+  if (REST_ID) {
+    await sb.from('restaurantes').update({ foto_capa: publicUrl }).eq('id', REST_ID);
+    toast('Foto de capa atualizada!');
+  } else {
+    toast('Foto pronta! Salve os dados para confirmar.');
+  }
+}
+
+// ── GALERIA ──
+async function carregarFotos() {
+  const { data } = await sb.from('fotos_restaurante').select('*').eq('restaurante_id', REST_ID).order('ordem');
+  renderGaleria(data || []);
+}
+
+function renderGaleria(fotos) {
+  const grid = document.getElementById('galeria-grid');
+  grid.innerHTML = fotos.map(f => `
+    <div class="galeria-item">
+      <img src="${f.url}" alt="">
+      <button class="btn-remove-foto" onclick="removerFoto('${f.id}')">✕</button>
+    </div>`).join('');
+}
+
+async function uploadFotosGaleria(input) {
+  if (!REST_ID) { toast('Salve os dados gerais primeiro.', false); return; }
+  const files = [...input.files];
+  toast(`Enviando ${files.length} foto(s)...`);
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const ext = file.name.split('.').pop();
+    const path = `galeria/${REST_ID}/${Date.now()}_${i}.${ext}`;
+    const { error } = await sb.storage.from('fotos-restaurantes').upload(path, file);
+    if (error) continue;
+    const { data: { publicUrl } } = sb.storage.from('fotos-restaurantes').getPublicUrl(path);
+    await sb.from('fotos_restaurante').insert({ restaurante_id: REST_ID, url: publicUrl, ordem: i });
+  }
+  await carregarFotos();
+  toast('Fotos adicionadas!');
+  input.value = '';
+}
+
+async function removerFoto(id) {
+  if (!confirm('Remover esta foto?')) return;
+  await sb.from('fotos_restaurante').delete().eq('id', id);
+  await carregarFotos();
+  toast('Foto removida.');
+}
+
+// ── CARDÁPIO ──
+async function carregarCardapio() {
+  const [{ data: cats }, { data: itens }] = await Promise.all([
+    sb.from('cardapio_categorias').select('*').eq('restaurante_id', REST_ID).order('ordem'),
+    sb.from('cardapio_itens').select('*').eq('restaurante_id', REST_ID).order('ordem')
+  ]);
+  categorias = cats || [];
+  pratos = itens || [];
+  renderCategorias();
+  renderPratos();
+}
+
+function renderCategorias() {
+  const el = document.getElementById('cardapio-cats');
+  if (!categorias.length) {
+    el.innerHTML = '<span style="color:#bbb;font-size:0.82rem;">Nenhuma categoria ainda.</span>';
+    return;
+  }
+  el.innerHTML = categorias.map(c => `
+    <div class="cat-chip">
+      <span>${c.nome}</span>
+      <button class="btn-del-cat" onclick="deletarCategoria('${c.id}')" title="Excluir categoria">✕</button>
+    </div>`).join('');
+}
+
+function renderPratos() {
+  const el = document.getElementById('pratos-lista');
+  if (!categorias.length) {
+    el.innerHTML = '<p style="color:#bbb;font-size:0.82rem;">Crie uma categoria primeiro.</p>';
+    return;
+  }
+  if (!pratos.length) {
+    el.innerHTML = '<button class="btn-add-ghost" onclick="addPrato()">➕ Adicionar primeiro prato</button>';
+    return;
+  }
+  el.innerHTML = pratos.map((p, i) => `
+    <div class="prato-item" id="prato-${p.id || 'new-'+i}">
+      <div class="prato-foto-thumb" onclick="uploadFotoPrato('${p.id || ''}', this)" title="Clique para adicionar foto">
+        ${p.foto_url ? `<img src="${p.foto_url}" alt="">` : '🍴'}
+      </div>
+      <div class="prato-info">
+        <div class="prato-row">
+          <input type="text" class="prato-nome-input" placeholder="Nome do prato *" value="${esc(p.nome)}" data-field="nome" data-id="${p.id||''}">
+          <input type="number" class="prato-preco-input" placeholder="Preço R$" value="${p.preco||''}" step="0.01" min="0" data-field="preco" data-id="${p.id||''}">
+          <select data-field="categoria_id" data-id="${p.id||''}">
+            <option value="">Sem categoria</option>
+            ${categorias.map(c => `<option value="${c.id}" ${p.categoria_id === c.id ? 'selected' : ''}>${c.nome}</option>`).join('')}
+          </select>
+        </div>
+        <textarea class="prato-desc-input" placeholder="Descrição opcional (ingredientes, alergênicos...)" data-field="descricao" data-id="${p.id||''}">${esc(p.descricao||'')}</textarea>
+        <div class="toggle-disponivel">
+          <input type="checkbox" id="disp-${p.id||i}" ${p.disponivel !== false ? 'checked' : ''} data-field="disponivel" data-id="${p.id||''}">
+          <label for="disp-${p.id||i}">Disponível no cardápio</label>
+        </div>
+      </div>
+      <div class="prato-actions">
+        <button class="btn-prato-del" onclick="deletarPrato('${p.id||''}', ${i})" title="Remover prato">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function esc(str) { return (str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function addCategoria() {
+  if (!REST_ID) { toast('Salve os dados gerais primeiro.', false); return; }
+  const nome = prompt('Nome da categoria (ex: Entradas, Pratos Principais, Bebidas):');
+  if (!nome?.trim()) return;
+  const { data, error } = await sb.from('cardapio_categorias')
+    .insert({ restaurante_id: REST_ID, nome: nome.trim(), ordem: categorias.length })
+    .select().single();
+  if (error) { toast('Erro: ' + error.message, false); return; }
+  categorias.push(data);
+  renderCategorias();
+  renderPratos();
+  toast(`Categoria "${nome}" criada!`);
+}
+
+async function deletarCategoria(id) {
+  if (!confirm('Excluir esta categoria? Os pratos dela ficarão sem categoria.')) return;
+  await sb.from('cardapio_categorias').delete().eq('id', id);
+  categorias = categorias.filter(c => c.id !== id);
+  pratos.forEach(p => { if (p.categoria_id === id) p.categoria_id = null; });
+  renderCategorias();
+  renderPratos();
+  toast('Categoria removida.');
+}
+
+function addPrato() {
+  if (!REST_ID) { toast('Salve os dados gerais primeiro.', false); return; }
+  if (!categorias.length) { toast('Crie pelo menos uma categoria antes de adicionar pratos.', false); return; }
+  pratos.push({ id: '', nome: '', descricao: '', preco: '', foto_url: '', disponivel: true, categoria_id: categorias[0]?.id || null, ordem: pratos.length });
+  renderPratos();
+}
+
+async function deletarPrato(id, idx) {
+  if (!confirm('Remover este prato?')) return;
+  if (id) await sb.from('cardapio_itens').delete().eq('id', id);
+  pratos.splice(idx, 1);
+  renderPratos();
+  toast('Prato removido.');
+}
+
+async function uploadFotoPrato(pratoId, thumbEl) {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = async () => {
+    if (!input.files[0] || !REST_ID) return;
+    toast('Enviando foto do prato...');
+    const file = input.files[0];
+    const ext = file.name.split('.').pop();
+    const path = `pratos/${REST_ID}/${Date.now()}.${ext}`;
+    const { error } = await sb.storage.from('fotos-restaurantes').upload(path, file);
+    if (error) { toast('Erro: ' + error.message, false); return; }
+    const { data: { publicUrl } } = sb.storage.from('fotos-restaurantes').getPublicUrl(path);
+    thumbEl.innerHTML = `<img src="${publicUrl}" alt="">`;
+    thumbEl.dataset.fotoUrl = publicUrl;
+    // Atualiza no array local
+    if (pratoId) {
+      const p = pratos.find(x => x.id === pratoId);
+      if (p) p.foto_url = publicUrl;
+      await sb.from('cardapio_itens').update({ foto_url: publicUrl }).eq('id', pratoId);
+    }
+    toast('Foto do prato salva!');
   };
+  input.click();
 }
 
-// ── LIGHTBOX ──
-function abrirLightbox(idx) {
-  lbIndex = idx;
-  document.getElementById('lb-img').src = todasFotos[idx];
-  document.getElementById('lightbox').classList.add('aberto');
-}
-function fecharLightbox() { document.getElementById('lightbox').classList.remove('aberto'); }
-function lightboxNav(dir) {
-  lbIndex = (lbIndex + dir + todasFotos.length) % todasFotos.length;
-  document.getElementById('lb-img').src = todasFotos[lbIndex];
-}
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') fecharLightbox();
-  if (e.key === 'ArrowRight') lightboxNav(1);
-  if (e.key === 'ArrowLeft') lightboxNav(-1);
-});
+async function salvarCardapio() {
+  if (!REST_ID) { toast('Salve os dados gerais primeiro.', false); return; }
+  const btn = document.querySelector('#cardapio .btn-salvar');
+  btn.textContent = '⏳ Salvando...'; btn.disabled = true;
 
-// ── HELPER: ESTÁ ABERTO ──
-function estaAberto(horario) {
-  if (!horario || !horario.length) return null;
-  const dias = ['domingo','segunda','terca','quarta','quinta','sexta','sabado'];
-  const hoje = dias[new Date().getDay()];
-  const agora = new Date();
-  const horaAtual = agora.getHours() * 60 + agora.getMinutes();
-  const h = horario.find(d => d.dia === hoje);
-  if (!h || h.fechado) return false;
-  const [abH, abM] = (h.abertura || '00:00').split(':').map(Number);
-  const [feH, feM] = (h.fechamento || '23:59').split(':').map(Number);
-  return horaAtual >= abH * 60 + abM && horaAtual <= feH * 60 + feM;
+  // Coleta dados de todos os pratos do DOM
+  const items = document.querySelectorAll('.prato-item');
+  let erros = 0;
+
+  for (const item of items) {
+    const id    = item.querySelector('[data-field="nome"]')?.dataset.id || '';
+    const nome  = item.querySelector('[data-field="nome"]')?.value.trim();
+    const preco = parseFloat(item.querySelector('[data-field="preco"]')?.value) || null;
+    const desc  = item.querySelector('[data-field="descricao"]')?.value.trim();
+    const catId = item.querySelector('[data-field="categoria_id"]')?.value || null;
+    const disp  = item.querySelector('[data-field="disponivel"]')?.checked !== false;
+    const fotoThumb = item.querySelector('.prato-foto-thumb');
+    const fotoUrl = fotoThumb?.dataset.fotoUrl || pratos.find(p => p.id === id)?.foto_url || null;
+
+    if (!nome) continue;
+
+    const payload = { restaurante_id: REST_ID, nome, preco, descricao: desc, categoria_id: catId || null, disponivel: disp, foto_url: fotoUrl };
+
+    if (id) {
+      const { error } = await sb.from('cardapio_itens').update(payload).eq('id', id);
+      if (error) erros++;
+    } else {
+      const { data, error } = await sb.from('cardapio_itens').insert({ ...payload, ordem: pratos.length }).select().single();
+      if (error) erros++;
+      else if (data) {
+        // Atualiza id no array local
+        const p = pratos.find(x => !x.id && x.nome === '');
+        if (p) p.id = data.id;
+      }
+    }
+  }
+
+  await carregarCardapio();
+  btn.textContent = '💾 Salvar cardápio'; btn.disabled = false;
+  toast(erros ? `Salvo com ${erros} erro(s).` : 'Cardápio salvo com sucesso!', erros === 0);
 }
+
+// ── BUSCAR CEP ──
+async function buscarCep(cep) {
+  const limpo = cep.replace(/\D/g,'');
+  if (limpo.length !== 8) return;
+  try {
+    const r = await fetch(`https://viacep.com.br/ws/${limpo}/json/`);
+    const d = await r.json();
+    if (d.erro) return;
+    if (d.logradouro) document.getElementById('endereco').value = d.logradouro;
+    if (d.bairro)     document.getElementById('bairro').value   = d.bairro;
+    if (d.localidade) document.getElementById('cidade').value   = d.localidade;
+    if (d.uf)         document.getElementById('estado').value   = d.uf;
+  } catch(_) {}
+}
+
+init();
 </script>
 </body>
 </html>
