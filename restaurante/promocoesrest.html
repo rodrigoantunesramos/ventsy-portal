@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promoções — VENTSY</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;background:#f0f2f5}
+    #loading-screen{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:16px}
+    .loading-logo{font-size:2rem;font-weight:900;color:#0d0d0d;letter-spacing:-1px}
+    .loading-logo em{font-style:normal;color:#ff385c}
+    .loading-dots{display:flex;gap:6px}
+    .loading-dots span{width:8px;height:8px;background:#ff385c;border-radius:50%;animation:bounce 1.2s ease-in-out infinite}
+    .loading-dots span:nth-child(2){animation-delay:.2s}
+    .loading-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+    header.topbar{width:100%;height:72px;background:#fff;display:flex;align-items:center;padding:0 5%;box-shadow:0 2px 5px rgba(0,0,0,.08);position:fixed;top:0;z-index:9999;box-sizing:border-box}
+    .header-left,.header-right{flex:1;display:flex}
+    .header-right{align-items:center;gap:12px;justify-content:flex-end}
+    .logo{height:44px;cursor:pointer}
+    .btn-back{display:flex;align-items:center;gap:6px;color:#444;text-decoration:none;font-size:.88rem;font-weight:600;padding:7px 14px;border-radius:8px;transition:background .15s}
+    .btn-back:hover{background:#f5f5f5}
+    .dash-container{display:flex;min-height:100vh;margin-top:72px}
+    .dash-sidebar{width:250px;background:#fff;padding:24px 18px;border-right:1px solid #eee;position:fixed;top:72px;left:0;bottom:0;overflow-y:auto;z-index:200}
+    .menu-section-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;padding:12px 12px 4px}
+    .dash-menu{display:flex;flex-direction:column}
+    .dash-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;color:#666;text-decoration:none;border-radius:8px;margin-bottom:2px;font-size:.88rem;transition:all .2s}
+    .dash-menu a:hover{background:#f7f7f7;color:#0d0d0d}
+    .dash-menu a.active{background:rgba(255,56,92,.08);color:#ff385c;font-weight:600}
+    .dash-content{padding:0 32px 80px;width:100%;margin-left:250px}
+    .page-header{padding:22px 0 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .page-header h2{font-size:1.4rem;font-weight:700;color:#222}
+    .btn-primary{background:#ff385c;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .2s}
+    .btn-primary:hover{background:#e0304f}
+
+    /* Layout */
+    .promo-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+
+    /* Lista de promoções */
+    .promo-lista{display:flex;flex-direction:column;gap:14px}
+    .promo-card{background:#fff;border-radius:14px;border:1px solid #eee;padding:20px;transition:box-shadow .2s;position:relative;overflow:hidden}
+    .promo-card:hover{box-shadow:0 4px 18px rgba(0,0,0,.07)}
+    .promo-card.inativa{opacity:.6}
+    .promo-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#ff385c;border-radius:0}
+    .promo-card.inativa::before{background:#ddd}
+    .promo-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+    .promo-titulo{font-size:1rem;font-weight:700;color:#0d0d0d}
+    .promo-desc-txt{font-size:.84rem;color:#717171;margin-bottom:10px}
+    .promo-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+    .promo-tag{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:99px}
+    .tag-dias{background:#f0f2f5;color:#555}
+    .tag-desconto{background:rgba(255,56,92,.1);color:#ff385c}
+    .tag-cupom{background:rgba(37,99,235,.1);color:#2563eb;font-family:monospace;letter-spacing:.05em}
+    .tag-horario{background:rgba(22,163,74,.1);color:#16a34a}
+    .promo-validade{font-size:.75rem;color:#bbb}
+    .promo-actions{display:flex;gap:8px;margin-top:12px}
+    .btn-sm{padding:6px 14px;border-radius:8px;border:none;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .btn-sm-ghost{background:#f0f2f5;color:#444}
+    .btn-sm-ghost:hover{background:#e4e6e9}
+    .btn-sm-danger{background:rgba(239,68,68,.1);color:#ef4444}
+    .toggle-ativo{display:flex;align-items:center;gap:6px;font-size:.78rem;color:#666;cursor:pointer}
+    .tog-track{position:relative;width:36px;height:20px;flex-shrink:0}
+    .tog-track input{opacity:0;width:0;height:0}
+    .tog-bg{position:absolute;inset:0;background:#ddd;border-radius:99px;cursor:pointer;transition:background .2s}
+    .tog-track input:checked+.tog-bg{background:#16a34a}
+    .tog-knob{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none}
+    .tog-track input:checked~.tog-knob{transform:translateX(16px)}
+
+    /* Formulário */
+    .form-card{background:#fff;border-radius:14px;border:1px solid #eee;padding:22px;position:sticky;top:90px}
+    .form-card h3{font-size:.95rem;font-weight:700;color:#0d0d0d;margin-bottom:16px}
+    .form-label{font-size:.75rem;font-weight:700;color:#444;margin-bottom:5px;display:block}
+    .form-input,.form-select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-family:inherit;font-size:.88rem;color:#222;outline:none;transition:border-color .2s;background:#fdfdfd;margin-bottom:12px}
+    .form-input:focus,.form-select:focus{border-color:#ff385c}
+    textarea.form-input{resize:vertical;min-height:70px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .dias-check{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+    .dia-check{display:none}
+    .dia-label{padding:5px 12px;border-radius:99px;border:1.5px solid #eee;font-size:.78rem;font-weight:600;color:#666;cursor:pointer;transition:all .15s;user-select:none}
+    .dia-check:checked+.dia-label{background:#ff385c;color:#fff;border-color:#ff385c}
+
+    /* Preview do cupom */
+    .cupom-preview{background:linear-gradient(135deg,#0d0d0d,#222);color:#fff;border-radius:14px;padding:18px;margin-top:14px;position:relative;overflow:hidden}
+    .cupom-preview::before{content:'';position:absolute;right:-20px;top:-20px;width:80px;height:80px;background:rgba(255,56,92,.2);border-radius:50%}
+    .cupom-preview::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:repeating-linear-gradient(to bottom,#333,#333 6px,transparent 6px,transparent 12px)}
+    .cupom-left{padding-right:20px}
+    .cupom-nome{font-size:.7rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+    .cupom-titulo-prev{font-size:1.1rem;font-weight:900;margin-bottom:4px}
+    .cupom-desc-prev{font-size:.8rem;color:#aaa}
+    .cupom-codigo{background:rgba(255,255,255,.1);border:1.5px dashed rgba(255,255,255,.3);border-radius:8px;padding:8px 14px;font-family:monospace;font-size:1rem;font-weight:700;letter-spacing:.15em;text-align:center;margin-top:12px;color:#fff}
+
+    /* Empty state */
+    .empty-promo{text-align:center;padding:50px 20px;color:#bbb}
+    .empty-promo .icon{font-size:3rem;margin-bottom:14px}
+    .empty-promo h3{font-size:1rem;font-weight:700;color:#444;margin-bottom:8px}
+    .empty-promo p{font-size:.84rem;line-height:1.6}
+
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#0d0d0d;color:#fff;padding:13px 24px;border-radius:12px;font-size:.86rem;box-shadow:0 8px 28px rgba(0,0,0,.22);z-index:9999;display:flex;align-items:center;gap:10px;opacity:0;transition:transform .38s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+    .toast.visivel{transform:translateX(-50%) translateY(0);opacity:1}
+    @media(max-width:1000px){.promo-layout{grid-template-columns:1fr}.dash-sidebar{display:none}.dash-content{margin-left:0;padding:0 16px 80px}}
+  </style>
+</head>
+<body>
+<div id="loading-screen"><div class="loading-logo">VENT<em>SY</em></div><div class="loading-dots"><span></span><span></span><span></span></div></div>
+
+<header class="topbar">
+  <div class="header-left"><a href="index.html"><img src="logovents.png" alt="Ventsy" class="logo"></a></div>
+  <div class="header-right"><a href="dashboard-restaurante.html" class="btn-back">← Dashboard</a></div>
+</header>
+
+<div class="dash-container" id="main-content" style="display:none;">
+  <aside class="dash-sidebar">
+    <nav class="dash-menu">
+      <a href="dashboard-restaurante.html">🏠 Dashboard</a>
+      <span class="menu-section-label">Gestão</span>
+      <a href="meurestaurante.html">📋 Dados e Cardápio</a>
+      <a href="calendario-restaurante.html">📅 Calendário</a>
+      <a href="relatorio-restaurante.html">📊 Relatório</a>
+      <span class="menu-section-label">Financeiro</span>
+      <a href="financeiro-restaurante.html">💰 Financeiro</a>
+      <a href="equipe-restaurante.html">👥 Equipe</a>
+      <a href="promocoes-restaurante.html" class="active">🎟️ Promoções</a>
+      <span class="menu-section-label">Relacionamento</span>
+      <a href="avaliacoes-restaurante.html">⭐ Avaliações</a>
+      <a href="documentos-restaurante.html">📁 Documentos</a>
+    </nav>
+  </aside>
+
+  <section class="dash-content">
+    <div class="page-header">
+      <div>
+        <h2>🎟️ Promoções e Cupons</h2>
+        <div style="font-size:.82rem;color:#999;margin-top:2px;">Crie ofertas que aparecem na sua página pública</div>
+      </div>
+    </div>
+
+    <div class="promo-layout">
+
+      <!-- Lista -->
+      <div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button class="btn-sm btn-sm-ghost" id="filtro-todas" onclick="filtrar('todas')" style="border:1.5px solid #0d0d0d;color:#0d0d0d;">Todas</button>
+          <button class="btn-sm btn-sm-ghost" id="filtro-ativas" onclick="filtrar('ativas')">✅ Ativas</button>
+          <button class="btn-sm btn-sm-ghost" id="filtro-inativas" onclick="filtrar('inativas')">⏸ Inativas</button>
+        </div>
+        <div id="promo-lista"></div>
+      </div>
+
+      <!-- Formulário -->
+      <div class="form-card">
+        <h3>➕ Nova promoção</h3>
+
+        <div class="form-label">Título da promoção *</div>
+        <input type="text" class="form-input" id="p-titulo" placeholder="Ex: Quarta é dia de feijoada 🍲">
+
+        <div class="form-label">Descrição</div>
+        <textarea class="form-input" id="p-desc" placeholder="Detalhe os termos, o que inclui, restrições..."></textarea>
+
+        <div class="form-label">Tipo de desconto</div>
+        <select class="form-select" id="p-tipo" onchange="updatePreview()">
+          <option value="percentual">% Percentual (ex: 30% off)</option>
+          <option value="valor_fixo">R$ Valor fixo (ex: R$20 de desconto)</option>
+          <option value="item_gratis">Item grátis (ex: sobremesa grátis)</option>
+          <option value="descricao_livre">Descrição livre</option>
+        </select>
+
+        <div id="campo-desconto">
+          <div class="form-label">Valor do desconto</div>
+          <input type="number" class="form-input" id="p-valor" placeholder="30" min="0" step="0.01" oninput="updatePreview()">
+        </div>
+
+        <div class="form-label">Dias da semana</div>
+        <div class="dias-check">
+          <input type="checkbox" class="dia-check" id="d-seg" value="segunda"><label class="dia-label" for="d-seg">Seg</label>
+          <input type="checkbox" class="dia-check" id="d-ter" value="terca"><label class="dia-label" for="d-ter">Ter</label>
+          <input type="checkbox" class="dia-check" id="d-qua" value="quarta"><label class="dia-label" for="d-qua">Qua</label>
+          <input type="checkbox" class="dia-check" id="d-qui" value="quinta"><label class="dia-label" for="d-qui">Qui</label>
+          <input type="checkbox" class="dia-check" id="d-sex" value="sexta"><label class="dia-label" for="d-sex">Sex</label>
+          <input type="checkbox" class="dia-check" id="d-sab" value="sabado"><label class="dia-label" for="d-sab">Sáb</label>
+          <input type="checkbox" class="dia-check" id="d-dom" value="domingo"><label class="dia-label" for="d-dom">Dom</label>
+        </div>
+
+        <div class="form-grid">
+          <div><div class="form-label">Horário início</div><input type="time" class="form-input" id="p-hi"></div>
+          <div><div class="form-label">Horário fim</div><input type="time" class="form-input" id="p-hf"></div>
+        </div>
+
+        <div class="form-grid">
+          <div><div class="form-label">Válido de</div><input type="date" class="form-input" id="p-di"></div>
+          <div><div class="form-label">Válido até</div><input type="date" class="form-input" id="p-df"></div>
+        </div>
+
+        <div class="form-label">Código do cupom (opcional)</div>
+        <input type="text" class="form-input" id="p-cupom" placeholder="FEIJOADA30" style="text-transform:uppercase;letter-spacing:.1em;font-weight:700;" oninput="this.value=this.value.toUpperCase();updatePreview()">
+
+        <!-- Preview -->
+        <div class="cupom-preview" id="cupom-preview">
+          <div class="cupom-left">
+            <div class="cupom-nome">🍽️ Ventsy Promoção</div>
+            <div class="cupom-titulo-prev" id="prev-titulo">Nova promoção</div>
+            <div class="cupom-desc-prev" id="prev-desc">Preencha o formulário ao lado</div>
+          </div>
+          <div class="cupom-codigo" id="prev-codigo" style="display:none;"></div>
+        </div>
+
+        <button class="btn-primary" style="width:100%;justify-content:center;margin-top:14px;" onclick="salvarPromocao()">✅ Publicar promoção</button>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL='https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+let REST_ID=null, todasPromos=[], filtroAtual='todas';
+
+function toast(msg,ok=true){const el=document.getElementById('toast');el.innerHTML=(ok?'✅':'❌')+' '+msg;el.classList.add('visivel');setTimeout(()=>el.classList.remove('visivel'),3000)}
+
+function updatePreview(){
+  const titulo=document.getElementById('p-titulo').value||'Nova promoção';
+  const desc=document.getElementById('p-desc').value||'Preencha o formulário ao lado';
+  const cupom=document.getElementById('p-cupom').value;
+  const tipo=document.getElementById('p-tipo').value;
+  const valor=document.getElementById('p-valor').value;
+  let descStr=desc;
+  if(tipo==='percentual'&&valor) descStr=`${valor}% de desconto · `+desc;
+  else if(tipo==='valor_fixo'&&valor) descStr=`R$${valor} de desconto · `+desc;
+  document.getElementById('prev-titulo').textContent=titulo;
+  document.getElementById('prev-desc').textContent=descStr;
+  const codEl=document.getElementById('prev-codigo');
+  if(cupom){codEl.textContent=cupom;codEl.style.display='block'}
+  else codEl.style.display='none';
+  // Mostra/oculta campo valor
+  document.getElementById('campo-desconto').style.display=['percentual','valor_fixo'].includes(tipo)?'block':'none';
+}
+
+function filtrar(f){
+  filtroAtual=f;
+  ['todas','ativas','inativas'].forEach(x=>{const b=document.getElementById('filtro-'+x);b.style.borderColor=x===f?'#ff385c':'#eee';b.style.color=x===f?'#ff385c':'#444'});
+  renderPromos();
+}
+
+async function init(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.href='login.html';return}
+  const {data:rest}=await sb.from('restaurantes').select('id').eq('usuario_id',session.user.id).single();
+  if(!rest){window.location.href='dashboard-restaurante.html';return}
+  REST_ID=rest.id;
+  await carregarPromos();
+  updatePreview();
+  // Atualiza preview ao digitar
+  document.getElementById('p-titulo').addEventListener('input',updatePreview);
+  document.getElementById('p-desc').addEventListener('input',updatePreview);
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('main-content').style.display='flex';
+}
+
+async function carregarPromos(){
+  try{
+    const {data,error}=await sb.from('promocoes_restaurante').select('*').eq('restaurante_id',REST_ID).order('criado_em',{ascending:false});
+    if(error&&error.code==='42P01'){todasPromos=[];renderPromos();return}
+    todasPromos=data||[];
+    renderPromos();
+  }catch(_){todasPromos=[];renderPromos()}
+}
+
+function renderPromos(){
+  const el=document.getElementById('promo-lista');
+  let lista=todasPromos;
+  if(filtroAtual==='ativas') lista=lista.filter(p=>p.ativa);
+  if(filtroAtual==='inativas') lista=lista.filter(p=>!p.ativa);
+  if(!lista.length){
+    el.innerHTML=`<div class="empty-promo"><div class="icon">🎟️</div><h3>Nenhuma promoção ${filtroAtual==='ativas'?'ativa':filtroAtual==='inativas'?'inativa':''}</h3><p>Crie sua primeira promoção usando o formulário ao lado.</p></div>`;
+    return;
+  }
+  const diasLabel={segunda:'Seg',terca:'Ter',quarta:'Qua',quinta:'Qui',sexta:'Sex',sabado:'Sáb',domingo:'Dom'};
+  el.innerHTML=lista.map(p=>{
+    const dias=(p.dias_semana||[]).map(d=>diasLabel[d]||d).join(', ');
+    const horario=p.horario_inicio&&p.horario_fim?`${p.horario_inicio}–${p.horario_fim}`:'';
+    const validade=p.data_fim?`Até ${new Date(p.data_fim+'T12:00:00').toLocaleDateString('pt-BR')}`:'Sem data limite';
+    let descontoTag='';
+    if(p.tipo==='percentual'&&p.valor_desconto) descontoTag=`<span class="promo-tag tag-desconto">${p.valor_desconto}% off</span>`;
+    else if(p.tipo==='valor_fixo'&&p.valor_desconto) descontoTag=`<span class="promo-tag tag-desconto">R$${p.valor_desconto} off</span>`;
+    return`<div class="promo-card${p.ativa?'':' inativa'}">
+      <div class="promo-header">
+        <div style="flex:1;"><div class="promo-titulo">${p.titulo}</div></div>
+        <label class="toggle-ativo"><span class="tog-track"><input type="checkbox" ${p.ativa?'checked':''} onchange="toggleAtiva('${p.id}',this.checked)"><span class="tog-bg"></span><span class="tog-knob"></span></span>${p.ativa?'Ativa':'Inativa'}</label>
+      </div>
+      ${p.descricao?`<div class="promo-desc-txt">${p.descricao}</div>`:''}
+      <div class="promo-tags">
+        ${descontoTag}
+        ${dias?`<span class="promo-tag tag-dias">📅 ${dias}</span>`:''}
+        ${horario?`<span class="promo-tag tag-horario">🕐 ${horario}</span>`:''}
+        ${p.codigo_cupom?`<span class="promo-tag tag-cupom">🎫 ${p.codigo_cupom}</span>`:''}
+      </div>
+      <div class="promo-validade">${validade}</div>
+      <div class="promo-actions">
+        <button class="btn-sm btn-sm-danger" onclick="deletarPromo('${p.id}')">🗑️ Excluir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function salvarPromocao(){
+  const titulo=document.getElementById('p-titulo').value.trim();
+  if(!titulo){toast('Informe o título da promoção',false);return}
+  const dias=Array.from(document.querySelectorAll('.dia-check:checked')).map(c=>c.value);
+  const btn=document.querySelector('.form-card .btn-primary');
+  btn.textContent='⏳ Publicando...'; btn.disabled=true;
+  const payload={
+    restaurante_id:REST_ID,
+    titulo,
+    descricao:document.getElementById('p-desc').value.trim()||null,
+    tipo:document.getElementById('p-tipo').value,
+    valor_desconto:parseFloat(document.getElementById('p-valor').value)||null,
+    dias_semana:dias.length?dias:null,
+    horario_inicio:document.getElementById('p-hi').value||null,
+    horario_fim:document.getElementById('p-hf').value||null,
+    data_inicio:document.getElementById('p-di').value||null,
+    data_fim:document.getElementById('p-df').value||null,
+    codigo_cupom:document.getElementById('p-cupom').value||null,
+    ativa:true,
+  };
+  const {error}=await sb.from('promocoes_restaurante').insert(payload);
+  btn.textContent='✅ Publicar promoção'; btn.disabled=false;
+  if(error){toast('Erro: '+error.message,false);return}
+  toast('🎟️ Promoção publicada!');
+  // Limpa formulário
+  ['p-titulo','p-desc','p-valor','p-hi','p-hf','p-di','p-df','p-cupom'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('.dia-check').forEach(c=>c.checked=false);
+  updatePreview();
+  await carregarPromos();
+}
+
+async function toggleAtiva(id,ativa){
+  await sb.from('promocoes_restaurante').update({ativa}).eq('id',id);
+  await carregarPromos();
+  toast(ativa?'Promoção ativada!':'Promoção pausada.');
+}
+
+async function deletarPromo(id){
+  if(!confirm('Excluir esta promoção?'))return;
+  await sb.from('promocoes_restaurante').delete().eq('id',id);
+  await carregarPromos();
+  toast('Promoção excluída.');
+}
+
+init();
+</script>
+</body>
+</html>
