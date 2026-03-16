@@ -49,10 +49,10 @@
 
 <!-- TEST: PERFIS / INCOMPLETOS -->
 <div class="card">
-  <h2>👥 Teste: Tabela Perfis <span class="badge badge-wait" id="badge-usuarios">aguardando</span></h2>
+  <h2>👥 Teste: Tabela Perfis <span class="badge badge-wait" id="badge-perfis">aguardando</span></h2>
   <p>Verifica se a tabela perfis tem a coluna email e retorna usuários com cadastro incompleto.</p>
   <button onclick="testarPerfis()">▶ Testar</button>
-  <div id="result-usuarios" class="result"></div>
+  <div id="result-perfis" class="result"></div>
 </div>
 
 <!-- TEST: BUSCAS LOG -->
@@ -125,11 +125,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function testarPerfis() {
-  badge('badge-usuarios', 'wait', 'testando...');
+  badge('badge-perfis', 'wait', 'testando...');
   try {
     // Testa leitura de perfis incompletos
     const { data, error } = await sb
-      .from('usuarios')
+      .from('perfis')
       .select('id, email, nome, cadastro_completo, criado_em')
       .or('cadastro_completo.eq.false,nome.is.null')
       .limit(5);
@@ -138,13 +138,13 @@ async function testarPerfis() {
 
     const total = data.length;
     const comEmail = data.filter(u => u.email).length;
-    badge('badge-usuarios', 'ok', '✓ OK');
-    show('result-usuarios', 
-      `✅ Tabela usuarios OK!\n\nRegistros incompletos (amostra de 5): ${total}\nCom e-mail: ${comEmail}\nSem e-mail: ${total - comEmail}\n\nAmostra:\n${data.map(u => `  • ${u.email || 'sem-email'} | nome: ${u.nome || 'NULL'} | completo: ${u.cadastro_completo}`).join('\n')}`,
+    badge('badge-perfis', 'ok', '✓ OK');
+    show('result-perfis', 
+      `✅ Tabela perfis OK!\n\nRegistros incompletos (amostra de 5): ${total}\nCom e-mail: ${comEmail}\nSem e-mail: ${total - comEmail}\n\nAmostra:\n${data.map(u => `  • ${u.email || 'sem-email'} | nome: ${u.nome || 'NULL'} | completo: ${u.cadastro_completo}`).join('\n')}`,
       'ok');
   } catch(err) {
-    badge('badge-usuarios', 'err', '✗ Erro');
-    show('result-usuarios', '❌ Erro: ' + err.message + '\n\nSe diz "column email does not exist", execute no SQL Editor:\nALTER TABLE perfis ADD COLUMN IF NOT EXISTS email text;', 'err');
+    badge('badge-perfis', 'err', '✗ Erro');
+    show('result-perfis', '❌ Erro: ' + err.message + '\n\nSe diz "column email does not exist", execute no SQL Editor:\nALTER TABLE perfis ADD COLUMN IF NOT EXISTS email text;', 'err');
   }
 }
 
