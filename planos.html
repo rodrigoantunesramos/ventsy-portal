@@ -607,7 +607,7 @@
             <li class="nao"><span class="feat-icon">✗</span> Selo de verificação</li>
         </ul>
 
-        <button class="btn-plano btn-plano-outline" style="visibility:hidden; height:0; padding:0; margin:0; border:none;"></button>
+        <a href="cadastro.html" class="btn-plano btn-plano-outline" style="display:block;text-align:center;text-decoration:none;margin-top:20px;">Começar grátis</a>
     </div>
 
     <!-- PRO — DESTAQUE -->
@@ -633,6 +633,10 @@
             <li class="sim"><span class="feat-icon">✔</span> Calendário de disponibilidade</li>
             <li class="sim"><span class="feat-icon">✔</span> Suporte prioritário</li>
         </ul>
+
+        <button class="btn-plano" id="btn-pro" onclick="assinarPlano('pro')" style="width:100%;margin-top:20px;cursor:pointer;">
+            ⭐ Assinar Pro
+        </button>
     </div>
 
     <!-- ULTRA -->
@@ -657,6 +661,10 @@
             <li class="sim"><span class="feat-icon">✔</span> Destaque na Home do site</li>
             <li class="sim"><span class="feat-icon">✔</span> Gerador de Contratos PDF</li>
         </ul>
+
+        <button class="btn-plano btn-plano-outline" id="btn-ultra" onclick="assinarPlano('ultra')" style="width:100%;margin-top:20px;cursor:pointer;">
+            🚀 Assinar Ultra
+        </button>
     </div>
 
 </div>
@@ -697,7 +705,12 @@
     <div class="footer-bottom"><p>&copy; 2026 VENTSY. Todos os direitos reservados.</p></div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+    const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+    const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
     // Toggle menu hamburguer
     function toggleMenuExtra() {
         const menu = document.getElementById('extra-menu');
@@ -712,7 +725,7 @@
 
     // Toggle mensal / anual
     let isAnual = false;
-    const precosPro   = { mensal: 79,  anual: 63  }; // anual = 20% desc
+    const precosPro   = { mensal: 79,  anual: 63  };
     const precosUltra = { mensal: 149, anual: 119 };
 
     function alternarPeriodo() {
@@ -720,13 +733,77 @@
         const toggle = document.getElementById('toggle-periodo');
         const labelMensal = document.getElementById('label-mensal');
         const labelAnual  = document.getElementById('label-anual');
-
         toggle.classList.toggle('anual', isAnual);
         labelMensal.classList.toggle('ativo', !isAnual);
         labelAnual.classList.toggle('ativo', isAnual);
-
         document.getElementById('valor-pro').textContent   = isAnual ? precosPro.anual   : precosPro.mensal;
         document.getElementById('valor-ultra').textContent = isAnual ? precosUltra.anual : precosUltra.mensal;
+    }
+
+    // Verificar status de pagamento na volta do MP
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const status = params.get('pagamento');
+        if (status === 'sucesso') {
+            mostrarAlerta('✅ Pagamento aprovado! Seu plano foi ativado. Redirecionando...', 'green');
+            setTimeout(() => window.location.href = 'minhapropriedade.html', 3000);
+        } else if (status === 'erro') {
+            mostrarAlerta('❌ Houve um problema com o pagamento. Tente novamente.', 'red');
+        } else if (status === 'pendente') {
+            mostrarAlerta('⏳ Pagamento pendente. Você receberá um e-mail de confirmação.', 'orange');
+        }
+    });
+
+    function mostrarAlerta(msg, cor) {
+        const div = document.createElement('div');
+        div.style.cssText = `position:fixed;top:90px;left:50%;transform:translateX(-50%);background:#fff;border:2px solid ${cor};border-radius:12px;padding:16px 28px;font-weight:600;color:${cor};z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.15);max-width:90%;text-align:center;`;
+        div.textContent = msg;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 5000);
+    }
+
+    async function assinarPlano(plano) {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) {
+            // Não logado — redireciona para login com retorno
+            window.location.href = `login.html?redirect=planos.html&plano=${plano}`;
+            return;
+        }
+
+        const btn = document.getElementById(`btn-${plano}`);
+        const textoOriginal = btn.innerHTML;
+        btn.innerHTML = '⏳ Aguarde...';
+        btn.disabled = true;
+
+        try {
+            const periodo = isAnual ? 'anual' : 'mensal';
+            const res = await fetch(`${SUPA_URL}/functions/v1/create-payment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
+                    plano,
+                    periodo,
+                    usuario_id: session.user.id,
+                    email: session.user.email,
+                    nome: session.user.user_metadata?.nome || session.user.email,
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error?.message || JSON.stringify(data.error));
+
+            // Em produção use data.checkout_url; em testes use data.sandbox_url
+            const url = data.sandbox_url || data.checkout_url;
+            window.location.href = url;
+
+        } catch (err) {
+            mostrarAlerta('Erro ao gerar pagamento: ' + err.message, 'red');
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        }
     }
 </script>
 
