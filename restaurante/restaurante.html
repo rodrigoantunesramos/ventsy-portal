@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurante — VENTSY</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #fff; color: #0d0d0d; }
+
+    /* ── LOADING ── */
+    #loading-screen {
+      position: fixed; inset: 0; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 99999; flex-direction: column; gap: 16px;
+    }
+    .loading-logo { font-size: 2rem; font-weight: 900; letter-spacing: -1px; }
+    .loading-logo em { font-style: normal; color: #ff385c; }
+    .loading-dots { display: flex; gap: 6px; }
+    .loading-dots span { width: 8px; height: 8px; background: #ff385c; border-radius: 50%; animation: bounce 1.2s ease-in-out infinite; }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,80%,100%{transform:scale(0.6);opacity:.4} 40%{transform:scale(1);opacity:1} }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      background: #fff; border-bottom: 1px solid #eee;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 64px;
+      transition: box-shadow 0.3s;
+    }
+    header.scrolled { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .logo { height: 40px; cursor: pointer; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .btn-voltar {
+      display: flex; align-items: center; gap: 6px;
+      color: #444; text-decoration: none; font-size: 0.88rem; font-weight: 600;
+      padding: 7px 14px; border-radius: 8px; transition: background 0.15s;
+    }
+    .btn-voltar:hover { background: #f5f5f5; }
+
+    /* ── GALERIA HERO ── */
+    .galeria-hero {
+      margin-top: 64px; display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      grid-template-rows: 280px 280px;
+      gap: 6px; height: 566px; overflow: hidden;
+    }
+    .galeria-hero .foto-principal { grid-row: 1 / 3; }
+    .galeria-foto {
+      overflow: hidden; cursor: pointer; position: relative;
+      background: #f0f2f5;
+    }
+    .galeria-foto:first-child { border-radius: 0; }
+    .galeria-foto img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.4s;
+    }
+    .galeria-foto:hover img { transform: scale(1.04); }
+    .galeria-placeholder {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #f8d7da, #fce4ec);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+    }
+    .btn-ver-fotos {
+      position: absolute; bottom: 16px; right: 16px;
+      background: #fff; border: 1.5px solid #ddd; border-radius: 8px;
+      padding: 8px 16px; font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: box-shadow 0.2s;
+    }
+    .btn-ver-fotos:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+    /* ── LAYOUT PRINCIPAL ── */
+    .main-layout {
+      max-width: 1100px; margin: 0 auto;
+      padding: 40px 5% 80px;
+      display: grid; grid-template-columns: 1fr 360px;
+      gap: 48px; align-items: start;
+    }
+
+    /* ── COLUNA ESQUERDA ── */
+    .col-esq h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; }
+    .rest-meta {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 16px; font-size: 0.88rem; color: #717171;
+    }
+    .rest-meta strong { color: #0d0d0d; }
+    .badge-culinaria {
+      background: #f7f7f7; border: 1px solid #eee; border-radius: 99px;
+      padding: 3px 12px; font-size: 0.78rem; font-weight: 600; color: #444;
+    }
+    .badge-preco {
+      background: rgba(255,56,92,0.08); color: #ff385c;
+      border: 1px solid rgba(255,56,92,0.2); border-radius: 99px;
+      padding: 3px 12px; font-size: 0.78rem; font-weight: 700;
+    }
+    .badge-aberto { background: rgba(22,163,74,0.1); color: #16a34a; border: 1px solid rgba(22,163,74,0.2); border-radius: 99px; padding: 3px 12px; font-size: 0.78rem; font-weight: 700; }
+    .badge-fechado { background: #f5f5f5; color: #888; border: 1px solid #eee; border-radius: 99px; padding: 3px 12px; font-size: 0.78rem; font-weight: 700; }
+
+    .divider { height: 1px; background: #f0f0f0; margin: 28px 0; }
+
+    /* Descrição */
+    .rest-descricao { font-size: 0.95rem; color: #444; line-height: 1.8; }
+    .rest-descricao.truncado { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .btn-mais {
+      background: none; border: none; color: #ff385c;
+      font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      margin-top: 8px; padding: 0; display: block;
+    }
+
+    /* ── HORÁRIOS ── */
+    .section-titulo { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; }
+    .horarios-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .horario-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 12px; border-radius: 8px; background: #f8f9fa;
+      font-size: 0.85rem;
+    }
+    .horario-row .dia { font-weight: 600; color: #0d0d0d; text-transform: capitalize; }
+    .horario-row .hora { color: #444; }
+    .horario-row.hoje { background: rgba(255,56,92,0.06); border: 1px solid rgba(255,56,92,0.15); }
+    .horario-row.hoje .dia { color: #ff385c; }
+    .horario-row.fechado { opacity: 0.5; }
+
+    /* ── CARDÁPIO ── */
+    .cardapio-nav {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 24px; padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .cardapio-cat-btn {
+      padding: 6px 16px; border-radius: 99px; border: 1.5px solid #eee;
+      background: #fff; font-size: 0.82rem; font-weight: 600; color: #444;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .cardapio-cat-btn:hover { border-color: #ff385c; color: #ff385c; }
+    .cardapio-cat-btn.ativo { background: #ff385c; color: #fff; border-color: #ff385c; }
+
+    .cardapio-secao { margin-bottom: 36px; }
+    .cardapio-secao-titulo { font-size: 1rem; font-weight: 800; margin-bottom: 16px; color: #0d0d0d; padding-bottom: 8px; border-bottom: 1.5px solid #f0f0f0; }
+
+    .cardapio-grid { display: flex; flex-direction: column; gap: 12px; }
+    .prato-card {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 14px; border-radius: 12px; background: #fff;
+      border: 1px solid #f0f0f0; transition: box-shadow 0.2s;
+    }
+    .prato-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+    .prato-card.destaque { border-color: rgba(255,56,92,0.25); background: rgba(255,56,92,0.02); }
+    .prato-info { flex: 1; }
+    .prato-nome { font-size: 0.95rem; font-weight: 700; color: #0d0d0d; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .prato-badge-dest { background: #ff385c; color: #fff; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+    .prato-desc { font-size: 0.82rem; color: #717171; line-height: 1.5; margin-bottom: 6px; }
+    .prato-preco { font-size: 0.95rem; font-weight: 800; color: #0d0d0d; }
+    .prato-indisponivel { opacity: 0.5; }
+    .prato-indisponivel .prato-preco::after { content: ' · Indisponível'; font-size: 0.75rem; color: #999; font-weight: 400; }
+    .prato-foto {
+      width: 90px; height: 90px; border-radius: 10px;
+      object-fit: cover; flex-shrink: 0;
+    }
+    .prato-foto-placeholder {
+      width: 90px; height: 90px; border-radius: 10px;
+      background: #f5f5f5; display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; flex-shrink: 0;
+    }
+
+    /* ── COLUNA DIREITA (sticky) ── */
+    .col-dir { position: sticky; top: 84px; }
+
+    .contato-card {
+      background: #fff; border: 1.5px solid #eee; border-radius: 20px;
+      padding: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      margin-bottom: 20px;
+    }
+    .contato-card-titulo { font-size: 0.78rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+
+    .btn-contato {
+      width: 100%; padding: 14px; border-radius: 12px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      border: none; display: flex; align-items: center; justify-content: center;
+      gap: 10px; text-decoration: none; margin-bottom: 10px;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-contato:last-child { margin-bottom: 0; }
+    .btn-contato:hover { opacity: 0.88; transform: scale(1.01); }
+    .btn-wpp { background: #25D366; color: #fff; }
+    .btn-reserva { background: #ff385c; color: #fff; }
+    .btn-tel { background: #f7f7f7; color: #0d0d0d; border: 1.5px solid #eee; }
+    .btn-site { background: #f7f7f7; color: #0d0d0d; border: 1.5px solid #eee; }
+
+    /* Infos rápidas */
+    .info-rapida { display: flex; flex-direction: column; gap: 10px; }
+    .info-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 0.85rem; color: #444; padding: 10px 12px;
+      background: #f8f9fa; border-radius: 8px;
+    }
+    .info-item .icon { font-size: 1.1rem; flex-shrink: 0; }
+    .info-item strong { display: block; font-weight: 600; color: #0d0d0d; margin-bottom: 1px; }
+
+    /* Mapa mini */
+    #mapa-mini { height: 200px; border-radius: 14px; overflow: hidden; margin-top: 20px; }
+
+    /* ── LIGHTBOX FOTOS ── */
+    #lightbox {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+      z-index: 9999; display: none; align-items: center; justify-content: center;
+    }
+    #lightbox.aberto { display: flex; }
+    #lightbox img { max-width: 90vw; max-height: 88vh; border-radius: 12px; object-fit: contain; }
+    .lb-close {
+      position: absolute; top: 20px; right: 24px;
+      color: #fff; font-size: 2rem; cursor: pointer; background: none; border: none;
+    }
+    .lb-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      color: #fff; font-size: 2.5rem; cursor: pointer; background: none; border: none;
+      padding: 0 20px; opacity: 0.8; transition: opacity 0.15s;
+    }
+    .lb-nav:hover { opacity: 1; }
+    .lb-prev { left: 0; }
+    .lb-next { right: 0; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .main-layout { grid-template-columns: 1fr; gap: 28px; }
+      .col-dir { position: static; }
+      .galeria-hero { grid-template-columns: 1fr; grid-template-rows: 280px; height: 280px; }
+      .galeria-hero .foto-principal { grid-row: 1; }
+      .galeria-hero .galeria-foto:not(.foto-principal) { display: none; }
+      .horarios-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="loading-logo">VENT<em>SY</em></div>
+  <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button class="lb-close" onclick="fecharLightbox()">✕</button>
+  <button class="lb-nav lb-prev" onclick="lightboxNav(-1)">‹</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb-nav lb-next" onclick="lightboxNav(1)">›</button>
+</div>
+
+<!-- HEADER -->
+<header id="header">
+  <a href="index.html"><img src="logovents.png" alt="Ventsy" class="logo"></a>
+  <div class="header-right">
+    <a href="buscarestaurante.html" class="btn-voltar">← Voltar aos restaurantes</a>
+  </div>
+</header>
+
+<!-- GALERIA HERO -->
+<div class="galeria-hero" id="galeria-hero">
+  <div class="loading-dots" style="grid-column:1/-1;justify-self:center;align-self:center;"><span></span><span></span><span></span></div>
+</div>
+
+<!-- CONTEÚDO PRINCIPAL -->
+<div class="main-layout" id="main-content" style="display:none;">
+
+  <!-- COLUNA ESQUERDA -->
+  <div class="col-esq">
+
+    <h1 id="rest-nome">Carregando...</h1>
+    <div class="rest-meta" id="rest-meta"></div>
+    <div id="rest-desc-wrap">
+      <p class="rest-descricao truncado" id="rest-descricao"></p>
+      <button class="btn-mais" id="btn-mais" onclick="expandirDesc()" style="display:none;">Mostrar mais ↓</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- HORÁRIOS -->
+    <div id="secao-horarios" style="display:none;">
+      <div class="section-titulo">🕐 Horário de funcionamento</div>
+      <div class="horarios-grid" id="horarios-grid"></div>
+      <div class="divider"></div>
+    </div>
+
+    <!-- CARDÁPIO -->
+    <div id="secao-cardapio">
+      <div class="section-titulo">🍽️ Cardápio</div>
+      <div class="cardapio-nav" id="cardapio-nav"></div>
+      <div id="cardapio-conteudo">
+        <div style="text-align:center;padding:40px;color:#bbb;">Carregando cardápio...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COLUNA DIREITA -->
+  <div class="col-dir">
+
+    <!-- BOTÕES DE CONTATO -->
+    <div class="contato-card" id="contato-card">
+      <div class="contato-card-titulo">Entrar em contato</div>
+      <div id="btns-contato"></div>
+    </div>
+
+    <!-- INFOS RÁPIDAS -->
+    <div class="contato-card">
+      <div class="contato-card-titulo">Informações</div>
+      <div class="info-rapida" id="info-rapida"></div>
+    </div>
+
+    <!-- MAPA -->
+    <div id="mapa-mini"></div>
+
+  </div>
+</div>
+
+<script>
+const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+const restId = new URLSearchParams(window.location.search).get('id');
+let todasFotos = [];
+let lbIndex = 0;
+let cardapioData = [];
+let catAtiva = null;
+
+// ── HEADER SCROLL ──
+window.addEventListener('scroll', () => {
+  document.getElementById('header').classList.toggle('scrolled', window.scrollY > 10);
+});
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!restId) { window.location.href = 'buscarestaurante.html'; return; }
+
+  // Busca restaurante + fotos + cardápio em paralelo
+  const [restRes, fotosRes, catRes] = await Promise.all([
+    sb.from('restaurantes').select('*').eq('id', restId).single(),
+    sb.from('fotos_restaurante').select('*').eq('restaurante_id', restId).order('ordem'),
+    sb.from('cardapio_categorias').select('*').eq('restaurante_id', restId).order('ordem')
+  ]);
+
+  const rest = restRes.data;
+  if (!rest) { window.location.href = 'buscarestaurante.html'; return; }
+
+  // Atualiza title/meta
+  document.title = `${rest.nome} — VENTSY`;
+
+  // Render galeria
+  renderGaleria(rest, fotosRes.data || []);
+
+  // Render info principal
+  renderInfo(rest);
+
+  // Render horários
+  renderHorarios(rest.horario);
+
+  // Render contatos
+  renderContatos(rest);
+
+  // Render infos rápidas
+  renderInfoRapida(rest);
+
+  // Cardápio
+  await renderCardapio(catRes.data || [], rest.id);
+
+  // Mapa
+  if (rest.latitude && rest.longitude) renderMapa(rest);
+
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('main-content').style.display   = 'grid';
+});
+
+// ── GALERIA ──
+function renderGaleria(rest, fotos) {
+  todasFotos = [];
+  if (rest.foto_capa) todasFotos.push(rest.foto_capa);
+  fotos.forEach(f => { if (f.url && !todasFotos.includes(f.url)) todasFotos.push(f.url); });
+
+  const hero = document.getElementById('galeria-hero');
+
+  if (!todasFotos.length) {
+    hero.innerHTML = `<div class="galeria-foto foto-principal" style="border-radius:0;"><div class="galeria-placeholder">🍽️</div></div>`;
+    return;
+  }
+
+  const fotosHtml = todasFotos.slice(0, 3).map((url, i) => `
+    <div class="galeria-foto${i === 0 ? ' foto-principal' : ''}" onclick="abrirLightbox(${i})">
+      <img src="${url}" alt="Foto ${i+1}" loading="lazy">
+      ${i === 2 && todasFotos.length > 3 ? `<button class="btn-ver-fotos">🖼 Ver todas as fotos (${todasFotos.length})</button>` : ''}
+    </div>`).join('');
+
+  hero.innerHTML = fotosHtml;
+}
+
+// ── INFO PRINCIPAL ──
+function renderInfo(rest) {
+  document.getElementById('rest-nome').textContent = rest.nome;
+
+  const aberto = estaAberto(rest.horario);
+  const statusHtml = aberto === null ? '' :
+    aberto ? '<span class="badge-aberto">🟢 Aberto agora</span>' :
+             '<span class="badge-fechado">🔴 Fechado</span>';
+
+  const precoHtml = rest.preco_medio ? `<span class="badge-preco">${rest.preco_medio}</span>` : '';
+  const culHtml = rest.tipo_culinaria ? `<span class="badge-culinaria">${rest.tipo_culinaria}</span>` : '';
+  const locHtml = rest.cidade ? `<span>📍 ${rest.cidade}${rest.estado ? ', ' + rest.estado : ''}</span>` : '';
+
+  document.getElementById('rest-meta').innerHTML = `${culHtml}${precoHtml}${statusHtml}${locHtml}`;
+
+  if (rest.descricao) {
+    document.getElementById('rest-descricao').textContent = rest.descricao;
+    if (rest.descricao.length > 280) document.getElementById('btn-mais').style.display = 'block';
+  } else {
+    document.getElementById('rest-desc-wrap').style.display = 'none';
+  }
+}
+
+function expandirDesc() {
+  document.getElementById('rest-descricao').classList.remove('truncado');
+  document.getElementById('btn-mais').style.display = 'none';
+}
+
+// ── HORÁRIOS ──
+function renderHorarios(horario) {
+  if (!horario || !horario.length) return;
+  document.getElementById('secao-horarios').style.display = 'block';
+
+  const diasLabel = { segunda:'Segunda-feira', terca:'Terça-feira', quarta:'Quarta-feira',
+    quinta:'Quinta-feira', sexta:'Sexta-feira', sabado:'Sábado', domingo:'Domingo' };
+  const diasOrdem = ['segunda','terca','quarta','quinta','sexta','sabado','domingo'];
+  const hojeNome = ['domingo','segunda','terca','quarta','quinta','sexta','sabado'][new Date().getDay()];
+
+  const grid = document.getElementById('horarios-grid');
+  grid.innerHTML = diasOrdem.map(dia => {
+    const h = horario.find(d => d.dia === dia);
+    const hoje = dia === hojeNome;
+    if (!h || h.fechado) return `<div class="horario-row fechado${hoje ? ' hoje' : ''}"><span class="dia">${diasLabel[dia]}</span><span class="hora">Fechado</span></div>`;
+    return `<div class="horario-row${hoje ? ' hoje' : ''}"><span class="dia">${diasLabel[dia]}${hoje ? ' 📍' : ''}</span><span class="hora">${h.abertura || '—'} – ${h.fechamento || '—'}</span></div>`;
+  }).join('');
+}
+
+// ── CONTATOS ──
+function renderContatos(rest) {
+  const btns = [];
+  if (rest.whatsapp) {
+    const num = rest.whatsapp.replace(/\D/g, '');
+    btns.push(`<a class="btn-contato btn-wpp" href="https://wa.me/55${num}?text=Olá! Vi o ${encodeURIComponent(rest.nome)} na Ventsy e gostaria de mais informações." target="_blank">💬 WhatsApp</a>`);
+  }
+  if (rest.link_reserva) {
+    btns.push(`<a class="btn-contato btn-reserva" href="${rest.link_reserva}" target="_blank">📅 Fazer Reserva</a>`);
+  }
+  if (rest.telefone) {
+    btns.push(`<a class="btn-contato btn-tel" href="tel:${rest.telefone.replace(/\D/g,'')}">📞 ${rest.telefone}</a>`);
+  }
+  if (rest.site) {
+    btns.push(`<a class="btn-contato btn-site" href="${rest.site}" target="_blank">🌐 Acessar Site</a>`);
+  }
+
+  if (!btns.length) {
+    document.getElementById('contato-card').style.display = 'none';
+    return;
+  }
+  document.getElementById('btns-contato').innerHTML = btns.join('');
+}
+
+// ── INFOS RÁPIDAS ──
+function renderInfoRapida(rest) {
+  const items = [];
+  if (rest.endereco) items.push(`<div class="info-item"><span class="icon">📍</span><div><strong>Endereço</strong>${rest.endereco}${rest.cidade ? ', ' + rest.cidade : ''}</div></div>`);
+  if (rest.tipo_culinaria) items.push(`<div class="info-item"><span class="icon">🍴</span><div><strong>Culinária</strong>${rest.tipo_culinaria}</div></div>`);
+  if (rest.preco_medio) items.push(`<div class="info-item"><span class="icon">💰</span><div><strong>Preço médio</strong>${rest.preco_medio} por pessoa</div></div>`);
+  if (rest.instagram) items.push(`<div class="info-item"><span class="icon">📸</span><div><strong>Instagram</strong><a href="https://instagram.com/${rest.instagram.replace('@','')}" target="_blank" style="color:#ff385c;">${rest.instagram}</a></div></div>`);
+
+  document.getElementById('info-rapida').innerHTML = items.join('') || '<div style="color:#bbb;font-size:0.85rem;">Informações em breve</div>';
+}
+
+// ── CARDÁPIO ──
+async function renderCardapio(categorias, restId) {
+  if (!categorias.length) {
+    document.getElementById('secao-cardapio').style.display = 'none';
+    return;
+  }
+
+  // Busca todos os itens do cardápio
+  const { data: itens } = await sb
+    .from('cardapio_itens')
+    .select('*')
+    .eq('restaurante_id', restId)
+    .order('ordem');
+
+  cardapioData = { categorias, itens: itens || [] };
+  catAtiva = categorias[0]?.id || null;
+
+  // Nav de categorias
+  const nav = document.getElementById('cardapio-nav');
+  nav.innerHTML = [
+    `<button class="cardapio-cat-btn ativo" onclick="filtrarCat(null, this)">Tudo</button>`,
+    ...categorias.map(c => `<button class="cardapio-cat-btn" onclick="filtrarCat('${c.id}', this)">${c.nome}</button>`)
+  ].join('');
+
+  renderItensCat(null);
+}
+
+function filtrarCat(catId, btn) {
+  document.querySelectorAll('.cardapio-cat-btn').forEach(b => b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  catAtiva = catId;
+  renderItensCat(catId);
+}
+
+function renderItensCat(catId) {
+  const { categorias, itens } = cardapioData;
+  const conteudo = document.getElementById('cardapio-conteudo');
+
+  const catsParaRender = catId ? categorias.filter(c => c.id === catId) : categorias;
+
+  if (!itens.length) {
+    conteudo.innerHTML = `<div style="text-align:center;padding:40px;color:#bbb;"><div style="font-size:2rem;margin-bottom:12px;">🍽️</div><p>Cardápio sendo atualizado...</p></div>`;
+    return;
+  }
+
+  conteudo.innerHTML = catsParaRender.map(cat => {
+    const itensCat = itens.filter(i => i.categoria_id === cat.id);
+    if (!itensCat.length) return '';
+    return `
+      <div class="cardapio-secao">
+        <div class="cardapio-secao-titulo">${cat.nome}</div>
+        <div class="cardapio-grid">
+          ${itensCat.map(item => `
+            <div class="prato-card${item.destaque ? ' destaque' : ''}${!item.disponivel ? ' prato-indisponivel' : ''}">
+              <div class="prato-info">
+                <div class="prato-nome">
+                  ${item.nome}
+                  ${item.destaque ? '<span class="prato-badge-dest">⭐ Destaque</span>' : ''}
+                </div>
+                ${item.descricao ? `<div class="prato-desc">${item.descricao}</div>` : ''}
+                <div class="prato-preco">${item.preco ? 'R$ ' + Number(item.preco).toFixed(2).replace('.',',') : ''}</div>
+              </div>
+              ${item.foto_url
+                ? `<img class="prato-foto" src="${item.foto_url}" alt="${item.nome}" loading="lazy">`
+                : `<div class="prato-foto-placeholder">🍴</div>`
+              }
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── MAPA ──
+function renderMapa(rest) {
+  const mapa = L.map('mapa-mini', { zoomControl: false, dragging: false, scrollWheelZoom: false })
+    .setView([rest.latitude, rest.longitude], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
+  L.marker([rest.latitude, rest.longitude])
+    .addTo(mapa)
+    .bindPopup(rest.nome);
+
+  document.getElementById('mapa-mini').style.cursor = 'pointer';
+  document.getElementById('mapa-mini').onclick = () => {
+    window.open(`https://www.google.com/maps?q=${rest.latitude},${rest.longitude}`, '_blank');
+  };
+}
+
+// ── LIGHTBOX ──
+function abrirLightbox(idx) {
+  lbIndex = idx;
+  document.getElementById('lb-img').src = todasFotos[idx];
+  document.getElementById('lightbox').classList.add('aberto');
+}
+function fecharLightbox() { document.getElementById('lightbox').classList.remove('aberto'); }
+function lightboxNav(dir) {
+  lbIndex = (lbIndex + dir + todasFotos.length) % todasFotos.length;
+  document.getElementById('lb-img').src = todasFotos[lbIndex];
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') fecharLightbox();
+  if (e.key === 'ArrowRight') lightboxNav(1);
+  if (e.key === 'ArrowLeft') lightboxNav(-1);
+});
+
+// ── HELPER: ESTÁ ABERTO ──
+function estaAberto(horario) {
+  if (!horario || !horario.length) return null;
+  const dias = ['domingo','segunda','terca','quarta','quinta','sexta','sabado'];
+  const hoje = dias[new Date().getDay()];
+  const agora = new Date();
+  const horaAtual = agora.getHours() * 60 + agora.getMinutes();
+  const h = horario.find(d => d.dia === hoje);
+  if (!h || h.fechado) return false;
+  const [abH, abM] = (h.abertura || '00:00').split(':').map(Number);
+  const [feH, feM] = (h.fechamento || '23:59').split(':').map(Number);
+  return horaAtual >= abH * 60 + abM && horaAtual <= feH * 60 + feM;
+}
+</script>
+</body>
+</html>
