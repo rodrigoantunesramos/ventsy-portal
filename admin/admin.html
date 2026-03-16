@@ -785,6 +785,10 @@
   <div class="sidebar-link" onclick="showPage('usuarios')">
     <span class="icon">👥</span> Usuários
   </div>
+  <div class="sidebar-link" onclick="showPage('incompletos')">
+    <span class="icon">⚠️</span> Cadastros Incompletos
+    <span class="sidebar-badge" id="badge-incompletos" style="background:var(--yellow);">0</span>
+  </div>
   <div class="sidebar-link" onclick="showPage('assinaturas')">
     <span class="icon">💳</span> Assinaturas
   </div>
@@ -1035,6 +1039,83 @@
           </tr></thead>
           <tbody id="users-tbody"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ═══════════ CADASTROS INCOMPLETOS ═══════════ -->
+    <div class="page" id="page-incompletos">
+      <div class="alert-banner" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;">
+        <span style="font-size:1.3rem;">⚠️</span>
+        <div>
+          <div style="font-weight:700;color:var(--yellow);margin-bottom:4px;">Usuários que não finalizaram o cadastro</div>
+          <div style="font-size:0.82rem;color:var(--text2);">Estas pessoas criaram uma conta mas <strong>não preencheram o perfil</strong>. Entre em contato para não perder esses clientes. O e-mail real é enviado via Resend.</div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+        <div class="stat-card yellow">
+          <div class="stat-icon yellow">⚠️</div>
+          <div class="stat-value loading" id="inc-total">—</div>
+          <div class="stat-label">Cadastros incompletos</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon red">📅</div>
+          <div class="stat-value loading" id="inc-hoje">—</div>
+          <div class="stat-label">Incompletos hoje</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">📧</div>
+          <div class="stat-value loading" id="inc-emails">—</div>
+          <div class="stat-label">E-mails disponíveis</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header" style="flex-wrap:wrap;gap:10px;">
+          <div class="section-title">📋 Lista de cadastros incompletos</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="recarregarIncompletos()">🔄 Atualizar</button>
+            <button class="btn btn-warn btn-sm" onclick="emailTodosIncompletos()">📧 E-mail para todos</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportIncompletos()">⬇️ Exportar CSV</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>E-mail</th><th>Cadastrado em</th><th>Tempo sem completar</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="inc-tbody">
+            <tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text3);">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal envio de e-mail individual -->
+      <div class="modal-overlay" id="modal-email-inc">
+        <div class="modal" style="max-width:540px;">
+          <button class="modal-close" onclick="closeModal('modal-email-inc')">✕</button>
+          <div class="modal-title">📧 Enviar e-mail de recuperação</div>
+          <div class="modal-sub" id="email-inc-para">Para: —</div>
+          <input type="hidden" id="email-inc-dest">
+          <div class="form-label">Assunto</div>
+          <input type="text" class="form-input" id="email-inc-assunto" value="Finalize seu cadastro na Ventsy 🏡">
+          <div class="form-label">Mensagem (HTML aceito)</div>
+          <textarea class="compose-textarea" id="email-inc-corpo" style="min-height:180px;">Olá! 👋
+
+Notamos que você criou sua conta na <strong>Ventsy</strong> mas ainda não finalizou o cadastro do seu espaço.
+
+Leva menos de 5 minutos e você começa a receber solicitações de clientes imediatamente!
+
+<a href="https://ventsy.com.br/cadastro.html" style="background:#ff385c;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">👉 Completar meu cadastro</a>
+
+Qualquer dúvida, estamos aqui!
+
+Equipe Ventsy</textarea>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('modal-email-inc')">Cancelar</button>
+            <button class="btn btn-primary" onclick="enviarEmailIncompleto()">📤 Enviar e-mail</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1723,7 +1804,8 @@ function showPage(page) {
     cupons: ['Cupons & Promoções', 'Criar e gerenciar cupons de desconto'],
     qualidade: ['Qualidade da Plataforma', 'Score e métricas de completude dos perfis'],
     comunicacao: ['Comunicação', 'Enviar mensagens segmentadas para usuários'],
-    logs: ['Logs de Auditoria', 'Histórico de ações do administrador']
+    logs: ['Logs de Auditoria', 'Histórico de ações do administrador'],
+    incompletos: ['Cadastros Incompletos', 'Usuários que não finalizaram o perfil — oportunidade de recuperação'],
   };
   const [t, s] = titles[page] || ['', ''];
   document.getElementById('page-title').textContent = t;
@@ -1740,6 +1822,7 @@ function showPage(page) {
   if (page === 'cupons') renderCupons();
   if (page === 'logs') renderLogs();
   if (page === 'planos') carregarPlanos();
+  if (page === 'incompletos') renderIncompletos();
 }
 
 // ─── DASHBOARD ───
@@ -2664,18 +2747,72 @@ async function enviarMensagem() {
   const titulo = document.getElementById('com-titulo').value.trim();
   const msg    = document.getElementById('com-mensagem').value.trim();
   if (!titulo || !msg) { toast('Preencha título e mensagem', 'error'); return; }
-  const count = Number(document.getElementById('com-count-num').textContent);
-  if (!confirm(`Registrar envio para ${count} usuário(s)?`)) return;
 
+  // Monta lista de e-mails baseada no segmento
+  let destinatarios = [];
+  if (dest === 'todos') destinatarios = allUsers.filter(u => u.email).map(u => u.email);
+  else if (['basico','pro','ultra'].includes(dest)) {
+    const ids = allAss.filter(a => a.plano_ativo === dest && (a.status === 'ativa' || a.status === 'trial')).map(a => a.usuario_id);
+    destinatarios = allUsers.filter(u => ids.includes(u.id) && u.email).map(u => u.email);
+  } else if (dest === 'trial') {
+    const ids = allAss.filter(a => a.status === 'trial').map(a => a.usuario_id);
+    destinatarios = allUsers.filter(u => ids.includes(u.id) && u.email).map(u => u.email);
+  } else if (dest === 'sem_assinatura') {
+    destinatarios = allUsers.filter(u => !allAss.find(a => a.usuario_id === u.id) && u.email).map(u => u.email);
+  }
+
+  const count = destinatarios.length;
+  if (!count) { toast('Nenhum destinatário com e-mail cadastrado para este segmento', 'error'); return; }
+  if (!confirm(`Enviar e-mail para ${count} usuário(s) do segmento "${dest}"?\n\nIsto enviará e-mails REAIS via Resend.`)) return;
+
+  const btn = document.querySelector('#page-comunicacao .btn-primary');
+  if (btn) { btn.textContent = '⏳ Enviando...'; btn.disabled = true; }
+
+  const tipoIcons = { info:'ℹ️', promo:'🎁', alerta:'⚠️', atualizacao:'🔄' };
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      <div style="background:#0a0a0f;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
+        <span style="font-family:Arial,sans-serif;font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-1px;">VENT<span style="color:#ff385c;">SY</span></span>
+      </div>
+      <div style="background:#fff;padding:32px;border-radius:0 0 12px 12px;border:1px solid #eee;">
+        <h2 style="margin:0 0 16px;color:#111;">${tipoIcons[tipo]||'📣'} ${titulo}</h2>
+        <div style="color:#444;line-height:1.7;font-size:0.95rem;">${msg.replace(/\n/g,'<br>')}</div>
+        <hr style="margin:24px 0;border:none;border-top:1px solid #eee;">
+        <p style="color:#aaa;font-size:0.78rem;text-align:center;">Ventsy — Encontre o espaço perfeito para o seu evento</p>
+      </div>
+    </div>`;
+
+  const { data: { session } } = await sb.auth.getSession();
+  let enviados = 0, erros = 0;
+
+  // Envia em lotes de 10 para não sobrecarregar
+  const lotes = [];
+  for (let i = 0; i < destinatarios.length; i += 10) lotes.push(destinatarios.slice(i, i+10));
+
+  for (const lote of lotes) {
+    await Promise.all(lote.map(async email => {
+      try {
+        const res = await fetch(`${SUPA_URL}/functions/v1/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || SUPA_KEY}` },
+          body: JSON.stringify({ to: email, subject: titulo, html, from_name: 'Ventsy' }),
+        });
+        if (res.ok) enviados++; else erros++;
+      } catch { erros++; }
+    }));
+  }
+
+  // Salva no histórico
   const hist = JSON.parse(localStorage.getItem('ventsy_com_historico') || '[]');
-  hist.unshift({ titulo, msg, dest, tipo, count, ts: new Date().toISOString() });
+  hist.unshift({ titulo, msg, dest, tipo, count: enviados, ts: new Date().toISOString() });
   if (hist.length > 50) hist.splice(50);
   localStorage.setItem('ventsy_com_historico', JSON.stringify(hist));
 
-  addLog('comunicacao', `Mensagem enviada: "${titulo}"`, `${count} destinatário(s) · segmento: ${dest}`);
-  toast(`📤 Mensagem registrada para ${count} usuário(s)!`, 'success');
+  addLog('comunicacao', `E-mail enviado: "${titulo}"`, `${enviados} enviados · ${erros} erros · segmento: ${dest}`);
+  toast(`📤 ${enviados} e-mail(s) enviados!${erros ? ` (${erros} erros)` : ''}`, enviados > 0 ? 'success' : 'error');
   clearCompose();
   renderComHistorico();
+  if (btn) { btn.textContent = '📤 Enviar'; btn.disabled = false; }
 }
 
 function renderComHistorico() {
@@ -2779,6 +2916,169 @@ async function deletarCupom(id) {
 
 // ─── START ───
 init();
+
+// ══════════════════════════════════════════════
+// ─── CADASTROS INCOMPLETOS ───
+// ══════════════════════════════════════════════
+let allIncompletos = [];
+
+async function renderIncompletos() {
+  await recarregarIncompletos();
+}
+
+async function recarregarIncompletos() {
+  // Busca registros da tabela perfis onde cadastro_completo = false OU nome é null
+  const { data, error } = await sb
+    .from('perfis')
+    .select('id, email, criado_em, cadastro_completo, nome')
+    .or('cadastro_completo.eq.false,nome.is.null')
+    .order('criado_em', { ascending: false });
+
+  if (error) {
+    toast('Erro ao carregar cadastros incompletos: ' + error.message, 'error');
+    allIncompletos = [];
+  } else {
+    allIncompletos = (data || []).filter(u => !u.nome || !u.cadastro_completo);
+  }
+
+  const hoje = new Date().toDateString();
+  const incHoje = allIncompletos.filter(u => new Date(u.criado_em).toDateString() === hoje).length;
+  const comEmail = allIncompletos.filter(u => u.email).length;
+
+  setValue('inc-total', allIncompletos.length);
+  setValue('inc-hoje', incHoje);
+  setValue('inc-emails', comEmail);
+
+  // Atualiza badge na sidebar
+  const badge = document.getElementById('badge-incompletos');
+  if (badge) badge.textContent = allIncompletos.length;
+
+  const tbody = document.getElementById('inc-tbody');
+  if (!tbody) return;
+
+  if (!allIncompletos.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text3);">🎉 Nenhum cadastro incompleto encontrado!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = allIncompletos.map(u => {
+    const dt = u.criado_em ? new Date(u.criado_em).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+    const agora = new Date();
+    const criado = new Date(u.criado_em || agora);
+    const diffH = Math.floor((agora - criado) / 36e5);
+    const diffStr = diffH < 1 ? 'Há menos de 1h' : diffH < 24 ? `Há ${diffH}h` : `Há ${Math.floor(diffH/24)} dia(s)`;
+    const urgColor = diffH < 24 ? 'var(--green)' : diffH < 72 ? 'var(--yellow)' : 'var(--red)';
+    const emailDisplay = u.email || '<span style="color:var(--text3);font-style:italic;">sem e-mail</span>';
+    return `<tr>
+      <td><div class="td-name"><div class="td-avatar" style="background:var(--yellow-dim);color:var(--yellow);">?</div><div>${emailDisplay}</div></div></td>
+      <td style="color:var(--text3);">${dt}</td>
+      <td><span style="color:${urgColor};font-weight:600;font-size:0.82rem;">${diffStr}</span></td>
+      <td><div style="display:flex;gap:6px;">
+        ${u.email ? `<button class="btn btn-warn btn-sm" onclick="abrirEmailInc('${u.email}')">📧 E-mail</button>` : '<span style="color:var(--text3);font-size:0.75rem;">sem e-mail</span>'}
+        <button class="btn btn-ghost btn-sm" onclick="copiarEmail('${u.email||''}')">📋 Copiar</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function abrirEmailInc(email) {
+  document.getElementById('email-inc-dest').value = email;
+  document.getElementById('email-inc-para').textContent = `Para: ${email}`;
+  openModal('modal-email-inc');
+}
+
+function copiarEmail(email) {
+  if (!email) { toast('Sem e-mail disponível', 'error'); return; }
+  navigator.clipboard.writeText(email);
+  toast(`📋 E-mail copiado: ${email}`, 'success');
+}
+
+async function enviarEmailIncompleto() {
+  const to      = document.getElementById('email-inc-dest').value;
+  const subject = document.getElementById('email-inc-assunto').value.trim();
+  const body    = document.getElementById('email-inc-corpo').value.trim();
+
+  if (!to || !subject || !body) { toast('Preencha todos os campos', 'error'); return; }
+
+  const btn = document.querySelector('#modal-email-inc .btn-primary');
+  btn.textContent = '⏳ Enviando...';
+  btn.disabled = true;
+
+  try {
+    const html = body.replace(/\n/g, '<br>');
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch(`${SUPA_URL}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token || SUPA_KEY}`,
+      },
+      body: JSON.stringify({ to, subject, html, from_name: 'Ventsy' }),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error?.message || JSON.stringify(result.error));
+    addLog('comunicacao', `E-mail enviado para cadastro incompleto`, to);
+    toast(`✅ E-mail enviado para ${to}!`, 'success');
+    closeModal('modal-email-inc');
+  } catch (err) {
+    toast('Erro ao enviar e-mail: ' + err.message, 'error');
+  } finally {
+    btn.textContent = '📤 Enviar e-mail';
+    btn.disabled = false;
+  }
+}
+
+async function emailTodosIncompletos() {
+  const comEmail = allIncompletos.filter(u => u.email);
+  if (!comEmail.length) { toast('Nenhum cadastro incompleto com e-mail', 'error'); return; }
+  if (!confirm(`Enviar e-mail de recuperação para ${comEmail.length} usuário(s) com cadastro incompleto?`)) return;
+
+  const subject = 'Finalize seu cadastro na Ventsy 🏡';
+  const html = `<p>Olá! 👋</p><p>Notamos que você criou sua conta na <strong>Ventsy</strong> mas ainda não finalizou o cadastro do seu espaço.</p><p>Leva menos de 5 minutos e você começa a receber solicitações imediatamente!</p><p><a href="https://ventsy.com.br/cadastro.html" style="background:#ff385c;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">👉 Completar meu cadastro</a></p><br><p>Equipe Ventsy</p>`;
+
+  let enviados = 0;
+  const { data: { session } } = await sb.auth.getSession();
+
+  for (const u of comEmail) {
+    try {
+      await fetch(`${SUPA_URL}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || SUPA_KEY}` },
+        body: JSON.stringify({ to: u.email, subject, html, from_name: 'Ventsy' }),
+      });
+      enviados++;
+    } catch(e) { /* continua */ }
+  }
+  addLog('comunicacao', `E-mail em massa para cadastros incompletos`, `${enviados} enviados`);
+  toast(`✅ ${enviados} e-mail(s) enviados!`, 'success');
+}
+
+function exportIncompletos() {
+  if (!allIncompletos.length) { toast('Nenhum dado para exportar', 'error'); return; }
+  const csv = ['E-mail,Cadastrado em,Completo']
+    .concat(allIncompletos.map(u => `"${u.email||''}","${u.criado_em||''}","${u.cadastro_completo?'Sim':'Não'}"`))
+    .join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `cadastros-incompletos-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  toast('📊 CSV exportado!', 'success');
+}
+
+// ══════════════════════════════════════════════
+// ─── RELATÓRIO DE BUSCAS ───
+// ══════════════════════════════════════════════
+async function loadBuscasSemResultado() {
+  // Carregado no admin para exibir no relatório / qualidade
+  const { data } = await sb
+    .from('buscas_log')
+    .select('termo, resultados, criado_em')
+    .eq('resultados', 0)
+    .order('criado_em', { ascending: false })
+    .limit(50);
+  return data || [];
+}
 </script>
 </body>
 </html>
