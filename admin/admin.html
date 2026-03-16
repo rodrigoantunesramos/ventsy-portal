@@ -963,9 +963,17 @@
           <div class="stat-value loading" id="an-total-form">—</div>
           <div class="stat-label">Total Cliques Formulário</div>
         </div>
+        <div class="stat-card purple">
+          <div class="stat-icon purple">🎯</div>
+          <div class="stat-value loading" id="an-ctr">—</div>
+          <div class="stat-label">CTR — Cliques/Visualizações</div>
+          <div class="stat-sub">WhatsApp ÷ Views</div>
+        </div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:1fr;margin-bottom:24px;">
         <div class="stat-card yellow">
           <div class="stat-icon yellow">🏆</div>
-          <div class="stat-value loading" id="an-top-prop">—</div>
+          <div class="stat-value loading" id="an-top-prop" style="font-size:1.2rem;">—</div>
           <div class="stat-label">Propriedade mais vista</div>
         </div>
       </div>
@@ -1011,6 +1019,9 @@
 
     <!-- ═══════════ USUÁRIOS ═══════════ -->
     <div class="page" id="page-usuarios">
+      <div class="alert-banner info" style="margin-bottom:16px;">
+        ℹ️ Apenas usuários que <strong>completaram o cadastro</strong> (preencheram o perfil) aparecem aqui. Usuários que criaram conta mas não concluíram o cadastro ficam somente em <code>auth.users</code> no Supabase e não aparecem nesta lista.
+      </div>
       <div class="table-card">
         <div class="table-header">
           <div class="section-title">Todos os usuários</div>
@@ -1061,31 +1072,53 @@
 
     <!-- ═══════════ PLANOS ═══════════ -->
     <div class="page" id="page-planos">
-      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px;">
-        <div class="stat-card gray" style="padding:28px;">
-          <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:6px;">Básico</div>
-          <div style="font-size:2rem; font-weight:800; color:var(--text3); font-family:var(--font-display); margin-bottom:16px;">Grátis</div>
-          <div style="font-size:0.8rem; color:var(--text3); line-height:1.8;">
-            ✓ 1 propriedade<br>✓ Listagem básica<br>✓ Suporte por email<br>✗ Analytics<br>✗ Destaque
-          </div>
+      <div class="alert-banner info" style="margin-bottom:20px;">
+        ℹ️ Alterações de preço aqui atualizam os cálculos de MRR/ARR no financeiro. Para mudar o preço cobrado nas páginas públicas, edite também <code>planos.html</code>.
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:28px;">
+        <!-- Básico -->
+        <div class="stat-card" style="padding:28px; border-color:rgba(255,255,255,0.08);">
+          <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:16px;">⚪ Básico</div>
+          <div class="form-label">Preço mensal (R$)</div>
+          <input type="number" class="form-input" id="plano-basico-preco" value="0" min="0" style="margin-bottom:12px;">
+          <div class="form-label">Benefícios (um por linha)</div>
+          <textarea class="compose-textarea" id="plano-basico-items" style="min-height:100px;">1 propriedade
+Listagem básica
+Suporte por email</textarea>
+          <div class="form-label">Status</div>
+          <select class="form-select" id="plano-basico-status"><option value="ativo">Ativo</option><option value="oculto">Oculto</option></select>
         </div>
+        <!-- Pro -->
         <div class="stat-card blue" style="padding:28px; border-color:rgba(59,130,246,0.3);">
-          <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:6px; color:var(--blue);">Pro ⭐</div>
-          <div style="font-size:2rem; font-weight:800; color:var(--blue); font-family:var(--font-display); margin-bottom:16px;">R$99/mês</div>
-          <div style="font-size:0.8rem; color:var(--text2); line-height:1.8;">
-            ✓ 3 propriedades<br>✓ Analytics básico<br>✓ Suporte prioritário<br>✓ Destaque search<br>✗ API access
-          </div>
+          <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:16px; color:var(--blue);">⭐ Pro</div>
+          <div class="form-label">Preço mensal (R$)</div>
+          <input type="number" class="form-input" id="plano-pro-preco" value="99" min="0" style="margin-bottom:12px;">
+          <div class="form-label">Benefícios (um por linha)</div>
+          <textarea class="compose-textarea" id="plano-pro-items" style="min-height:100px;">3 propriedades
+Analytics básico
+Suporte prioritário
+Destaque na busca</textarea>
+          <div class="form-label">Status</div>
+          <select class="form-select" id="plano-pro-status"><option value="ativo">Ativo</option><option value="oculto">Oculto</option></select>
         </div>
+        <!-- Ultra -->
         <div class="stat-card purple" style="padding:28px; border-color:rgba(139,92,246,0.3);">
-          <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:6px; color:var(--purple);">Ultra 🚀</div>
-          <div style="font-size:2rem; font-weight:800; color:var(--purple); font-family:var(--font-display); margin-bottom:16px;">R$249/mês</div>
-          <div style="font-size:0.8rem; color:var(--text2); line-height:1.8;">
-            ✓ Ilimitado<br>✓ Analytics completo<br>✓ Suporte 24/7<br>✓ Topo de busca<br>✓ API access
-          </div>
+          <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:16px; color:var(--purple);">🚀 Ultra</div>
+          <div class="form-label">Preço mensal (R$)</div>
+          <input type="number" class="form-input" id="plano-ultra-preco" value="249" min="0" style="margin-bottom:12px;">
+          <div class="form-label">Benefícios (um por linha)</div>
+          <textarea class="compose-textarea" id="plano-ultra-items" style="min-height:100px;">Propriedades ilimitadas
+Analytics completo
+Suporte 24/7
+Topo da busca
+Selo verificado</textarea>
+          <div class="form-label">Status</div>
+          <select class="form-select" id="plano-ultra-status"><option value="ativo">Ativo</option><option value="oculto">Oculto</option></select>
         </div>
       </div>
-      <div style="margin-top:32px; padding:24px; background:var(--bg2); border:1px solid var(--border); border-radius:16px; color:var(--text3); font-size:0.85rem;">
-        💡 <strong style="color:var(--text);">Configuração de planos</strong> — Para editar preços e benefícios dos planos, acesse o painel Supabase diretamente na tabela <code style="color:var(--red);">planos_anunciantes</code>.
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn btn-ghost" onclick="carregarPlanos()">↺ Resetar</button>
+        <button class="btn btn-primary" onclick="salvarPlanos()">💾 Salvar configurações de planos</button>
       </div>
     </div>
 
@@ -1511,6 +1544,56 @@
   </div>
 </div>
 
+<!-- MODAL: EDITAR PROPRIEDADE (WYSIWYG Admin) -->
+<div class="modal-overlay" id="modal-edit-prop">
+  <div class="modal" style="max-width:680px;">
+    <button class="modal-close" onclick="closeModal('modal-edit-prop')">✕</button>
+    <div class="modal-title">✏️ Editar propriedade</div>
+    <div class="modal-sub" id="mep-sub">Alterações salvas diretamente no banco</div>
+    <input type="hidden" id="mep-id">
+    <div class="two-col">
+      <div>
+        <div class="form-label">Nome da propriedade</div>
+        <input type="text" class="form-input" id="mep-nome" placeholder="Nome">
+        <div class="form-label">Cidade</div>
+        <input type="text" class="form-input" id="mep-cidade" placeholder="Cidade">
+        <div class="form-label">Estado (UF)</div>
+        <input type="text" class="form-input" id="mep-estado" placeholder="RJ" maxlength="2" style="text-transform:uppercase;">
+        <div class="form-label">Capacidade (pessoas)</div>
+        <input type="number" class="form-input" id="mep-capacidade" placeholder="100" min="1">
+      </div>
+      <div>
+        <div class="form-label">Valor base (R$)</div>
+        <input type="number" class="form-input" id="mep-valor" placeholder="500" min="0">
+        <div class="form-label">WhatsApp</div>
+        <input type="text" class="form-input" id="mep-whatsapp" placeholder="(21) 99999-9999">
+        <div class="form-label">Email de contato</div>
+        <input type="email" class="form-input" id="mep-email" placeholder="contato@email.com">
+        <div class="form-label">Tipo / Categoria</div>
+        <input type="text" class="form-input" id="mep-tipo" placeholder="Sítio, Salão, etc.">
+      </div>
+    </div>
+    <div class="form-label">Descrição</div>
+    <textarea class="compose-textarea" id="mep-descricao" placeholder="Descrição completa do espaço..."></textarea>
+    <div class="form-label">CEP</div>
+    <input type="text" class="form-input" id="mep-cep" placeholder="00000-000">
+    <div class="form-label">Endereço completo</div>
+    <input type="text" class="form-input" id="mep-endereco" placeholder="Rua, número, bairro">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 14px;background:var(--bg3);border-radius:8px;">
+      <input type="checkbox" id="mep-publicada" style="width:16px;height:16px;accent-color:var(--green);">
+      <label for="mep-publicada" style="font-size:0.88rem;color:var(--text2);cursor:pointer;">✅ Propriedade publicada (visível ao público)</label>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 14px;background:var(--bg3);border-radius:8px;">
+      <input type="checkbox" id="mep-destaque" style="width:16px;height:16px;accent-color:var(--purple);">
+      <label for="mep-destaque" style="font-size:0.88rem;color:var(--text2);cursor:pointer;">📌 Destaque no topo (fixar na página inicial)</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-prop')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProp()">💾 Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOASTS -->
 <div id="toast-container"></div>
 
@@ -1519,11 +1602,13 @@ const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
+const ADMIN_EMAILS = ['rodrigoantunesramos@gmail.com'];
 
 // ─── ESTADO GLOBAL ───
-let allUsers = [], allProps = [], allAss = [], allEvents = [];
+let allUsers = [], allProps = [], allAss = [], allEvents = [], allFotos = [];
 let adminEmail = '';
 let graficoAtividade = null, graficoPlanos = null, graficoTipos = null;
+
 
 // ─── TOAST ───
 function toast(msg, type='info') {
@@ -1541,12 +1626,21 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 
 // ─── LOGIN ───
 async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-password').value;
-  document.getElementById('login-err').style.display = 'none';
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+
+  if (!ADMIN_EMAILS.includes(email)) {
+    errEl.textContent = '🔒 Acesso negado. Esta conta não tem permissão de admin.';
+    errEl.style.display = 'block';
+    return;
+  }
+
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
   if (error) {
-    document.getElementById('login-err').style.display = 'block';
+    errEl.textContent = 'E-mail ou senha incorretos.';
+    errEl.style.display = 'block';
     return;
   }
   adminEmail = email;
@@ -1567,7 +1661,15 @@ async function init() {
     document.getElementById('login-screen').style.display = 'flex';
     return;
   }
-  adminEmail = session.user.email;
+  adminEmail = session.user.email.toLowerCase();
+  if (!ADMIN_EMAILS.includes(adminEmail)) {
+    await sb.auth.signOut();
+    const errEl = document.getElementById('login-err');
+    errEl.textContent = '🔒 Acesso negado. Esta conta não tem permissão de admin.';
+    errEl.style.display = 'block';
+    document.getElementById('login-screen').style.display = 'flex';
+    return;
+  }
   showApp();
 }
 
@@ -1587,16 +1689,18 @@ async function showApp() {
 
 // ─── LOAD DATA ───
 async function loadAllData() {
-  const [r1, r2, r3, r4] = await Promise.all([
+  const [r1, r2, r3, r4, r5] = await Promise.all([
     sb.from('usuarios').select('*').order('criado_em', { ascending: false }),
     sb.from('propriedades').select('*').order('criadoem', { ascending: false }),
     sb.from('assinaturas').select('*').order('criado_em', { ascending: false }),
-    sb.from('analytics_eventos').select('*').order('created_at', { ascending: false })
+    sb.from('analytics_eventos').select('*').order('created_at', { ascending: false }),
+    sb.from('fotos_imovel').select('propriedade_id, url, secao').order('ordem')
   ]);
   allUsers = r1.data || [];
   allProps = r2.data || [];
   allAss = r3.data || [];
   allEvents = r4.data || [];
+  allFotos = r5.data || [];
   await loadCupons();
 }
 
@@ -1635,6 +1739,7 @@ function showPage(page) {
   if (page === 'comunicacao') { updateComCount(); renderComHistorico(); }
   if (page === 'cupons') renderCupons();
   if (page === 'logs') renderLogs();
+  if (page === 'planos') carregarPlanos();
 }
 
 // ─── DASHBOARD ───
@@ -1789,13 +1894,15 @@ function renderRecentUsers() {
 
 // ─── ANALYTICS ───
 function renderAnalytics() {
-  const total = allEvents.length;
   const totalV = allEvents.filter(e=>e.evento_tipo==='view').length;
   const totalW = allEvents.filter(e=>e.evento_tipo==='whatsapp').length;
   const totalF = allEvents.filter(e=>e.evento_tipo==='formulario').length;
   setValue('an-total-views', totalV);
   setValue('an-total-wa', totalW);
   setValue('an-total-form', totalF);
+  // CTR: cliques WA / visualizações
+  const ctr = totalV > 0 ? ((totalW / totalV) * 100).toFixed(1) : '0';
+  setValue('an-ctr', `${ctr}%`);
 
   // Top prop
   const propCount = {};
@@ -1854,20 +1961,22 @@ function renderPropriedades(filter='') {
   tbody.innerHTML = data.map(p => {
     const owner = allUsers.find(u => u.id === p.usuario_id);
     const ass = allAss.find(a => a.usuario_id === p.usuario_id);
-    const status = p.publicada ? '<span class="badge badge-green">✓ Ativa</span>' : '<span class="badge badge-yellow">⏳ Pendente</span>';
+    const statusBadge = p.publicada ? '<span class="badge badge-green">✓ Ativa</span>' : '<span class="badge badge-yellow">⏳ Pendente</span>';
+    const destBadge = p.destaque ? '<span class="badge badge-purple" style="margin-left:4px;">📌</span>' : '';
     return `<tr>
       <td><div class="td-name" style="gap:10px">
         <div style="width:36px;height:36px;border-radius:8px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">🏡</div>
-        <div><div style="font-weight:600;color:var(--text)">${p.nome||'Sem nome'}</div><div style="font-size:0.72rem;color:var(--text3)">${p.tipo_propriedade||p.categoria||'—'}</div></div>
+        <div><div style="font-weight:600;color:var(--text)">${p.nome||'Sem nome'}${destBadge}</div><div style="font-size:0.72rem;color:var(--text3)">${p.tipo_propriedade||p.categoria||'—'}</div></div>
       </div></td>
       <td style="color:var(--text2)">${owner?.nome||'Desconhecido'}</td>
-      <td>${status}</td>
+      <td>${statusBadge}</td>
       <td><span class="badge plano-${ass?.plano_ativo||'basico'}">${ass?.plano_ativo||'básico'}</span></td>
       <td style="color:var(--text3)">${p.cidade||'—'}, ${p.estado||'—'}</td>
       <td>
-        <div style="display:flex;gap:6px">
-          ${!p.publicada ? `<button class="btn btn-success btn-sm" onclick="liberarProp('${p.id}')">✅ Liberar</button>` : `<button class="btn btn-warn btn-sm" onclick="suspenderProp('${p.id}')">⏸ Suspender</button>`}
-          <button class="btn btn-ghost btn-sm" onclick="verProp('${p.id}')">👁</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${!p.publicada ? `<button class="btn btn-success btn-sm" onclick="liberarProp('${p.id}')">✅ Liberar</button>` : `<button class="btn btn-warn btn-sm" onclick="suspenderProp('${p.id}')">⏸</button>`}
+          <button class="btn btn-ghost btn-sm" onclick="editarProp('${p.id}')">✏️</button>
+          <button class="btn btn-ghost btn-sm" onclick="${p.destaque ? `removerDestaque('${p.id}')` : `fixarDestaque('${p.id}')`}" title="${p.destaque?'Remover destaque':'Fixar no topo'}">📌</button>
         </div>
       </td>
     </tr>`;
@@ -2069,6 +2178,107 @@ async function saveAss() {
 }
 
 // ══════════════════════════════════════════════
+// ─── EDITOR DE PLANOS ───
+// ══════════════════════════════════════════════
+function carregarPlanos() {
+  const p = getPlanPrices();
+  const el = (id) => document.getElementById(id);
+  if (el('plano-basico-preco')) el('plano-basico-preco').value = p.basico;
+  if (el('plano-pro-preco'))    el('plano-pro-preco').value    = p.pro;
+  if (el('plano-ultra-preco'))  el('plano-ultra-preco').value  = p.ultra;
+}
+
+function salvarPlanos() {
+  const basico = Number(document.getElementById('plano-basico-preco').value) || 0;
+  const pro    = Number(document.getElementById('plano-pro-preco').value) || 99;
+  const ultra  = Number(document.getElementById('plano-ultra-preco').value) || 249;
+  const prices = { basico, pro, ultra };
+  savePlanPrices(prices);
+  PLAN_PRICES = prices;
+  addLog('sistema', 'Preços de planos atualizados', `Básico R$${basico} · Pro R$${pro} · Ultra R$${ultra}`);
+  toast('💾 Configurações de planos salvas! MRR será recalculado automaticamente.', 'success');
+}
+
+// ══════════════════════════════════════════════
+// ─── EDITOR DE PROPRIEDADE (WYSIWYG ADMIN) ───
+// ══════════════════════════════════════════════
+function editarProp(id) {
+  const p = allProps.find(p => p.id == id);
+  if (!p) return;
+  const owner = allUsers.find(u => u.id === p.usuario_id);
+  document.getElementById('mep-id').value = id;
+  document.getElementById('mep-sub').textContent = `Dono: ${owner?.nome || 'Desconhecido'} · ID #${id}`;
+  document.getElementById('mep-nome').value      = p.nome || '';
+  document.getElementById('mep-cidade').value    = p.cidade || '';
+  document.getElementById('mep-estado').value    = p.estado || '';
+  document.getElementById('mep-capacidade').value= p.capacidade || '';
+  document.getElementById('mep-valor').value     = p.valor_base || '';
+  document.getElementById('mep-whatsapp').value  = p.whatsapp || '';
+  document.getElementById('mep-email').value     = p.email_contato || '';
+  document.getElementById('mep-tipo').value      = p.tipo_propriedade || p.categoria || '';
+  document.getElementById('mep-descricao').value = p.descricao || '';
+  document.getElementById('mep-cep').value       = p.cep || '';
+  document.getElementById('mep-endereco').value  = p.rua ? `${p.rua}, ${p.numero||''} - ${p.bairro||''}` : (p.endereco || '');
+  document.getElementById('mep-publicada').checked = !!p.publicada;
+  document.getElementById('mep-destaque').checked  = !!p.destaque;
+  openModal('modal-edit-prop');
+}
+
+async function saveProp() {
+  const id = document.getElementById('mep-id').value;
+  const p  = allProps.find(x => x.id == id);
+  const payload = {
+    nome:           document.getElementById('mep-nome').value.trim() || null,
+    cidade:         document.getElementById('mep-cidade').value.trim() || null,
+    estado:         document.getElementById('mep-estado').value.trim().toUpperCase() || null,
+    capacidade:     Number(document.getElementById('mep-capacidade').value) || null,
+    valor_base:     Number(document.getElementById('mep-valor').value) || null,
+    whatsapp:       document.getElementById('mep-whatsapp').value.trim() || null,
+    email_contato:  document.getElementById('mep-email').value.trim() || null,
+    tipo_propriedade: document.getElementById('mep-tipo').value.trim() || null,
+    descricao:      document.getElementById('mep-descricao').value.trim() || null,
+    cep:            document.getElementById('mep-cep').value.trim() || null,
+    publicada:      document.getElementById('mep-publicada').checked,
+    destaque:       document.getElementById('mep-destaque').checked,
+  };
+  const { error } = await sb.from('propriedades').update(payload).eq('id', id);
+  if (error) { toast('Erro: ' + error.message, 'error'); return; }
+  // Log de alterações com diff
+  const diffs = [];
+  if (p?.nome !== payload.nome) diffs.push(`Nome: "${p?.nome}" → "${payload.nome}"`);
+  if (Number(p?.valor_base) !== payload.valor_base) diffs.push(`Valor: R$${p?.valor_base||0} → R$${payload.valor_base||0}`);
+  if (p?.publicada !== payload.publicada) diffs.push(`Publicada: ${p?.publicada} → ${payload.publicada}`);
+  const idx = allProps.findIndex(x => x.id == id);
+  if (idx >= 0) Object.assign(allProps[idx], payload);
+  addLog('propriedade', `Propriedade editada pelo admin: ${payload.nome}`, diffs.join(' | ') || 'campos atualizados');
+  closeModal('modal-edit-prop');
+  toast('✅ Propriedade atualizada!', 'success');
+  renderPropriedades();
+  renderPendentes();
+  renderDashboard();
+}
+
+// ─── DESTAQUE ───
+async function fixarDestaque(id) {
+  const { error } = await sb.from('propriedades').update({ destaque: true }).eq('id', id);
+  if (error) { toast('Erro: ' + error.message, 'error'); return; }
+  const p = allProps.find(x => x.id == id);
+  if (p) p.destaque = true;
+  addLog('propriedade', `Propriedade fixada em destaque: ${p?.nome||id}`, '');
+  toast('📌 Propriedade fixada no destaque!', 'success');
+  renderPropriedades();
+}
+
+async function removerDestaque(id) {
+  const { error } = await sb.from('propriedades').update({ destaque: false }).eq('id', id);
+  if (error) { toast('Erro: ' + error.message, 'error'); return; }
+  const p = allProps.find(x => x.id == id);
+  if (p) p.destaque = false;
+  toast('📌 Destaque removido', 'info');
+  renderPropriedades();
+}
+
+// ══════════════════════════════════════════════
 // ─── LOGS DE AUDITORIA (localStorage) ───
 // ══════════════════════════════════════════════
 function addLog(tipo, acao, detalhe = '') {
@@ -2115,9 +2325,21 @@ function clearLogs() {
 // ══════════════════════════════════════════════
 // ─── FINANCEIRO ───
 // ══════════════════════════════════════════════
-const PLAN_PRICES = { basico: 0, pro: 99, ultra: 249 };
+// PLAN_PRICES lê do localStorage para refletir edições do admin
+function getPlanPrices() {
+  try {
+    const saved = localStorage.getItem('ventsy_plan_prices');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return { basico: 0, pro: 99, ultra: 249 };
+}
+function savePlanPrices(prices) {
+  localStorage.setItem('ventsy_plan_prices', JSON.stringify(prices));
+}
+let PLAN_PRICES = getPlanPrices();
 
 function renderFinanceiro() {
+  PLAN_PRICES = getPlanPrices(); // recarrega preços dinâmicos
   const ativas = allAss.filter(a => a.status === 'ativa' || a.status === 'trial');
 
   // MRR / ARR
@@ -2125,9 +2347,14 @@ function renderFinanceiro() {
   setValue('fin-mrr', `R$${mrr.toLocaleString('pt-BR')}`);
   setValue('fin-arr', `R$${(mrr * 12).toLocaleString('pt-BR')}`);
 
-  // Receita total histórica
+  // Receita total histórica (valor_pago registrado manualmente nas assinaturas)
   const total = allAss.reduce((sum, a) => sum + Number(a.valor_pago || 0), 0);
-  setValue('fin-total', `R$${total.toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2})}`);
+  const totalEl = document.getElementById('fin-total');
+  if (totalEl) {
+    totalEl.textContent = `R$${total.toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2})}`;
+    totalEl.classList.remove('loading');
+    totalEl.title = 'Baseado no campo valor_pago das assinaturas. Atualize manualmente ao confirmar pagamentos.';
+  }
 
   // ARPU
   const arpu = ativas.length ? (mrr / ativas.length) : 0;
@@ -2274,7 +2501,9 @@ function renderFinPagamentos() {
 // ══════════════════════════════════════════════
 function renderQualidade() {
   const pubProps = allProps.filter(p => p.publicada);
-  const semFoto = pubProps.filter(p => !p.foto_capa && !p.foto_principal).length;
+  // Fotos ficam na tabela fotos_imovel (separada das propriedades)
+  const propsComFoto = new Set(allFotos.map(f => f.propriedade_id));
+  const semFoto = pubProps.filter(p => !propsComFoto.has(p.id)).length;
   const semDesc = pubProps.filter(p => !p.descricao?.trim()).length;
   const semWa   = pubProps.filter(p => !p.whatsapp?.trim()).length;
   const usersComProp = new Set(allProps.map(p => p.usuario_id));
@@ -2314,7 +2543,7 @@ function renderQualidade() {
   // Propriedades com problemas
   const propsComProblemas = allProps.map(p => {
     const issues = [];
-    if (!p.foto_capa && !p.foto_principal) issues.push('📷 Sem foto');
+    if (!propsComFoto.has(p.id)) issues.push('📷 Sem foto');
     if (!p.descricao?.trim()) issues.push('📝 Sem descrição');
     if (!p.whatsapp?.trim()) issues.push('📱 Sem WhatsApp');
     if (!p.cidade?.trim()) issues.push('📍 Sem cidade');

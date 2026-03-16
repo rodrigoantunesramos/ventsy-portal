@@ -625,7 +625,7 @@ async function render() {
     const container = document.getElementById('container-cats');
 
     const [{ data: props, error }, planos] = await Promise.all([
-        _sb.from('propriedades').select('*'),
+        _sb.from('propriedades').select('*').eq('publicada', true),
         planosMap()
     ]);
 
