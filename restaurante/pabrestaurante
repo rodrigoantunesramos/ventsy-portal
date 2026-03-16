@@ -339,45 +339,87 @@ window.addEventListener('scroll', () => {
 
 // ── INIT ──
 window.addEventListener('DOMContentLoaded', async () => {
-  if (!restId) { window.location.href = 'buscarestaurante.html'; return; }
 
-  // Busca restaurante + fotos + cardápio em paralelo
-  const [restRes, fotosRes, catRes] = await Promise.all([
-    sb.from('restaurantes').select('*').eq('id', restId).single(),
-    sb.from('fotos_restaurante').select('*').eq('restaurante_id', restId).order('ordem'),
-    sb.from('cardapio_categorias').select('*').eq('restaurante_id', restId).order('ordem')
-  ]);
+  // Se não tem id na URL, mostra tela de demonstração em vez de redirecionar
+  if (!restId) {
+    document.getElementById('loading-screen').style.display = 'none';
+    mostrarErro('Nenhum restaurante selecionado', 'Acesse esta página a partir da busca de restaurantes.', 'buscarestaurante.html', '← Ver restaurantes');
+    return;
+  }
 
-  const rest = restRes.data;
-  if (!rest) { window.location.href = 'buscarestaurante.html'; return; }
+  try {
+    // Busca restaurante + fotos + cardápio em paralelo
+    const [restRes, fotosRes, catRes] = await Promise.all([
+      sb.from('restaurantes').select('*').eq('id', restId).single(),
+      sb.from('fotos_restaurante').select('*').eq('restaurante_id', restId).order('ordem'),
+      sb.from('cardapio_categorias').select('*').eq('restaurante_id', restId).order('ordem')
+    ]);
 
-  // Atualiza title/meta
-  document.title = `${rest.nome} — VENTSY`;
+    // Trata erro de tabela não criada ainda
+    if (restRes.error) {
+      document.getElementById('loading-screen').style.display = 'none';
+      if (restRes.error.code === '42P01') {
+        mostrarErro('Módulo em configuração', 'As tabelas do módulo de restaurantes ainda não foram criadas no banco de dados. Execute o SQL fornecido no Supabase para ativar este módulo.', 'buscarestaurante.html', '← Voltar');
+      } else {
+        mostrarErro('Restaurante não encontrado', restRes.error.message, 'buscarestaurante.html', '← Ver restaurantes');
+      }
+      return;
+    }
 
-  // Render galeria
-  renderGaleria(rest, fotosRes.data || []);
+    const rest = restRes.data;
+    if (!rest) {
+      document.getElementById('loading-screen').style.display = 'none';
+      mostrarErro('Restaurante não encontrado', 'Este restaurante pode ter sido removido ou o link está incorreto.', 'buscarestaurante.html', '← Ver restaurantes');
+      return;
+    }
 
-  // Render info principal
-  renderInfo(rest);
+    // Atualiza title
+    document.title = `${rest.nome} — VENTSY`;
 
-  // Render horários
-  renderHorarios(rest.horario);
+    // Render galeria
+    renderGaleria(rest, fotosRes.data || []);
 
-  // Render contatos
-  renderContatos(rest);
+    // Render info principal
+    renderInfo(rest);
 
-  // Render infos rápidas
-  renderInfoRapida(rest);
+    // Render horários
+    renderHorarios(rest.horario);
 
-  // Cardápio
-  await renderCardapio(catRes.data || [], rest.id);
+    // Render contatos
+    renderContatos(rest);
 
-  // Mapa
-  if (rest.latitude && rest.longitude) renderMapa(rest);
+    // Render infos rápidas
+    renderInfoRapida(rest);
 
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('main-content').style.display   = 'grid';
+    // Cardápio (ignora erro de tabela ausente)
+    if (!catRes.error) {
+      await renderCardapio(catRes.data || [], rest.id);
+    } else {
+      document.getElementById('secao-cardapio').style.display = 'none';
+    }
+
+    // Mapa
+    if (rest.latitude && rest.longitude) renderMapa(rest);
+
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('main-content').style.display   = 'grid';
+
+  } catch (err) {
+    document.getElementById('loading-screen').style.display = 'none';
+    mostrarErro('Erro ao carregar', err.message, 'buscarestaurante.html', '← Voltar');
+  }
 });
+
+// ── TELA DE ERRO ──
+function mostrarErro(titulo, msg, href, btnTxt) {
+  document.body.insertAdjacentHTML('beforeend', `
+    <div style="min-height:80vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:40px;text-align:center;margin-top:64px;">
+      <div style="font-size:3rem;">🍽️</div>
+      <h2 style="font-size:1.3rem;font-weight:800;color:#0d0d0d;">${titulo}</h2>
+      <p style="color:#717171;font-size:0.9rem;max-width:400px;line-height:1.6;">${msg}</p>
+      <a href="${href}" style="background:#ff385c;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;margin-top:8px;">${btnTxt}</a>
+    </div>`);
+}
 
 // ── GALERIA ──
 function renderGaleria(rest, fotos) {
