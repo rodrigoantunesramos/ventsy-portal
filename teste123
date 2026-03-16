@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>VENTSY — Teste de Funções</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #0a0a0f; color: #f0f0f5; padding: 40px; }
+  h1 { font-size: 1.5rem; margin-bottom: 8px; }
+  h1 em { color: #ff385c; font-style: normal; }
+  .sub { color: #666; font-size: 0.85rem; margin-bottom: 40px; }
+
+  .card { background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; margin-bottom: 20px; max-width: 700px; }
+  .card h2 { font-size: 1rem; margin-bottom: 6px; }
+  .card p { font-size: 0.82rem; color: #888; margin-bottom: 16px; }
+
+  input, textarea { width: 100%; padding: 10px 14px; background: #1a1a24; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #f0f0f5; font-family: Arial; font-size: 0.88rem; margin-bottom: 10px; }
+  input:focus, textarea:focus { outline: none; border-color: #ff385c; }
+
+  button { padding: 10px 20px; background: #ff385c; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 700; }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .result { margin-top: 14px; padding: 14px; border-radius: 8px; font-size: 0.82rem; font-family: monospace; white-space: pre-wrap; word-break: break-all; display: none; }
+  .result.ok { background: rgba(12,166,120,0.1); border: 1px solid rgba(12,166,120,0.3); color: #0ca678; }
+  .result.err { background: rgba(255,56,92,0.1); border: 1px solid rgba(255,56,92,0.3); color: #ff385c; }
+  .result.info { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
+
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; margin-left: 8px; }
+  .badge-wait { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .badge-ok { background: rgba(12,166,120,0.15); color: #0ca678; }
+  .badge-err { background: rgba(255,56,92,0.15); color: #ff385c; }
+
+  label { font-size: 0.72rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<h1>VENT<em>SY</em> — Teste de Integrações</h1>
+<p class="sub">Valide se as Edge Functions e integrações estão funcionando corretamente.</p>
+
+<!-- LOGIN STATUS -->
+<div class="card">
+  <h2>🔐 Status da Sessão <span class="badge badge-wait" id="badge-session">verificando...</span></h2>
+  <p>Confirma se você está logado no Supabase (necessário para chamar as functions).</p>
+  <div id="result-session" class="result info">Verificando...</div>
+</div>
+
+<!-- TEST: PERFIS / INCOMPLETOS -->
+<div class="card">
+  <h2>👥 Teste: Tabela Perfis <span class="badge badge-wait" id="badge-usuarios">aguardando</span></h2>
+  <p>Verifica se a tabela perfis tem a coluna email e retorna usuários com cadastro incompleto.</p>
+  <button onclick="testarPerfis()">▶ Testar</button>
+  <div id="result-usuarios" class="result"></div>
+</div>
+
+<!-- TEST: BUSCAS LOG -->
+<div class="card">
+  <h2>🔍 Teste: Tabela buscas_log <span class="badge badge-wait" id="badge-buscas">aguardando</span></h2>
+  <p>Verifica se a tabela buscas_log existe e insere um registro de teste.</p>
+  <button onclick="testarBuscasLog()">▶ Testar</button>
+  <div id="result-buscas" class="result"></div>
+</div>
+
+<!-- TEST: SEND EMAIL -->
+<div class="card">
+  <h2>📧 Teste: Resend (send-email) <span class="badge badge-wait" id="badge-email">aguardando</span></h2>
+  <p>Envia um e-mail de teste via Edge Function → Resend. Use seu próprio e-mail.</p>
+  <label>E-mail de destino</label>
+  <input type="email" id="test-email-dest" placeholder="seuemail@gmail.com" value="rodrigoantunesramos@gmail.com">
+  <button onclick="testarEmail()">▶ Enviar e-mail de teste</button>
+  <div id="result-email" class="result"></div>
+</div>
+
+<!-- TEST: MERCADOPAGO -->
+<div class="card">
+  <h2>💳 Teste: MercadoPago (create-payment) <span class="badge badge-wait" id="badge-mp">aguardando</span></h2>
+  <p>Gera um link de checkout de teste para o plano Pro mensal. Não cobra nada — é ambiente sandbox.</p>
+  <button onclick="testarMP()">▶ Gerar link de pagamento</button>
+  <div id="result-mp" class="result"></div>
+</div>
+
+<!-- TEST: WEBHOOK MP -->
+<div class="card">
+  <h2>🔗 URL do Webhook MercadoPago <span class="badge badge-ok">Info</span></h2>
+  <p>Configure esta URL nas notificações do MercadoPago para ativar planos automaticamente após pagamento aprovado.</p>
+  <div class="result info" style="display:block;">https://hxvlfalgrduitevbhqvq.supabase.co/functions/v1/mp-webhook</div>
+</div>
+
+<script>
+const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+let sessionToken = SUPA_KEY;
+
+function show(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2);
+  el.className = `result ${type}`;
+  el.style.display = 'block';
+}
+function badge(id, type, text) {
+  const el = document.getElementById(id);
+  el.className = `badge badge-${type}`;
+  el.textContent = text;
+}
+
+// Auto-check session on load
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  const el = document.getElementById('result-session');
+  el.style.display = 'block';
+  if (session) {
+    sessionToken = session.access_token;
+    badge('badge-session', 'ok', '✓ Logado');
+    el.className = 'result ok';
+    el.textContent = `✅ Logado como: ${session.user.email}\nUser ID: ${session.user.id}\nToken: ${session.access_token.substring(0,40)}...`;
+  } else {
+    badge('badge-session', 'err', '✗ Deslogado');
+    el.className = 'result err';
+    el.textContent = '⚠️ Você não está logado no Supabase.\nAs funções ainda serão testadas com a chave anon, mas o webhook de pagamento não conseguirá atualizar assinaturas sem service role.\n\nAbra o admin.html primeiro e faça login, depois volte aqui.';
+  }
+});
+
+async function testarPerfis() {
+  badge('badge-usuarios', 'wait', 'testando...');
+  try {
+    // Testa leitura de perfis incompletos
+    const { data, error } = await sb
+      .from('usuarios')
+      .select('id, email, nome, cadastro_completo, criado_em')
+      .or('cadastro_completo.eq.false,nome.is.null')
+      .limit(5);
+
+    if (error) throw new Error(error.message + ' (code: ' + error.code + ')');
+
+    const total = data.length;
+    const comEmail = data.filter(u => u.email).length;
+    badge('badge-usuarios', 'ok', '✓ OK');
+    show('result-usuarios', 
+      `✅ Tabela usuarios OK!\n\nRegistros incompletos (amostra de 5): ${total}\nCom e-mail: ${comEmail}\nSem e-mail: ${total - comEmail}\n\nAmostra:\n${data.map(u => `  • ${u.email || 'sem-email'} | nome: ${u.nome || 'NULL'} | completo: ${u.cadastro_completo}`).join('\n')}`,
+      'ok');
+  } catch(err) {
+    badge('badge-usuarios', 'err', '✗ Erro');
+    show('result-usuarios', '❌ Erro: ' + err.message + '\n\nSe diz "column email does not exist", execute no SQL Editor:\nALTER TABLE perfis ADD COLUMN IF NOT EXISTS email text;', 'err');
+  }
+}
+
+async function testarBuscasLog() {
+  badge('badge-buscas', 'wait', 'testando...');
+  try {
+    // Insere registro de teste
+    const { error: insertErr } = await sb
+      .from('buscas_log')
+      .insert({ termo: '__teste__', resultados: 0, criado_em: new Date().toISOString() });
+
+    if (insertErr) throw new Error(insertErr.message + ' (code: ' + insertErr.code + ')');
+
+    // Lê de volta
+    const { data, error: selectErr } = await sb
+      .from('buscas_log')
+      .select('*')
+      .eq('termo', '__teste__')
+      .limit(1);
+
+    if (selectErr) throw new Error(selectErr.message);
+
+    // Limpa o registro de teste
+    await sb.from('buscas_log').delete().eq('termo', '__teste__');
+
+    badge('badge-buscas', 'ok', '✓ OK');
+    show('result-buscas', '✅ Tabela buscas_log funciona!\n\nInseriu, leu e apagou registro de teste com sucesso.\nO rastreamento de buscas sem resultado está ativo.', 'ok');
+  } catch(err) {
+    badge('badge-buscas', 'err', '✗ Erro');
+    show('result-buscas', '❌ Erro: ' + err.message + '\n\nSe diz "relation does not exist", execute no SQL Editor:\nCREATE TABLE buscas_log (\n  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,\n  termo text NOT NULL,\n  resultados int DEFAULT 0,\n  criado_em timestamptz DEFAULT NOW()\n);', 'err');
+  }
+}
+
+async function testarEmail() {
+  const dest = document.getElementById('test-email-dest').value.trim();
+  if (!dest) { alert('Digite um e-mail de destino'); return; }
+
+  badge('badge-email', 'wait', 'enviando...');
+  try {
+    const res = await fetch(`${SUPA_URL}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionToken}`,
+      },
+      body: JSON.stringify({
+        to: dest,
+        subject: '✅ Teste Ventsy — E-mail funcionando!',
+        html: `
+          <div style="font-family:Arial;max-width:500px;margin:0 auto;">
+            <div style="background:#0a0a0f;padding:20px;border-radius:12px 12px 0 0;text-align:center;">
+              <span style="font-size:1.5rem;font-weight:900;color:#fff;">VENT<span style="color:#ff385c;">SY</span></span>
+            </div>
+            <div style="background:#fff;padding:28px;border-radius:0 0 12px 12px;border:1px solid #eee;">
+              <h2 style="color:#111;">✅ Integração Resend funcionando!</h2>
+              <p style="color:#444;margin-top:12px;">Este é um e-mail de teste enviado às <strong>${new Date().toLocaleTimeString('pt-BR')}</strong>.</p>
+              <p style="color:#444;margin-top:8px;">Sua integração de e-mail transacional está configurada corretamente.</p>
+              <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
+              <p style="color:#aaa;font-size:0.75rem;text-align:center;">Ventsy — Sistema de Teste</p>
+            </div>
+          </div>`,
+        from_name: 'Ventsy Teste',
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(JSON.stringify(data.error || data));
+
+    badge('badge-email', 'ok', '✓ Enviado!');
+    show('result-email', `✅ E-mail enviado com sucesso!\n\nDestinatário: ${dest}\nID Resend: ${data.id}\n\nVerifique sua caixa de entrada (e spam).`, 'ok');
+  } catch(err) {
+    badge('badge-email', 'err', '✗ Erro');
+    show('result-email', '❌ Erro: ' + err.message + '\n\nVerifique:\n1. A Edge Function "send-email" foi criada no Supabase?\n2. O Secret RESEND_API_KEY está correto?\n3. O domínio no Resend está verificado (ou usando o domínio padrão)?', 'err');
+  }
+}
+
+async function testarMP() {
+  badge('badge-mp', 'wait', 'gerando...');
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token || SUPA_KEY;
+    const userId = session?.user?.id || 'teste-usuario-id';
+    const email = session?.user?.email || 'teste@ventsy.com.br';
+
+    const res = await fetch(`${SUPA_URL}/functions/v1/create-payment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        plano: 'pro',
+        periodo: 'mensal',
+        usuario_id: userId,
+        email: email,
+        nome: 'Teste Ventsy',
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(JSON.stringify(data.error || data));
+
+    badge('badge-mp', 'ok', '✓ OK!');
+    show('result-mp', 
+      `✅ MercadoPago funcionando!\n\nPreference ID: ${data.preference_id}\n\nLink SANDBOX (teste, não cobra): ${data.sandbox_url}\n\nLink PRODUÇÃO (real): ${data.checkout_url}\n\n⚠️ Para testar o pagamento clique no link sandbox abaixo.`,
+      'ok');
+
+    // Adiciona link clicável
+    const el = document.getElementById('result-mp');
+    const link = document.createElement('a');
+    link.href = data.sandbox_url;
+    link.target = '_blank';
+    link.style.cssText = 'display:block;margin-top:12px;background:#ff385c;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;text-align:center;';
+    link.textContent = '🧪 Abrir checkout de teste';
+    el.appendChild(link);
+
+  } catch(err) {
+    badge('badge-mp', 'err', '✗ Erro');
+    show('result-mp', '❌ Erro: ' + err.message + '\n\nVerifique:\n1. A Edge Function "create-payment" foi criada no Supabase?\n2. O Secret MP_ACCESS_TOKEN está correto?\n3. O token começa com TEST- para sandbox?', 'err');
+  }
+}
+</script>
+</body>
+</html>
