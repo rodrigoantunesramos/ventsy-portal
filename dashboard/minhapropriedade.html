@@ -377,6 +377,37 @@
             color: #717171; font-size: 0.85rem;
         }
 
+        /* ── TERMÔMETRO DO ANÚNCIO ── */
+        .termometro-card {
+            background: #fff; border-radius: 16px;
+            padding: 24px 28px; margin-bottom: 24px;
+            border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .termometro-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+        }
+        .termometro-titulo { font-size: 1rem; font-weight: 700; color: #0d0d0d; display: flex; align-items: center; gap: 8px; }
+        .termometro-pct { font-size: 2rem; font-weight: 900; line-height: 1; font-family: Arial Black, sans-serif; }
+        .termometro-bar-wrap { background: #f0f2f5; border-radius: 99px; height: 12px; overflow: hidden; margin-bottom: 6px; }
+        .termometro-bar-fill { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(.4,0,.2,1), background 0.5s; background: #ff385c; }
+        .termometro-msg { font-size: 0.82rem; color: #717171; margin-bottom: 20px; line-height: 1.5; }
+        .termometro-itens { display: flex; flex-direction: column; gap: 10px; }
+        .termo-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: #f8f9fa; transition: background 0.2s; }
+        .termo-item.ok { background: rgba(22,163,74,0.06); }
+        .termo-item.pendente { background: rgba(255,56,92,0.05); cursor: pointer; }
+        .termo-item.pendente:hover { background: rgba(255,56,92,0.1); }
+        .termo-icone { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .termo-icone.ok { background: rgba(22,163,74,0.12); }
+        .termo-icone.pendente { background: rgba(255,56,92,0.12); }
+        .termo-texto { flex: 1; }
+        .termo-nome { font-size: 0.88rem; font-weight: 600; color: #0d0d0d; }
+        .termo-dica { font-size: 0.75rem; color: #717171; margin-top: 2px; }
+        .termo-pts { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; flex-shrink: 0; }
+        .termo-pts.ok { background: rgba(22,163,74,0.12); color: #16a34a; }
+        .termo-pts.pendente { background: rgba(255,56,92,0.1); color: #ff385c; }
+        .termo-seta { color: #ff385c; font-size: 0.85rem; flex-shrink: 0; }
+
         /* ── MOBILE SIDEBAR TOGGLE ── */
         .btn-sidebar-toggle {
             display: none;
@@ -508,6 +539,19 @@
             <button class="btn-visualizar" id="btn-visualizar" onclick="verAnuncio()">👁 Ver Anúncio Público</button>
         </header>
 
+        <!-- TERMÔMETRO DO ANÚNCIO -->
+        <div class="termometro-card" id="termometro-card">
+            <div class="termometro-header">
+                <div class="termometro-titulo">🌡️ Força do seu anúncio</div>
+                <div class="termometro-pct" id="termo-pct" style="color:#ff385c;">—</div>
+            </div>
+            <div class="termometro-bar-wrap">
+                <div class="termometro-bar-fill" id="termo-bar" style="width:0%;"></div>
+            </div>
+            <div class="termometro-msg" id="termo-msg">Calculando...</div>
+            <div class="termometro-itens" id="termo-itens"></div>
+        </div>
+
         <!-- ABAS -->
         <nav class="sub-menu-propriedade">
             <button class="tab-link active" onclick="openTab(event, 'contato')">1. Contato</button>
@@ -537,7 +581,7 @@
                                 <option value="">Selecione o tipo...</option>
                                 <option value="Sítio">🌿 Sítio</option>
                                 <option value="Chácara">🏡 Chácara</option>
-                                <option value="Casas de Festas">🎉 Salão de Festas</option>
+                                <option value="Salão de Festas">🎉 Salão de Festas</option>
                                 <option value="Fazenda">🐄 Fazenda</option>
                                 <option value="Casa de Campo">🏠 Casa de Campo</option>
                                 <option value="Mansão / Villa">🏛️ Mansão / Villa</option>
@@ -904,6 +948,117 @@
 
     let PROP_ID = null;
 
+    /* ── TERMÔMETRO DO ANÚNCIO ── */
+    async function calcularTermometro(prop) {
+        // Busca quantidade de fotos na galeria
+        let numFotos = 0;
+        try {
+            const { count } = await sb
+                .from('fotos_imovel')
+                .select('id', { count: 'exact', head: true })
+                .eq('propriedade_id', prop.id);
+            numFotos = count || 0;
+        } catch(_) {}
+
+        // Define os critérios com peso e status
+        const criterios = [
+            {
+                nome: 'Fotos da propriedade',
+                ok: numFotos >= 3,
+                dica_ok: `${numFotos} foto(s) adicionada(s) — ótimo!`,
+                dica_pendente: numFotos === 0
+                    ? 'Adicione pelo menos 3 fotos. Anúncios com fotos recebem 3x mais cliques.'
+                    : `Você tem ${numFotos} foto. Adicione mais ${3 - numFotos} para atingir o mínimo recomendado.`,
+                acao: () => window.location.href = 'fotos.html',
+                link: 'fotos.html',
+                pts: 30
+            },
+            {
+                nome: 'Descrição do espaço',
+                ok: (prop.descricao || '').trim().length >= 80,
+                dica_ok: 'Descrição completa — clientes entendem melhor seu espaço.',
+                dica_pendente: !(prop.descricao || '').trim()
+                    ? 'Adicione uma descrição na aba "Sobre". Descreva o ambiente, estrutura e diferenciais.'
+                    : `Sua descrição está curta (${(prop.descricao||'').trim().length} caracteres). Tente chegar em 80+ para mais destaque.`,
+                acao: () => { document.querySelector('[onclick*="sobre"]')?.click(); },
+                link: null,
+                pts: 25
+            },
+            {
+                nome: 'WhatsApp de contato',
+                ok: !!(prop.whatsapp || '').trim(),
+                dica_ok: 'WhatsApp configurado — clientes podem entrar em contato diretamente.',
+                dica_pendente: 'Adicione seu WhatsApp na aba "Contato". É o canal preferido dos clientes.',
+                acao: () => { document.querySelector('[onclick*="contato"]')?.click(); document.getElementById('whatsapp')?.focus(); },
+                link: null,
+                pts: 20
+            },
+            {
+                nome: 'Endereço completo',
+                ok: !!(prop.cidade && prop.estado),
+                dica_ok: 'Endereço informado — aparece nos resultados de busca por localização.',
+                dica_pendente: 'Preencha cidade e estado na aba "Endereço" para aparecer nas buscas por região.',
+                acao: () => { document.querySelector('[onclick*="endereco"]')?.click(); },
+                link: null,
+                pts: 15
+            },
+            {
+                nome: 'Preço por diária',
+                ok: !!(prop.valor_base),
+                dica_ok: 'Preço informado — clientes sabem o que esperar antes de entrar em contato.',
+                dica_pendente: 'Adicione o valor base por diária na aba "Valores". Anúncios com preço recebem mais consultas qualificadas.',
+                acao: () => { document.querySelector('[onclick*="valores"]')?.click(); },
+                link: null,
+                pts: 10
+            },
+        ];
+
+        // Calcula score total
+        const scoreTotal = criterios.reduce((acc, c) => acc + (c.ok ? c.pts : 0), 0);
+        const ptsMax = criterios.reduce((acc, c) => acc + c.pts, 0); // 100
+
+        // Cor baseada no score
+        const cor = scoreTotal >= 80 ? '#16a34a' : scoreTotal >= 50 ? '#d97706' : '#ff385c';
+
+        // Mensagem motivacional
+        const msgs = {
+            100: '🏆 Parabéns! Seu anúncio está completo e com máxima visibilidade.',
+            80:  '🎉 Muito bom! Seu anúncio está quase perfeito. Pequenos ajustes podem aumentar ainda mais seus contatos.',
+            50:  '🚀 Bom começo! Complete os itens abaixo para aparecer mais nas buscas e receber mais contatos.',
+            0:   '⚡ Seu anúncio precisa de atenção. Complete os itens abaixo para começar a receber clientes.',
+        };
+        const msgKey = scoreTotal >= 100 ? 100 : scoreTotal >= 80 ? 80 : scoreTotal >= 50 ? 50 : 0;
+        const msg = msgs[msgKey];
+
+        // Renderiza
+        document.getElementById('termo-pct').textContent = scoreTotal + '%';
+        document.getElementById('termo-pct').style.color = cor;
+        document.getElementById('termo-msg').textContent = msg;
+
+        const bar = document.getElementById('termo-bar');
+        bar.style.background = cor;
+        setTimeout(() => { bar.style.width = scoreTotal + '%'; }, 100);
+
+        const itensEl = document.getElementById('termo-itens');
+        itensEl.innerHTML = criterios.map((c, i) => `
+            <div class="termo-item ${c.ok ? 'ok' : 'pendente'}" onclick="${c.ok ? '' : `termoAcao(${i})`}">
+                <div class="termo-icone ${c.ok ? 'ok' : 'pendente'}">${c.ok ? '✅' : '⚠️'}</div>
+                <div class="termo-texto">
+                    <div class="termo-nome">${c.nome}</div>
+                    <div class="termo-dica">${c.ok ? c.dica_ok : c.dica_pendente}</div>
+                </div>
+                <span class="termo-pts ${c.ok ? 'ok' : 'pendente'}">+${c.pts}pts</span>
+                ${!c.ok ? '<span class="termo-seta">→ Corrigir</span>' : ''}
+            </div>`).join('');
+
+        // Guarda as ações para chamada via onclick (string)
+        window._termoAcoes = criterios.map(c => c.acao);
+    }
+
+    function termoAcao(i) {
+        if (window._termoAcoes && window._termoAcoes[i]) window._termoAcoes[i]();
+    }
+
     /* ── Init ── */
     async function init() {
         const { data: { session } } = await sb.auth.getSession();
@@ -951,8 +1106,6 @@
 
         if (prop) {
             PROP_ID = prop.id;
-
-            // Aba 1 — Contato
 
             setVal('nome-espaco',     prop.nome);
             setVal('tipo-propriedade', prop.tipo_propriedade);
@@ -1063,7 +1216,22 @@
             }
 
             atualizarBtnAnuncio();
+            // Calcula e exibe o termômetro do anúncio
+            await calcularTermometro(prop);
             // Mapa carrega quando o usuário abre a aba Endereço (evita inicializar em container oculto)
+        } else {
+            // Sem propriedade ainda — mostra termômetro zerado com mensagem de início
+            document.getElementById('termo-pct').textContent = '0%';
+            document.getElementById('termo-pct').style.color = '#ff385c';
+            document.getElementById('termo-msg').textContent = '⚡ Preencha os dados abaixo para ativar seu anúncio e começar a receber clientes!';
+            document.getElementById('termo-itens').innerHTML = `
+                <div class="termo-item pendente">
+                    <div class="termo-icone pendente">⚠️</div>
+                    <div class="termo-texto">
+                        <div class="termo-nome">Cadastro não iniciado</div>
+                        <div class="termo-dica">Preencha e salve os dados da propriedade para começar.</div>
+                    </div>
+                </div>`;
         }
 
         // Auto-save comodidades e servicos_extras ao marcar/desmarcar
