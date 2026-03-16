@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipe — VENTSY</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;background:#f0f2f5}
+    #loading-screen{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:16px}
+    .loading-logo{font-size:2rem;font-weight:900;color:#0d0d0d;letter-spacing:-1px}
+    .loading-logo em{font-style:normal;color:#ff385c}
+    .loading-dots{display:flex;gap:6px}
+    .loading-dots span{width:8px;height:8px;background:#ff385c;border-radius:50%;animation:bounce 1.2s ease-in-out infinite}
+    .loading-dots span:nth-child(2){animation-delay:.2s}
+    .loading-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+    header.topbar{width:100%;height:72px;background:#fff;display:flex;align-items:center;padding:0 5%;box-shadow:0 2px 5px rgba(0,0,0,.08);position:fixed;top:0;z-index:9999;box-sizing:border-box}
+    .header-left,.header-right{flex:1;display:flex}
+    .header-right{align-items:center;gap:12px;justify-content:flex-end}
+    .logo{height:44px;cursor:pointer}
+    .btn-back{display:flex;align-items:center;gap:6px;color:#444;text-decoration:none;font-size:.88rem;font-weight:600;padding:7px 14px;border-radius:8px;transition:background .15s}
+    .btn-back:hover{background:#f5f5f5}
+    .dash-container{display:flex;min-height:100vh;margin-top:72px}
+    .dash-sidebar{width:250px;background:#fff;padding:24px 18px;border-right:1px solid #eee;position:fixed;top:72px;left:0;bottom:0;overflow-y:auto;z-index:200}
+    .menu-section-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;padding:12px 12px 4px}
+    .dash-menu{display:flex;flex-direction:column}
+    .dash-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;color:#666;text-decoration:none;border-radius:8px;margin-bottom:2px;font-size:.88rem;transition:all .2s}
+    .dash-menu a:hover{background:#f7f7f7;color:#0d0d0d}
+    .dash-menu a.active{background:rgba(255,56,92,.08);color:#ff385c;font-weight:600}
+    .dash-content{padding:0 32px 80px;width:100%;margin-left:250px}
+    .page-header{padding:22px 0 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .page-header h2{font-size:1.4rem;font-weight:700;color:#222}
+    .btn-primary{background:#ff385c;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .2s}
+    .btn-primary:hover{background:#e0304f}
+
+    /* KPIs */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+    .kpi-card{background:#fff;border-radius:14px;padding:18px;border:1px solid #eee;position:relative;overflow:hidden}
+    .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+    .kpi-red::before{background:#ef4444}
+    .kpi-green::before{background:#16a34a}
+    .kpi-blue::before{background:#2563eb}
+    .kpi-amber::before{background:#d97706}
+    .kpi-icon{font-size:1.2rem;margin-bottom:8px}
+    .kpi-valor{font-size:1.5rem;font-weight:900;color:#0d0d0d;line-height:1;margin-bottom:4px;font-family:Arial Black,sans-serif}
+    .kpi-label{font-size:.75rem;color:#717171}
+
+    /* Tabs */
+    .tabs-bar{display:flex;gap:4px;border-bottom:2px solid #eee;margin-bottom:20px}
+    .tab-btn{padding:10px 18px;background:none;border:none;border-bottom:2px solid transparent;font-family:inherit;font-size:.88rem;font-weight:500;color:#666;cursor:pointer;transition:all .2s;margin-bottom:-2px}
+    .tab-btn:hover{color:#0d0d0d}
+    .tab-btn.active{color:#ff385c;border-bottom-color:#ff385c;font-weight:700}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+
+    /* Cards de funcionários */
+    .func-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .func-card{background:#fff;border-radius:14px;border:1px solid #eee;padding:20px;transition:box-shadow .2s}
+    .func-card:hover{box-shadow:0 4px 18px rgba(0,0,0,.07)}
+    .func-card.inativo{opacity:.55}
+    .func-avatar{width:56px;height:56px;border-radius:50%;background:#ff385c;color:#fff;font-size:1.3rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:12px;overflow:hidden}
+    .func-avatar img{width:100%;height:100%;object-fit:cover}
+    .func-nome{font-size:.95rem;font-weight:700;color:#0d0d0d;margin-bottom:2px}
+    .func-cargo{font-size:.78rem;color:#717171;margin-bottom:8px}
+    .func-salario{font-size:.82rem;font-weight:600;color:#0d0d0d;background:#f8f9fa;padding:6px 10px;border-radius:8px;margin-bottom:12px;display:inline-block}
+    .func-actions{display:flex;gap:8px}
+    .btn-sm{padding:6px 14px;border-radius:8px;border:none;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .btn-sm-ghost{background:#f0f2f5;color:#444}
+    .btn-sm-ghost:hover{background:#e4e6e9}
+    .btn-sm-danger{background:rgba(239,68,68,.1);color:#ef4444}
+    .btn-sm-danger:hover{background:rgba(239,68,68,.2)}
+    .btn-sm-success{background:rgba(22,163,74,.1);color:#16a34a}
+    .btn-add-card{background:#fff;border:2px dashed #ddd;border-radius:14px;padding:20px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:border-color .2s;color:#bbb;font-size:.84rem;font-weight:600}
+    .btn-add-card:hover{border-color:#ff385c;color:#ff385c}
+    .btn-add-card span{font-size:1.8rem}
+
+    /* Folha */
+    .folha-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+    .folha-header h3{font-size:.95rem;font-weight:700;color:#0d0d0d}
+    .select-mes{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:.84rem;color:#444;outline:none;background:#fff}
+    .select-mes:focus{border-color:#ff385c}
+    table{width:100%;border-collapse:collapse}
+    .folha-table{background:#fff;border-radius:14px;border:1px solid #eee;overflow:hidden}
+    thead th{padding:10px 16px;font-size:.7rem;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.08em;text-align:left;background:#f8f9fa;border-bottom:1px solid #f0f0f0}
+    tbody tr{border-bottom:1px solid #f5f5f5}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:#fafafa}
+    tbody td{padding:12px 16px;font-size:.84rem;color:#444}
+    .td-nome{font-weight:600;color:#0d0d0d;display:flex;align-items:center;gap:8px}
+    .td-avatar-sm{width:28px;height:28px;border-radius:50%;background:#ff385c;color:#fff;font-size:.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .badge-pago{background:rgba(22,163,74,.1);color:#16a34a;border:1px solid rgba(22,163,74,.2);font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px}
+    .badge-pendente{background:rgba(245,158,11,.1);color:#d97706;border:1px solid rgba(245,158,11,.2);font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px}
+    input[type=number].td-input{width:90px;padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:.82rem;font-family:inherit;text-align:right}
+    input[type=number].td-input:focus{outline:none;border-color:#ff385c}
+    .folha-total{background:#f8f9fa;padding:14px 16px;display:flex;justify-content:flex-end;gap:24px;border-top:2px solid #f0f0f0;font-size:.84rem;font-weight:700;color:#0d0d0d}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:18px;padding:28px;width:100%;max-width:460px;max-height:85vh;overflow-y:auto}
+    .modal-titulo{font-size:1.05rem;font-weight:700;margin-bottom:4px}
+    .modal-sub{font-size:.8rem;color:#999;margin-bottom:20px}
+    .form-label{font-size:.75rem;font-weight:700;color:#444;margin-bottom:5px;display:block}
+    .form-input,.form-select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-family:inherit;font-size:.88rem;color:#222;outline:none;transition:border-color .2s;background:#fdfdfd;margin-bottom:12px}
+    .form-input:focus,.form-select:focus{border-color:#ff385c}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0}
+    .btn-cancel{background:#f5f5f5;color:#666;border:none;padding:10px 18px;border-radius:10px;font-family:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
+
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#0d0d0d;color:#fff;padding:13px 24px;border-radius:12px;font-size:.86rem;box-shadow:0 8px 28px rgba(0,0,0,.22);z-index:9999;display:flex;align-items:center;gap:10px;opacity:0;transition:transform .38s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+    .toast.visivel{transform:translateX(-50%) translateY(0);opacity:1}
+    @media(max-width:900px){.dash-sidebar{display:none}.dash-content{margin-left:0;padding:0 16px 80px}.kpi-grid{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+<div id="loading-screen"><div class="loading-logo">VENT<em>SY</em></div><div class="loading-dots"><span></span><span></span><span></span></div></div>
+
+<!-- MODAL: Novo funcionário -->
+<div class="modal-overlay" id="modal-func">
+  <div class="modal">
+    <div class="modal-titulo" id="modal-func-titulo">👤 Novo funcionário</div>
+    <div class="modal-sub">Dados básicos do membro da equipe</div>
+    <input type="hidden" id="func-id">
+    <div class="form-label">Nome completo *</div>
+    <input type="text" class="form-input" id="func-nome" placeholder="Ex: João Silva">
+    <div class="form-grid">
+      <div><div class="form-label">Cargo</div><input type="text" class="form-input" id="func-cargo" placeholder="Garçom, Cozinheiro..."></div>
+      <div><div class="form-label">Salário base (R$)</div><input type="number" class="form-input" id="func-salario" placeholder="1.500,00" min="0" step="0.01"></div>
+    </div>
+    <div class="form-grid">
+      <div><div class="form-label">Data de admissão</div><input type="date" class="form-input" id="func-admissao"></div>
+      <div><div class="form-label">Telefone</div><input type="tel" class="form-input" id="func-tel" placeholder="(21) 99999-0000"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-primary" onclick="salvarFuncionario()">✅ Salvar</button>
+    </div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="header-left"><a href="index.html"><img src="logovents.png" alt="Ventsy" class="logo"></a></div>
+  <div class="header-right"><a href="dashboard-restaurante.html" class="btn-back">← Dashboard</a></div>
+</header>
+
+<div class="dash-container" id="main-content" style="display:none;">
+  <aside class="dash-sidebar">
+    <nav class="dash-menu">
+      <a href="dashboard-restaurante.html">🏠 Dashboard</a>
+      <span class="menu-section-label">Gestão</span>
+      <a href="meurestaurante.html">📋 Dados e Cardápio</a>
+      <a href="calendario-restaurante.html">📅 Calendário</a>
+      <a href="relatorio-restaurante.html">📊 Relatório</a>
+      <span class="menu-section-label">Financeiro</span>
+      <a href="financeiro-restaurante.html">💰 Financeiro</a>
+      <a href="equipe-restaurante.html" class="active">👥 Equipe</a>
+      <a href="promocoes-restaurante.html">🎟️ Promoções</a>
+      <span class="menu-section-label">Relacionamento</span>
+      <a href="avaliacoes-restaurante.html">⭐ Avaliações</a>
+      <a href="documentos-restaurante.html">📁 Documentos</a>
+    </nav>
+  </aside>
+
+  <section class="dash-content">
+    <div class="page-header">
+      <div>
+        <h2>👥 Equipe</h2>
+        <div style="font-size:.82rem;color:#999;margin-top:2px;">Funcionários e folha de pagamento</div>
+      </div>
+      <button class="btn-primary" onclick="abrirModalNovo()">+ Novo funcionário</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-blue"><div class="kpi-icon">👥</div><div class="kpi-valor" id="kpi-total">0</div><div class="kpi-label">Funcionários ativos</div></div>
+      <div class="kpi-card kpi-red"><div class="kpi-icon">💰</div><div class="kpi-valor" id="kpi-folha">R$ 0</div><div class="kpi-label">Folha mensal bruta</div></div>
+      <div class="kpi-card kpi-amber"><div class="kpi-icon">⏳</div><div class="kpi-valor" id="kpi-pendentes">0</div><div class="kpi-label">Pagamentos pendentes</div></div>
+      <div class="kpi-card kpi-green"><div class="kpi-icon">✅</div><div class="kpi-valor" id="kpi-pagos">0</div><div class="kpi-label">Já pagos este mês</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="openTab(event,'equipe-tab')">👤 Equipe</button>
+      <button class="tab-btn" onclick="openTab(event,'folha-tab')">📋 Folha de Pagamento</button>
+    </div>
+
+    <!-- Aba Equipe -->
+    <div id="equipe-tab" class="tab-content active">
+      <div class="func-grid" id="func-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:#bbb;">Carregando...</div>
+      </div>
+    </div>
+
+    <!-- Aba Folha -->
+    <div id="folha-tab" class="tab-content">
+      <div class="folha-header">
+        <h3>📋 Folha de pagamento</h3>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <select class="select-mes" id="sel-mes-folha" onchange="carregarFolha()"></select>
+          <button class="btn-primary" onclick="gerarFolhaMes()">⚡ Gerar mês</button>
+          <button class="btn-primary" style="background:#0d0d0d;" onclick="exportarFolha()">⬇️ Exportar</button>
+        </div>
+      </div>
+      <div class="folha-table">
+        <table>
+          <thead><tr><th>Funcionário</th><th>Cargo</th><th>Salário Base</th><th>Extras (R$)</th><th>Descontos (R$)</th><th>Líquido</th><th>Status</th><th></th></tr></thead>
+          <tbody id="folha-tbody"><tr><td colspan="8" style="text-align:center;padding:28px;color:#bbb;">Selecione um mês</td></tr></tbody>
+        </table>
+        <div class="folha-total" id="folha-total" style="display:none;">
+          <span>Total bruto: <span id="ft-bruto">R$ 0</span></span>
+          <span>Total líquido: <span id="ft-liquido">R$ 0</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL='https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+let REST_ID=null, funcionarios=[], folhaData=[];
+
+function toast(msg,ok=true){const el=document.getElementById('toast');el.innerHTML=(ok?'✅':'❌')+' '+msg;el.classList.add('visivel');setTimeout(()=>el.classList.remove('visivel'),3000)}
+function fmt(v){return'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}
+function openTab(e,id){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');e.currentTarget.classList.add('active')}
+function fecharModal(){document.getElementById('modal-func').classList.remove('open')}
+
+function popularMesesFolha(){
+  const sel=document.getElementById('sel-mes-folha');
+  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const hoje=new Date();
+  for(let i=0;i<12;i++){
+    const d=new Date(hoje.getFullYear(),hoje.getMonth()-i,1);
+    const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const opt=document.createElement('option');
+    opt.value=val; opt.textContent=`${meses[d.getMonth()]} ${d.getFullYear()}`;
+    if(i===0) opt.selected=true;
+    sel.appendChild(opt);
+  }
+}
+
+async function init(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.href='login.html';return}
+  const {data:rest}=await sb.from('restaurantes').select('id').eq('usuario_id',session.user.id).single();
+  if(!rest){window.location.href='dashboard-restaurante.html';return}
+  REST_ID=rest.id;
+  popularMesesFolha();
+  await carregarFuncionarios();
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('main-content').style.display='flex';
+}
+
+async function carregarFuncionarios(){
+  try{
+    const {data,error}=await sb.from('funcionarios').select('*').eq('restaurante_id',REST_ID).order('nome');
+    if(error&&error.code==='42P01'){funcionarios=[];renderEquipe();return}
+    funcionarios=data||[];
+    renderEquipe();
+    atualizarKPIs();
+  }catch(_){funcionarios=[];renderEquipe()}
+}
+
+function renderEquipe(){
+  const grid=document.getElementById('func-grid');
+  const ativos=funcionarios.filter(f=>f.ativo);
+  const inativos=funcionarios.filter(f=>!f.ativo);
+  const renderCard=(f)=>{
+    const inicial=(f.nome||'?')[0].toUpperCase();
+    const adm=f.data_admissao?new Date(f.data_admissao+'T12:00:00').toLocaleDateString('pt-BR',{month:'short',year:'numeric'}):'—';
+    return`<div class="func-card${f.ativo?'':' inativo'}">
+      <div class="func-avatar">${f.foto_url?`<img src="${f.foto_url}" alt="">`:inicial}</div>
+      <div class="func-nome">${f.nome}</div>
+      <div class="func-cargo">${f.cargo||'Sem cargo definido'} · desde ${adm}</div>
+      <div class="func-salario">💰 ${fmt(f.salario_base)}/mês</div>
+      ${f.telefone?`<div style="font-size:.75rem;color:#999;margin-bottom:10px;">📞 ${f.telefone}</div>`:''}
+      <div class="func-actions">
+        <button class="btn-sm btn-sm-ghost" onclick="editarFuncionario('${f.id}')">✏️ Editar</button>
+        <button class="btn-sm ${f.ativo?'btn-sm-danger':'btn-sm-success'}" onclick="toggleAtivo('${f.id}',${!f.ativo})">${f.ativo?'Desativar':'Reativar'}</button>
+      </div>
+    </div>`;
+  };
+  let html=ativos.map(renderCard).join('');
+  if(inativos.length) html+=`<div style="grid-column:1/-1;"><div style="font-size:.75rem;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px;">Inativos</div><div class="func-grid" style="margin:0;">${inativos.map(renderCard).join('')}</div></div>`;
+  html+=`<div class="btn-add-card" onclick="abrirModalNovo()"><span>➕</span>Adicionar funcionário</div>`;
+  grid.innerHTML=html;
+}
+
+function atualizarKPIs(){
+  const ativos=funcionarios.filter(f=>f.ativo);
+  const folhaTotal=ativos.reduce((a,f)=>a+Number(f.salario_base||0),0);
+  document.getElementById('kpi-total').textContent=ativos.length;
+  document.getElementById('kpi-folha').textContent=fmt(folhaTotal);
+  const pagos=folhaData.filter(f=>f.status==='pago').length;
+  const pendentes=folhaData.filter(f=>f.status==='pendente').length;
+  document.getElementById('kpi-pagos').textContent=pagos;
+  document.getElementById('kpi-pendentes').textContent=pendentes;
+}
+
+function abrirModalNovo(){
+  document.getElementById('func-id').value='';
+  document.getElementById('modal-func-titulo').textContent='👤 Novo funcionário';
+  ['func-nome','func-cargo','func-tel'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('func-salario').value='';
+  document.getElementById('func-admissao').value=new Date().toISOString().split('T')[0];
+  document.getElementById('modal-func').classList.add('open');
+}
+
+function editarFuncionario(id){
+  const f=funcionarios.find(x=>x.id===id); if(!f) return;
+  document.getElementById('func-id').value=f.id;
+  document.getElementById('modal-func-titulo').textContent='✏️ Editar funcionário';
+  document.getElementById('func-nome').value=f.nome||'';
+  document.getElementById('func-cargo').value=f.cargo||'';
+  document.getElementById('func-salario').value=f.salario_base||'';
+  document.getElementById('func-admissao').value=f.data_admissao||'';
+  document.getElementById('func-tel').value=f.telefone||'';
+  document.getElementById('modal-func').classList.add('open');
+}
+
+async function salvarFuncionario(){
+  const id=document.getElementById('func-id').value;
+  const nome=document.getElementById('func-nome').value.trim();
+  if(!nome){toast('Informe o nome',false);return}
+  const payload={restaurante_id:REST_ID,nome,cargo:document.getElementById('func-cargo').value.trim()||null,salario_base:parseFloat(document.getElementById('func-salario').value)||0,data_admissao:document.getElementById('func-admissao').value||null,telefone:document.getElementById('func-tel').value.trim()||null};
+  const btn=document.querySelector('#modal-func .btn-primary');
+  btn.textContent='⏳...'; btn.disabled=true;
+  let error;
+  if(id){({error}=await sb.from('funcionarios').update(payload).eq('id',id));}
+  else{({error}=await sb.from('funcionarios').insert(payload));}
+  btn.textContent='✅ Salvar'; btn.disabled=false;
+  if(error){toast('Erro: '+error.message,false);return}
+  toast(id?'Funcionário atualizado!':'Funcionário adicionado!');
+  fecharModal();
+  await carregarFuncionarios();
+}
+
+async function toggleAtivo(id,ativo){
+  await sb.from('funcionarios').update({ativo}).eq('id',id);
+  await carregarFuncionarios();
+  toast(ativo?'Funcionário reativado.':'Funcionário desativado.');
+}
+
+// ── FOLHA ──
+async function carregarFolha(){
+  const mes=document.getElementById('sel-mes-folha').value;
+  try{
+    const {data,error}=await sb.from('folha_pagamento').select('*,funcionario:funcionarios(nome,cargo)').eq('restaurante_id',REST_ID).eq('mes_referencia',mes);
+    if(error&&error.code==='42P01'){folhaData=[];renderFolha([]);return}
+    folhaData=data||[];
+    renderFolha(folhaData);
+    atualizarKPIs();
+  }catch(_){folhaData=[];renderFolha([])}
+}
+
+function renderFolha(folha){
+  const tbody=document.getElementById('folha-tbody');
+  if(!folha.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:28px;color:#bbb;font-size:.84rem;">Nenhum registro. Clique em "Gerar mês" para criar a folha automaticamente.</td></tr>';document.getElementById('folha-total').style.display='none';return}
+  let bruto=0,liquido=0;
+  tbody.innerHTML=folha.map(f=>{
+    const sal=Number(f.salario_base||0);
+    const ext=Number(f.extras||0);
+    const desc=Number(f.descontos||0);
+    const liq=sal+ext-desc;
+    bruto+=sal; liquido+=liq;
+    const inicial=(f.funcionario?.nome||'?')[0].toUpperCase();
+    return`<tr>
+      <td><div class="td-nome"><div class="td-avatar-sm">${inicial}</div>${f.funcionario?.nome||'—'}</div></td>
+      <td style="color:#717171">${f.funcionario?.cargo||'—'}</td>
+      <td>${fmt(sal)}</td>
+      <td><input type="number" class="td-input" value="${f.extras||0}" step="0.01" min="0" onchange="atualizarLinha('${f.id}','extras',this.value)"></td>
+      <td><input type="number" class="td-input" value="${f.descontos||0}" step="0.01" min="0" onchange="atualizarLinha('${f.id}','descontos',this.value)"></td>
+      <td style="font-weight:700;color:#0d0d0d;">${fmt(liq)}</td>
+      <td>${f.status==='pago'?'<span class="badge-pago">✅ Pago</span>':'<span class="badge-pendente">⏳ Pendente</span>'}</td>
+      <td>
+        ${f.status==='pendente'?`<button class="btn-sm btn-sm-success" onclick="marcarPago('${f.id}')">Marcar pago</button>`:`<button class="btn-sm btn-sm-ghost" style="font-size:.7rem;" onclick="desfazerPago('${f.id}')">Desfazer</button>`}
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('ft-bruto').textContent=fmt(bruto);
+  document.getElementById('ft-liquido').textContent=fmt(liquido);
+  document.getElementById('folha-total').style.display='flex';
+}
+
+async function gerarFolhaMes(){
+  const mes=document.getElementById('sel-mes-folha').value;
+  const ativos=funcionarios.filter(f=>f.ativo);
+  if(!ativos.length){toast('Nenhum funcionário ativo',false);return}
+  if(!confirm(`Gerar folha de pagamento para ${ativos.length} funcionário(s) — ${mes}?`))return;
+  // Verifica se já existe
+  const {data:existe}=await sb.from('folha_pagamento').select('id').eq('restaurante_id',REST_ID).eq('mes_referencia',mes).limit(1);
+  if(existe&&existe.length){toast('Folha já gerada para este mês. Exclua e regere se necessário.',false);return}
+  const inserts=ativos.map(f=>({restaurante_id:REST_ID,funcionario_id:f.id,mes_referencia:mes,salario_base:f.salario_base||0,extras:0,descontos:0,status:'pendente'}));
+  const {error}=await sb.from('folha_pagamento').insert(inserts);
+  if(error){toast('Erro: '+error.message,false);return}
+  toast('✅ Folha gerada!');
+  await carregarFolha();
+  atualizarKPIs();
+}
+
+async function atualizarLinha(id,campo,val){
+  await sb.from('folha_pagamento').update({[campo]:parseFloat(val)||0}).eq('id',id);
+  await carregarFolha();
+}
+
+async function marcarPago(id){
+  await sb.from('folha_pagamento').update({status:'pago',pago_em:new Date().toISOString()}).eq('id',id);
+  await carregarFolha();
+  atualizarKPIs();
+  toast('Pagamento registrado!');
+}
+
+async function desfazerPago(id){
+  await sb.from('folha_pagamento').update({status:'pendente',pago_em:null}).eq('id',id);
+  await carregarFolha();
+  atualizarKPIs();
+}
+
+function exportarFolha(){
+  if(!folhaData.length){toast('Sem dados',false);return}
+  const csv=['Funcionário,Cargo,Salário Base,Extras,Descontos,Líquido,Status'].concat(folhaData.map(f=>`"${f.funcionario?.nome||''}","${f.funcionario?.cargo||''}","${f.salario_base}","${f.extras}","${f.descontos}","${Number(f.salario_base)+Number(f.extras)-Number(f.descontos)}","${f.status}"`)).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`folha-${document.getElementById('sel-mes-folha').value}.csv`;
+  a.click(); toast('📊 Exportado!');
+}
+
+init();
+</script>
+</body>
+</html>
