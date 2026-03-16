@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendário — VENTSY</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;background:#f0f2f5}
+
+    #loading-screen{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:16px}
+    .loading-logo{font-size:2rem;font-weight:900;color:#0d0d0d;letter-spacing:-1px}
+    .loading-logo em{font-style:normal;color:#ff385c}
+    .loading-dots{display:flex;gap:6px}
+    .loading-dots span{width:8px;height:8px;background:#ff385c;border-radius:50%;animation:bounce 1.2s ease-in-out infinite}
+    .loading-dots span:nth-child(2){animation-delay:.2s}
+    .loading-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+    header.topbar{width:100%;height:72px;background:#fff;display:flex;align-items:center;padding:0 5%;box-shadow:0 2px 5px rgba(0,0,0,.08);position:fixed;top:0;z-index:9999;box-sizing:border-box}
+    .header-left,.header-right{flex:1;display:flex}
+    .header-right{align-items:center;gap:12px;justify-content:flex-end}
+    .logo{height:44px;width:auto;cursor:pointer}
+    .btn-back{display:flex;align-items:center;gap:6px;color:#444;text-decoration:none;font-size:.88rem;font-weight:600;padding:7px 14px;border-radius:8px;transition:background .15s}
+    .btn-back:hover{background:#f5f5f5}
+
+    .dash-container{display:flex;min-height:100vh;margin-top:72px}
+
+    /* Sidebar */
+    .dash-sidebar{width:250px;background:#fff;padding:24px 18px;border-right:1px solid #eee;position:fixed;top:72px;left:0;bottom:0;overflow-y:auto;z-index:200}
+    .menu-section-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#bbb;padding:12px 12px 4px}
+    .dash-menu{display:flex;flex-direction:column}
+    .dash-menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;color:#666;text-decoration:none;border-radius:8px;margin-bottom:2px;font-size:.88rem;transition:all .2s}
+    .dash-menu a:hover{background:#f7f7f7;color:#0d0d0d}
+    .dash-menu a.active{background:rgba(255,56,92,.08);color:#ff385c;font-weight:600}
+
+    .dash-content{padding:0 32px 60px;width:100%;margin-left:250px}
+    .page-header{padding:22px 0 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+    .page-header h2{font-size:1.4rem;font-weight:700;color:#222}
+    .btn-primary{background:#ff385c;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .2s}
+    .btn-primary:hover{background:#e0304f}
+
+    /* Layout calendário */
+    .cal-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+
+    /* Calendário */
+    .cal-card{background:#fff;border-radius:16px;border:1px solid #eee;overflow:hidden}
+    .cal-nav{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #f0f0f0}
+    .cal-mes{font-size:1rem;font-weight:700;color:#0d0d0d}
+    .cal-btn-nav{background:none;border:1px solid #eee;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+    .cal-btn-nav:hover{background:#f5f5f5;border-color:#ddd}
+    .cal-dias-header{display:grid;grid-template-columns:repeat(7,1fr);padding:8px 16px 0}
+    .cal-dia-label{text-align:center;font-size:.72rem;font-weight:700;color:#bbb;padding:6px 0;text-transform:uppercase}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:8px 16px 16px;gap:4px}
+    .cal-dia{min-height:72px;border-radius:10px;padding:6px;cursor:pointer;transition:all .15s;position:relative;border:1.5px solid transparent}
+    .cal-dia:hover{background:#f7f7f7}
+    .cal-dia.outro-mes{opacity:.3;cursor:default}
+    .cal-dia.hoje{border-color:#ff385c}
+    .cal-dia.fechado{background:rgba(239,68,68,.05)}
+    .cal-dia.fechado .dia-num{color:#bbb}
+    .cal-dia.selecionado{background:rgba(255,56,92,.08);border-color:#ff385c}
+    .dia-num{font-size:.85rem;font-weight:700;color:#0d0d0d;margin-bottom:4px}
+    .dia-status{font-size:.62rem;padding:1px 6px;border-radius:99px;display:inline-block;font-weight:700}
+    .ds-aberto{background:rgba(22,163,74,.1);color:#16a34a}
+    .ds-fechado{background:rgba(239,68,68,.1);color:#ef4444}
+    .dia-reservas{margin-top:4px;display:flex;flex-direction:column;gap:2px}
+    .dia-res-chip{font-size:.6rem;padding:1px 5px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+    .drc-aniversario{background:rgba(124,58,237,.15);color:#7c3aed}
+    .drc-grupo{background:rgba(37,99,235,.15);color:#2563eb}
+    .drc-corporativo{background:rgba(245,158,11,.15);color:#d97706}
+    .drc-outro{background:#f0f2f5;color:#666}
+
+    /* Painel lateral */
+    .side-panel{display:flex;flex-direction:column;gap:16px}
+    .side-card{background:#fff;border-radius:14px;border:1px solid #eee;padding:18px}
+    .side-card h3{font-size:.9rem;font-weight:700;color:#0d0d0d;margin-bottom:4px}
+    .side-sub{font-size:.75rem;color:#999;margin-bottom:14px}
+
+    /* Horários funcionamento */
+    .horario-row-mini{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f5f5f5;font-size:.82rem}
+    .horario-row-mini:last-child{border-bottom:none}
+    .hrm-dia{font-weight:600;color:#0d0d0d;text-transform:capitalize}
+    .hrm-hora{color:#717171}
+    .hrm-fechado{color:#bbb}
+    .hrm-hoje{color:#ff385c}
+
+    /* Detalhe do dia selecionado */
+    .detalhe-dia{background:#fff;border-radius:14px;border:1px solid #eee;padding:18px;margin-bottom:16px}
+    .detalhe-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .detalhe-titulo{font-size:.95rem;font-weight:700;color:#0d0d0d}
+    .toggle-fechado-dia{display:flex;align-items:center;gap:8px;font-size:.8rem;color:#444}
+    .toggle-track{position:relative;width:38px;height:22px;flex-shrink:0}
+    .toggle-track input{opacity:0;width:0;height:0}
+    .tgl-bg{position:absolute;inset:0;background:#ddd;border-radius:99px;cursor:pointer;transition:background .2s}
+    .toggle-track input:checked+.tgl-bg{background:#16a34a}
+    .tgl-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none}
+    .toggle-track input:checked~.tgl-knob{transform:translateX(16px)}
+
+    .reserva-item-mini{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:10px;background:#f8f9fa;margin-bottom:8px}
+    .rim-tipo{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+    .rim-info{flex:1}
+    .rim-nome{font-size:.86rem;font-weight:600;color:#0d0d0d}
+    .rim-det{font-size:.74rem;color:#999;margin-top:2px}
+    .rim-actions{display:flex;gap:6px;flex-shrink:0}
+    .btn-sm{padding:4px 10px;border-radius:6px;font-size:.72rem;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+    .btn-sm-ghost{background:#f0f2f5;color:#666}
+    .btn-sm-danger{background:rgba(239,68,68,.1);color:#ef4444}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:18px;padding:28px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto}
+    .modal-titulo{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+    .modal-sub{font-size:.8rem;color:#999;margin-bottom:20px}
+    .form-label{font-size:.75rem;font-weight:700;color:#444;margin-bottom:5px;display:block}
+    .form-input,.form-select{width:100%;padding:10px 13px;border:1px solid #ddd;border-radius:10px;font-size:.9rem;font-family:inherit;color:#222;outline:none;transition:border-color .2s;background:#fdfdfd;margin-bottom:12px}
+    .form-input:focus,.form-select:focus{border-color:#ff385c}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid #f0f0f0}
+    .btn-cancel{background:#f5f5f5;color:#666;border:none;padding:10px 18px;border-radius:10px;font-family:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
+
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#0d0d0d;color:#fff;padding:13px 24px;border-radius:12px;font-size:.86rem;font-weight:500;box-shadow:0 8px 28px rgba(0,0,0,.22);z-index:9999;display:flex;align-items:center;gap:10px;opacity:0;transition:transform .38s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+    .toast.visivel{transform:translateX(-50%) translateY(0);opacity:1}
+
+    @media(max-width:900px){
+      .cal-layout{grid-template-columns:1fr}
+      .dash-sidebar{display:none}
+      .dash-content{margin-left:0;padding:0 16px 60px}
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="loading-logo">VENT<em>SY</em></div>
+  <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- MODAL: Nova reserva -->
+<div class="modal-overlay" id="modal-reserva">
+  <div class="modal">
+    <div class="modal-titulo">📅 Nova reserva especial</div>
+    <div class="modal-sub" id="modal-data-label">Data selecionada</div>
+    <input type="hidden" id="res-data">
+    <div class="form-label">Nome do cliente *</div>
+    <input type="text" class="form-input" id="res-nome" placeholder="Ex: Maria e família">
+    <div class="form-grid">
+      <div>
+        <div class="form-label">Tipo de reserva</div>
+        <select class="form-select" id="res-tipo">
+          <option value="aniversario">🎂 Aniversário</option>
+          <option value="grupo">👥 Grupo</option>
+          <option value="corporativo">💼 Corporativo</option>
+          <option value="outro">📌 Outro</option>
+        </select>
+      </div>
+      <div>
+        <div class="form-label">Nº de pessoas</div>
+        <input type="number" class="form-input" id="res-pessoas" placeholder="10" min="1">
+      </div>
+    </div>
+    <div class="form-grid">
+      <div>
+        <div class="form-label">Horário</div>
+        <input type="time" class="form-input" id="res-horario" value="19:00">
+      </div>
+      <div>
+        <div class="form-label">WhatsApp do cliente</div>
+        <input type="tel" class="form-input" id="res-whatsapp" placeholder="(21) 99999-0000">
+      </div>
+    </div>
+    <div class="form-label">Observações</div>
+    <textarea class="form-input" id="res-obs" placeholder="Bolo de aniversário, cadeirinha, decoração especial..." style="min-height:70px;resize:vertical;"></textarea>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-primary" onclick="salvarReserva()">✅ Confirmar reserva</button>
+    </div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="header-left">
+    <a href="index.html"><img src="logovents.png" alt="Ventsy" class="logo"></a>
+  </div>
+  <div class="header-right">
+    <a href="dashboard-restaurante.html" class="btn-back">← Dashboard</a>
+  </div>
+</header>
+
+<div class="dash-container" id="main-content" style="display:none;">
+
+  <aside class="dash-sidebar">
+    <nav class="dash-menu">
+      <a href="dashboard-restaurante.html">🏠 Dashboard</a>
+      <span class="menu-section-label">Gestão</span>
+      <a href="meurestaurante.html">📋 Dados e Cardápio</a>
+      <a href="calendario-restaurante.html" class="active">📅 Calendário e Reservas</a>
+      <a href="relatorio-restaurante.html">📊 Relatório</a>
+      <span class="menu-section-label">Financeiro</span>
+      <a href="financeiro-restaurante.html">💰 Financeiro</a>
+      <a href="equipe-restaurante.html">👥 Equipe</a>
+      <a href="promocoes-restaurante.html">🎟️ Promoções</a>
+      <span class="menu-section-label">Relacionamento</span>
+      <a href="avaliacoes-restaurante.html">⭐ Avaliações</a>
+      <a href="documentos-restaurante.html">📁 Documentos</a>
+    </nav>
+  </aside>
+
+  <section class="dash-content">
+    <div class="page-header">
+      <div>
+        <h2>📅 Calendário e Reservas</h2>
+        <div style="font-size:.82rem;color:#999;margin-top:2px;">Gerencie disponibilidade e mesas especiais</div>
+      </div>
+      <button class="btn-primary" onclick="abrirModalHoje()">+ Nova reserva</button>
+    </div>
+
+    <div class="cal-layout">
+      <!-- Calendário principal -->
+      <div>
+        <!-- Detalhe do dia selecionado -->
+        <div class="detalhe-dia" id="detalhe-dia" style="display:none;">
+          <div class="detalhe-header">
+            <div class="detalhe-titulo" id="detalhe-titulo">Dia selecionado</div>
+            <label class="toggle-fechado-dia">
+              <span id="detalhe-status-txt">Aberto</span>
+              <div class="toggle-track">
+                <input type="checkbox" id="toggle-dia-aberto" checked onchange="toggleDiaAberto()">
+                <span class="tgl-bg"></span>
+                <span class="tgl-knob"></span>
+              </div>
+            </label>
+          </div>
+          <div id="detalhe-reservas"></div>
+          <button class="btn-primary" style="width:100%;justify-content:center;margin-top:10px;" onclick="abrirModal()">+ Adicionar reserva neste dia</button>
+        </div>
+
+        <!-- Calendário -->
+        <div class="cal-card">
+          <div class="cal-nav">
+            <button class="cal-btn-nav" onclick="mudarMes(-1)">‹</button>
+            <div class="cal-mes" id="cal-mes-titulo">—</div>
+            <button class="cal-btn-nav" onclick="mudarMes(1)">›</button>
+          </div>
+          <div class="cal-dias-header">
+            <div class="cal-dia-label">Dom</div><div class="cal-dia-label">Seg</div>
+            <div class="cal-dia-label">Ter</div><div class="cal-dia-label">Qua</div>
+            <div class="cal-dia-label">Qui</div><div class="cal-dia-label">Sex</div>
+            <div class="cal-dia-label">Sáb</div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+
+        <!-- Legenda -->
+        <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;font-size:.75rem;color:#666;">
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.3);display:inline-block;"></span>Aberto</span>
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(239,68,68,.1);display:inline-block;"></span>Fechado</span>
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:#7c3aed;display:inline-block;"></span>Aniversário</span>
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:#2563eb;display:inline-block;"></span>Grupo</span>
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:#d97706;display:inline-block;"></span>Corporativo</span>
+        </div>
+      </div>
+
+      <!-- Painel lateral -->
+      <div class="side-panel">
+
+        <!-- Horários de funcionamento -->
+        <div class="side-card">
+          <h3>🕐 Horários de funcionamento</h3>
+          <p class="side-sub">Configurado em Dados do Restaurante</p>
+          <div id="horarios-mini">
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:.82rem;">Carregando...</div>
+          </div>
+          <a href="meurestaurante.html" style="display:block;text-align:center;margin-top:12px;font-size:.78rem;color:#ff385c;font-weight:600;text-decoration:none;">Editar horários →</a>
+        </div>
+
+        <!-- Próximas reservas -->
+        <div class="side-card">
+          <h3>📋 Próximas reservas</h3>
+          <p class="side-sub">Nos próximos 30 dias</p>
+          <div id="lista-reservas">
+            <div style="text-align:center;padding:16px;color:#bbb;font-size:.82rem;">Carregando...</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL='https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+let REST_ID=null, restData=null;
+let mesAtual=new Date().getMonth(), anoAtual=new Date().getFullYear();
+let diaSelecionado=null;
+let todasReservas=[], diasFechados=[];
+
+function toast(msg,ok=true){const el=document.getElementById('toast');el.innerHTML=(ok?'✅':'❌')+' '+msg;el.classList.add('visivel');setTimeout(()=>el.classList.remove('visivel'),3000)}
+function fecharModal(){document.getElementById('modal-reserva').classList.remove('open')}
+
+async function init(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){window.location.href='login.html';return}
+  const {data:rest}=await sb.from('restaurantes').select('*').eq('usuario_id',session.user.id).single();
+  if(!rest){window.location.href='dashboard-restaurante.html';return}
+  REST_ID=rest.id; restData=rest;
+  renderHorariosMini(rest.horario||[]);
+  await carregarReservas();
+  renderCalendario();
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('main-content').style.display='flex';
+}
+
+// ── CALENDÁRIO ──
+function renderCalendario(){
+  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('cal-mes-titulo').textContent=`${meses[mesAtual]} ${anoAtual}`;
+  const grid=document.getElementById('cal-grid');
+  const hoje=new Date(); const hojeStr=hoje.toISOString().split('T')[0];
+  const primeiroDia=new Date(anoAtual,mesAtual,1).getDay();
+  const ultimoDia=new Date(anoAtual,mesAtual+1,0).getDate();
+  const diasSemana=['domingo','segunda','terca','quarta','quinta','sexta','sabado'];
+  let html='';
+  // Dias do mês anterior
+  const diasMesAnt=new Date(anoAtual,mesAtual,0).getDate();
+  for(let i=primeiroDia-1;i>=0;i--){
+    html+=`<div class="cal-dia outro-mes"><div class="dia-num" style="color:#ccc">${diasMesAnt-i}</div></div>`;
+  }
+  // Dias do mês atual
+  for(let d=1;d<=ultimoDia;d++){
+    const dataStr=`${anoAtual}-${String(mesAtual+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const ehHoje=dataStr===hojeStr;
+    const ehSelecionado=dataStr===diaSelecionado;
+    // Verifica se está fechado no horário de funcionamento
+    const diaSemana=diasSemana[new Date(dataStr+'T12:00:00').getDay()];
+    const horarioDia=restData?.horario?.find(h=>h.dia===diaSemana);
+    const fechadoHorario=horarioDia?.fechado===true;
+    const fechadoManual=diasFechados.includes(dataStr);
+    const estaFechado=fechadoHorario||fechadoManual;
+    // Reservas deste dia
+    const ressDia=todasReservas.filter(r=>r.data===dataStr&&r.status!=='cancelada');
+    const tipoColor={aniversario:'drc-aniversario',grupo:'drc-grupo',corporativo:'drc-corporativo',outro:'drc-outro'};
+    const chipsHtml=ressDia.slice(0,2).map(r=>`<div class="dia-res-chip ${tipoColor[r.tipo]||'drc-outro'}">${r.nome_cliente.split(' ')[0]}</div>`).join('');
+    const mais=ressDia.length>2?`<div class="dia-res-chip drc-outro">+${ressDia.length-2}</div>`:'';
+    html+=`<div class="cal-dia${ehHoje?' hoje':''}${estaFechado?' fechado':''}${ehSelecionado?' selecionado':''}" onclick="selecionarDia('${dataStr}')">
+      <div class="dia-num">${d}</div>
+      ${estaFechado?'<span class="dia-status ds-fechado">Fechado</span>':'<span class="dia-status ds-aberto">Aberto</span>'}
+      <div class="dia-reservas">${chipsHtml}${mais}</div>
+    </div>`;
+  }
+  // Dias do próximo mês
+  const totalCelulas=Math.ceil((primeiroDia+ultimoDia)/7)*7;
+  for(let i=1;i<=totalCelulas-(primeiroDia+ultimoDia);i++){
+    html+=`<div class="cal-dia outro-mes"><div class="dia-num" style="color:#ccc">${i}</div></div>`;
+  }
+  grid.innerHTML=html;
+}
+
+function mudarMes(dir){
+  mesAtual+=dir;
+  if(mesAtual>11){mesAtual=0;anoAtual++}
+  if(mesAtual<0){mesAtual=11;anoAtual--}
+  diaSelecionado=null;
+  document.getElementById('detalhe-dia').style.display='none';
+  renderCalendario();
+}
+
+function selecionarDia(dataStr){
+  diaSelecionado=dataStr;
+  renderCalendario();
+  // Mostra detalhe
+  const dt=new Date(dataStr+'T12:00:00');
+  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const diasSemana=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  document.getElementById('detalhe-titulo').textContent=`${diasSemana[dt.getDay()]}, ${dt.getDate()} de ${meses[dt.getMonth()]}`;
+  // Toggle aberto/fechado
+  const diasSemanaId=['domingo','segunda','terca','quarta','quinta','sexta','sabado'];
+  const diaSemana=diasSemanaId[dt.getDay()];
+  const horarioDia=restData?.horario?.find(h=>h.dia===diaSemana);
+  const fechadoManual=diasFechados.includes(dataStr);
+  const estaAberto=!fechadoManual&&!(horarioDia?.fechado);
+  document.getElementById('toggle-dia-aberto').checked=estaAberto;
+  document.getElementById('detalhe-status-txt').textContent=estaAberto?'Aberto':'Fechado';
+  // Reservas do dia
+  const ressDia=todasReservas.filter(r=>r.data===dataStr&&r.status!=='cancelada');
+  const detalheReservas=document.getElementById('detalhe-reservas');
+  if(!ressDia.length){
+    detalheReservas.innerHTML='<div style="text-align:center;padding:14px;color:#bbb;font-size:.82rem;">Nenhuma reserva neste dia</div>';
+  } else {
+    const tipoColor={aniversario:'#7c3aed',grupo:'#2563eb',corporativo:'#d97706',outro:'#888'};
+    detalheReservas.innerHTML=ressDia.map(r=>`
+      <div class="reserva-item-mini">
+        <div class="rim-tipo" style="background:${tipoColor[r.tipo]||'#888'}"></div>
+        <div class="rim-info">
+          <div class="rim-nome">${r.nome_cliente}</div>
+          <div class="rim-det">${r.num_pessoas} pessoas${r.horario?' · '+r.horario:''}${r.observacoes?' · '+r.observacoes:''}</div>
+        </div>
+        <div class="rim-actions">
+          <button class="btn-sm btn-sm-danger" onclick="cancelarReserva('${r.id}')">Cancelar</button>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('detalhe-dia').style.display='block';
+  document.getElementById('res-data').value=dataStr;
+  document.getElementById('modal-data-label').textContent=`${diasSemana[dt.getDay()]}, ${dt.getDate()} de ${meses[dt.getMonth()]}`;
+}
+
+async function toggleDiaAberto(){
+  const aberto=document.getElementById('toggle-dia-aberto').checked;
+  document.getElementById('detalhe-status-txt').textContent=aberto?'Aberto':'Fechado';
+  // Persiste no campo dias_fechados do restaurante
+  if(!REST_ID||!diaSelecionado)return;
+  if(!aberto){
+    if(!diasFechados.includes(diaSelecionado))diasFechados.push(diaSelecionado);
+  } else {
+    diasFechados=diasFechados.filter(d=>d!==diaSelecionado);
+  }
+  await sb.from('restaurantes').update({dias_fechados:diasFechados}).eq('id',REST_ID);
+  renderCalendario();
+  toast(aberto?'Dia marcado como aberto':'Dia marcado como fechado');
+}
+
+// ── RESERVAS ──
+async function carregarReservas(){
+  try{
+    const {data}=await sb.from('reservas_mesas').select('*').eq('restaurante_id',REST_ID).order('data').order('horario');
+    todasReservas=data||[];
+    // Dias fechados salvos no restaurante
+    const {data:rest}=await sb.from('restaurantes').select('dias_fechados').eq('id',REST_ID).single();
+    diasFechados=rest?.dias_fechados||[];
+    renderListaReservas();
+  }catch(_){todasReservas=[];diasFechados=[]}
+}
+
+function renderListaReservas(){
+  const hoje=new Date().toISOString().split('T')[0];
+  const proximas=todasReservas.filter(r=>r.data>=hoje&&r.status!=='cancelada').slice(0,8);
+  const el=document.getElementById('lista-reservas');
+  if(!proximas.length){el.innerHTML='<div style="text-align:center;padding:16px;color:#bbb;font-size:.82rem;">Sem reservas nos próximos dias</div>';return}
+  const tipoColor={aniversario:'#7c3aed',grupo:'#2563eb',corporativo:'#d97706',outro:'#888'};
+  el.innerHTML=proximas.map(r=>{
+    const dt=new Date(r.data+'T12:00:00');
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;">
+      <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,56,92,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+        <div style="font-size:.8rem;font-weight:900;color:#ff385c;line-height:1">${dt.getDate()}</div>
+        <div style="font-size:.55rem;font-weight:700;color:#ff385c;text-transform:uppercase">${dt.toLocaleString('pt-BR',{month:'short'})}</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.84rem;font-weight:600;color:#0d0d0d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.nome_cliente}</div>
+        <div style="font-size:.72rem;color:#999">${r.num_pessoas} pessoas · ${r.tipo}</div>
+      </div>
+      <div style="width:8px;height:8px;border-radius:50%;background:${tipoColor[r.tipo]||'#888'};flex-shrink:0"></div>
+    </div>`;
+  }).join('');
+}
+
+function abrirModal(){
+  if(!diaSelecionado){const h=new Date();diaSelecionado=h.toISOString().split('T')[0]}
+  document.getElementById('modal-reserva').classList.add('open');
+  ['res-nome','res-whatsapp','res-obs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('res-pessoas').value='';
+}
+
+function abrirModalHoje(){
+  diaSelecionado=new Date().toISOString().split('T')[0];
+  document.getElementById('res-data').value=diaSelecionado;
+  const dt=new Date(diaSelecionado+'T12:00:00');
+  document.getElementById('modal-data-label').textContent='Hoje, '+dt.toLocaleDateString('pt-BR');
+  abrirModal();
+}
+
+async function salvarReserva(){
+  const nome=document.getElementById('res-nome').value.trim();
+  if(!nome){toast('Informe o nome do cliente',false);return}
+  if(!REST_ID){toast('Sem restaurante associado',false);return}
+  const btn=document.querySelector('#modal-reserva .btn-primary');
+  btn.textContent='⏳ Salvando...'; btn.disabled=true;
+  const payload={
+    restaurante_id:REST_ID,
+    data:document.getElementById('res-data').value,
+    horario:document.getElementById('res-horario').value||null,
+    nome_cliente:nome,
+    whatsapp:document.getElementById('res-whatsapp').value.trim()||null,
+    tipo:document.getElementById('res-tipo').value,
+    num_pessoas:parseInt(document.getElementById('res-pessoas').value)||1,
+    observacoes:document.getElementById('res-obs').value.trim()||null,
+    status:'confirmada',
+  };
+  const {error}=await sb.from('reservas_mesas').insert(payload);
+  btn.textContent='✅ Confirmar reserva'; btn.disabled=false;
+  if(error){toast('Erro: '+error.message,false);return}
+  toast('Reserva confirmada!');
+  fecharModal();
+  await carregarReservas();
+  if(diaSelecionado) selecionarDia(diaSelecionado);
+  renderCalendario();
+}
+
+async function cancelarReserva(id){
+  if(!confirm('Cancelar esta reserva?'))return;
+  await sb.from('reservas_mesas').update({status:'cancelada'}).eq('id',id);
+  await carregarReservas();
+  if(diaSelecionado) selecionarDia(diaSelecionado);
+  renderCalendario();
+  toast('Reserva cancelada.');
+}
+
+// ── HORÁRIOS MINI ──
+function renderHorariosMini(horario){
+  const el=document.getElementById('horarios-mini');
+  if(!horario||!horario.length){el.innerHTML='<div style="text-align:center;padding:12px;color:#bbb;font-size:.8rem;">Horários não configurados.<br><a href="meurestaurante.html" style="color:#ff385c;">Configurar →</a></div>';return}
+  const diasLabel={segunda:'Segunda',terca:'Terça',quarta:'Quarta',quinta:'Quinta',sexta:'Sexta',sabado:'Sábado',domingo:'Domingo'};
+  const diasOrdem=['segunda','terca','quarta','quinta','sexta','sabado','domingo'];
+  const hojeIdx=['domingo','segunda','terca','quarta','quinta','sexta','sabado'][new Date().getDay()];
+  el.innerHTML=diasOrdem.map(d=>{
+    const h=horario.find(x=>x.dia===d);
+    const hoje=d===hojeIdx;
+    if(!h||h.fechado) return`<div class="horario-row-mini${hoje?' hrm-hoje':''}"><span class="hrm-dia">${diasLabel[d]}</span><span class="hrm-fechado">Fechado</span></div>`;
+    return`<div class="horario-row-mini${hoje?' hrm-hoje':''}"><span class="hrm-dia">${diasLabel[d]}</span><span class="hrm-hora">${h.abertura||'—'} – ${h.fechamento||'—'}</span></div>`;
+  }).join('');
+}
+
+init();
+</script>
+</body>
+</html>
