@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurantes — VENTSY</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; flex-direction: column; }
+
+    /* ── HEADER ── */
+    header {
+      width: 100%; background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: fixed; top: 0; z-index: 9999;
+      box-sizing: border-box;
+    }
+
+    /* ── TOPBAR (logo + login) ── */
+    .topbar-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 64px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .logo { height: 44px; width: auto; cursor: pointer; }
+    .btn-login {
+      background: #f0f2f5; color: #ff385c;
+      padding: 8px 18px; border-radius: 8px;
+      text-decoration: none; font-size: 0.88rem; font-weight: 700;
+      transition: background 0.2s;
+    }
+    .btn-login:hover { background: #ffe0e5; }
+
+    /* ── NAVEGAÇÃO DE SEÇÕES (estilo Airbnb) ── */
+    .nav-secoes {
+      display: flex; align-items: center; justify-content: center;
+      gap: 4px; padding: 0 5%; height: 52px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .nav-secao-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 8px 20px; border-radius: 99px;
+      font-size: 0.88rem; font-weight: 600; color: #717171;
+      text-decoration: none; border: 1.5px solid transparent;
+      transition: all 0.18s; white-space: nowrap; cursor: pointer;
+      background: none;
+    }
+    .nav-secao-btn:hover { background: #f7f7f7; color: #222; }
+    .nav-secao-btn.ativo {
+      color: #ff385c; border-color: #ff385c;
+      background: rgba(255,56,92,0.04);
+    }
+    .nav-secao-btn .secao-emoji { font-size: 1.1rem; }
+
+    /* ── BARRA DE BUSCA ── */
+    .search-wrap {
+      padding: 14px 5%;
+      background: #fff;
+    }
+    .search-bar {
+      display: flex; align-items: center;
+      background: #fff; border: 1.5px solid #ddd;
+      border-radius: 99px; overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      max-width: 860px; margin: 0 auto;
+    }
+    .search-bar:focus-within { border-color: #ff385c; box-shadow: 0 2px 16px rgba(255,56,92,0.12); }
+    .s-item {
+      flex: 1; padding: 10px 20px; position: relative;
+      border-right: 1px solid #eee; min-width: 0;
+    }
+    .s-item:last-of-type { border-right: none; }
+    .s-item label { display: block; font-size: 0.68rem; font-weight: 700; color: #222; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .s-item input, .s-item select {
+      width: 100%; border: none; outline: none; font-size: 0.9rem;
+      color: #555; background: transparent; font-family: Arial;
+    }
+    .s-item select option { color: #222; }
+    .btn-search {
+      width: 48px; height: 48px; margin: 4px;
+      background: #ff385c; border: none; border-radius: 50%;
+      color: #fff; font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.2s, transform 0.15s;
+    }
+    .btn-search:hover { background: #e02d50; transform: scale(1.05); }
+    .suggestions-dropdown {
+      position: absolute; top: 110%; left: 0; right: 0;
+      background: #fff; border-radius: 12px; z-index: 100;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+      overflow: hidden; display: none;
+    }
+    .suggestions-dropdown.aberto { display: block; }
+    .suggestion-item {
+      padding: 12px 18px; font-size: 0.88rem; color: #444;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover { background: #fff5f6; color: #ff385c; }
+
+    /* ── BODY: CARDS + MAPA ── */
+    .listagem-split {
+      display: flex; margin-top: 198px;
+      height: calc(100vh - 198px);
+    }
+    .coluna-cards {
+      flex: 1; overflow-y: auto; padding: 24px 28px 40px;
+    }
+    .coluna-mapa {
+      width: 44%; position: sticky; top: 198px;
+      height: calc(100vh - 198px);
+    }
+    #mapa-restaurantes { width: 100%; height: 100%; }
+
+    /* ── HEADER LISTAGEM ── */
+    .header-listagem { margin-bottom: 20px; }
+    .header-listagem h1 { font-size: 1.3rem; font-weight: 800; color: #0d0d0d; margin-bottom: 4px; }
+    .header-listagem p { font-size: 0.88rem; color: #717171; }
+
+    /* ── FILTROS RÁPIDOS ── */
+    .filtros-rapidos {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .filtro-btn {
+      padding: 6px 16px; border-radius: 99px; border: 1.5px solid #ddd;
+      background: #fff; font-size: 0.82rem; font-weight: 600; color: #444;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .filtro-btn:hover { border-color: #ff385c; color: #ff385c; }
+    .filtro-btn.ativo { background: #ff385c; color: #fff; border-color: #ff385c; }
+
+    /* ── GRID DE CARDS ── */
+    .grid-rest {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) { .grid-rest { grid-template-columns: 1fr; } }
+
+    /* ── CARD RESTAURANTE ── */
+    .card-rest {
+      background: #fff; border-radius: 16px; overflow: hidden;
+      cursor: pointer; transition: transform 0.22s, box-shadow 0.22s;
+      text-decoration: none; display: block; color: inherit;
+    }
+    .card-rest:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
+    .card-rest-foto {
+      width: 100%; aspect-ratio: 4/3; overflow: hidden; position: relative;
+    }
+    .card-rest-foto img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.4s;
+    }
+    .card-rest:hover .card-rest-foto img { transform: scale(1.04); }
+    .card-rest-foto-placeholder {
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #f8d7da, #fce4ec);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem;
+    }
+    .card-badge-rest {
+      position: absolute; top: 10px; left: 10px;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(6px);
+      border-radius: 20px; padding: 4px 10px;
+      font-size: 0.7rem; font-weight: 700; color: #222; text-transform: uppercase;
+    }
+    .card-badge-aberto { background: rgba(22,163,74,0.9); color: #fff; }
+    .card-badge-fechado { background: rgba(100,100,100,0.85); color: #fff; }
+    .card-fav {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(255,255,255,0.85); border: none; border-radius: 50%;
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1rem; transition: transform 0.2s;
+    }
+    .card-fav:hover { transform: scale(1.15); }
+    .card-rest-info { padding: 12px 4px 8px; display: flex; flex-direction: column; gap: 4px; }
+    .card-rest-topo { display: flex; justify-content: space-between; align-items: flex-start; }
+    .card-rest-nome { font-size: 0.95rem; font-weight: 700; color: #0d0d0d; }
+    .card-rest-nota {
+      display: flex; align-items: center; gap: 3px;
+      font-size: 0.82rem; font-weight: 600; color: #0d0d0d;
+      white-space: nowrap;
+    }
+    .card-rest-tipo { font-size: 0.82rem; color: #717171; }
+    .card-rest-local { font-size: 0.8rem; color: #999; }
+    .card-rest-preco { font-size: 0.88rem; color: #444; margin-top: 2px; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: #999; grid-column: 1/-1;
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 1.1rem; font-weight: 700; color: #444; margin-bottom: 8px; }
+    .empty-state p { font-size: 0.88rem; line-height: 1.6; }
+
+    /* ── LOADING SKELETON ── */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 10px;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      .listagem-split { flex-direction: column; height: auto; margin-top: 180px; }
+      .coluna-mapa { display: none; }
+      .coluna-cards { padding: 16px; }
+      .nav-secoes { gap: 2px; padding: 0 3%; }
+      .nav-secao-btn { padding: 6px 12px; font-size: 0.78rem; }
+      .search-wrap { padding: 10px 4%; }
+      .s-item { padding: 8px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <!-- TOPBAR -->
+  <div class="topbar-row">
+    <a href="index.html">
+      <img src="logovents.png" alt="Ventsy" class="logo">
+    </a>
+    <a href="login.html" class="btn-login">ENTRAR</a>
+  </div>
+
+  <!-- NAVEGAÇÃO DE SEÇÕES -->
+  <nav class="nav-secoes">
+    <a href="buscapropriedade.html" class="nav-secao-btn">
+      <span class="secao-emoji">🎉</span> Espaços para Eventos
+    </a>
+    <a href="buscarestaurante.html" class="nav-secao-btn ativo">
+      <span class="secao-emoji">🍽️</span> Restaurantes
+    </a>
+    <a href="#" class="nav-secao-btn" style="opacity:0.45;pointer-events:none;">
+      <span class="secao-emoji">🛍️</span> Fornecedores <span style="font-size:0.65rem;background:#f0f0f0;padding:1px 6px;border-radius:4px;margin-left:2px;">Em breve</span>
+    </a>
+    <a href="#" class="nav-secao-btn" style="opacity:0.45;pointer-events:none;">
+      <span class="secao-emoji">🌿</span> Turismo <span style="font-size:0.65rem;background:#f0f0f0;padding:1px 6px;border-radius:4px;margin-left:2px;">Em breve</span>
+    </a>
+  </nav>
+
+  <!-- BARRA DE BUSCA -->
+  <div class="search-wrap">
+    <div class="search-bar">
+      <div class="s-item" style="flex:1.4; position:relative;">
+        <label>Cidade</label>
+        <input type="text" id="input-cidade" placeholder="Ex: Rio de Janeiro" autocomplete="off">
+        <div id="cidade-suggestions" class="suggestions-dropdown"></div>
+      </div>
+      <div class="s-item" style="flex:1;">
+        <label>Tipo de culinária</label>
+        <select id="input-culinaria">
+          <option value="">Todas as culinárias</option>
+          <option value="Brasileira">🇧🇷 Brasileira</option>
+          <option value="Italiana">🇮🇹 Italiana</option>
+          <option value="Japonesa">🇯🇵 Japonesa</option>
+          <option value="Árabe">🇱🇧 Árabe</option>
+          <option value="Portuguesa">🇵🇹 Portuguesa</option>
+          <option value="Churrascaria">🥩 Churrascaria</option>
+          <option value="Frutos do Mar">🦞 Frutos do Mar</option>
+          <option value="Vegetariana">🥗 Vegetariana</option>
+          <option value="Fast Food">🍔 Fast Food</option>
+          <option value="Pizzaria">🍕 Pizzaria</option>
+          <option value="Cafeteria">☕ Cafeteria</option>
+          <option value="Padaria">🥐 Padaria</option>
+          <option value="Sorveteria">🍦 Sorveteria</option>
+          <option value="Mexicana">🌮 Mexicana</option>
+          <option value="Chinesa">🥢 Chinesa</option>
+        </select>
+      </div>
+      <div class="s-item" style="flex:0.7;">
+        <label>Faixa de preço</label>
+        <select id="input-preco">
+          <option value="">Qualquer preço</option>
+          <option value="$">$ — Barato</option>
+          <option value="$$">$$ — Moderado</option>
+          <option value="$$$">$$$ — Sofisticado</option>
+          <option value="$$$$">$$$$ — Premium</option>
+        </select>
+      </div>
+      <button class="btn-search" onclick="buscar()">🔍</button>
+    </div>
+  </div>
+</header>
+
+<!-- CONTEÚDO -->
+<div class="listagem-split">
+
+  <!-- COLUNA CARDS -->
+  <section class="coluna-cards">
+    <div class="header-listagem">
+      <h1 id="titulo-resultados">Buscando restaurantes...</h1>
+      <p id="subtitulo-resultados"></p>
+    </div>
+
+    <!-- Filtros rápidos -->
+    <div class="filtros-rapidos" id="filtros-rapidos">
+      <button class="filtro-btn ativo" onclick="filtroRapido('', this)">Todos</button>
+      <button class="filtro-btn" onclick="filtroRapido('Brasileira', this)">🇧🇷 Brasileira</button>
+      <button class="filtro-btn" onclick="filtroRapido('Italiana', this)">🇮🇹 Italiana</button>
+      <button class="filtro-btn" onclick="filtroRapido('Japonesa', this)">🇯🇵 Japonesa</button>
+      <button class="filtro-btn" onclick="filtroRapido('Churrascaria', this)">🥩 Churrasco</button>
+      <button class="filtro-btn" onclick="filtroRapido('Frutos do Mar', this)">🦞 Frutos do Mar</button>
+      <button class="filtro-btn" onclick="filtroRapido('Pizzaria', this)">🍕 Pizza</button>
+      <button class="filtro-btn" onclick="filtroRapido('Vegetariana', this)">🥗 Veggie</button>
+    </div>
+
+    <div id="grid-resultados" class="grid-rest">
+      <!-- Cards injetados pelo JS -->
+    </div>
+  </section>
+
+  <!-- COLUNA MAPA -->
+  <section class="coluna-mapa">
+    <div id="mapa-restaurantes"></div>
+  </section>
+
+</div>
+
+<script>
+const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+const params = new URLSearchParams(window.location.search);
+let cidadeAtual  = params.get('cidade')    || '';
+let culinariaAtual = params.get('culinaria') || '';
+let precoAtual   = params.get('preco')     || '';
+let filtroAtivo  = '';
+let todosResultados = [];
+let mapa, markers = [];
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  if (cidadeAtual) document.getElementById('input-cidade').value = cidadeAtual;
+  if (culinariaAtual) document.getElementById('input-culinaria').value = culinariaAtual;
+  if (precoAtual) document.getElementById('input-preco').value = precoAtual;
+
+  iniciarMapa();
+  buscar();
+  setupAutocompleteCidade();
+});
+
+// ── MAPA ──
+function iniciarMapa() {
+  mapa = L.map('mapa-restaurantes', { zoomControl: true }).setView([-22.9, -43.2], 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(mapa);
+}
+
+function atualizarMapa(lista) {
+  markers.forEach(m => mapa.removeLayer(m));
+  markers = [];
+  if (!lista.length) return;
+
+  const bounds = [];
+  lista.forEach(r => {
+    if (!r.latitude || !r.longitude) return;
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="background:#ff385c;color:#fff;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);">🍽️ ${r.nome}</div>`,
+      iconAnchor: [0, 0]
+    });
+    const m = L.marker([r.latitude, r.longitude], { icon })
+      .addTo(mapa)
+      .on('click', () => window.open(`restaurante.html?id=${r.id}`, '_blank'));
+    markers.push(m);
+    bounds.push([r.latitude, r.longitude]);
+  });
+  if (bounds.length) mapa.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+}
+
+// ── BUSCA PRINCIPAL ──
+async function buscar() {
+  cidadeAtual    = document.getElementById('input-cidade').value.trim();
+  culinariaAtual = document.getElementById('input-culinaria').value;
+  precoAtual     = document.getElementById('input-preco').value;
+
+  document.getElementById('titulo-resultados').textContent = `Restaurantes${cidadeAtual ? ' em ' + cidadeAtual : ''}`;
+  renderSkeleton();
+
+  let query = sb.from('restaurantes')
+    .select('id, nome, tipo_culinaria, cidade, estado, descricao, foto_capa, preco_medio, latitude, longitude, horario, whatsapp, destaque')
+    .eq('publicado', true)
+    .order('destaque', { ascending: false })
+    .order('criado_em', { ascending: false });
+
+  if (cidadeAtual) query = query.ilike('cidade', `%${cidadeAtual}%`);
+  if (culinariaAtual) query = query.ilike('tipo_culinaria', `%${culinariaAtual}%`);
+  if (precoAtual) query = query.eq('preco_medio', precoAtual);
+
+  const { data, error } = await query;
+
+  if (error) {
+    document.getElementById('grid-resultados').innerHTML = `<div class="empty-state"><div class="icon">❌</div><h3>Erro ao carregar</h3><p>${error.message}</p></div>`;
+    return;
+  }
+
+  todosResultados = data || [];
+  renderCards(filtroAtivo ? todosResultados.filter(r => r.tipo_culinaria?.includes(filtroAtivo)) : todosResultados);
+  atualizarMapa(todosResultados);
+
+  // Log busca sem resultado
+  if (!todosResultados.length && cidadeAtual) {
+    try { await sb.from('buscas_log').insert({ termo: `rest:${cidadeAtual}`, resultados: 0, criado_em: new Date().toISOString() }); } catch(_){}
+  }
+}
+
+// ── FILTRO RÁPIDO (culinária) ──
+function filtroRapido(culinaria, btn) {
+  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  filtroAtivo = culinaria;
+  const filtrado = culinaria ? todosResultados.filter(r => r.tipo_culinaria?.includes(culinaria)) : todosResultados;
+  renderCards(filtrado);
+  atualizarMapa(filtrado);
+}
+
+// ── RENDER CARDS ──
+function renderCards(lista) {
+  const grid = document.getElementById('grid-resultados');
+  const sub  = document.getElementById('subtitulo-resultados');
+
+  if (!lista.length) {
+    sub.textContent = '';
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🍽️</div>
+        <h3>Nenhum restaurante encontrado</h3>
+        <p>Tente buscar em outra cidade ou mude os filtros.<br>Em breve mais restaurantes estarão disponíveis!</p>
+      </div>`;
+    return;
+  }
+
+  sub.textContent = `${lista.length} ${lista.length === 1 ? 'restaurante encontrado' : 'restaurantes encontrados'}`;
+
+  grid.innerHTML = lista.map(r => {
+    const aberto = estaAberto(r.horario);
+    const statusBadge = aberto === null ? '' :
+      aberto ? `<span class="card-badge-rest card-badge-aberto">Aberto agora</span>` :
+               `<span class="card-badge-rest card-badge-fechado">Fechado</span>`;
+
+    const foto = r.foto_capa
+      ? `<img src="${r.foto_capa}" alt="${r.nome}" loading="lazy">`
+      : `<div class="card-rest-foto-placeholder">🍽️</div>`;
+
+    const destaqueBadge = r.destaque
+      ? `<span class="card-badge-rest" style="background:linear-gradient(135deg,#1a1a1a,#3d3d3d);color:#f0c040;right:10px;left:auto;">⭐ Destaque</span>` : '';
+
+    return `
+      <a class="card-rest${r.destaque ? ' card-premium' : ''}" href="restaurante.html?id=${r.id}">
+        <div class="card-rest-foto">
+          ${foto}
+          ${statusBadge}
+          ${destaqueBadge}
+          <button class="card-fav" onclick="event.preventDefault()">♡</button>
+        </div>
+        <div class="card-rest-info">
+          <div class="card-rest-topo">
+            <div class="card-rest-nome">${r.nome}</div>
+            <div class="card-rest-nota">⭐ Novo</div>
+          </div>
+          <div class="card-rest-tipo">${r.tipo_culinaria || 'Restaurante'}</div>
+          <div class="card-rest-local">📍 ${r.cidade || '—'}${r.estado ? ', ' + r.estado : ''}</div>
+          ${r.preco_medio ? `<div class="card-rest-preco">${r.preco_medio} · Preço médio por pessoa</div>` : ''}
+        </div>
+      </a>`;
+  }).join('');
+}
+
+// ── VERIFICA SE ESTÁ ABERTO AGORA ──
+function estaAberto(horarioJson) {
+  if (!horarioJson || !horarioJson.length) return null;
+  const dias = ['domingo','segunda','terca','quarta','quinta','sexta','sabado'];
+  const hoje = dias[new Date().getDay()];
+  const agora = new Date();
+  const horaAtual = agora.getHours() * 60 + agora.getMinutes();
+  const h = horarioJson.find(d => d.dia === hoje);
+  if (!h || h.fechado) return false;
+  const [abH, abM] = (h.abertura || '00:00').split(':').map(Number);
+  const [feH, feM] = (h.fechamento || '23:59').split(':').map(Number);
+  return horaAtual >= abH * 60 + abM && horaAtual <= feH * 60 + feM;
+}
+
+// ── SKELETON LOADING ──
+function renderSkeleton() {
+  const grid = document.getElementById('grid-resultados');
+  grid.innerHTML = Array(6).fill('').map(() => `
+    <div class="card-rest">
+      <div class="card-rest-foto"><div class="skeleton" style="width:100%;aspect-ratio:4/3;"></div></div>
+      <div class="card-rest-info">
+        <div class="skeleton" style="height:16px;width:70%;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:12px;width:45%;margin-bottom:6px;"></div>
+        <div class="skeleton" style="height:12px;width:55%;"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ── AUTOCOMPLETE CIDADE ──
+function setupAutocompleteCidade() {
+  const input = document.getElementById('input-cidade');
+  const drop  = document.getElementById('cidade-suggestions');
+
+  const cidades = ['Rio de Janeiro','São Paulo','Belo Horizonte','Curitiba','Porto Alegre',
+    'Salvador','Fortaleza','Recife','Manaus','Florianópolis','Vitória','Goiânia',
+    'Cachoeiras de Macacu','Petrópolis','Teresópolis','Angra dos Reis','Paraty',
+    'Búzios','Cabo Frio','Arraial do Cabo','Nova Friburgo','Volta Redonda'];
+
+  input.addEventListener('input', () => {
+    const v = input.value.toLowerCase();
+    if (v.length < 2) { drop.classList.remove('aberto'); return; }
+    const matches = cidades.filter(c => c.toLowerCase().includes(v)).slice(0, 6);
+    if (!matches.length) { drop.classList.remove('aberto'); return; }
+    drop.innerHTML = matches.map(c => `<div class="suggestion-item" onclick="selecionarCidade('${c}')">📍 ${c}</div>`).join('');
+    drop.classList.add('aberto');
+  });
+
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target)) drop.classList.remove('aberto');
+  });
+}
+
+function selecionarCidade(cidade) {
+  document.getElementById('input-cidade').value = cidade;
+  document.getElementById('cidade-suggestions').classList.remove('aberto');
+  buscar();
+}
+</script>
+</body>
+</html>
