@@ -1436,12 +1436,38 @@ Selo verificado</textarea>
           <div class="section-count">Oportunidade de engajamento / ativação</div>
         </div>
       </div>
-      <div class="table-card">
+      <div class="table-card" style="margin-bottom:28px;">
         <table>
           <thead><tr>
             <th>Usuário</th><th>Plano</th><th>Cadastrado em</th><th>Ações</th>
           </tr></thead>
           <tbody id="q-users-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Buscas sem resultado -->
+      <div class="section-header">
+        <div>
+          <div class="section-title">🔍 Buscas sem resultado</div>
+          <div class="section-count">Termos buscados que não encontraram nenhuma propriedade — oportunidade de expansão</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="recarregarBuscasSemResultado()">🔄 Atualizar</button>
+          <button class="btn btn-ghost btn-sm" onclick="exportBuscasSemResultado()">⬇️ CSV</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header" style="padding:14px 24px;">
+          <div style="font-size:0.78rem;color:var(--text3);">Total de buscas sem resultado: <strong id="bsr-total" style="color:var(--text);">—</strong></div>
+          <div style="font-size:0.78rem;color:var(--text3);">Período: últimos 30 dias</div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Termo buscado</th><th>Ocorrências</th><th>Última busca</th><th>Ação sugerida</th>
+          </tr></thead>
+          <tbody id="bsr-tbody">
+            <tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text3);">Carregando...</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -1817,7 +1843,7 @@ function showPage(page) {
   if (page === 'usuarios') renderUsuarios();
   if (page === 'assinaturas') renderAssinaturas();
   if (page === 'financeiro') renderFinanceiro();
-  if (page === 'qualidade') renderQualidade();
+  if (page === 'qualidade') { renderQualidade(); recarregarBuscasSemResultado(); }
   if (page === 'comunicacao') { updateComCount(); renderComHistorico(); }
   if (page === 'cupons') renderCupons();
   if (page === 'logs') renderLogs();
@@ -2927,9 +2953,9 @@ async function renderIncompletos() {
 }
 
 async function recarregarIncompletos() {
-  // Busca registros da tabela usuarios onde cadastro_completo = false OU nome é null
+  // Busca registros da tabela perfis onde cadastro_completo = false OU nome é null
   const { data, error } = await sb
-    .from('usuarios')
+    .from('perfis')
     .select('id, email, criado_em, cadastro_completo, nome')
     .or('cadastro_completo.eq.false,nome.is.null')
     .order('criado_em', { ascending: false });
@@ -3070,14 +3096,68 @@ function exportIncompletos() {
 // ─── RELATÓRIO DE BUSCAS ───
 // ══════════════════════════════════════════════
 async function loadBuscasSemResultado() {
-  // Carregado no admin para exibir no relatório / qualidade
   const { data } = await sb
     .from('buscas_log')
     .select('termo, resultados, criado_em')
     .eq('resultados', 0)
     .order('criado_em', { ascending: false })
-    .limit(50);
+    .limit(200);
   return data || [];
+}
+
+async function recarregarBuscasSemResultado() {
+  const tbody = document.getElementById('bsr-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3);">Carregando...</td></tr>`;
+
+  const data = await loadBuscasSemResultado();
+  document.getElementById('bsr-total').textContent = data.length;
+
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--green);">✅ Nenhuma busca sem resultado nos últimos 30 dias!</td></tr>`;
+    return;
+  }
+
+  // Agrupar por termo
+  const agrupado = {};
+  data.forEach(b => {
+    const t = b.termo || 'desconhecido';
+    if (!agrupado[t]) agrupado[t] = { count: 0, ultima: b.criado_em };
+    agrupado[t].count++;
+    if (b.criado_em > agrupado[t].ultima) agrupado[t].ultima = b.criado_em;
+  });
+
+  const sorted = Object.entries(agrupado).sort((a, b) => b[1].count - a[1].count);
+
+  tbody.innerHTML = sorted.map(([termo, info]) => {
+    const dt = new Date(info.ultima).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+    const urgColor = info.count >= 10 ? 'var(--red)' : info.count >= 5 ? 'var(--yellow)' : 'var(--text2)';
+    const acao = info.count >= 10
+      ? '<span style="color:var(--red);font-size:0.75rem;font-weight:600;">🔴 Adicionar propriedade nessa região</span>'
+      : info.count >= 5
+      ? '<span style="color:var(--yellow);font-size:0.75rem;">🟡 Considerar expansão</span>'
+      : '<span style="color:var(--text3);font-size:0.75rem;">📌 Monitorar</span>';
+    return `<tr>
+      <td><strong style="color:var(--text);">🔍 ${termo}</strong></td>
+      <td><span style="color:${urgColor};font-weight:700;font-family:var(--font-display);">${info.count}x</span></td>
+      <td style="color:var(--text3);">${dt}</td>
+      <td>${acao}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportBuscasSemResultado() {
+  const rows = document.querySelectorAll('#bsr-tbody tr');
+  if (!rows.length || rows[0].cells.length < 3) { toast('Sem dados para exportar', 'error'); return; }
+  const csv = ['Termo,Ocorrências,Última busca']
+    .concat([...rows].map(r => `"${r.cells[0]?.textContent?.replace('🔍 ','').trim()}","${r.cells[1]?.textContent?.trim()}","${r.cells[2]?.textContent?.trim()}"` ))
+    .join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `buscas-sem-resultado-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  toast('📊 CSV exportado!', 'success');
 }
 </script>
 </body>
