@@ -301,6 +301,14 @@
                     <p style="color:#bbb;font-size:0.85rem;">Carregando...</p>
                 </div>
             </div>
+
+            <div class="card-tendencias" style="margin-top:20px;border:1px solid #fee2e2;background:#fff9f9;">
+                <h3 style="color:#dc2626;">🔍 Buscas sem resultado</h3>
+                <p style="font-size:0.78rem;color:#999;margin-bottom:16px;">Termos buscados que não encontraram nenhuma propriedade — oportunidade de expansão.</p>
+                <div id="buscas-sem-resultado-content">
+                    <p style="color:#bbb;font-size:0.85rem;">Carregando...</p>
+                </div>
+            </div>
         </div>
 
     </section>
@@ -478,6 +486,7 @@ async function init() {
         // Carregar ranking e buscas populares (independente de período)
         renderRanking();
         renderBuscasPopulares();
+        renderBuscasSemResultado();
 
     } catch (err) {
         console.error('Erro no init relatorio:', err);
@@ -888,6 +897,42 @@ async function renderBuscasPopulares() {
         }, 400);
     } catch (_) {
         container.innerHTML = `<p style="color:#bbb;font-size:0.85rem;">Sem dados disponíveis.</p>`;
+    }
+}
+
+/* ── BUSCAS SEM RESULTADO ── */
+async function renderBuscasSemResultado() {
+    const container = document.getElementById('buscas-sem-resultado-content');
+    if (!container) return;
+    try {
+        const { data } = await sb
+            .from('buscas_log')
+            .select('termo, criado_em')
+            .eq('resultados', 0)
+            .order('criado_em', { ascending: false })
+            .limit(30);
+
+        if (!data || !data.length) {
+            container.innerHTML = `<p style="color:#bbb;font-size:0.85rem;">✅ Nenhuma busca sem resultado registrada ainda.</p>`;
+            return;
+        }
+
+        // Agrupar por termo
+        const agrupado = {};
+        data.forEach(b => {
+            const t = b.termo || 'desconhecido';
+            agrupado[t] = (agrupado[t] || 0) + 1;
+        });
+        const sorted = Object.entries(agrupado).sort((a, b) => b[1] - a[1]);
+
+        container.innerHTML = sorted.map(([termo, count]) =>
+            `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+                <span style="font-size:0.88rem;color:#333;font-weight:500;">🔍 ${termo}</span>
+                <span style="background:#fee2e2;color:#dc2626;border-radius:99px;padding:2px 10px;font-size:0.72rem;font-weight:700;">${count}x</span>
+            </div>`
+        ).join('');
+    } catch (_) {
+        container.innerHTML = `<p style="color:#bbb;font-size:0.85rem;">Não foi possível carregar.</p>`;
     }
 }
 
