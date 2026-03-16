@@ -2393,10 +2393,26 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             titulo.textContent = `Nenhum espaço encontrado em ${estadoBuscado}`;
             subtitulo.textContent = 'Tente buscar em outro estado.';
             grid.innerHTML = '';
+            // Registra busca sem resultado no banco
+            try {
+                await _supabase.from('buscas_log').insert({
+                    termo: estadoBuscado || 'sem_estado',
+                    resultados: 0,
+                    criado_em: new Date().toISOString()
+                });
+            } catch(e) { /* silencioso */ }
             return;
         }
 
         subtitulo.textContent = `${propriedades.length} ${propriedades.length === 1 ? 'espaço encontrado' : 'espaços encontrados'}`;
+        // Registra busca com resultado
+        try {
+            await _supabase.from('buscas_log').insert({
+                termo: estadoBuscado || 'sem_estado',
+                resultados: propriedades.length,
+                criado_em: new Date().toISOString()
+            });
+        } catch(e) { /* silencioso */ }
         grid.innerHTML = propriedades.map(criarCardHTML).join('');
 
         // Inicia o mapa com os pins das propriedades encontradas
