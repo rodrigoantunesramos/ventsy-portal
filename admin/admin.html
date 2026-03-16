@@ -816,6 +816,9 @@
   <div class="sidebar-link" onclick="showPage('comunicacao')">
     <span class="icon">📣</span> Comunicação
   </div>
+  <div class="sidebar-link" onclick="showPage('buscas')">
+    <span class="icon">📣</span> Buscas
+  </div>
   <div class="sidebar-link" onclick="showPage('logs')">
     <span class="icon">📋</span> Logs Admin
   </div>
@@ -1446,6 +1449,10 @@ Selo verificado</textarea>
       </div>
 
       <!-- Buscas sem resultado -->
+      
+       <div class="page" id="page-buscas">
+        <div id="bus-alerts"></div>
+      
       <div class="section-header">
         <div>
           <div class="section-title">🔍 Buscas sem resultado</div>
@@ -1849,6 +1856,7 @@ function showPage(page) {
   if (page === 'logs') renderLogs();
   if (page === 'planos') carregarPlanos();
   if (page === 'incompletos') renderIncompletos();
+  if (page === 'buscas') renderBuscas();
 }
 
 // ─── DASHBOARD ───
