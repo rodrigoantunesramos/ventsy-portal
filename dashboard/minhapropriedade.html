@@ -1313,7 +1313,29 @@
                     .update({ comodidades, servicos_extras: servicosExtras })
                     .eq('id', PROP_ID);
                 if (error) console.error('[AUTO-SAVE servicos] erro:', error);
-                else console.log('[AUTO-SAVE servicos] ok — comodidades:', comodidades, '| extras:', servicosExtras);
+                else {
+                    console.log('[AUTO-SAVE servicos] ok — comodidades:', comodidades, '| extras:', servicosExtras);
+                    if (window._propCache) { window._propCache.comodidades = comodidades; window._propCache.servicos_extras = servicosExtras; }
+                }
+            });
+        });
+
+        // Auto-save eventos ao marcar/desmarcar
+        document.querySelectorAll('input[name="tipo_evento"]').forEach(cb => {
+            cb.addEventListener('change', async () => {
+                if (!PROP_ID) return;
+                const tipos = Array.from(
+                    document.querySelectorAll('input[name="tipo_evento"]:checked')
+                ).map(c => c.value);
+                const tipoEventoStr = tipos.join(', ');
+                const { error } = await sb.from('propriedades')
+                    .update({ tipo_evento: tipoEventoStr || null })
+                    .eq('id', PROP_ID);
+                if (error) console.error('[AUTO-SAVE eventos] erro:', error);
+                else {
+                    console.log('[AUTO-SAVE eventos] ok —', tipoEventoStr);
+                    if (window._propCache) window._propCache.tipo_evento = tipoEventoStr;
+                }
             });
         });
 
@@ -1517,7 +1539,7 @@
             if (existing?.id) {
                 PROP_ID = existing.id;
 
-                const res = await sb.from('propriedades').update(dados).eq('usuario_id', userId);
+                const res = await sb.from('propriedades').update(dados).eq('id', PROP_ID);
                 console.log('[SAVE] update result:', res);
                 saveError = res.error;
             } else {
