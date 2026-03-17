@@ -1842,6 +1842,208 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             .search-item:last-of-type { border-bottom: none; }
             .btn-search { width: 100%; border-radius: 10px; height: 44px; }
         }
+
+        /* ──────────── ESTADO DROPDOWN GRID ──────────── */
+        .estado-display {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .83rem; color: #555; cursor: pointer;
+            margin-top: 2px; gap: 4px; min-width: 110px;
+        }
+        .estado-display span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .estado-caret { width: 14px; height: 14px; flex-shrink: 0; color: #aaa; transition: transform .2s; }
+        .estado-display.open .estado-caret { transform: rotate(180deg); }
+
+        @keyframes dropIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .estado-dropdown {
+            position: absolute;
+            top: calc(100% + 14px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 560px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.15);
+            border: 1px solid #eee;
+            z-index: 5000;
+            animation: dropIn .18s ease;
+        }
+        .estado-grid-wrap {
+            padding: 16px 18px 18px;
+            max-height: 440px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ddd transparent;
+        }
+        .est-regiao-label {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #aaa; margin: 14px 0 7px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .est-regiao-label::after {
+            content: ''; flex: 1; height: 1px; background: #f0f0f0;
+        }
+        .est-regiao-label:first-of-type { margin-top: 0; }
+        .est-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            margin-bottom: 4px;
+        }
+        .est-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 3px; padding: 8px 4px 7px;
+            border-radius: 11px; cursor: pointer;
+            text-align: center; line-height: 1.25;
+            background: #f9f9f9; border: 1px solid transparent;
+            transition: background .15s, border-color .15s, transform .12s, color .15s;
+            user-select: none; position: relative; overflow: hidden;
+        }
+        .est-sigla {
+            font-size: .82rem; font-weight: 800; color: #222;
+            letter-spacing: .02em; line-height: 1;
+        }
+        .est-nome-full {
+            font-size: .6rem; font-weight: 500; color: #888;
+            line-height: 1.2; max-width: 100%;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            width: 100%;
+        }
+        .est-item:hover { background: #fff5f7; border-color: #ffd6dd; transform: translateY(-2px); }
+        .est-item:hover .est-sigla { color: var(--vermelho); }
+        .est-item:hover .est-nome-full { color: var(--vermelho); }
+        .est-item.selected { background: var(--vermelho); border-color: var(--vermelho); }
+        .est-item.selected .est-sigla,
+        .est-item.selected .est-nome-full { color: #fff; }
+
+        .est-item::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            border-radius: 11px 11px 0 0; opacity: .6;
+        }
+        .est-norte::before   { background: #22c55e; }
+        .est-nordeste::before{ background: #f59e0b; }
+        .est-co::before      { background: #8b5cf6; }
+        .est-sudeste::before { background: #3b82f6; }
+        .est-sul::before     { background: #ef4444; }
+
+        .regiao-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px; border-radius: 20px;
+            font-size: .67rem; font-weight: 800;
+            letter-spacing: .06em; color: #fff;
+        }
+        .pill-norte    { background: #22c55e; }
+        .pill-nordeste { background: #f59e0b; }
+        .pill-co       { background: #8b5cf6; }
+        .pill-sudeste  { background: #3b82f6; }
+        .pill-sul      { background: #ef4444; }
+
+        @media (max-width: 620px) {
+            .estado-dropdown { width: calc(100vw - 32px); left: 0; transform: none; }
+            .est-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        /* ──────────── CIDADE DROPDOWN GRID ──────────── */
+        .cidade-display {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .83rem; color: #555; cursor: pointer;
+            margin-top: 2px; gap: 4px; min-width: 110px;
+        }
+        .cidade-display span.cidade-texto { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cidade-caret { width: 14px; height: 14px; flex-shrink: 0; color: #aaa; transition: transform .2s; }
+        .cidade-display.open .cidade-caret { transform: rotate(180deg); }
+        .cidade-display.disabled-display { opacity: .4; cursor: not-allowed; pointer-events: none; }
+
+        .cidade-dropdown {
+            position: absolute;
+            top: calc(100% + 14px);
+            right: 0;
+            width: 420px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.15);
+            border: 1px solid #eee;
+            z-index: 5000;
+            animation: dropInRight .18s ease;
+        }
+        @keyframes dropInRight {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .cidade-grid-wrap {
+            padding: 16px 18px 18px;
+            max-height: 380px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ddd transparent;
+        }
+        .cid-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .cid-header-title {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #aaa;
+        }
+        .cid-clear-btn {
+            background: #f7f7f7; border: 1px solid #eee;
+            border-radius: 8px; padding: 4px 10px;
+            font-size: .75rem; font-weight: 600; color: #666;
+            cursor: pointer; font-family: inherit;
+            transition: background .15s, color .15s;
+        }
+        .cid-clear-btn:hover { background: #fee; color: var(--vermelho); border-color: #fcc; }
+        .cid-loading {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 28px 0;
+            font-size: .85rem; color: #aaa;
+        }
+        .cid-loading-spinner::before {
+            content: ''; display: inline-block; width: 18px; height: 18px;
+            border: 2px solid #eee; border-top-color: var(--vermelho);
+            border-radius: 50%; animation: spin .7s linear infinite;
+            vertical-align: middle; margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .cid-empty {
+            text-align: center; padding: 28px 0;
+            font-size: .85rem; color: #bbb;
+        }
+        .cid-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .cid-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; padding: 10px 6px 8px;
+            border-radius: 12px; cursor: pointer;
+            text-align: center; line-height: 1.25;
+            background: #f9f9f9; border: 1px solid transparent;
+            transition: background .15s, border-color .15s, transform .12s;
+            user-select: none;
+        }
+        .cid-icon { font-size: 1.1rem; line-height: 1; }
+        .cid-nome {
+            font-size: .73rem; font-weight: 700; color: #333;
+            line-height: 1.2; max-width: 100%;
+            overflow: hidden; display: -webkit-box;
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        }
+        .cid-item:hover { background: #fff5f7; border-color: #ffd6dd; transform: translateY(-2px); }
+        .cid-item:hover .cid-nome { color: var(--vermelho); }
+        .cid-item.selected { background: var(--vermelho); border-color: var(--vermelho); }
+        .cid-item.selected .cid-nome,
+        .cid-item.selected .cid-icon { color: #fff; }
+
+        @media (max-width: 620px) {
+            .cidade-dropdown { width: calc(100vw - 32px); right: 0; left: auto; }
+            .cid-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -1869,11 +2071,65 @@ input:checked + .slider-round:before { transform: translateX(20px); }
     <nav class="header-center">
         <div class="search-container">
             <div class="search-bar">
-                <div class="search-item" id="location-container">
-                    <label>Localização</label>
-                    <input type="text" id="location-input" placeholder="Estado..." autocomplete="off">
-                    <span id="location-erro" style="display:none;font-size:.68rem;color:var(--vermelho);font-weight:700;margin-top:2px">Selecione da lista</span>
-                    <div id="location-suggestions" class="suggestions-dropdown"></div>
+                <div class="search-item" id="location-container" style="position:relative;">
+                    <label>Estado</label>
+                    <input type="hidden" id="location-input" value="">
+                    <div id="estado-display" class="estado-display" onclick="toggleEstadoDropdown(event)">
+                        <span id="estado-texto">Selecionar estado</span>
+                        <svg class="estado-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div id="estado-dropdown" class="estado-dropdown" style="display:none;">
+                        <div class="estado-grid-wrap">
+
+                            <div class="est-regiao-label"><span class="regiao-pill pill-norte">🌿 Norte</span></div>
+                            <div class="est-grid">
+                                <div class="est-item est-norte" data-n="Acre" data-s="AC" onclick="selectEstado(this)"><div class="est-sigla">AC</div><div class="est-nome-full">Acre</div></div>
+                                <div class="est-item est-norte" data-n="Amapá" data-s="AP" onclick="selectEstado(this)"><div class="est-sigla">AP</div><div class="est-nome-full">Amapá</div></div>
+                                <div class="est-item est-norte" data-n="Amazonas" data-s="AM" onclick="selectEstado(this)"><div class="est-sigla">AM</div><div class="est-nome-full">Amazonas</div></div>
+                                <div class="est-item est-norte" data-n="Pará" data-s="PA" onclick="selectEstado(this)"><div class="est-sigla">PA</div><div class="est-nome-full">Pará</div></div>
+                                <div class="est-item est-norte" data-n="Rondônia" data-s="RO" onclick="selectEstado(this)"><div class="est-sigla">RO</div><div class="est-nome-full">Rondônia</div></div>
+                                <div class="est-item est-norte" data-n="Roraima" data-s="RR" onclick="selectEstado(this)"><div class="est-sigla">RR</div><div class="est-nome-full">Roraima</div></div>
+                                <div class="est-item est-norte" data-n="Tocantins" data-s="TO" onclick="selectEstado(this)"><div class="est-sigla">TO</div><div class="est-nome-full">Tocantins</div></div>
+                            </div>
+
+                            <div class="est-regiao-label"><span class="regiao-pill pill-nordeste">☀️ Nordeste</span></div>
+                            <div class="est-grid">
+                                <div class="est-item est-nordeste" data-n="Alagoas" data-s="AL" onclick="selectEstado(this)"><div class="est-sigla">AL</div><div class="est-nome-full">Alagoas</div></div>
+                                <div class="est-item est-nordeste" data-n="Bahia" data-s="BA" onclick="selectEstado(this)"><div class="est-sigla">BA</div><div class="est-nome-full">Bahia</div></div>
+                                <div class="est-item est-nordeste" data-n="Ceará" data-s="CE" onclick="selectEstado(this)"><div class="est-sigla">CE</div><div class="est-nome-full">Ceará</div></div>
+                                <div class="est-item est-nordeste" data-n="Maranhão" data-s="MA" onclick="selectEstado(this)"><div class="est-sigla">MA</div><div class="est-nome-full">Maranhão</div></div>
+                                <div class="est-item est-nordeste" data-n="Paraíba" data-s="PB" onclick="selectEstado(this)"><div class="est-sigla">PB</div><div class="est-nome-full">Paraíba</div></div>
+                                <div class="est-item est-nordeste" data-n="Pernambuco" data-s="PE" onclick="selectEstado(this)"><div class="est-sigla">PE</div><div class="est-nome-full">Pernambuco</div></div>
+                                <div class="est-item est-nordeste" data-n="Piauí" data-s="PI" onclick="selectEstado(this)"><div class="est-sigla">PI</div><div class="est-nome-full">Piauí</div></div>
+                                <div class="est-item est-nordeste" data-n="Rio Grande do Norte" data-s="RN" onclick="selectEstado(this)"><div class="est-sigla">RN</div><div class="est-nome-full">Rio Gd. Norte</div></div>
+                                <div class="est-item est-nordeste" data-n="Sergipe" data-s="SE" onclick="selectEstado(this)"><div class="est-sigla">SE</div><div class="est-nome-full">Sergipe</div></div>
+                            </div>
+
+                            <div class="est-regiao-label"><span class="regiao-pill pill-co">🏜️ Centro-Oeste</span></div>
+                            <div class="est-grid">
+                                <div class="est-item est-co" data-n="Distrito Federal" data-s="DF" onclick="selectEstado(this)"><div class="est-sigla">DF</div><div class="est-nome-full">Distrito Federal</div></div>
+                                <div class="est-item est-co" data-n="Goiás" data-s="GO" onclick="selectEstado(this)"><div class="est-sigla">GO</div><div class="est-nome-full">Goiás</div></div>
+                                <div class="est-item est-co" data-n="Mato Grosso" data-s="MT" onclick="selectEstado(this)"><div class="est-sigla">MT</div><div class="est-nome-full">Mato Grosso</div></div>
+                                <div class="est-item est-co" data-n="Mato Grosso do Sul" data-s="MS" onclick="selectEstado(this)"><div class="est-sigla">MS</div><div class="est-nome-full">M. G. do Sul</div></div>
+                            </div>
+
+                            <div class="est-regiao-label"><span class="regiao-pill pill-sudeste">🏙️ Sudeste</span></div>
+                            <div class="est-grid">
+                                <div class="est-item est-sudeste" data-n="Espírito Santo" data-s="ES" onclick="selectEstado(this)"><div class="est-sigla">ES</div><div class="est-nome-full">Espírito Santo</div></div>
+                                <div class="est-item est-sudeste" data-n="Minas Gerais" data-s="MG" onclick="selectEstado(this)"><div class="est-sigla">MG</div><div class="est-nome-full">Minas Gerais</div></div>
+                                <div class="est-item est-sudeste" data-n="Rio de Janeiro" data-s="RJ" onclick="selectEstado(this)"><div class="est-sigla">RJ</div><div class="est-nome-full">Rio de Janeiro</div></div>
+                                <div class="est-item est-sudeste" data-n="São Paulo" data-s="SP" onclick="selectEstado(this)"><div class="est-sigla">SP</div><div class="est-nome-full">São Paulo</div></div>
+                            </div>
+
+                            <div class="est-regiao-label"><span class="regiao-pill pill-sul">🌲 Sul</span></div>
+                            <div class="est-grid">
+                                <div class="est-item est-sul" data-n="Paraná" data-s="PR" onclick="selectEstado(this)"><div class="est-sigla">PR</div><div class="est-nome-full">Paraná</div></div>
+                                <div class="est-item est-sul" data-n="Rio Grande do Sul" data-s="RS" onclick="selectEstado(this)"><div class="est-sigla">RS</div><div class="est-nome-full">Rio Gd. do Sul</div></div>
+                                <div class="est-item est-sul" data-n="Santa Catarina" data-s="SC" onclick="selectEstado(this)"><div class="est-sigla">SC</div><div class="est-nome-full">Santa Catarina</div></div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
                 <div class="divider"></div>
                 <div class="search-item" id="range-container">
@@ -1965,10 +2221,18 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                     </div>
                 </div>
                 <div class="divider"></div>
-                <div class="search-item" id="cidade-container">
+                <div class="search-item" id="cidade-container" style="position:relative;">
                     <label>Cidade</label>
-                    <input type="text" id="cidade-input" placeholder="Todas as cidades" autocomplete="off">
-                    <div id="cidade-suggestions" class="suggestions-dropdown"></div>
+                    <input type="hidden" id="cidade-input" value="">
+                    <div id="cidade-display" class="cidade-display disabled-display" onclick="toggleCidadeDropdown(event)">
+                        <span class="cidade-texto" id="cidade-texto">Todas as cidades</span>
+                        <svg class="cidade-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div id="cidade-dropdown" class="cidade-dropdown" style="display:none;">
+                        <div class="cidade-grid-wrap" id="cidade-grid-wrap">
+                            <div class="cid-loading">Selecione um estado primeiro</div>
+                        </div>
+                    </div>
                 </div>
                 <button class="btn-search" id="main-search-btn" style="opacity:.3;pointer-events:none;">&#128269;</button>
             </div>
@@ -2516,177 +2780,174 @@ input:checked + .slider-round:before { transform: translateX(20px); }
         document.getElementById('input-periodo')._flatpickr.open();
     });
     
-// Lista de locais — label exibido + sigla que vai para o Supabase (coluna "estado")
-    const listaLocais = [
-        { label: "Rio de Janeiro, RJ",   estado: "RJ" },
-        { label: "São Paulo, SP",         estado: "SP" },
-        { label: "Belo Horizonte, MG",    estado: "MG" },
-        { label: "Salvador, BA",          estado: "BA" },
-        { label: "Curitiba, PR",          estado: "PR" },
-        { label: "Recife, PE",            estado: "PE" },
-        { label: "Brasília, DF",          estado: "DF" },
-        { label: "Fortaleza, CE",         estado: "CE" },
-        { label: "Manaus, AM",            estado: "AM" },
-        { label: "Porto Alegre, RS",      estado: "RS" },
-        { label: "Belém, PA",             estado: "PA" },
-        { label: "Goiânia, GO",           estado: "GO" },
-        { label: "Florianópolis, SC",     estado: "SC" },
-        { label: "São Luís, MA",          estado: "MA" },
-        { label: "Maceió, AL",            estado: "AL" },
-        { label: "Natal, RN",             estado: "RN" },
-        { label: "Teresina, PI",          estado: "PI" },
-        { label: "Campo Grande, MS",      estado: "MS" },
-        { label: "João Pessoa, PB",       estado: "PB" },
-        { label: "Aracaju, SE",           estado: "SE" },
-        { label: "Porto Velho, RO",       estado: "RO" },
-        { label: "Cuiabá, MT",            estado: "MT" },
-        { label: "Macapá, AP",            estado: "AP" },
-        { label: "Rio Branco, AC",        estado: "AC" },
-        { label: "Boa Vista, RR",         estado: "RR" },
-        { label: "Palmas, TO",            estado: "TO" },
-        { label: "Vitória, ES",           estado: "ES" },
-    ];
+    // ==========================================================
+    // ESTADO DROPDOWN GRID
+    // ==========================================================
+    const btnBusca = document.getElementById('main-search-btn');
 
-    // Estado selecionado pelo usuário (separado do label exibido)
-    let estadoSelecionado = estadoBuscado;
+    function toggleEstadoDropdown(e) {
+        e.stopPropagation();
+        const drop = document.getElementById('estado-dropdown');
+        const disp = document.getElementById('estado-display');
+        const isOpen = drop.style.display === 'block';
+        drop.style.display = isOpen ? 'none' : 'block';
+        disp.classList.toggle('open', !isOpen);
+    }
 
-    // ── Autocomplete de Cidade ──
-    const cidadeInput = document.getElementById('cidade-input');
-    const cidadeDrop  = document.getElementById('cidade-suggestions');
-    let listaCidades  = [];
+    function selectEstado(el) {
+        const input = document.getElementById('location-input');
+        const texto = document.getElementById('estado-texto');
+        const drop  = document.getElementById('estado-dropdown');
+        const disp  = document.getElementById('estado-display');
+
+        document.querySelectorAll('.est-item.selected').forEach(i => i.classList.remove('selected'));
+
+        const sigla = el.dataset.s;
+        const nome  = el.dataset.n;
+        input.value = sigla;
+        texto.textContent = sigla + ' — ' + nome;
+        el.classList.add('selected');
+
+        drop.style.display = 'none';
+        disp.classList.remove('open');
+
+        // Reset cidade e carrega as novas
+        document.getElementById('cidade-input').value = '';
+        document.getElementById('cidade-texto').textContent = 'Todas as cidades';
+        document.getElementById('cidade-texto').style.color = '';
+        document.querySelectorAll('.cid-item.selected').forEach(i => i.classList.remove('selected'));
+        carregarCidadesBarraBusca(sigla);
+        habilitarBusca(true);
+    }
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#location-container')) {
+            const drop = document.getElementById('estado-dropdown');
+            const disp = document.getElementById('estado-display');
+            if (drop) drop.style.display = 'none';
+            if (disp) disp.classList.remove('open');
+        }
+        if (!e.target.closest('#cidade-container')) {
+            const cdrop = document.getElementById('cidade-dropdown');
+            const cdisp = document.getElementById('cidade-display');
+            if (cdrop) cdrop.style.display = 'none';
+            if (cdisp) cdisp.classList.remove('open');
+        }
+    });
+
+    function habilitarBusca(sim) {
+        btnBusca.style.opacity       = sim ? "1"       : "0.3";
+        btnBusca.style.pointerEvents = sim ? "auto"    : "none";
+        btnBusca.style.cursor        = sim ? "pointer" : "not-allowed";
+    }
+
+    // ==========================================================
+    // CIDADE DROPDOWN GRID
+    // ==========================================================
+    let listaCidades = [];
+
+    function toggleCidadeDropdown(e) {
+        e.stopPropagation();
+        const disp = document.getElementById('cidade-display');
+        if (disp.classList.contains('disabled-display')) return;
+        const drop = document.getElementById('cidade-dropdown');
+        const isOpen = drop.style.display === 'block';
+        drop.style.display = isOpen ? 'none' : 'block';
+        disp.classList.toggle('open', !isOpen);
+    }
+
+    function selectCidade(el) {
+        const input = document.getElementById('cidade-input');
+        const texto = document.getElementById('cidade-texto');
+        const drop  = document.getElementById('cidade-dropdown');
+        const disp  = document.getElementById('cidade-display');
+
+        document.querySelectorAll('.cid-item.selected').forEach(i => i.classList.remove('selected'));
+
+        if (!el) {
+            input.value = '';
+            texto.textContent = 'Todas as cidades';
+            texto.style.color = '';
+        } else {
+            input.value = el.dataset.c;
+            texto.textContent = el.dataset.c;
+            texto.style.color = '#222';
+            el.classList.add('selected');
+        }
+
+        drop.style.display = 'none';
+        disp.classList.remove('open');
+    }
+
+    function emojiCidade(nome) {
+        const n = nome.toLowerCase();
+        if (['são paulo','rio de janeiro','salvador','fortaleza','belo horizonte','manaus','curitiba','recife','porto alegre','belém','goiânia','brasília'].some(c => n.includes(c))) return '🌆';
+        if (['praia','cabo','litoral','angra','búzios','arraial','guarujá','ubatuba','florianópolis','maceió','natal'].some(c => n.includes(c))) return '🏖️';
+        if (['petrópolis','gramado','campos do jordão','visconde','nova friburgo','teresópolis'].some(c => n.includes(c))) return '⛰️';
+        if (n.includes('cachoeira')) return '💧';
+        if (n.includes('foz') || n.includes('iguaçu')) return '🌊';
+        return '📍';
+    }
+
+    function renderCidadesGrid(lista) {
+        const wrap = document.getElementById('cidade-grid-wrap');
+        if (!lista.length) {
+            wrap.innerHTML = '<div class="cid-empty">🏜️ Nenhuma cidade encontrada</div>';
+            return;
+        }
+        const itens = lista.map(c =>
+            `<div class="cid-item" data-c="${c}" onclick="selectCidade(this)">
+                <div class="cid-icon">${emojiCidade(c)}</div>
+                <div class="cid-nome">${c}</div>
+            </div>`
+        ).join('');
+        wrap.innerHTML = `
+            <div class="cid-header">
+                <span class="cid-header-title">🏙️ ${lista.length} cidade${lista.length !== 1 ? 's' : ''}</span>
+                <button class="cid-clear-btn" onclick="selectCidade(null)">✕ Todas</button>
+            </div>
+            <div class="cid-grid">${itens}</div>
+        `;
+    }
 
     async function carregarCidadesBarraBusca(sigla) {
-        if (!sigla) { listaCidades = []; cidadeInput.value = ''; cidadeInput.disabled = true; return; }
-        cidadeInput.disabled = false;
-        cidadeInput.placeholder = 'Carregando...';
+        const disp = document.getElementById('cidade-display');
+        const wrap = document.getElementById('cidade-grid-wrap');
+
+        if (!sigla) {
+            listaCidades = [];
+            disp.classList.add('disabled-display');
+            wrap.innerHTML = '<div class="cid-loading">Selecione um estado primeiro</div>';
+            return;
+        }
+
+        disp.classList.remove('disabled-display');
+        wrap.innerHTML = '<div class="cid-loading cid-loading-spinner">Carregando cidades...</div>';
+
         const { data } = await _supabase
             .from('propriedades').select('cidade')
             .eq('estado', sigla).eq('publicada', true).not('cidade', 'is', null);
         listaCidades = data ? [...new Set(data.map(p => p.cidade).filter(Boolean))].sort() : [];
-        cidadeInput.placeholder = listaCidades.length ? 'Todas as cidades' : 'Sem cidades cadastradas';
-        // Preenche se já veio na URL
-        if (cidadeBuscada) cidadeInput.value = cidadeBuscada;
-    }
+        renderCidadesGrid(listaCidades);
 
-    function renderCidades(lista) {
-        cidadeDrop.innerHTML = lista.map(c =>
-            `<div class="suggestion-item" data-c="${c}"><span>🏙️</span>${c}</div>`
-        ).join('');
-        cidadeDrop.style.display = lista.length ? 'block' : 'none';
-        cidadeDrop.querySelectorAll('.suggestion-item').forEach(el => {
-            el.addEventListener('mousedown', e => {
-                e.preventDefault();
-                cidadeInput.value = el.dataset.c;
-                cidadeDrop.style.display = 'none';
-            });
-        });
-    }
-
-    cidadeInput.addEventListener('input', () => {
-        const t = cidadeInput.value.trim().toLowerCase();
-        const filtradas = t
-            ? listaCidades.filter(c => c.toLowerCase().includes(t))
-            : listaCidades;
-        renderCidades(filtradas.slice(0, 6));
-    });
-    cidadeInput.addEventListener('focus', () => renderCidades(listaCidades.slice(0, 6)));
-    cidadeInput.addEventListener('blur',  () => setTimeout(() => cidadeDrop.style.display = 'none', 200));
-
-    // Inicializa campo cidade desabilitado até ter estado
-    cidadeInput.disabled = !estadoBuscado;
-    if (estadoBuscado) carregarCidadesBarraBusca(estadoBuscado);
-
-    const inputLocal = document.getElementById('location-input');
-    const dropdown   = document.getElementById('location-suggestions');
-    const btnBusca   = document.getElementById('main-search-btn');
-
-    // Renderiza sugestões filtradas
-    function renderLista(lista) {
-        dropdown.innerHTML = "";
-        const top5 = lista.slice(0, 5);
-        if (top5.length > 0) {
-            top5.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'suggestion-item';
-                div.innerHTML = `<span>📍</span> ${item.label}`;
-                div.addEventListener('mousedown', (e) => {
-                    e.preventDefault(); // Evita blur antes do click registrar
-                    inputLocal.value = item.label;
-                    inputLocal.style.color = "#222";
-                    estadoSelecionado = item.estado;
-                    dropdown.style.display = 'none';
-                    habilitarBusca(true);
-                    // Carrega cidades do estado selecionado
-                    cidadeInput.value = '';
-                    carregarCidadesBarraBusca(item.estado);
-                });
-                dropdown.appendChild(div);
-            });
-            dropdown.style.display = 'block';
-        } else {
-            dropdown.style.display = 'none';
+        // Pré-selecionar cidade da URL, se houver
+        if (cidadeBuscada) {
+            document.getElementById('cidade-input').value = cidadeBuscada;
+            const cidTexto = document.getElementById('cidade-texto');
+            cidTexto.textContent = cidadeBuscada;
+            cidTexto.style.color = '#222';
+            // Marca item selecionado no grid
+            setTimeout(() => {
+                const el = document.querySelector(`.cid-item[data-c="${cidadeBuscada}"]`);
+                if (el) el.classList.add('selected');
+            }, 50);
         }
     }
-
-    function habilitarBusca(sim) {
-        btnBusca.style.opacity       = sim ? "1"        : "0.3";
-        btnBusca.style.pointerEvents = sim ? "auto"     : "none";
-        btnBusca.style.cursor        = sim ? "pointer"  : "not-allowed";
-    }
-
-    // Ao digitar — filtra sugestões, sem pintar de vermelho enquanto digita
-    inputLocal.addEventListener('input', (e) => {
-        const busca = e.target.value.trim().toLowerCase();
-        inputLocal.style.color = "#222"; // Reseta vermelho ao digitar
-        estadoSelecionado = "";
-        habilitarBusca(false);
-
-        if (busca === "") {
-            renderLista(listaLocais);
-        } else {
-            const filtrados = listaLocais.filter(l =>
-                l.label.toLowerCase().includes(busca) ||
-                l.estado.toLowerCase().includes(busca)
-            );
-            renderLista(filtrados);
-        }
-    });
-
-    inputLocal.addEventListener('focus', () => {
-        const busca = inputLocal.value.trim().toLowerCase();
-        if (busca === "") {
-            renderLista(listaLocais);
-        } else {
-            const filtrados = listaLocais.filter(l => l.label.toLowerCase().includes(busca));
-            renderLista(filtrados);
-        }
-    });
-
-    // Fecha dropdown ao clicar fora
-    document.addEventListener('click', (e) => {
-        if (!document.getElementById('location-container')?.contains(e.target)) {
-            dropdown.style.display = 'none';
-        }
-    });
-
-    // Ao sair do campo — só pinta vermelho se não selecionou nada da lista
-    inputLocal.addEventListener('blur', () => {
-        setTimeout(() => {
-            if (!estadoSelecionado && inputLocal.value.trim() !== "") {
-                inputLocal.style.color = "red";
-                habilitarBusca(false);
-            } else if (!estadoSelecionado) {
-                inputLocal.style.color = "#222";
-                inputLocal.value = "";
-                habilitarBusca(false);
-            }
-            dropdown.style.display = 'none';
-        }, 200);
-    });
 
     // Botão de busca navega com todos os parâmetros
     btnBusca.addEventListener('click', () => {
-        if (!estadoSelecionado) return;
+        const estado = document.getElementById('location-input').value.trim();
+        if (!estado) return;
 
         const tipo    = document.getElementById('tipo-espaco')?.value || '';
         const cidade  = document.getElementById('cidade-input')?.value.trim() || '';
@@ -2694,13 +2955,34 @@ input:checked + .slider-round:before { transform: translateX(20px); }
         const dataVal = (data && data !== 'Adicionar datas') ? data : '';
 
         const url = new URL('buscapropriedade.html', window.location.href);
-        url.searchParams.set('estado', estadoSelecionado);
+        url.searchParams.set('estado', estado);
         if (cidade)  url.searchParams.set('cidade', cidade);
         if (tipo)    url.searchParams.set('tipo',   tipo);
         if (dataVal) url.searchParams.set('data',   dataVal);
 
         window.location.href = url.toString();
     });
+
+    // Pré-preenche barra de busca se veio estado na URL
+    if (estadoBuscado) {
+        const input = document.getElementById('location-input');
+        const texto = document.getElementById('estado-texto');
+        const estadoNomes = {
+            'AC':'Acre','AL':'Alagoas','AP':'Amapá','AM':'Amazonas','BA':'Bahia',
+            'CE':'Ceará','DF':'Distrito Federal','ES':'Espírito Santo','GO':'Goiás',
+            'MA':'Maranhão','MT':'Mato Grosso','MS':'Mato Grosso do Sul','MG':'Minas Gerais',
+            'PA':'Pará','PB':'Paraíba','PR':'Paraná','PE':'Pernambuco','PI':'Piauí',
+            'RJ':'Rio de Janeiro','RN':'Rio Grande do Norte','RS':'Rio Grande do Sul',
+            'RO':'Rondônia','RR':'Roraima','SC':'Santa Catarina','SP':'São Paulo',
+            'SE':'Sergipe','TO':'Tocantins'
+        };
+        input.value = estadoBuscado;
+        texto.textContent = estadoBuscado + ' — ' + (estadoNomes[estadoBuscado] || estadoBuscado);
+        const elEstado = document.querySelector(`.est-item[data-s="${estadoBuscado}"]`);
+        if (elEstado) elEstado.classList.add('selected');
+        habilitarBusca(true);
+        carregarCidadesBarraBusca(estadoBuscado);
+    }
 
     const inputQtd = document.getElementById('qtd-total');
 
@@ -2742,7 +3024,7 @@ function toggleMenuExtra() {
     }
 
     // Fecha o menu se clicar fora dele
-    window.onclick = function(event) {
+    document.addEventListener('click', function(event) {
         if (!event.target.closest('.menu-hamburguer-container')) {
             document.getElementById('extra-menu').style.display = 'none';
         }
@@ -2753,7 +3035,7 @@ function toggleMenuExtra() {
             if (drop) drop.style.display = 'none';
             if (disp) disp.classList.remove('open');
         }
-    }
+    }, true);
 
 function toggleEventoDropdown(e) {
     e.stopPropagation();
