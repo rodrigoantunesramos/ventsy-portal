@@ -358,7 +358,85 @@
             color: #aaa; font-size: .8rem;
         }
 
-        @media (max-width: 900px) {
+        /* ──────────── EVENTO DROPDOWN GRID ──────────── */
+        .tipo-display {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .83rem; color: #555; cursor: pointer;
+            margin-top: 2px; gap: 4px; min-width: 120px;
+        }
+        .tipo-display span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tipo-caret { width: 14px; height: 14px; flex-shrink: 0; color: #aaa; transition: transform .2s; }
+        .tipo-display.open .tipo-caret { transform: rotate(180deg); }
+
+        .evento-dropdown {
+            position: absolute;
+            top: calc(100% + 14px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 540px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.15);
+            border: 1px solid #eee;
+            z-index: 5000;
+            animation: dropIn .18s ease;
+        }
+        @keyframes dropIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        .evento-grid-wrap {
+            padding: 16px 18px 18px;
+            max-height: 420px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ddd transparent;
+        }
+        .ev-clear {
+            width: 100%; background: #f7f7f7; border: 1px solid #eee;
+            border-radius: 10px; padding: 8px 14px;
+            font-size: .8rem; font-weight: 600; color: #666;
+            cursor: pointer; text-align: left; margin-bottom: 14px;
+            transition: background .15s, color .15s; font-family: inherit;
+        }
+        .ev-clear:hover { background: #fee; color: var(--vermelho); border-color: #fcc; }
+        .ev-cat-label {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #aaa; margin: 12px 0 7px;
+        }
+        .ev-cat-label:first-of-type { margin-top: 0; }
+        .ev-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        .ev-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; padding: 8px 6px 7px;
+            border-radius: 12px; cursor: pointer;
+            font-size: .72rem; font-weight: 600; color: #444;
+            text-align: center; line-height: 1.2;
+            background: #f9f9f9; border: 1px solid transparent;
+            transition: background .15s, border-color .15s, transform .12s, color .15s;
+            user-select: none;
+        }
+        .ev-item span { font-size: 1.25rem; line-height: 1; }
+        .ev-item:hover {
+            background: #fff5f7; border-color: #ffd6dd; color: var(--vermelho);
+            transform: translateY(-2px);
+        }
+        .ev-item.selected {
+            background: var(--vermelho); color: #fff; border-color: var(--vermelho);
+        }
+        .ev-item.selected span { filter: none; }
+
+        @media (max-width: 620px) {
+            .evento-dropdown { width: calc(100vw - 32px); left: 0; transform: none; }
+            .ev-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+
             .banner-inner { flex-direction: column; text-align: center; }
             .footer-container { flex-direction: column; gap: 36px; }
             .hero h1 { font-size: 1.9rem; }
@@ -430,61 +508,98 @@
                     <input type="text" id="input-periodo" style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;">
                 </div>
                 <div class="divider"></div>
-                <div class="search-item" id="tipo-container">
+                <div class="search-item" id="tipo-container" style="position:relative;">
                     <label>Evento</label>
-                    <select id="tipo-espaco">
-                        <option value="">Todos os eventos</option>
-                        <option value="Casamento">💍 Casamento</option>
-                        <option value="Festa de Aniversário">🎂 Aniversário</option>
-                        <option value="Festa Infantil">🎈 Festa Infantil</option>
-                        <option value="Formatura">🎓 Formatura</option>
-                        <option value="Confraternização">🥂 Confraternização</option>
-                        <option value="Workshop">💼 Workshop</option>
-                        <option value="Chá de Bebê">👶 Chá de Bebê</option>
-                        <option value="Chá Revelação">🎀 Chá Revelação</option>
-                        <option value="Debutante">👑 Debutante</option>
-                        <option value="Show">🎵 Show</option>
-                        <option value="Retiro">🌿 Retiro</option>
-                        <option value="Acampamento"> Acampamento</option>
-                        <option value="Leilão"> Leilão</option>
-                        <option value="Provas Hípicas"> Provas Hípicas</option>
-                        <option value="Torneios"> Torneios</option>
-                        <option value="Festival"> Festival</option>
-                        <option value="Ensaio Fotográfico"> Ensaio Fotográfico</option>
-                        <option value="Amostras"> Amostras</option>
-                        <option value="Apresentações"> Apresentações</option>
-                        <option value="Field Day"> Field Day</option>
-                        <option value="Treinamento"> Treinamento</option>
-                        <option value="Lançamento de Produto"> Lançamento de Produto</option>
-                        <option value="Seminários"> Seminários</option>
-                        <option value="Networking"> Networking</option>
-                        <option value="Happy Hour"> Happy Hour</option>
-                        <option value="Noivado"> Noivado</option>
-                        <option value="Renovação de Votos"> Renovação de Votos</option>
-                        <option value="Batizado"> Batizado</option>
-                        <option value="Bodas"> Bodas</option>
-                        <option value="Colação de Grau"> Colação de Grau</option>
-                        <option value="Congresso"> Congresso</option>
-                        <option value="Vigilia"> Vigilia</option>
-                        <option value="Encontro Religioso"> Encontro Religioso</option>
-                        <option value="Pop-up Store"> Pop-up Store</option>
-                        <option value="Vernissage"> Vernissage</option>
-                        <option value="Debutante"> Debutante</option>
-                        <option value="Exposição"> Exposição</option>
-                        <option value="Dia de Campo"> Dia de Campo</option>
-                        <option value="Pescaria"> Pescaria</option>
-                        <option value="Futebol"> Futebol</option>
-                        <option value="Radical"> Radical</option>
-                        <option value="Encontro de Motos"> Encontro de Motos</option>
-                        
+                    <input type="hidden" id="tipo-espaco" value="">
+                    <div id="tipo-display" class="tipo-display" onclick="toggleEventoDropdown(event)">
+                        <span id="tipo-texto">Todos os eventos</span>
+                        <svg class="tipo-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div id="evento-dropdown" class="evento-dropdown" style="display:none;">
+                        <div class="evento-grid-wrap">
 
+                            <button class="ev-clear" onclick="selectEvento(null)">✕ Todos os eventos</button>
 
+                            <div class="ev-cat-label">🏢 Corporativo</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Workshop" onclick="selectEvento(this)"><span>💼</span>Workshop</div>
+                                <div class="ev-item" data-v="Treinamento" onclick="selectEvento(this)"><span>📋</span>Treinamento</div>
+                                <div class="ev-item" data-v="Seminários" onclick="selectEvento(this)"><span>🎙️</span>Seminários</div>
+                                <div class="ev-item" data-v="Congresso" onclick="selectEvento(this)"><span>🏛️</span>Congresso</div>
+                                <div class="ev-item" data-v="Networking" onclick="selectEvento(this)"><span>🤝</span>Networking</div>
+                                <div class="ev-item" data-v="Happy Hour" onclick="selectEvento(this)"><span>🥂</span>Happy Hour</div>
+                                <div class="ev-item" data-v="Confraternização" onclick="selectEvento(this)"><span>🎉</span>Confraternização</div>
+                                <div class="ev-item" data-v="Lançamento de Produto" onclick="selectEvento(this)"><span>🚀</span>Lançamento</div>
+                                <div class="ev-item" data-v="Field Day" onclick="selectEvento(this)"><span>🌤️</span>Field Day</div>
+                                <div class="ev-item" data-v="Pop-up Store" onclick="selectEvento(this)"><span>🛍️</span>Pop-up Store</div>
+                            </div>
 
-                
+                            <div class="ev-cat-label">🐴 Cavalo</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Provas Hípicas" onclick="selectEvento(this)"><span>🏇</span>Provas Hípicas</div>
+                                <div class="ev-item" data-v="Torneios" onclick="selectEvento(this)"><span>🏆</span>Torneios</div>
+                                <div class="ev-item" data-v="Leilão" onclick="selectEvento(this)"><span>🔨</span>Leilão</div>
+                                <div class="ev-item" data-v="Dia de Campo" onclick="selectEvento(this)"><span>🌾</span>Dia de Campo</div>
+                            </div>
 
+                            <div class="ev-cat-label">🎣 Pescaria</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Pescaria" onclick="selectEvento(this)"><span>🎣</span>Pescaria</div>
+                                <div class="ev-item" data-v="Acampamento" onclick="selectEvento(this)"><span>⛺</span>Acampamento</div>
+                                <div class="ev-item" data-v="Retiro" onclick="selectEvento(this)"><span>🌿</span>Retiro</div>
+                            </div>
 
+                            <div class="ev-cat-label">🪂 Radicais</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Radical" onclick="selectEvento(this)"><span>🪂</span>Radical</div>
+                                <div class="ev-item" data-v="Encontro de Motos" onclick="selectEvento(this)"><span>🏍️</span>Motos</div>
+                                <div class="ev-item" data-v="Futebol" onclick="selectEvento(this)"><span>⚽</span>Futebol</div>
+                            </div>
 
-                    </select>
+                            <div class="ev-cat-label">🥂 Sociais & Celebrações</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Casamento" onclick="selectEvento(this)"><span>💍</span>Casamento</div>
+                                <div class="ev-item" data-v="Noivado" onclick="selectEvento(this)"><span>💒</span>Noivado</div>
+                                <div class="ev-item" data-v="Renovação de Votos" onclick="selectEvento(this)"><span>🌹</span>Renovação Votos</div>
+                                <div class="ev-item" data-v="Bodas" onclick="selectEvento(this)"><span>👫</span>Bodas</div>
+                                <div class="ev-item" data-v="Festa de Aniversário" onclick="selectEvento(this)"><span>🎂</span>Aniversário</div>
+                                <div class="ev-item" data-v="Festa Infantil" onclick="selectEvento(this)"><span>🎈</span>Festa Infantil</div>
+                                <div class="ev-item" data-v="Debutante" onclick="selectEvento(this)"><span>👑</span>Debutante</div>
+                                <div class="ev-item" data-v="Chá de Bebê" onclick="selectEvento(this)"><span>👶</span>Chá de Bebê</div>
+                                <div class="ev-item" data-v="Chá Revelação" onclick="selectEvento(this)"><span>🎀</span>Chá Revelação</div>
+                            </div>
+
+                            <div class="ev-cat-label">🎓 Acadêmico</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Formatura" onclick="selectEvento(this)"><span>🎓</span>Formatura</div>
+                                <div class="ev-item" data-v="Colação de Grau" onclick="selectEvento(this)"><span>📜</span>Colação de Grau</div>
+                                <div class="ev-item" data-v="Amostras" onclick="selectEvento(this)"><span>🔬</span>Amostras</div>
+                                <div class="ev-item" data-v="Apresentações" onclick="selectEvento(this)"><span>📊</span>Apresentações</div>
+                            </div>
+
+                            <div class="ev-cat-label">✝️ Religioso</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Batizado" onclick="selectEvento(this)"><span>🕊️</span>Batizado</div>
+                                <div class="ev-item" data-v="Vigilia" onclick="selectEvento(this)"><span>🕯️</span>Vigília</div>
+                                <div class="ev-item" data-v="Encontro Religioso" onclick="selectEvento(this)"><span>🙏</span>Encontro Religioso</div>
+                            </div>
+
+                            <div class="ev-cat-label">🎵 Entretenimento</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Show" onclick="selectEvento(this)"><span>🎵</span>Show</div>
+                                <div class="ev-item" data-v="Festival" onclick="selectEvento(this)"><span>🎪</span>Festival</div>
+                                <div class="ev-item" data-v="Apresentações" onclick="selectEvento(this)"><span>🎭</span>Teatro</div>
+                            </div>
+
+                            <div class="ev-cat-label">✨ Estilo de Vida</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Ensaio Fotográfico" onclick="selectEvento(this)"><span>📸</span>Ensaio</div>
+                                <div class="ev-item" data-v="Vernissage" onclick="selectEvento(this)"><span>🖼️</span>Vernissage</div>
+                                <div class="ev-item" data-v="Exposição" onclick="selectEvento(this)"><span>🏛️</span>Exposição</div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
                 <div class="divider"></div>
                 <div class="search-item" id="cidade-container">
@@ -926,6 +1041,50 @@ function toggleMenuExtra() {
 document.addEventListener('click', e => {
     if (!e.target.closest('.menu-hamburguer-container'))
         document.getElementById('extra-menu').style.display = 'none';
+});
+
+function toggleEventoDropdown(e) {
+    e.stopPropagation();
+    const drop = document.getElementById('evento-dropdown');
+    const disp = document.getElementById('tipo-display');
+    const isOpen = drop.style.display === 'block';
+    drop.style.display = isOpen ? 'none' : 'block';
+    disp.classList.toggle('open', !isOpen);
+}
+
+function selectEvento(el) {
+    const input = document.getElementById('tipo-espaco');
+    const texto = document.getElementById('tipo-texto');
+    const drop  = document.getElementById('evento-dropdown');
+    const disp  = document.getElementById('tipo-display');
+
+    // Remove previous selection highlight
+    document.querySelectorAll('.ev-item.selected').forEach(i => i.classList.remove('selected'));
+
+    if (!el) {
+        // Clear / "Todos os eventos"
+        input.value = '';
+        texto.textContent = 'Todos os eventos';
+    } else {
+        const v = el.dataset.v;
+        input.value = v;
+        const emoji = el.querySelector('span').textContent;
+        texto.textContent = emoji + ' ' + el.textContent.trim().replace(emoji, '').trim();
+        el.classList.add('selected');
+    }
+
+    drop.style.display = 'none';
+    disp.classList.remove('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', e => {
+    if (!e.target.closest('#tipo-container')) {
+        const drop = document.getElementById('evento-dropdown');
+        const disp = document.getElementById('tipo-display');
+        if (drop) drop.style.display = 'none';
+        if (disp) disp.classList.remove('open');
+    }
 });
 
 document.addEventListener('DOMContentLoaded', render);
