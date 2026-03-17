@@ -703,15 +703,20 @@ async function salvarLeadIncompleto() {
     const docRaw    = document.getElementById('documento')?.value || '';
     const documento = docRaw.replace(/\D/g, '') || null;
     const ref       = document.getElementById('ref-codigo')?.value.trim() || null;
-    const timeout   = new Promise(resolve => setTimeout(resolve, 3000));
-    const salvar    = sb.rpc('salvar_cadastro_incompleto', {
-        p_email:     email,
-        p_nome:      nome || null,
-        p_documento: documento || null,
-        p_tipo_doc:  documento ? tipoDoc : null,
-        p_ref:       ref || null
-    }).catch(e => console.warn('Lead incompleto não salvo:', e.message));
-    await Promise.race([salvar, timeout]);
+    try {
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 3000);
+        await sb.rpc('salvar_cadastro_incompleto', {
+            p_email:     email,
+            p_nome:      nome || null,
+            p_documento: documento || null,
+            p_tipo_doc:  documento ? tipoDoc : null,
+            p_ref:       ref || null
+        });
+        clearTimeout(tid);
+    } catch (e) {
+        console.warn('Lead incompleto não salvo:', e.message);
+    }
 }
 
 // ── Usuário ──
@@ -946,7 +951,7 @@ async function submeterCadastro() {
 
         // Erro explícito do Auth
         if (authError) {
-            await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_auth', p_erro_msg: authError.message }).catch(() => {});
+            try { await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_auth', p_erro_msg: authError.message }); } catch(_){}
             throw new Error('Este e-mail já está cadastrado. Tente fazer login.');
         }
 
@@ -965,8 +970,8 @@ async function submeterCadastro() {
 
         if (dbError) {
             // signUp ok mas INSERT falhou — limpa zumbi para permitir nova tentativa
-            await sb.rpc('limpar_zumbi_auth', { p_user_id: userId }).catch(() => {});
-            await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_db', p_erro_msg: dbError.message }).catch(() => {});
+            try { await sb.rpc('limpar_zumbi_auth', { p_user_id: userId }); } catch(_){}
+            try { await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_db', p_erro_msg: dbError.message }); } catch(_){}
             if (dbError.code === '23505') {
                 if (dbError.message.includes('documento')) throw new Error('Este CPF/CNPJ já está cadastrado.');
                 if (dbError.message.includes('usuario'))   throw new Error('Este nome de usuário já está em uso. Escolha outro.');
@@ -976,11 +981,11 @@ async function submeterCadastro() {
 
         // 3. Indicação
         if (refCodigo && userId) {
-            await sb.rpc('registrar_indicacao', { p_indicado_id: userId, p_ref_handle: refCodigo }).catch(() => {});
+            try { await sb.rpc('registrar_indicacao', { p_indicado_id: userId, p_ref_handle: refCodigo }); } catch(_){}
         }
 
         // 4. Marca lead como convertido
-        await sb.rpc('marcar_cadastro_convertido', { p_email: email }).catch(() => {});
+        try { await sb.rpc('marcar_cadastro_convertido', { p_email: email }); } catch(_){}
 
         // ✅ Sucesso — mostra tela de confirmação
         document.getElementById('form-cadastro').style.opacity = '0';
