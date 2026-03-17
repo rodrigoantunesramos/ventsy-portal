@@ -975,6 +975,9 @@ async function submeterCadastro() {
             options: { data: { nome, usuario } }
         });
 
+        console.log('AUTH ID:', authData?.user?.id);
+        console.log('IDENTITIES:', JSON.stringify(authData?.user?.identities));
+
         // Erro explícito do Auth
         if (authError) {
             try { await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_auth', p_erro_msg: authError.message }); } catch(_){}
