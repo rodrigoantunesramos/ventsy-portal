@@ -2406,7 +2406,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                 // Tipos de evento — vem do Set centralizado
                 tiposEvento:    [...eventosSelecionados],
                 // Tipos de propriedade — coleta todos os marcados
-                categorias: [...document.querySelectorAll('#modalFiltro input[id^="f-cat-"]:checked')]
+                categorias: [...document.querySelectorAll('#modalFiltro .grid-categorias input[type="checkbox"]:checked')]
                                 .map(cb => cb.value),
             };
         }
@@ -3045,9 +3045,9 @@ function atualizarDisplayEventos() {
     }
 }
 
-// Sincroniza chips do modal → a partir do Set
+// Sincroniza chips do modal → a partir do Set (apenas chips de EVENTO)
 function sincronizarChipsModal() {
-    document.querySelectorAll('#modalFiltro .grid-eventos .evento-chip input[type="checkbox"]')
+    document.querySelectorAll('#modalFiltro .grid-eventos:not(.grid-categorias) .evento-chip input[type="checkbox"]')
         .forEach(cb => { cb.checked = eventosSelecionados.has(cb.value); });
 }
 
@@ -3072,16 +3072,16 @@ function selectEvento(el) {
     // Não fecha — permite múltipla seleção
 }
 
-// Toggle via chips do modal — chamado pelo change dos checkboxes
+// Toggle via chips do modal — chamado pelo change dos checkboxes de EVENTO
 function onChipModalChange(cb) {
     cb.checked ? eventosSelecionados.add(cb.value) : eventosSelecionados.delete(cb.value);
     sincronizarEvItems();
     atualizarDisplayEventos();
 }
 
-// Aplica listeners nos chips do modal após DOM pronto
+// Aplica listeners nos chips de EVENTO do modal após DOM pronto
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('#modalFiltro .grid-eventos .evento-chip input[type="checkbox"]')
+    document.querySelectorAll('#modalFiltro .grid-eventos:not(.grid-categorias) .evento-chip input[type="checkbox"]')
         .forEach(cb => cb.addEventListener('change', () => onChipModalChange(cb)));
 });
 
@@ -3345,35 +3345,35 @@ function fecharModalFiltro() {
 
             <section class="filtro-secao">
                 <h3>Tipo de Propriedade</h3>
-                <div class="grid-eventos">
-                    <label class="evento-chip"><input type="checkbox" value="Casas de Festas"><span>🏠 Casas de Festas</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Sítios"><span>🌳 Sítios</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Chácaras"><span>🌿 Chácaras</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Fazendas"><span>🐄 Fazendas</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Acampamentos"><span>⛺ Acampamentos</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Bares e Restaurantes"><span>🍽️ Bares e Rest.</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Beach Clubs"><span>🏖️ Beach Clubs</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Centros de Convenções e Galpões"><span>🏭 Galpões</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Clubes"><span>🏊 Clubes</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Hotéis, Pousadas e Resorts"><span>🏨 Hotéis</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Rooftops"><span>🌆 Rooftops</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Teatros"><span>🎭 Teatros</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Salão de Festas"><span>🎊 Salão de Festas</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Mansões"><span>🏰 Mansões</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Espaço Gourmet"><span>👨‍🍳 Espaço Gourmet</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Lofts"><span>🏙️ Lofts</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Espaço Industrial"><span>🔩 Industrial</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Arena"><span>🏟️ Arena</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Estádios"><span>⚽ Estádios</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Auditórios"><span>🎤 Auditórios</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Coworkings"><span>💻 Coworkings</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Galeria de Arte"><span>🖼️ Galerias</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Museus"><span>🏛️ Museus</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Vinicolas"><span>🍷 Vinícolas</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Iates"><span>⛵ Iates</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Lanchas"><span>🚤 Lanchas</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Escuna"><span>⛴️ Escuna</span></label>
-                    <label class="evento-chip"><input type="checkbox" value="Haras"><span>🐎 Haras</span></label>
+                <div class="grid-eventos grid-categorias">
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-casas-festas" value="Casas de Festas"><span>🏠 Casas de Festas</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-sitios" value="Sítios"><span>🌳 Sítios</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-chacaras" value="Chácaras"><span>🌿 Chácaras</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-fazendas" value="Fazendas"><span>🐄 Fazendas</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-acampamentos" value="Acampamentos"><span>⛺ Acampamentos</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-bares" value="Bares e Restaurantes"><span>🍽️ Bares e Rest.</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-beach-clubs" value="Beach Clubs"><span>🏖️ Beach Clubs</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-galpoes" value="Centros de Convenções e Galpões"><span>🏭 Galpões</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-clubes" value="Clubes"><span>🏊 Clubes</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-hoteis" value="Hotéis, Pousadas e Resorts"><span>🏨 Hotéis</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-rooftops" value="Rooftops"><span>🌆 Rooftops</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-teatros" value="Teatros"><span>🎭 Teatros</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-salao-festas" value="Salão de Festas"><span>🎊 Salão de Festas</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-mansoes" value="Mansões"><span>🏰 Mansões</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-gourmet" value="Espaço Gourmet"><span>👨‍🍳 Espaço Gourmet</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-lofts" value="Lofts"><span>🏙️ Lofts</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-industrial" value="Espaço Industrial"><span>🔩 Industrial</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-arena" value="Arena"><span>🏟️ Arena</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-estadios" value="Estádios"><span>⚽ Estádios</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-auditorios" value="Auditórios"><span>🎤 Auditórios</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-coworkings" value="Coworkings"><span>💻 Coworkings</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-galerias" value="Galeria de Arte"><span>🖼️ Galerias</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-museus" value="Museus"><span>🏛️ Museus</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-vinicolas" value="Vinicolas"><span>🍷 Vinícolas</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-iates" value="Iates"><span>⛵ Iates</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-lanchas" value="Lanchas"><span>🚤 Lanchas</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-escuna" value="Escuna"><span>⛴️ Escuna</span></label>
+                    <label class="evento-chip"><input type="checkbox" id="f-cat-haras" value="Haras"><span>🐎 Haras</span></label>
                 </div>
             </section>
 
