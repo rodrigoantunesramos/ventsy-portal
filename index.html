@@ -1417,56 +1417,81 @@ function selecionarOnde(item) {
 
 
 async function buscarOnde(q) {
-    const t = norm(q);
+    const t = norm(q); // ex: "chacara macacu"
 
-    // Estados — busca local com normalização de acentos
-    const estados = ESTADOS_ONDE
-        .filter(e => norm(e.n).includes(t) || e.s.toLowerCase().includes(t))
+    // ── Estados: busca local instantânea ──
+    const estadosMatch = ESTADOS_ONDE
+        .filter(e => norm(e.n).includes(t) || e.s.toLowerCase().startsWith(t))
         .slice(0, 3);
 
-    // Busca no Supabase — propriedades (nome + categoria) e cidades
     let props = [], cats = [], cidades = [];
+
     try {
-        // Busca por nome: usa ilike no Supabase, mas também filtra localmente
-        // com norm() para ignorar acentos e maiúsculas
-        const [rNome, rCat, rCids] = await Promise.all([
-            _sb.from('propriedades')
-               .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa')
-               .eq('publicada', true)
-               .limit(100),  // traz mais para filtrar localmente
-            _sb.from('propriedades')
-               .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa')
-               .eq('publicada', true)
-               .ilike('categoria', `%${q}%`)
-               .limit(4),
-            _sb.from('propriedades')
-               .select('cidade, estado')
-               .eq('publicada', true)
-               .not('cidade', 'is', null)
-               .limit(500)
-        ]);
+        // Monta termos de busca: original + sem acentos + primeira palavra de cada
+        const termos = [...new Set([
+            q,          // original digitado
+            t,          // sem acentos/maiúsculas
+            ...t.split(' ').filter(w => w.length >= 3)  // palavras individuais
+        ])];
 
-        // Filtra localmente com norm() — ignora acentos e maiúsculas/minúsculas
-        props = (rNome.data || [])
-            .filter(p => p.nome && norm(p.nome).includes(t))
-            .slice(0, 5);
+        // Executa buscas em paralelo para todos os termos
+        const buscasNome = termos.map(termo =>
+            _sb.from('propriedades')
+                .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa')
+                .eq('publicada', true)
+                .ilike('nome', `%${termo}%`)
+                .limit(6)
+        );
+        const buscasCat = termos.map(termo =>
+            _sb.from('propriedades')
+                .select('id, nome, cidade, estado, categoria')
+                .eq('publicada', true)
+                .ilike('categoria', `%${termo}%`)
+                .limit(20)
+        );
+        const buscasCid = termos.map(termo =>
+            _sb.from('propriedades')
+                .select('cidade, estado')
+                .eq('publicada', true)
+                .ilike('cidade', `%${termo}%`)
+                .not('cidade', 'is', null)
+                .limit(30)
+        );
 
-        // Categorias únicas que batem com a busca
+        const todos = await Promise.all([...buscasNome, ...buscasCat, ...buscasCid]);
+        const n = termos.length;
+        const rNomes = todos.slice(0, n);
+        const rCats  = todos.slice(n, n * 2);
+        const rCids  = todos.slice(n * 2);
+
+        // Log de debug (remova em produção)
+        console.log('[onde] termos:', termos);
+        console.log('[onde] nome hits:', rNomes.map(r => (r.data||[]).length));
+        console.log('[onde] cat  hits:', rCats.map(r => (r.data||[]).length));
+        if (rNomes[0]?.error) console.error('[onde] erro:', rNomes[0].error);
+
+        // Deduplica por id
+        const propMap = {};
+        rNomes.forEach(r => (r.data||[]).forEach(p => { if (p.id) propMap[p.id] = p; }));
+        props = Object.values(propMap).slice(0, 5);
+
+        // Categorias únicas com contagem
         const catMap = {};
-        (rCat.data || []).forEach(p => {
-            if (p.categoria && !catMap[p.categoria]) catMap[p.categoria] = 0;
-            if (p.categoria) catMap[p.categoria]++;
-        });
+        rCats.forEach(r => (r.data||[]).forEach(p => {
+            if (p.categoria) catMap[p.categoria] = (catMap[p.categoria] || 0) + 1;
+        }));
         cats = Object.entries(catMap).slice(0, 3).map(([cat, count]) => ({ cat, count }));
 
-        // Cidades únicas filtradas com norm()
+        // Cidades únicas
         const cidMap = {};
-        (rCids.data || []).forEach(p => {
-            if (p.cidade && norm(p.cidade).includes(t) && !cidMap[p.cidade])
-                cidMap[p.cidade] = p.estado;
-        });
+        rCids.forEach(r => (r.data||[]).forEach(p => {
+            if (p.cidade && !cidMap[p.cidade]) cidMap[p.cidade] = p.estado;
+        }));
         cidades = Object.entries(cidMap).slice(0, 4).map(([cidade, estado]) => ({ cidade, estado }));
-    } catch(_) {}
+
+    } catch(err) {
+        console.error('[onde] exceção:', err);
+    }
 
     let html = '';
 
@@ -1475,12 +1500,12 @@ async function buscarOnde(q) {
         html += props.map(p => {
             const img = p.imagem_url || p.foto_capa || '';
             const sub = [p.cidade, p.estado].filter(Boolean).join(', ');
-            const nomeEsc = (p.nome||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+            const nomeEsc = (p.nome||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
             return `<div class="onde-result" onclick="selecionarOnde({tipo:'prop',id:'${p.id}',nome:'${nomeEsc}',estado:'${p.estado||''}',cidade:'${p.cidade||''}',label:'${nomeEsc}'})">
-                <div class="onde-result-icon">${img?`<img src="${img}" alt="">`:'🏠'}</div>
+                <div class="onde-result-icon">${img ? `<img src="${img}" alt="">` : '🏠'}</div>
                 <div class="onde-result-info">
-                    <div class="onde-result-titulo">${p.nome||'Sem nome'}</div>
-                    <div class="onde-result-sub">${sub}${p.categoria ? ' · '+p.categoria : ''}</div>
+                    <div class="onde-result-titulo">${p.nome || 'Sem nome'}</div>
+                    <div class="onde-result-sub">${sub}${p.categoria ? ' · ' + p.categoria : ''}</div>
                 </div>
                 <span class="onde-result-badge badge-prop">Espaço</span>
             </div>`;
@@ -1490,12 +1515,12 @@ async function buscarOnde(q) {
     if (cats.length) {
         html += `<div class="onde-group-label">🏷️ Categorias</div>`;
         html += cats.map(c => {
-            const catEsc = c.cat.replace(/'/g,"\\'");
+            const catEsc = c.cat.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
             return `<div class="onde-result" onclick="selecionarOnde({tipo:'categoria',categoria:'${catEsc}',label:'${catEsc}'})">
                 <div class="onde-result-icon">🏷️</div>
                 <div class="onde-result-info">
                     <div class="onde-result-titulo">${c.cat}</div>
-                    <div class="onde-result-sub">${c.count} espaço${c.count!==1?'s':''} disponíve${c.count!==1?'is':'l'}</div>
+                    <div class="onde-result-sub">${c.count} espaço${c.count !== 1 ? 's' : ''} disponíve${c.count !== 1 ? 'is' : 'l'}</div>
                 </div>
                 <span class="onde-result-badge badge-cat">Categoria</span>
             </div>`;
@@ -1517,9 +1542,9 @@ async function buscarOnde(q) {
         }).join('');
     }
 
-    if (estados.length) {
+    if (estadosMatch.length) {
         html += `<div class="onde-group-label">📍 Estados</div>`;
-        html += estados.map(e => {
+        html += estadosMatch.map(e => {
             const label = `${e.n}, BR`;
             return `<div class="onde-result" onclick="selecionarOnde({tipo:'estado',estado:'${e.s}',cidade:'',label:'${label}'})">
                 <div class="onde-result-icon">📍</div>
@@ -1535,7 +1560,6 @@ async function buscarOnde(q) {
     if (!html) html = `<div class="onde-empty">Nenhum resultado para "<strong>${q}</strong>"</div>`;
     abrirOndeDrop(html);
 }
-
 
 function sugestoesDefault() {
     const populares = ['RJ','SP','MG','BA','SC','RS','CE','PE'];
