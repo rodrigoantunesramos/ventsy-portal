@@ -935,8 +935,39 @@
     async function verificarPassos(userId) {
         try {
             const { data: prop } = await sb.from('propriedades')
-                .select('id, descricao, cep, rua, numero, bairro, cidade, estado, nome, tipo_propriedade, capacidade, whatsapp, email_contato, nome_responsavel, foto_responsavel, valor_hora, valor_base, tipo_evento')
+                .select('id, descricao, cep, rua, numero, bairro, cidade, estado, nome, tipo_propriedade, capacidade, whatsapp, email_contato, nome_responsavel, foto_responsavel, valor_hora, valor_base, tipo_evento, status_publicacao')
                 .eq('usuario_id', userId).maybeSingle();
+
+            /* ── Verifica status de publicação ── */
+            const statusAtual     = (prop?.status_publicacao || '').toLowerCase();
+            const statusAprovado  = ['aprovada', 'publicada', 'ativo', 'ativa', 'aprovado'].includes(statusAtual);
+            const statusAguardando = ['aguardando', 'pendente', 'em_revisao', 'em revisao', 'solicitado'].includes(statusAtual);
+
+            /* Se aprovada: oculta toda a seção de setup */
+            if (statusAprovado) {
+                const secaoPassos   = document.querySelector('.passo-lista');
+                const tituloPassos  = document.querySelector('.passos-titulo');
+                const cardSolicitar = document.querySelector('.card-solicitar');
+                if (secaoPassos)   secaoPassos.style.display   = 'none';
+                if (tituloPassos)  tituloPassos.style.display  = 'none';
+                if (cardSolicitar) cardSolicitar.style.display = 'none';
+                return;
+            }
+
+            /* Se já solicitado/aguardando revisão: mostra botão no estado "enviado" */
+            if (statusAguardando) {
+                const btn   = document.getElementById('btn-solicitar');
+                const hint  = document.getElementById('solicitar-hint');
+                const aviso = document.getElementById('solicitar-aviso');
+                if (btn) {
+                    btn.disabled  = true;
+                    btn.innerHTML = '\u23F3 Aguardando revisão da equipe VENTSY...';
+                    btn.style.background = '#888';
+                    btn.style.boxShadow  = 'none';
+                }
+                if (hint) hint.innerHTML = 'Sua solicitação foi recebida e está em análise. Nossa equipe revisará em até <strong>48 horas úteis</strong>.';
+                if (aviso) aviso.classList.add('oculto');
+            }
 
             if (prop?.id) {
                 const { data: fotos } = await sb.from('fotos_imovel')
