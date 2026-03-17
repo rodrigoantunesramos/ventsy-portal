@@ -457,6 +457,36 @@
             header { padding: 0 4%; }
         }
 
+
+        /* ── GRID UF ── */
+        .uf-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .uf-btn {
+            padding: 9px 4px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+            text-align: center;
+        }
+        .uf-btn:hover { border-color: #ff385c; color: #ff385c; }
+        .uf-btn.selecionado {
+            background: #ff385c;
+            border-color: #ff385c;
+            color: #fff;
+        }
+        @media (max-width: 768px) {
+            .uf-grid { grid-template-columns: repeat(5, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -726,9 +756,38 @@
                             <span class="campo-label">Cidade</span>
                             <input type="text" id="cidade" placeholder="Ex: São Paulo">
                         </div>
-                        <div class="campo-curto">
-                            <span class="campo-label">UF</span>
-                            <input type="text" id="uf" placeholder="SP" maxlength="2" style="text-transform:uppercase">
+                        <div class="span-uf" style="grid-column: span 6;">
+                            <span class="campo-label">Estado</span>
+                            <input type="hidden" id="uf">
+                            <div class="uf-grid" id="uf-grid">
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'AC')">AC</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'AL')">AL</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'AP')">AP</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'AM')">AM</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'BA')">BA</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'CE')">CE</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'DF')">DF</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'ES')">ES</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'GO')">GO</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'MA')">MA</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'MT')">MT</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'MS')">MS</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'MG')">MG</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'PA')">PA</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'PB')">PB</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'PR')">PR</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'PE')">PE</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'PI')">PI</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'RJ')">RJ</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'RN')">RN</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'RS')">RS</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'RO')">RO</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'RR')">RR</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'SC')">SC</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'SP')">SP</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'SE')">SE</button>
+                                <button type="button" class="uf-btn" onclick="selecionarUF(this,'TO')">TO</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1108,7 +1167,7 @@
             PROP_ID = prop.id;
 
             setVal('nome-espaco',     prop.nome);
-            setVal('tipo-propriedade', prop.tipo_propriedade);
+            setVal('tipo-propriedade', prop.categoria);
             setVal('email-contato',   prop.email_contato);
             setVal('whatsapp',        prop.whatsapp);
             setVal('telefone',        prop.telefone);
@@ -1178,7 +1237,7 @@
             setVal('complemento', prop.complemento);
             setVal('bairro',      prop.bairro);
             setVal('cidade',      prop.cidade);
-            setVal('uf',          prop.estado);
+            if (prop.estado) selecionarUFpelaSigla(prop.estado.trim().toUpperCase());
 
             // Aba 5 — Eventos
 
@@ -1376,7 +1435,7 @@
             const complemento = document.getElementById('complemento').value.trim();
             const bairro      = document.getElementById('bairro').value.trim();
             const cidade      = document.getElementById('cidade').value.trim();
-            const uf          = document.getElementById('uf').value.trim().toUpperCase();
+            const uf          = document.getElementById('uf').value.trim();
             const endereco    = [rua, numero, complemento].filter(Boolean).join(', ');
 
             // Coleta Aba 5
@@ -1401,7 +1460,7 @@
 
                 usuario_id:       userId,
                 nome:             nome              || null,
-                tipo_propriedade: tipoPropriedade   || null,
+                categoria:        tipoPropriedade   || null,
                 descricao:        descricao   || null,
                 capacidade:       capVal      || null,
                 tipo_evento:      tipoEventoStr || null,
@@ -1575,6 +1634,17 @@
         item.querySelector('input').focus();
     }
 
+    /* ── Grid UF ── */
+    function selecionarUF(btn, sigla) {
+        document.querySelectorAll('#uf-grid .uf-btn').forEach(b => b.classList.remove('selecionado'));
+        if (btn) btn.classList.add('selecionado');
+        document.getElementById('uf').value = sigla;
+    }
+    function selecionarUFpelaSigla(sigla) {
+        const btn = document.querySelector('#uf-grid .uf-btn[onclick*="\'' + sigla + '\'"]');
+        selecionarUF(btn, sigla);
+    }
+
     /* ── Busca CEP ── */
     function buscarCEP() {
         const cep = document.getElementById('cep').value.replace(/\D/g, '');
@@ -1586,7 +1656,7 @@
                     document.getElementById('rua').value    = d.logradouro;
                     document.getElementById('bairro').value = d.bairro;
                     document.getElementById('cidade').value = d.localidade;
-                    document.getElementById('uf').value     = d.uf;
+                    selecionarUFpelaSigla(d.uf);
                     document.getElementById('numero').focus();
                     mostrarToast('📍', 'Endereço preenchido automaticamente!');
                     atualizarMapa();
