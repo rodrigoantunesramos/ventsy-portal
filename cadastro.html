@@ -238,6 +238,14 @@
         .ref-hint.ok    { color: #22c55e; }
         .ref-hint.aviso { color: #f59e0b; }
         .ref-hint .material-icons { font-size: 0.85rem; }
+        .ref-hint.erro  { color: #c0152b; }
+        .ref-status-icone.erro { color: #c0152b; display: block; }
+        #ref-codigo.erro {
+            border-color: #ff385c;
+            box-shadow: 0 0 0 3px rgba(255,56,92,0.15);
+            background: #fff0f3;
+        }
+        .indicacao-bloco.validando { opacity: 0.7; pointer-events: none; }
 
     </style>
 </head>
@@ -506,7 +514,7 @@ const sb = createClient(SUPA_URL, SUPA_KEY);
 
 function validarRefCodigo() {
     const campo = document.getElementById('ref-codigo');
-    campo.classList.remove('preenchido-auto');
+    campo.classList.remove('preenchido-auto', 'erro');
     atualizarRefHint(campo.value.trim(), false);
 }
 
@@ -531,6 +539,20 @@ function atualizarRefHint(valor, autoPreenchido) {
         hint.className     = 'ref-hint aviso';
         hint.innerHTML     = '<span class="material-icons">warning_amber</span> Digite exatamente como te passaram — maiúsculas e minúsculas importam!';
     }
+}
+
+// Verifica no banco se o handle do indicador existe
+async function verificarRefNobanco(handle) {
+    if (!handle) return true; // campo vazio = sem indicação, tudo ok
+
+    const { data, error } = await sb
+        .from('usuarios')
+        .select('id')
+        .or(`usuario.eq.${handle},id.like.${handle}%`)
+        .limit(1)
+        .single();
+
+    return !error && data;
 }
 
 // ── Menu ──
@@ -767,6 +789,31 @@ async function submeterCadastro() {
         return;
     }
 
+    // ── Valida código de indicação ANTES de criar a conta ──
+    const refCodigo = (document.getElementById('ref-codigo')?.value || '').trim();
+    if (refCodigo) {
+        btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Verificando código...';
+        const refValido = await verificarRefNobanco(refCodigo);
+        if (!refValido) {
+            // Destaca o campo visualmente
+            const campoRef = document.getElementById('ref-codigo');
+            campoRef.classList.add('erro');
+            campoRef.classList.remove('preenchido-auto');
+            const icone = document.getElementById('ref-status-icone');
+            icone.className   = 'material-icons ref-status-icone erro';
+            icone.textContent = 'error_outline';
+            const hint = document.getElementById('ref-hint');
+            hint.className = 'ref-hint erro';
+            hint.innerHTML = '<span class="material-icons">error_outline</span> Usuário não encontrado. Tem certeza que o código está certo? Deixe em branco ou confira com quem te indicou.';
+            // Rola até o bloco de indicação
+            document.getElementById('bloco-indicacao').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            _enviando = false;
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-icons">arrow_forward</span> Criar minha conta';
+            return;
+        }
+    }
+
     // Dados coletados
     const email     = document.getElementById('email').value.trim();
     const senha     = document.getElementById('senha').value;
@@ -813,18 +860,12 @@ async function submeterCadastro() {
             throw dbError;
         }
 
-        // ✅ Chama registrar_indicacao se houver código de indicação
-        const refCodigo = (document.getElementById('ref-codigo')?.value || '').trim();
+        // ✅ Registra indicação (código já foi validado antes, falha aqui é improvável)
         if (refCodigo && userId) {
-            try {
-                await sb.rpc('registrar_indicacao', {
-                    p_indicado_id: userId,
-                    p_ref_handle:  refCodigo
-                });
-            } catch (refErr) {
-                // Falha silenciosa: não impede o cadastro do usuário
-                console.warn('Indicação não registrada:', refErr.message);
-            }
+            await sb.rpc('registrar_indicacao', {
+                p_indicado_id: userId,
+                p_ref_handle:  refCodigo
+            }).catch(e => console.warn('Indicação pós-cadastro falhou:', e.message));
         }
 
         // ✅ Sucesso
