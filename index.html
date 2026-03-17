@@ -449,13 +449,10 @@
                     </select>
                 </div>
                 <div class="divider"></div>
-                <div class="search-item guest-direct-selector">
-                    <label>Convidados</label>
-                    <div class="stepper-control">
-                        <button type="button" class="btn-step" onclick="alterarQtd(-1)">–</button>
-                        <input type="number" id="qtd-total" class="qtd-input" value="1" min="1" onchange="validarInput(this)">
-                        <button type="button" class="btn-step" onclick="alterarQtd(1)">+</button>
-                    </div>
+                <div class="search-item" id="cidade-container">
+                    <label>Cidade</label>
+                    <input type="text" id="cidade-input" placeholder="Todas as cidades" autocomplete="off" disabled>
+                    <div id="cidade-suggestions" class="suggestions-dropdown"></div>
                 </div>
                 <button class="btn-search" id="main-search-btn" style="opacity:.3;pointer-events:none;">&#128269;</button>
             </div>
@@ -751,6 +748,10 @@ function renderSug(lista) {
         el.addEventListener('click', () => {
             locInput.value = el.dataset.n; locOk = true;
             locDrop.style.display = 'none'; checkBusca();
+            // Carrega cidades do estado selecionado
+            const sig = ESTADOS.find(e => e.n === el.dataset.n)?.s || '';
+            cidadeInput.value = '';
+            carregarCidades(sig);
         });
     });
 }
@@ -803,28 +804,58 @@ document.getElementById('range-container').addEventListener('click', () =>
     document.getElementById('input-periodo')._flatpickr.open()
 );
 
+/* ── Autocomplete de Cidade ── */
+const cidadeInput = document.getElementById('cidade-input');
+const cidadeDrop  = document.getElementById('cidade-suggestions');
+let listaCidades  = [];
+
+async function carregarCidades(sigla) {
+    if (!sigla) { listaCidades = []; cidadeInput.value = ''; cidadeInput.disabled = true; return; }
+    cidadeInput.disabled = false;
+    cidadeInput.placeholder = 'Carregando...';
+    const { data } = await _sb
+        .from('propriedades').select('cidade')
+        .eq('estado', sigla).eq('publicada', true).not('cidade', 'is', null);
+    listaCidades = data ? [...new Set(data.map(p => p.cidade).filter(Boolean))].sort() : [];
+    cidadeInput.placeholder = listaCidades.length ? 'Todas as cidades' : 'Sem cidades';
+}
+
+function renderCidades(lista) {
+    cidadeDrop.innerHTML = lista.map(c =>
+        `<div class="suggestion-item" data-c="${c}"><span>🏙️</span>${c}</div>`
+    ).join('');
+    cidadeDrop.style.display = lista.length ? 'block' : 'none';
+    cidadeDrop.querySelectorAll('.suggestion-item').forEach(el => {
+        el.addEventListener('mousedown', e => {
+            e.preventDefault();
+            cidadeInput.value = el.dataset.c;
+            cidadeDrop.style.display = 'none';
+        });
+    });
+}
+
+cidadeInput.addEventListener('input', () => {
+    const t = cidadeInput.value.trim().toLowerCase();
+    renderCidades((t ? listaCidades.filter(c => c.toLowerCase().includes(t)) : listaCidades).slice(0, 6));
+});
+cidadeInput.addEventListener('focus', () => renderCidades(listaCidades.slice(0, 6)));
+cidadeInput.addEventListener('blur',  () => setTimeout(() => cidadeDrop.style.display = 'none', 200));
+
 btnBusca.addEventListener('click', () => {
     const nomeEstado = locInput.value.trim(); if (!nomeEstado) return;
-    // Busca a sigla correspondente ao nome selecionado
     const encontrado = ESTADOS.find(e => e.n.toLowerCase() === nomeEstado.toLowerCase());
-    const estado = encontrado ? encontrado.s : nomeEstado; // envia sigla (ex: "RJ")
-    const tipo  = document.getElementById('tipo-espaco')?.value || '';
-    const conv  = document.getElementById('qtd-total')?.value   || '0';
-    const data  = dQuando.textContent.trim();
+    const estado = encontrado ? encontrado.s : nomeEstado;
+    const cidade = cidadeInput.value.trim();
+    const tipo   = document.getElementById('tipo-espaco')?.value || '';
+    const data   = dQuando.textContent.trim();
     registrarBusca(tipo);
-    const url   = new URL('buscapropriedade.html', window.location.href);
+    const url = new URL('buscapropriedade.html', window.location.href);
     url.searchParams.set('estado', estado);
-    if (tipo)              url.searchParams.set('evento', tipo);
-    if (conv && conv!=='0') url.searchParams.set('convidados', conv);
-    if (data && data!=='Adicionar datas') url.searchParams.set('data', data);
+    if (cidade) url.searchParams.set('cidade', cidade);
+    if (tipo)   url.searchParams.set('evento', tipo);
+    if (data && data !== 'Adicionar datas') url.searchParams.set('data', data);
     window.location.href = url.toString();
 });
-
-function alterarQtd(d) {
-    const i = document.getElementById('qtd-total');
-    i.value = Math.max(0, parseInt(i.value||0)+d);
-}
-function validarInput(el) { el.value = Math.max(0, parseInt(el.value)||0); }
 
 function toggleMenuExtra() {
     const m = document.getElementById('extra-menu');
