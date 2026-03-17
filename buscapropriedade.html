@@ -2156,7 +2156,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
     // LÊ O ESTADO DA URL E BUSCA NO SUPABASE
     // ==========================================================
     const params         = new URLSearchParams(window.location.search);
-    const tipoBuscado    = params.get('tipo')        || '';
+    const tipoBuscado    = params.get('evento')      || params.get('tipo') || '';
     const convBuscados   = parseInt(params.get('convidados')) || 0;
     const dataBuscada    = params.get('data')        || '';
 
@@ -2286,7 +2286,14 @@ input:checked + .slider-round:before { transform: translateX(20px); }
         let query = _supabase.from('propriedades').select('*').eq('publicada', true);
         if (estadoBuscado) query = query.eq('estado', estadoBuscado);
         if (cidadeBuscada) query = query.ilike('cidade', `%${cidadeBuscada}%`);
-        if (tipoBuscado)   query = query.eq(`evento_${tipoBuscado}`, true);
+        // Filtra por tipo de evento usando ilike (igual ao aplicarFiltros)
+        if (tipoBuscado) {
+            const eventos = tipoBuscado.split(',').map(t => t.trim()).filter(Boolean);
+            if (eventos.length > 0) {
+                const orStr = eventos.map(t => `tipo_evento.ilike.%${t}%`).join(',');
+                query = query.or(orStr);
+            }
+        }
 
         const { data: propriedades, error } = await query;
 
@@ -2323,16 +2330,14 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             document.getElementById('main-search-btn').style.opacity = '1';
             document.getElementById('main-search-btn').style.pointerEvents = 'auto';
         }
-        // Preenche tipo via hidden input + display
+        // Preenche tipo via Set centralizado + sincroniza display, chips do modal e ev-items do header
         if (tipoBuscado) {
-            const inputTipo = document.getElementById('tipo-espaco');
-            const textoTipo = document.getElementById('tipo-texto');
-            if (inputTipo) inputTipo.value = tipoBuscado;
-            if (textoTipo) textoTipo.textContent = tipoBuscado;
-            // Marca o item no grid se existir
-            document.querySelectorAll('.ev-item').forEach(el => {
-                if (el.dataset.v === tipoBuscado) el.classList.add('selected');
+            tipoBuscado.split(',').map(t => t.trim()).filter(Boolean).forEach(t => {
+                eventosSelecionados.add(t);
             });
+            sincronizarEvItems();
+            sincronizarChipsModal();
+            atualizarDisplayEventos();
         }
         // Preenche convidados
         if (convBuscados > 0) {
@@ -2567,18 +2572,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             selectEstado.value = estadoBuscado;
             carregarCidades(estadoBuscado);
         }
-        // Pré-seleciona tipo(s) de evento vindos da URL (pode ser vírgula-separado)
-        if (tipoBuscado) {
-            tipoBuscado.split(',').map(t => t.trim()).filter(Boolean).forEach(t => {
-                eventosSelecionados.add(t);
-            });
-            // Sincroniza depois que o DOM já está completo
-            setTimeout(() => {
-                sincronizarEvItems();
-                sincronizarChipsModal();
-                atualizarDisplayEventos();
-            }, 0);
-        }
+        // (Sincronização de eventos já feita acima no bloco de pré-preenchimento)
         // Pré-preenche capacidade
         if (convBuscados > 0) {
             const sliderCapEl = document.getElementById('slider-capacidade');
