@@ -3,13 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VENTSY</title>
+    <title>VENTSY — Busca de Espaços</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
 
 	/*Configurações Gerais do site é o BODY*/	
 
+        :root {
+            --preto:    #0d0d0d;
+            --vermelho: #ff385c;
+            --cinza:    #f5f5f5;
+            --borda:    #e8e8e8;
+            --texto:    #3a3a3a;
+            --suave:    #888;
+            --ouro:     #f59e0b;
+        }
+
         body {
-            font-family: Arial, sans-serif, Tahoma, Geneva, Verdana, 'Segoe UI';
+            font-family: 'DM Sans', Arial, sans-serif;
             display: flex;
 	        flex-direction: column; /* Alinha os itens um abaixo do outro */
             align-items: left;
@@ -20,166 +31,54 @@
         }
 
 	
-	/* BARRA DO TOPO (HEADER) */
+        /* ──────────── HEADER — igual ao index.html ──────────── */
         header {
-            width: 100%;
-            height: 80px;
-            background-color: #ffffff;
-            display: flex;
-            align-items: center; /* Centraliza verticalmente */
-	        padding: 0 5%;  /* Padding em % para ser flexível */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: fixed; /* Fixa no topo ao rolar a página */
-            top: 0;
-            z-index: 9999; /* Garante que a logo fique sempre por cima de tudo */
-            box-sizing: border-box; /* Garante que o padding não quebre a largura */
-            overflow: visible !important;
-           
+            width: 100%; height: 80px; background: #fff;
+            display: flex; align-items: center; padding: 0 5%;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
+            position: fixed; top: 0; z-index: 9999;
+            box-sizing: border-box; overflow: visible;
         }
+        .header-left { flex: 0 0 auto; display: flex; align-items: center; margin-right: 16px; }
+        .logo { height: 56px; width: auto; cursor: pointer; }
+        .header-center { flex: 3; display: flex; justify-content: center; overflow: visible; }
+        .header-right  { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; margin-left: 16px; }
 
-        /* Garante que a logo e o botão tenham o mesmo peso visual para o centro ser real */
-.header-left, .header-right {
-    flex: 1; 
-    display: flex;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    justify-content: flex-end; /* Empurra o botão de login para o fim da direita */
-}
-
-/* Estilo do Menu Central */
-.header-center {
-    display: flex;
-    justify-content: space-between;
-    gap: 25px; /* Espaço entre os links */
-    overflow: visible !important;
-
-}
-
-.header-center a {
-    text-decoration: none;
-    color: #b11515;
-    font-size: 0.95rem;
-    font-weight: 500;
-    position: relative;
-    padding: 5px 0;
-}
-
-/* Efeito da linha embaixo que você queria */
-.header-center a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: 0;
-    left: 0;
-    background-color: #1a73e8;
-    transition: width 0.3s ease;
-}
-
-.header-center a:hover::after {
-    width: 100%;
-}
-
-/* Botão de Login (Lateral Direita) */
-.btn-login {
-    background-color: #f0f2f5;
-    color: #1a73e8;
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
-}
-
-.btn-login:hover {
-    background-color: #1a73e8;
-    color: white;
-    box-shadow: 0 4px 10px rgba(26, 115, 232, 0.2);
-}
-
-.btn-menu {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-}
-
-.btn-menu:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* Dropdown Extra */
-.menu-hamburguer-container { position: relative; }
-
-.extra-menu-dropdown {
-    position: absolute;
-    top: 50px;
-    right: 0;
-    width: 200px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-    display: none;
-    flex-direction: column;
-    padding: 10px 0;
-    z-index: 1001;
-}
-
-.extra-menu-dropdown a {
-    padding: 12px 20px;
-    text-decoration: none;
-    color: #444;
-    font-size: 0.9rem;
-}
-
-.extra-menu-dropdown a:hover {
-    background: #f7f7f7;
-}
-
-nav {
-    /* Isso faz o menu ocupar o espaço central */
-    flex-grow: 1;
-    display: flex;
-    justify-content: center; /* Centraliza os links dentro do NAV */
-}
-
-nav a {
-    margin: 0 15px; /* Espaçamento entre os links */
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    padding-bottom: 5px; /* Espaço entre o texto e a linha */
-    border-bottom: 2px solid transparent; /* Linha invisível por padrão */
-    transition: all 0.3s ease; /* Faz a transição ser suave */
-}
-
-nav a:hover {
-    color: #1a73e8; /* Muda de cor ao passar o mouse */
-    border-bottom: 2px solid #1a73e8; /* A linha aparece com cor */
-}
-
-/* Espaçador invisível para equilibrar a logo e manter o menu no centro real */
-.spacer {
-    width: 150px; /* Deve ter o mesmo tamanho aproximado da sua logo */
-}
-
-	.logo {
-            height: 56px; /* Ajusta a altura da logo */
-            width: auto;
-            cursor: pointer;
+        .btn-login {
+            background: var(--vermelho); color: #fff;
+            padding: 9px 20px; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: .88rem;
+            transition: background .2s; white-space: nowrap;
         }
+        .btn-login:hover { background: #e0304f; }
+
+        .menu-hamburguer-container { position: relative; }
+        .btn-menu {
+            background: #fff; border: 1px solid #ddd;
+            border-radius: 20px; padding: 8px 14px;
+            cursor: pointer; font-size: .88rem;
+            display: flex; align-items: center; gap: 6px;
+            transition: box-shadow .2s;
+        }
+        .btn-menu:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+        .extra-menu-dropdown {
+            position: absolute; top: 50px; right: 0; width: 215px;
+            background: #fff; border-radius: 14px;
+            box-shadow: 0 8px 28px rgba(0,0,0,.13);
+            display: none; flex-direction: column;
+            padding: 8px 0; z-index: 2000;
+            border: 1px solid #f0f0f0;
+        }
+        .extra-menu-dropdown a {
+            padding: 12px 20px; text-decoration: none;
+            color: #444; font-size: .88rem; display: block;
+            transition: background .15s;
+        }
+        .extra-menu-dropdown a:hover { background: #f7f7f7; }
 
 	/* CONTEÚDO PRINCIPAL */
         main {
-            margin-top: 10px; /* Espaço para não ficar escondido atrás do header fixo */
+            margin-top: 88px;
             text-align: left;
 	        padding: 20px;
         }
@@ -203,234 +102,119 @@ nav a:hover {
             transform: translateY(-2px); /* Efeito de "levantar" levemente */
         }
 
-        /* Container da Busca */
-.search-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-    background: transparent;
-    z-index: 10000 !important; /* Um número maior que o do header */
-}
+        /* ──────────── SEARCH BAR — igual ao index.html ──────────── */
+        .search-container { width: 100%; display: flex; justify-content: center; }
+        .search-bar {
+            background: #fff; display: flex; align-items: center;
+            padding: 6px 8px 6px 18px; border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            border: 1px solid #ddd; max-width: 960px; width: 100%;
+        }
+        .search-item {
+            display: flex; flex-direction: column;
+            min-width: 0; flex: 1; padding: 5px 10px; position: relative; cursor: pointer;
+        }
+        .search-item label {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            color: #222; pointer-events: none; letter-spacing: .05em;
+        }
+        .date-text { font-size: .83rem; color: #717171; margin-top: 2px; pointer-events: none; }
+        .search-item input, .search-item select {
+            border: none; outline: none; font-size: .83rem;
+            color: #555; background: transparent; font-family: inherit;
+        }
+        .divider { width: 1px; height: 30px; background: #eee; flex-shrink: 0; }
+        .btn-search {
+            background: var(--vermelho); border: none;
+            width: 42px; height: 42px; border-radius: 50%; color: #fff;
+            font-size: 1rem; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            transition: transform .2s, background .2s; margin-left: 8px; flex-shrink: 0;
+        }
+        .btn-search:hover { background: #e31c5f; transform: scale(1.07); }
+        #location-container { position: relative; }
+        .suggestions-dropdown {
+            position: absolute; top: 100%; left: 0; width: 240px;
+            background: #fff; border-radius: 14px; margin-top: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.12);
+            display: none; overflow: hidden; z-index: 3000; border: 1px solid #eee;
+        }
+        .suggestion-item {
+            padding: 12px 18px; display: flex; align-items: center; gap: 10px;
+            cursor: pointer; transition: background .15s; font-size: .86rem; color: #333;
+        }
+        .suggestion-item:hover { background: #f7f7f7; }
+        .guest-direct-selector { flex: 0 0 auto; min-width: 90px; }
+        .stepper-control {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f7f7f7; border-radius: 25px; padding: 3px 8px;
+            border: 1px solid #eee; margin-top: 4px;
+        }
+        .btn-step {
+            width: 24px; height: 24px; border-radius: 50%; border: 1px solid #ddd;
+            background: #fff; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            font-size: .95rem; color: #444; transition: all .2s; padding: 0;
+        }
+        .btn-step:hover { border-color: var(--vermelho); color: var(--vermelho); }
+        .qtd-input {
+            width: 34px; border: none; background: transparent; text-align: center;
+            font-size: .9rem; font-weight: 700; color: #222; outline: none;
+            -webkit-appearance: none; appearance: textfield;
+        }
+        .qtd-input::-webkit-outer-spin-button,
+        .qtd-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-.search-bar {
-    background: rgb(255, 255, 255);
-    display: flex;
-    align-items: center;
-    padding: 10px 15px 10px 30px;
-    border-radius: 50px; /* Bordas bem arredondadas estilo Airbnb */
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    border: 1px solid #ddd;
-    max-width:850px;
-    width: 100%;
-    overflow: visible;
-}
-
-.search-item {
-    display: flex;
-    flex-direction: column;
-    min-width: 120px;
-    padding: 10px 20px;
-    position: relative;
-    cursor: pointer;
-}
-
-.search-item label {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: #222;
-    pointer-events: none; /* O clique passa pelo texto e vai para a div */
-    z-index: 1;
-}
-
-/* Faz o input de data ocupar todo o espaço interno da div */
-.search-item input[type="date"] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0; /* Esconde o input padrão, mas ele continua lá */
-    cursor: pointer;
-    z-index: 2; /* Fica por cima de tudo para capturar o clique */
-}
-
-/* Criamos um "espelho" visual para mostrar a data selecionada, 
-   já que o input real está invisível (opacity: 0) */
-.date-display {
-    font-size: 0.9rem;
-    color: #666;
-    margin-top: 4px;
-    pointer-events: none; /* Deixa o clique passar direto para o input */
-
-}
-
-.date-text {
-    font-size: 0.9rem;
-    color: #717171;
-    margin-top: 2px;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.search-item input, .search-item select {
-    border: none;
-    outline: none;
-    font-size: 0.9rem;
-    color: #666;
-    background: transparent;
-}
-
-/* Divisória vertical entre os itens */
-.divider {
-    width: 1px;
-    height: 35px;
-    background-color: #eee;
-}
-
-/* Botão Vermelho com Lupa */
-.btn-search {
-    background-color: #ff385c; /* Vermelho vibrante */
-    border: none;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 0.2s, background 0.3s;
-    margin-left: 10px;
-}
-
-.btn-search:hover {
-    background-color: #e31c5f;
-    transform: scale(1.05);
-}
-
-#location-container {
-    position: relative; /* Necessário para posicionar o dropdown */
-}
-
-.suggestions-dropdown {
-    position: absolute;
-    top: 100%; /* Aparece logo abaixo da barra */
-    left: 0;
-    width: 250px;
-    background: white;
-    border-radius: 16px;
-    margin-top: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    display: none; /* Escondido por padrão */
-    overflow: hidden;
-    z-index: 1001;
-    border: 1px solid #eee;
-}
-
-.suggestion-item {
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-    font-size: 0.9rem;
-    color: #333;
-}
-
-.suggestion-item:hover {
-    background-color: #f7f7f7;
-}
-
-.suggestion-item span {
-    font-size: 1.1rem;
-}
- 
-.input-erro {
-    color: #ff385c !important; /* Vermelho do seu botão */
-    font-weight: bold;
-}
-
-.guest-direct-selector {
-    min-width: 140px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.stepper-control {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 5px;
-    background: #f7f7f7;
-    border-radius: 25px;
-    padding: 2px 8px;
-    border: 1px solid #eee;
-}
-
-.btn-step {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 1px solid #ddd;
-    background: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    color: #444;
-    transition: all 0.2s ease;
-    padding: 0;
-    line-height: 0;
-}
-
-.btn-step:hover {
-    border-color: #ff385c;
-    color: #ff385c;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.qtd-display {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #222;
-    min-width: 30px;
-    text-align: center;
-}
-
-.qtd-input {
-    width: 45px;
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #222;
-    outline: none;
-    appearance: textfield; /* Remove setas no Firefox */
-}
-
-/* Remove setas no Chrome/Safari */
-.qtd-input::-webkit-outer-spin-button,
-.qtd-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.stepper-control {
-    display: flex;
-    align-items: center;
-    background: #f7f7f7;
-    border-radius: 25px;
-    padding: 3px 10px;
-    border: 1px solid #eee;
-    margin-top: 5px;
-}
+        /* Evento dropdown grid */
+        .tipo-display {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .83rem; color: #555; cursor: pointer;
+            margin-top: 2px; gap: 4px; min-width: 120px;
+        }
+        .tipo-display span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tipo-caret { width: 14px; height: 14px; flex-shrink: 0; color: #aaa; transition: transform .2s; }
+        .tipo-display.open .tipo-caret { transform: rotate(180deg); }
+        .evento-dropdown {
+            position: absolute; top: calc(100% + 14px); left: 50%;
+            transform: translateX(-50%); width: 540px;
+            background: #fff; border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.15);
+            border: 1px solid #eee; z-index: 5000;
+            animation: dropIn .18s ease;
+        }
+        @keyframes dropIn {
+            from { opacity:0; transform:translateX(-50%) translateY(-8px); }
+            to   { opacity:1; transform:translateX(-50%) translateY(0); }
+        }
+        .evento-grid-wrap {
+            padding: 16px 18px 18px; max-height: 420px;
+            overflow-y: auto; scrollbar-width: thin; scrollbar-color: #ddd transparent;
+        }
+        .ev-clear {
+            width: 100%; background: #f7f7f7; border: 1px solid #eee;
+            border-radius: 10px; padding: 8px 14px;
+            font-size: .8rem; font-weight: 600; color: #666;
+            cursor: pointer; text-align: left; margin-bottom: 14px;
+            transition: background .15s, color .15s; font-family: inherit;
+        }
+        .ev-clear:hover { background: #fee; color: var(--vermelho); border-color: #fcc; }
+        .ev-cat-label {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #aaa; margin: 12px 0 7px;
+        }
+        .ev-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 4px; }
+        .ev-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; padding: 8px 6px 7px; border-radius: 12px; cursor: pointer;
+            font-size: .72rem; font-weight: 600; color: #444;
+            text-align: center; line-height: 1.2;
+            background: #f9f9f9; border: 1px solid transparent;
+            transition: background .15s, border-color .15s, transform .12s, color .15s;
+            user-select: none;
+        }
+        .ev-item span { font-size: 1.25rem; line-height: 1; }
+        .ev-item:hover { background: #fff5f7; border-color: #ffd6dd; color: var(--vermelho); transform: translateY(-2px); }
+        .ev-item.selected { background: var(--vermelho); color: #fff; border-color: var(--vermelho); }
 
 .destinos-container {
     padding: 20px 5%;
@@ -1209,7 +993,7 @@ nav a:hover {
 .listagem-split {
     margin-top: 80px;
     display: flex;
-    height: calc(100vh - 80px); /* Altura total menos a altura do seu cabeçalho */
+    height: calc(100vh - 80px);
     overflow: hidden; /* Evita scroll na página inteira, o scroll será interno */
 }
 
@@ -2023,126 +1807,36 @@ input:checked + .slider-round:before { transform: translateX(20px); }
     white-space: nowrap;
 }
 
-        /* ── RESPONSIVO MOBILE ── */
+        /* ── MOBILE HEADER — igual ao index.html ── */
         @media (max-width: 768px) {
-            /* Header: stack search bar below logo/buttons */
             header {
-                height: auto;
-                min-height: 64px;
-                flex-wrap: wrap;
-                padding: 10px 4%;
-                gap: 8px;
-                align-items: center;
+                height: auto; min-height: 64px;
+                flex-wrap: wrap; padding: 10px 4%; gap: 8px;
             }
-            .header-left {
-                flex: 0 0 auto;
-            }
-            .logo {
-                height: 40px;
-            }
-            /* Move the right section to sit next to the logo */
-            .header-right {
-                flex: 0 0 auto;
-                margin-left: auto;
-                gap: 8px;
-            }
-            /* The nav (search container) drops to full-width second row */
-            nav.header-center {
-                order: 3;
-                width: 100%;
-                flex: 0 0 100%;
-                justify-content: center;
-            }
-            .search-container {
-                padding: 8px 0;
-            }
-            /* Search bar becomes a vertical stack */
-            .search-bar {
-                flex-direction: column;
-                border-radius: 16px;
-                padding: 12px 16px;
-                gap: 8px;
-                max-width: 100%;
-                align-items: stretch;
-            }
-            .search-item {
-                min-width: 0;
-                width: 100%;
-                padding: 8px 4px;
-            }
-            .divider {
-                display: none;
-            }
-            .btn-search {
-                width: 100%;
-                border-radius: 12px;
-                height: 46px;
-                margin-left: 0;
-            }
-            /* Main content: account for taller header — stack filter button above cards */
-            .listagem-split {
-                margin-top: 0;
-                height: auto;
-                overflow: visible;
-                flex-direction: column;
-            }
-            /* Cards column: reset fixed height so it scrolls naturally */
-            .coluna-cards {
-                padding: 12px 16px;
-                height: auto;
-                overflow-y: visible;
-            }
-            /* Cards: single column on small screens */
-            .grid-resultados-split {
-                grid-template-columns: 1fr;
-            }
-            /* card-foto fixed widths: let them fill their container */
-            .card-foto {
-                width: 100%;
-            }
-            .foto-card {
-                width: 100%;
-            }
-            /* Filter button: full-width */
-            .btn-abrir-filtro {
-                margin: 12px 16px 0;
-                width: calc(100% - 32px);
-                justify-content: center;
-                border-radius: 12px;
-            }
-            /* Footer */
-            .footer-container {
-                flex-wrap: wrap;
-                gap: 36px;
-            }
+            .header-left { flex: 0 0 auto; margin-right: 0; }
+            .logo { height: 44px; }
+            .header-right { flex: 0 0 auto; margin-left: auto; gap: 8px; }
+            .btn-login { padding: 8px 14px; font-size: .82rem; }
+            .header-center { order: 3; width: 100%; flex: 0 0 100%; justify-content: stretch; }
+            .search-container { width: 100%; }
+            .search-bar { max-width: 100%; border-radius: 14px; flex-wrap: wrap; padding: 8px 10px; gap: 6px; }
+            .search-item { min-width: calc(50% - 8px); }
+            .divider { display: none; }
+            .listagem-split { margin-top: 4px; height: auto; overflow: visible; flex-direction: column; }
+            .coluna-cards { padding: 12px 16px; height: auto; overflow-y: visible; }
+            .grid-resultados-split { grid-template-columns: 1fr; }
+            .card-foto { width: 100%; }
+            .foto-card { width: 100%; }
+            .btn-abrir-filtro { margin: 12px 16px 0; width: calc(100% - 32px); justify-content: center; border-radius: 12px; }
+            .footer-container { flex-wrap: wrap; gap: 36px; }
+            .evento-dropdown { width: calc(100vw - 32px); left: 0; transform: none; }
+            .ev-grid { grid-template-columns: repeat(4, 1fr); }
         }
-
         @media (max-width: 480px) {
-            .logo {
-                height: 34px;
-            }
-            .btn-login {
-                padding: 8px 12px;
-                font-size: 0.82rem;
-            }
-            .btn-menu {
-                padding: 6px 10px;
-                font-size: 0.85rem;
-            }
-            /* Tighter card layout on very small screens */
-            .foto-card-v {
-                border-radius: 12px;
-            }
-            .info-card-v {
-                padding: 10px 2px 4px;
-            }
-            .card-nome {
-                font-size: 0.88rem;
-            }
-            /* Guest stepper fits on one line */
-            .guest-direct-selector {
-                min-width: 0;
-            }
+            .search-bar { flex-direction: column; gap: 4px; border-radius: 12px; }
+            .search-item { min-width: 100%; border-bottom: 1px solid #f0f0f0; padding-bottom: 6px; }
+            .search-item:last-of-type { border-bottom: none; }
+            .btn-search { width: 100%; border-radius: 10px; height: 44px; }
         }
     </style>
 
@@ -2160,116 +1854,136 @@ input:checked + .slider-round:before { transform: translateX(20px); }
 </head>
 <body>
 
-	<header>
-	   <div class="header-left">
+
+<header>
+    <div class="header-left">
         <a href="index.html">
-            <img src="logovents.png" alt="Logo" class="logo">
+            <img src="logovents.png" alt="VENTSY" class="logo">
         </a>
     </div>
 
     <nav class="header-center">
-        <section class="search-container">
-    <div class="search-bar">
-        <div class="search-item" id="location-container">
-            <label>Localização</label>
-            <input type="text" id="location-input" placeholder="Onde você vai?" autocomplete="off">
-            <div id="location-suggestions" class="suggestions-dropdown"></div>
+        <div class="search-container">
+            <div class="search-bar">
+                <div class="search-item" id="location-container">
+                    <label>Localização</label>
+                    <input type="text" id="location-input" placeholder="Estado..." autocomplete="off">
+                    <span id="location-erro" style="display:none;font-size:.68rem;color:var(--vermelho);font-weight:700;margin-top:2px">Selecione da lista</span>
+                    <div id="location-suggestions" class="suggestions-dropdown"></div>
+                </div>
+                <div class="divider"></div>
+                <div class="search-item" id="range-container">
+                    <label>Quando</label>
+                    <span class="date-text" id="display-quando">Adicionar datas</span>
+                    <input type="text" id="input-periodo" style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;">
+                </div>
+                <div class="divider"></div>
+                <div class="search-item" id="tipo-container" style="position:relative;">
+                    <label>Evento</label>
+                    <input type="hidden" id="tipo-espaco" value="">
+                    <div id="tipo-display" class="tipo-display" onclick="toggleEventoDropdown(event)">
+                        <span id="tipo-texto">Todos os eventos</span>
+                        <svg class="tipo-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div id="evento-dropdown" class="evento-dropdown" style="display:none;">
+                        <div class="evento-grid-wrap">
+                            <button class="ev-clear" onclick="selectEvento(null)">✕ Todos os eventos</button>
+                            <div class="ev-cat-label">🏢 Corporativo</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Workshop" onclick="selectEvento(this)"><span>💼</span>Workshop</div>
+                                <div class="ev-item" data-v="Treinamento" onclick="selectEvento(this)"><span>📋</span>Treinamento</div>
+                                <div class="ev-item" data-v="Seminários" onclick="selectEvento(this)"><span>🎙️</span>Seminários</div>
+                                <div class="ev-item" data-v="Congresso" onclick="selectEvento(this)"><span>🏛️</span>Congresso</div>
+                                <div class="ev-item" data-v="Networking" onclick="selectEvento(this)"><span>🤝</span>Networking</div>
+                                <div class="ev-item" data-v="Happy Hour" onclick="selectEvento(this)"><span>🥂</span>Happy Hour</div>
+                                <div class="ev-item" data-v="Confraternização" onclick="selectEvento(this)"><span>🎉</span>Confraternização</div>
+                                <div class="ev-item" data-v="Lançamento de Produto" onclick="selectEvento(this)"><span>🚀</span>Lançamento</div>
+                                <div class="ev-item" data-v="Field Day" onclick="selectEvento(this)"><span>🌤️</span>Field Day</div>
+                                <div class="ev-item" data-v="Pop-up Store" onclick="selectEvento(this)"><span>🛍️</span>Pop-up Store</div>
+                            </div>
+                            <div class="ev-cat-label">🐴 Cavalo</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Provas Hípicas" onclick="selectEvento(this)"><span>🏇</span>Provas Hípicas</div>
+                                <div class="ev-item" data-v="Torneios" onclick="selectEvento(this)"><span>🏆</span>Torneios</div>
+                                <div class="ev-item" data-v="Leilão" onclick="selectEvento(this)"><span>🔨</span>Leilão</div>
+                                <div class="ev-item" data-v="Dia de Campo" onclick="selectEvento(this)"><span>🌾</span>Dia de Campo</div>
+                            </div>
+                            <div class="ev-cat-label">🎣 Pescaria</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Pescaria" onclick="selectEvento(this)"><span>🎣</span>Pescaria</div>
+                                <div class="ev-item" data-v="Acampamento" onclick="selectEvento(this)"><span>⛺</span>Acampamento</div>
+                                <div class="ev-item" data-v="Retiro" onclick="selectEvento(this)"><span>🌿</span>Retiro</div>
+                            </div>
+                            <div class="ev-cat-label">🪂 Radicais</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Radical" onclick="selectEvento(this)"><span>🪂</span>Radical</div>
+                                <div class="ev-item" data-v="Encontro de Motos" onclick="selectEvento(this)"><span>🏍️</span>Motos</div>
+                                <div class="ev-item" data-v="Futebol" onclick="selectEvento(this)"><span>⚽</span>Futebol</div>
+                            </div>
+                            <div class="ev-cat-label">🥂 Sociais & Celebrações</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Casamento" onclick="selectEvento(this)"><span>💍</span>Casamento</div>
+                                <div class="ev-item" data-v="Noivado" onclick="selectEvento(this)"><span>💒</span>Noivado</div>
+                                <div class="ev-item" data-v="Renovação de Votos" onclick="selectEvento(this)"><span>🌹</span>Renovação</div>
+                                <div class="ev-item" data-v="Bodas" onclick="selectEvento(this)"><span>👫</span>Bodas</div>
+                                <div class="ev-item" data-v="Festa de Aniversário" onclick="selectEvento(this)"><span>🎂</span>Aniversário</div>
+                                <div class="ev-item" data-v="Festa Infantil" onclick="selectEvento(this)"><span>🎈</span>Festa Infantil</div>
+                                <div class="ev-item" data-v="Debutante" onclick="selectEvento(this)"><span>👑</span>Debutante</div>
+                                <div class="ev-item" data-v="Chá de Bebê" onclick="selectEvento(this)"><span>👶</span>Chá de Bebê</div>
+                                <div class="ev-item" data-v="Chá Revelação" onclick="selectEvento(this)"><span>🎀</span>Chá Revelação</div>
+                            </div>
+                            <div class="ev-cat-label">🎓 Acadêmico</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Formatura" onclick="selectEvento(this)"><span>🎓</span>Formatura</div>
+                                <div class="ev-item" data-v="Colação de Grau" onclick="selectEvento(this)"><span>📜</span>Colação de Grau</div>
+                                <div class="ev-item" data-v="Amostras" onclick="selectEvento(this)"><span>🔬</span>Amostras</div>
+                                <div class="ev-item" data-v="Apresentações" onclick="selectEvento(this)"><span>📊</span>Apresentações</div>
+                            </div>
+                            <div class="ev-cat-label">✝️ Religioso</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Batizado" onclick="selectEvento(this)"><span>🕊️</span>Batizado</div>
+                                <div class="ev-item" data-v="Vigilia" onclick="selectEvento(this)"><span>🕯️</span>Vigília</div>
+                                <div class="ev-item" data-v="Encontro Religioso" onclick="selectEvento(this)"><span>🙏</span>Enc. Religioso</div>
+                            </div>
+                            <div class="ev-cat-label">🎵 Entretenimento</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Show" onclick="selectEvento(this)"><span>🎵</span>Show</div>
+                                <div class="ev-item" data-v="Festival" onclick="selectEvento(this)"><span>🎪</span>Festival</div>
+                                <div class="ev-item" data-v="Apresentações" onclick="selectEvento(this)"><span>🎭</span>Teatro</div>
+                            </div>
+                            <div class="ev-cat-label">✨ Estilo de Vida</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Ensaio Fotográfico" onclick="selectEvento(this)"><span>📸</span>Ensaio</div>
+                                <div class="ev-item" data-v="Vernissage" onclick="selectEvento(this)"><span>🖼️</span>Vernissage</div>
+                                <div class="ev-item" data-v="Exposição" onclick="selectEvento(this)"><span>🏛️</span>Exposição</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="search-item" id="cidade-container">
+                    <label>Cidade</label>
+                    <input type="text" id="cidade-input" placeholder="Todas as cidades" autocomplete="off">
+                    <div id="cidade-suggestions" class="suggestions-dropdown"></div>
+                </div>
+                <button class="btn-search" id="main-search-btn" style="opacity:.3;pointer-events:none;">&#128269;</button>
+            </div>
         </div>
-
-        <div class="divider"></div>
-
-        <div class="search-item" id="range-container">
-            <label>Quando</label>
-            <span class="date-text" id="display-quando">Adicionar datas</span>
-            <input type="text" id="input-periodo" style="position: absolute; visibility: hidden;">
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="search-item" id="tipo-container">
-            <label>Tipo de Evento</label>
-            <select id="tipo-espaco">
-                <option value="">Todos os eventos</option>
-                        <option value="Casamento">💍 Casamento</option>
-                        <option value="Festa de Aniversário">🎂 Aniversário</option>
-                        <option value="Festa Infantil">🎈 Festa Infantil</option>
-                        <option value="Formatura">🎓 Formatura</option>
-                        <option value="Confraternização">🥂 Confraternização</option>
-                        <option value="Workshop">💼 Workshop</option>
-                        <option value="Chá de Bebê">👶 Chá de Bebê</option>
-                        <option value="Chá Revelação">🎀 Chá Revelação</option>
-                        <option value="Debutante">👑 Debutante</option>
-                        <option value="Show">🎵 Show</option>
-                        <option value="Retiro">🌿 Retiro</option>
-                        <option value="Acampamento"> Acampamento</option>
-                        <option value="Leilão"> Leilão</option>
-                        <option value="Provas Hípicas"> Provas Hípicas</option>
-                        <option value="Torneios"> Torneios</option>
-                        <option value="Festival"> Festival</option>
-                        <option value="Ensaio Fotográfico"> Ensaio Fotográfico</option>
-                        <option value="Amostras"> Amostras</option>
-                        <option value="Apresentações"> Apresentações</option>
-                        <option value="Field Day"> Field Day</option>
-                        <option value="Treinamento"> Treinamento</option>
-                        <option value="Lançamento de Produto"> Lançamento de Produto</option>
-                        <option value="Seminários"> Seminários</option>
-                        <option value="Networking"> Networking</option>
-                        <option value="Happy Hour"> Happy Hour</option>
-                        <option value="Noivado"> Noivado</option>
-                        <option value="Renovação de Votos"> Renovação de Votos</option>
-                        <option value="Batizado"> Batizado</option>
-                        <option value="Bodas"> Bodas</option>
-                        <option value="Colação de Grau"> Colação de Grau</option>
-                        <option value="Congresso"> Congresso</option>
-                        <option value="Vigilia"> Vigilia</option>
-                        <option value="Encontro Religioso"> Encontro Religioso</option>
-                        <option value="Pop-up Store"> Pop-up Store</option>
-                        <option value="Vernissage"> Vernissage</option>
-                        <option value="Debutante"> Debutante</option>
-                        <option value="Exposição"> Exposição</option>
-                        <option value="Dia de Campo"> Dia de Campo</option>
-                        <option value="Pescaria"> Pescaria</option>
-                        <option value="Futebol"> Futebol</option>
-                        <option value="Radical"> Radical</option>
-                        <option value="Encontro de Motos"> Encontro de Motos</option>
-            </select>
-        </div>
-
-        <div class="divider"></div>
-
-<div class="search-item" id="cidade-container">
-    <label>Cidade</label>
-    <input type="text" id="cidade-input" placeholder="Todas as cidades" autocomplete="off">
-    <div id="cidade-suggestions" class="suggestions-dropdown"></div>
-</div>
-
-        <button class="btn-search" id="main-search-btn" style="opacity: 0.3; pointer-events: none;">
-            <span>&#128269;</span>
-        </button>
-    </div>
-</section>
     </nav>
 
     <div class="header-right">
-        <a href="login.html" class="btn-login">ENTRAR</a>
-    </div>
-                
-            <div class="menu-hamburguer-container">
-                <button class="btn-menu" onclick="toggleMenuExtra()">
-                    <span class="icon-menu">☰</span>
-                </button>
-                
-                <div id="extra-menu" class="extra-menu-dropdown">
-                    <a href="login.html">Anunciar</a>
-                    <a href="#">Planos</a>
-                    <a href="#">Como Funciona</a>
-                    <a href="#">Fale Conosco</a>
-                </div>
+        <a href="login.html" class="btn-login">Entrar</a>
+        <div class="menu-hamburguer-container">
+            <button class="btn-menu" onclick="toggleMenuExtra()">☰ Menu</button>
+            <div id="extra-menu" class="extra-menu-dropdown">
+                <a href="cadastro.html">✏️ Cadastre seu espaço</a>
+                <a href="planos.html">💳 Planos</a>
+                <a href="como-funciona.html">💡 Como Funciona</a>
+                <a href="fale-conosco.html">💬 Fale Conosco</a>
             </div>
         </div>
-
     </div>
-    	</header>
+</header>
 
 
 <div class="listagem-split">
@@ -2463,10 +2177,16 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             document.getElementById('main-search-btn').style.opacity = '1';
             document.getElementById('main-search-btn').style.pointerEvents = 'auto';
         }
-        // Preenche tipo
+        // Preenche tipo via hidden input + display
         if (tipoBuscado) {
-            const selectTipo = document.getElementById('tipo-espaco');
-            if (selectTipo) selectTipo.value = tipoBuscado;
+            const inputTipo = document.getElementById('tipo-espaco');
+            const textoTipo = document.getElementById('tipo-texto');
+            if (inputTipo) inputTipo.value = tipoBuscado;
+            if (textoTipo) textoTipo.textContent = tipoBuscado;
+            // Marca o item no grid se existir
+            document.querySelectorAll('.ev-item').forEach(el => {
+                if (el.dataset.v === tipoBuscado) el.classList.add('selected');
+            });
         }
         // Preenche convidados
         if (convBuscados > 0) {
@@ -3006,7 +2726,46 @@ function toggleMenuExtra() {
         if (!event.target.closest('.menu-hamburguer-container')) {
             document.getElementById('extra-menu').style.display = 'none';
         }
+        // Fecha dropdown de evento se clicar fora
+        if (!event.target.closest('#tipo-container')) {
+            const drop = document.getElementById('evento-dropdown');
+            const disp = document.getElementById('tipo-display');
+            if (drop) drop.style.display = 'none';
+            if (disp) disp.classList.remove('open');
+        }
     }
+
+function toggleEventoDropdown(e) {
+    e.stopPropagation();
+    const drop = document.getElementById('evento-dropdown');
+    const disp = document.getElementById('tipo-display');
+    const isOpen = drop.style.display === 'block';
+    drop.style.display = isOpen ? 'none' : 'block';
+    disp.classList.toggle('open', !isOpen);
+}
+
+function selectEvento(el) {
+    const input = document.getElementById('tipo-espaco');
+    const texto = document.getElementById('tipo-texto');
+    const drop  = document.getElementById('evento-dropdown');
+    const disp  = document.getElementById('tipo-display');
+
+    document.querySelectorAll('.ev-item.selected').forEach(i => i.classList.remove('selected'));
+
+    if (!el) {
+        input.value = '';
+        texto.textContent = 'Todos os eventos';
+    } else {
+        const v = el.dataset.v;
+        input.value = v;
+        const emoji = el.querySelector('span').textContent;
+        texto.textContent = emoji + ' ' + el.textContent.trim().replace(emoji, '').trim();
+        el.classList.add('selected');
+    }
+
+    drop.style.display = 'none';
+    disp.classList.remove('open');
+}
 
 function toggleFaq(elemento) {
     const item = elemento.parentElement;
@@ -3267,78 +3026,64 @@ function fecharModalFiltro() {
             </section>
 
             <section class="filtro-secao">
-                <h3>Tipo de Evento</h3>
+                <h3>Tipo de Propriedade</h3>
                 <div class="grid-eventos">
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-casamento" value="evento_casamento">
-                        <span>Casamentos</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-cat-sitios" value="Sítios, Chácaras e Fazendas">
-                        <span>🌳 Sítios e Chácaras</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-cat-acampamentos" value="Acampamentos">
-                        <span>⛺ Acampamentos</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-cat-bares" value="Bares e Restaurantes">
-                        <span>🍽️ Bares e Restaurantes</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-cat-beach" value="Beach Clubs">
-                        <span>🏖️ Beach Clubs</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-cat-galpaos" value="Centros de Convenções e Galpões">
-                        <span>🏭 Galpões e Centros</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-cat-clubes" value="Clubes">
-                        <span>🏊 Clubes</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-cat-hoteis" value="Hotéis, Pousadas e Resorts">
-                        <span>🏨 Hotéis e Pousadas</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-cat-rooftops" value="Rooftops">
-                        <span>🌆 Rooftops</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-cat-teatros" value="Teatros">
-                        <span>🎭 Teatros</span>
-                    </label>
+                    <label class="evento-chip"><input type="checkbox" value="Casas de Festas"><span>🏠 Casas de Festas</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Sítios"><span>🌳 Sítios</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Chácaras"><span>🌿 Chácaras</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Fazendas"><span>🐄 Fazendas</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Acampamentos"><span>⛺ Acampamentos</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Bares e Restaurantes"><span>🍽️ Bares e Rest.</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Beach Clubs"><span>🏖️ Beach Clubs</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Centros de Convenções e Galpões"><span>🏭 Galpões</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Clubes"><span>🏊 Clubes</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Hotéis, Pousadas e Resorts"><span>🏨 Hotéis</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Rooftops"><span>🌆 Rooftops</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Teatros"><span>🎭 Teatros</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Salão de Festas"><span>🎊 Salão de Festas</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Mansões"><span>🏰 Mansões</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Espaço Gourmet"><span>👨‍🍳 Espaço Gourmet</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Lofts"><span>🏙️ Lofts</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Espaço Industrial"><span>🔩 Industrial</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Arena"><span>🏟️ Arena</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Estádios"><span>⚽ Estádios</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Auditórios"><span>🎤 Auditórios</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Coworkings"><span>💻 Coworkings</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Galeria de Arte"><span>🖼️ Galerias</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Museus"><span>🏛️ Museus</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Vinicolas"><span>🍷 Vinícolas</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Iates"><span>⛵ Iates</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Lanchas"><span>🚤 Lanchas</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Escuna"><span>⛴️ Escuna</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Haras"><span>🐎 Haras</span></label>
                 </div>
             </section>
 
             <section class="filtro-secao">
-                <h3>Tipo de evento</h3>
+                <h3>Tipo de Evento</h3>
                 <div class="grid-eventos">
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-formatura">
-                        <span>🎓 Formatura</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-aniversario">
-                        <span>🎂 Aniversário</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-casamento">
-                        <span>💍 Casamento</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-corporativo">
-                        <span>💼 Corporativo</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-show">
-                        <span>🎤 Show</span>
-                    </label>
-                    <label class="evento-chip">
-                        <input type="checkbox" id="f-retiro">
-                        <span>🌿 Retiro</span>
-                    </label>
+                    <label class="evento-chip"><input type="checkbox" value="Casamento"><span>💍 Casamento</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Festa de Aniversário"><span>🎂 Aniversário</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Festa Infantil"><span>🎈 Festa Infantil</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Debutante"><span>👑 Debutante</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Formatura"><span>🎓 Formatura</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Colação de Grau"><span>📜 Colação de Grau</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Confraternização"><span>🎉 Confraternização</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Workshop"><span>💼 Workshop</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Seminários"><span>🎙️ Seminários</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Congresso"><span>🏛️ Congresso</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Networking"><span>🤝 Networking</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Happy Hour"><span>🥂 Happy Hour</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Show"><span>🎵 Show</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Festival"><span>🎪 Festival</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Batizado"><span>🕊️ Batizado</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Encontro Religioso"><span>🙏 Enc. Religioso</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Provas Hípicas"><span>🏇 Provas Hípicas</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Pescaria"><span>🎣 Pescaria</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Radical"><span>🪂 Radical</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Retiro"><span>🌿 Retiro</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Acampamento"><span>⛺ Acampamento</span></label>
+                    <label class="evento-chip"><input type="checkbox" value="Ensaio Fotográfico"><span>📸 Ensaio</span></label>
                 </div>
             </section>
 
