@@ -952,25 +952,28 @@ async function submeterCadastro() {
         // Erro explícito do Auth
         if (authError) {
             try { await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_auth', p_erro_msg: authError.message }); } catch(_){}
-            throw new Error('Este e-mail já está cadastrado. Tente fazer login.');
+            throw new Error('Erro ao criar conta. Tente novamente.');
         }
 
         let userId = authData.user?.id;
 
-        // Supabase retorna sucesso mas identities[] vazio = e-mail existe no Auth
-        // sem perfil em usuarios (zumbi de cadastro anterior com falha).
-        // Solução: limpa o zumbi e tenta o signUp de novo — desta vez funciona.
-        if (authData.user?.identities?.length === 0 && userId) {
-            try { await sb.rpc('limpar_zumbi_auth', { p_user_id: userId }); } catch(_){}
-            // Segunda tentativa após limpeza
-            const { data: authData2, error: authError2 } = await sb.auth.signUp({
-                email, password: senha, options: { data: { nome, usuario } }
-            });
-            if (authError2 || !authData2?.user?.id || authData2.user?.identities?.length === 0) {
-                // Se ainda falhar, é um cadastro real — manda para login
-                throw new Error('Este e-mail já está cadastrado. Tente fazer login.');
+        // Supabase retorna identities[] vazio quando o e-mail já existe no Auth
+        // mas sem perfil em usuarios (zumbi de cadastro anterior com falha).
+        // Nesse caso fazemos signIn com a senha atual para recuperar a sessão
+        // e seguimos para inserir o perfil que faltava.
+        if (authData.user?.identities?.length === 0) {
+            const { data: signInData, error: signInError } = await sb.auth.signInWithPassword({ email, password: senha });
+            if (signInError || !signInData?.user?.id) {
+                // signIn falhou = é uma conta real com senha diferente
+                throw new Error('Este e-mail já possui uma conta. Tente fazer login.');
             }
-            userId = authData2.user.id;
+            userId = signInData.user.id;
+            // Verifica se já tem perfil completo (conta real, não zumbi)
+            const { data: perfilExiste } = await sb.from('usuarios').select('id').eq('id', userId).single();
+            if (perfilExiste) {
+                throw new Error('Este e-mail já possui uma conta. Tente fazer login.');
+            }
+            // Não tem perfil = zumbi confirmado, segue para INSERT abaixo
         }
 
         if (!userId) {
