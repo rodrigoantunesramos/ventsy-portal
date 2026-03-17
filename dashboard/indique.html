@@ -296,7 +296,7 @@
         }
         .status-pilula.concluido { background: #e8faf0; color: #1ebc54; }
         .status-pilula.pendente  { background: #f4f4f4; color: #999; }
-        .status-pilula.analise   { background: #fff4e5; color: #f39c12; }
+        .status-pilula.analise   { background: #e8f0ff; color: #3b82f6; }
 
         .ganho     { color: #1ebc54; font-weight: 700; font-size: 0.85rem; }
         .em-espera { color: #bbb; font-size: 0.85rem; }
@@ -476,7 +476,7 @@
         <div class="card-hero">
             <div class="badge-promo">PROGRAMA DE PARCEIROS</div>
             <h3>Indique um espaço e ganhe<br><em>1 mês grátis</em></h3>
-            <p>Para cada novo espaço aprovado usando o seu link, você recebe <strong>1 mês de destaque gratuito</strong> ou desconto na próxima renovação.</p>
+            <p>Quando o indicado publicar uma propriedade e realizar a <strong>primeira compra de um plano</strong>, você recebe automaticamente <strong>1 mês gratuito</strong> na sua assinatura.</p>
 
             <div class="caixa-link-convite">
                 <label>Seu link de convite único</label>
@@ -505,31 +505,34 @@
             </div>
             <div class="passo">
                 <div class="numero">2</div>
-                <h4>Eles se cadastram</h4>
-                <p>O novo parceiro cria um anúncio na VENTSY usando seu link de convite único.</p>
+                <h4>Eles publicam e testam</h4>
+                <p>O novo parceiro cria e publica um anúncio na VENTSY durante o período de teste gratuito.</p>
             </div>
             <div class="passo">
                 <div class="numero">3</div>
                 <h4>Você ganha!</h4>
-                <p>Assim que o anúncio for aprovado pela nossa equipe, seu benefício é ativado automaticamente.</p>
+                <p>Quando o indicado realizar a <strong>primeira compra de um plano</strong>, seu 1 mês grátis é creditado. Renovações futuras dele não geram novo bônus.</p>
             </div>
         </div>
 
         <!-- RESULTADOS -->
         <div class="secao-resultados">
             <div class="header-resultados">
-                <h3>Acompanhe seus resultados</h3>
+                <div>
+                    <h3>Acompanhe seus resultados</h3>
+                    <p style="font-size:0.78rem;color:#aaa;margin-top:4px;">O bônus de 1 mês é creditado somente na <strong style="color:#888">primeira compra</strong> do indicado. Renovações não geram novo benefício.</p>
+                </div>
                 <div class="badges-resumo">
                     <div class="badge-resumo-item">
                         <span>Indicados</span>
                         <strong id="total-indicados">—</strong>
                     </div>
                     <div class="badge-resumo-item">
-                        <span>Cadastrados</span>
+                        <span>Publicaram</span>
                         <strong id="total-cadastrados">—</strong>
                     </div>
                     <div class="badge-resumo-item premio">
-                        <span>Créditos Ganhos</span>
+                        <span>Meses Ganhos</span>
                         <strong id="total-creditos">—</strong>
                     </div>
                 </div>
@@ -598,23 +601,23 @@ const INDICACOES_MOCK = [
         propriedade: 'Sítio Recanto Feliz',
         data: '10/03/2026',
         status: 'concluido',
-        statusLabel: 'Anúncio Ativo',
+        statusLabel: 'Plano Comprado',
         recompensa: 'ganho',
-        recompensaLabel: '+1 Mês Destaque',
+        recompensaLabel: '+1 Mês Grátis',
     },
     {
         propriedade: 'Espaço Boulevard',
         data: '05/03/2026',
-        status: 'pendente',
-        statusLabel: 'Aguardando Cadastro',
+        status: 'analise',
+        statusLabel: 'Em Teste (Trial)',
         recompensa: 'espera',
-        recompensaLabel: 'Pendente',
+        recompensaLabel: 'Aguardando 1ª Compra',
     },
     {
         propriedade: 'Chácara das Palmeiras',
         data: '28/02/2026',
-        status: 'analise',
-        statusLabel: 'Em Análise',
+        status: 'pendente',
+        statusLabel: 'Aguardando Cadastro',
         recompensa: 'espera',
         recompensaLabel: 'Pendente',
     },
@@ -659,12 +662,14 @@ async function init() {
     renderizarIndicacoes(INDICACOES_MOCK);
 
     // Contadores
-    const total      = INDICACOES_MOCK.length;
-    const cadastrados = INDICACOES_MOCK.filter(i => i.status !== 'pendente').length;
-    const creditos   = INDICACOES_MOCK.filter(i => i.recompensa === 'ganho').length;
-    document.getElementById('total-indicados').textContent  = total;
-    document.getElementById('total-cadastrados').textContent = cadastrados;
-    document.getElementById('total-creditos').textContent   = creditos + (creditos === 1 ? ' Mês' : ' Meses');
+    const total       = INDICACOES_MOCK.length;
+    // "Publicaram" = quem já saiu do status pendente (trial ou comprou)
+    const publicaram  = INDICACOES_MOCK.filter(i => i.status !== 'pendente').length;
+    // Crédito só na primeira compra (status concluido + recompensa ganho)
+    const creditos    = INDICACOES_MOCK.filter(i => i.recompensa === 'ganho').length;
+    document.getElementById('total-indicados').textContent   = total;
+    document.getElementById('total-cadastrados').textContent = publicaram;
+    document.getElementById('total-creditos').textContent    = creditos + (creditos === 1 ? ' Mês' : ' Meses');
 
     // Exibe página
     document.getElementById('loading-screen').style.display = 'none';
@@ -771,7 +776,3 @@ init();
 </script>
 </body>
 </html>
-
-
-
-
