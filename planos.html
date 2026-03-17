@@ -588,18 +588,18 @@
 <div class="planos-grid">
 
     <!-- BÁSICO -->
-    <div class="plano-card">
+    <div class="plano-card" data-plano="basico">
         <p class="plano-nome">Básico</p>
         <h2 class="plano-titulo">Para começar</h2>
         <p class="plano-desc">Para quem está começando a divulgar seu espaço.</p>
 
         <div class="plano-preco gratis">
-            <span class="valor">Grátis</span>
+            <span class="valor" data-plano-preco="basico">Grátis</span>
         </div>
 
         <div class="divider-plano"></div>
 
-        <ul class="plano-features">
+        <ul class="plano-features" data-plano-items="basico">
             <li class="sim"><span class="feat-icon">✔</span> Cadastro de 1 propriedade</li>
             <li class="sim"><span class="feat-icon">✔</span> Até 5 fotos na galeria</li>
             <li class="nao"><span class="feat-icon">✗</span> Botão de WhatsApp direto</li>
@@ -611,7 +611,7 @@
     </div>
 
     <!-- PRO — DESTAQUE -->
-    <div class="plano-card destaque">
+    <div class="plano-card destaque" data-plano="pro">
         <span class="badge-popular">Mais popular</span>
         <p class="plano-nome">Pro</p>
         <h2 class="plano-titulo">Profissional</h2>
@@ -619,13 +619,13 @@
 
         <div class="plano-preco">
             <span class="cifrao">R$</span>
-            <span class="valor" id="valor-pro">79</span>
+            <span class="valor" id="valor-pro" data-plano-preco="pro">79</span>
             <span class="periodo">/mês</span>
         </div>
 
         <div class="divider-plano"></div>
 
-        <ul class="plano-features">
+        <ul class="plano-features" data-plano-items="pro">
             <li class="sim"><span class="feat-icon">✔</span> Tudo do plano Básico</li>
             <li class="sim"><span class="feat-icon">✔</span> Fotos ilimitadas</li>
             <li class="sim"><span class="feat-icon">✔</span> Botão de WhatsApp direto</li>
@@ -640,20 +640,20 @@
     </div>
 
     <!-- ULTRA -->
-    <div class="plano-card">
+    <div class="plano-card" data-plano="ultra">
         <p class="plano-nome">Ultra</p>
         <h2 class="plano-titulo">Máximo alcance</h2>
         <p class="plano-desc">O máximo de leads para o seu negócio.</p>
 
         <div class="plano-preco">
             <span class="cifrao">R$</span>
-            <span class="valor" id="valor-ultra">149</span>
+            <span class="valor" id="valor-ultra" data-plano-preco="ultra">149</span>
             <span class="periodo">/mês</span>
         </div>
 
         <div class="divider-plano"></div>
 
-        <ul class="plano-features">
+        <ul class="plano-features" data-plano-items="ultra">
             <li class="sim"><span class="feat-icon">✔</span> Tudo do plano Pro</li>
             <li class="sim"><span class="feat-icon">✔</span> Upload de vídeos</li>
             <li class="sim"><span class="feat-icon">✔</span> Aparecer no topo das buscas</li>
@@ -805,6 +805,92 @@
             btn.disabled = false;
         }
     }
+<script>
+    // ── SYNC COM ADMIN ──
+    // Lê ventsy_planos_config salvo pelo admin e aplica preços/benefícios/status
+    (function () {
+        const DEFAULTS = {
+            basico: { preco: 0,   items: null, status: 'ativo' },
+            pro:    { preco: 79,  items: null, status: 'ativo' },
+            ultra:  { preco: 149, items: null, status: 'ativo' }
+        };
+
+        function getAdminConfig() {
+            try {
+                const raw = localStorage.getItem('ventsy_planos_config');
+                if (raw) {
+                    const p = JSON.parse(raw);
+                    return {
+                        basico: Object.assign({}, DEFAULTS.basico, p.basico || {}),
+                        pro:    Object.assign({}, DEFAULTS.pro,    p.pro    || {}),
+                        ultra:  Object.assign({}, DEFAULTS.ultra,  p.ultra  || {})
+                    };
+                }
+            } catch(e) {}
+            return DEFAULTS;
+        }
+
+        function aplicar() {
+            const cfg = getAdminConfig();
+
+            // ── Visibilidade dos cards ──
+            ['basico','pro','ultra'].forEach(nome => {
+                document.querySelectorAll(`[data-plano="${nome}"]`).forEach(el => {
+                    el.style.display = cfg[nome].status === 'oculto' ? 'none' : '';
+                });
+            });
+
+            // ── Preços ──
+            // Básico
+            const elBasicoPreco = document.querySelector('[data-plano-preco="basico"]');
+            if (elBasicoPreco) {
+                elBasicoPreco.textContent = cfg.basico.preco === 0 ? 'Grátis' : 'R$ ' + cfg.basico.preco;
+                // Esconde/mostra cifrao se necessário
+                const cifrao = elBasicoPreco.closest('.plano-preco')?.querySelector('.cifrao');
+                const periodo = elBasicoPreco.closest('.plano-preco')?.querySelector('.periodo');
+                if (cfg.basico.preco === 0) {
+                    if (cifrao) cifrao.style.display = 'none';
+                    if (periodo) periodo.style.display = 'none';
+                } else {
+                    if (cifrao) cifrao.style.display = '';
+                    if (periodo) periodo.style.display = '';
+                }
+            }
+
+            // Pro e Ultra — atualiza base mensal e recalcula anual proporcional
+            window._adminPrecos = { pro: cfg.pro.preco, ultra: cfg.ultra.preco };
+            const elProPreco   = document.getElementById('valor-pro');
+            const elUltraPreco = document.getElementById('valor-ultra');
+            if (elProPreco && !window.isAnual)   elProPreco.textContent   = cfg.pro.preco;
+            if (elUltraPreco && !window.isAnual) elUltraPreco.textContent = cfg.ultra.preco;
+
+            // Atualiza as variáveis de preços do toggle existente
+            if (typeof precosPro !== 'undefined') {
+                precosPro.mensal   = cfg.pro.preco;
+                precosPro.anual    = Math.round(cfg.pro.preco * 0.8);
+            }
+            if (typeof precosUltra !== 'undefined') {
+                precosUltra.mensal = cfg.ultra.preco;
+                precosUltra.anual  = Math.round(cfg.ultra.preco * 0.8);
+            }
+
+            // ── Benefícios ──
+            ['basico','pro','ultra'].forEach(nome => {
+                const ul = document.querySelector(`[data-plano-items="${nome}"]`);
+                if (!ul || !cfg[nome].items || !cfg[nome].items.length) return;
+                const liClass = ul.querySelector('li')?.className || 'sim';
+                ul.innerHTML = cfg[nome].items.map(item =>
+                    `<li class="${liClass}"><span class="feat-icon">✔</span> ${item}</li>`
+                ).join('');
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', aplicar);
+        } else {
+            aplicar();
+        }
+    })();
 </script>
 
 </body>
