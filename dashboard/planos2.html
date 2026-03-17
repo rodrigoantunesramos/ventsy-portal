@@ -781,44 +781,41 @@ const PLANOS = [
     }
 ];
 
-// ── SYNC COM ADMIN ──
-// Sobrescreve preços, benefícios e status a partir do que o admin salvou
-(function sincronizarComAdmin() {
+// ── SYNC COM ADMIN VIA SUPABASE ──
+// Carregado no init() antes de renderizar os cards
+async function sincronizarComAdmin() {
     try {
-        const raw = localStorage.getItem('ventsy_planos_config');
-        if (!raw) return;
-        const cfg = JSON.parse(raw);
+        const { data, error } = await sb.from('planos_config').select('*');
+        if (error || !data) return;
 
-        PLANOS.forEach(plano => {
+        const cfg = {};
+        data.forEach(row => { cfg[row.id] = row; });
+
+        // Atualiza o array PLANOS com os dados do admin
+        for (let i = PLANOS.length - 1; i >= 0; i--) {
+            const plano = PLANOS[i];
             const adminPlano = cfg[plano.id];
-            if (!adminPlano) return;
+            if (!adminPlano) continue;
 
-            // Preço e formatação
-            if (typeof adminPlano.preco === 'number') {
-                plano.preco = adminPlano.preco;
-                plano.precoFormatado = adminPlano.preco === 0 ? 'Grátis' : 'R$ ' + adminPlano.preco;
+            // Remove plano se estiver oculto
+            if (adminPlano.status === 'oculto') {
+                PLANOS.splice(i, 1);
+                continue;
             }
 
-            // Benefícios (itens de texto viram lista ok:true)
+            // Preço e formatação
+            plano.preco = adminPlano.preco ?? plano.preco;
+            plano.precoFormatado = plano.preco === 0 ? 'Grátis' : 'R$ ' + plano.preco;
+
+            // Benefícios
             if (Array.isArray(adminPlano.items) && adminPlano.items.length) {
                 plano.beneficios = adminPlano.items.map(texto => ({ texto, ok: true }));
             }
-
-            // Status oculto — remove o plano da lista
-            if (adminPlano.status === 'oculto') {
-                plano._oculto = true;
-            }
-        });
-
-        // Remove planos marcados como ocultos
-        const indices = [];
-        PLANOS.forEach((p, i) => { if (p._oculto) indices.unshift(i); });
-        indices.forEach(i => PLANOS.splice(i, 1));
-
+        }
     } catch (e) {
         console.warn('[ventsy] Erro ao sincronizar planos do admin:', e);
     }
-})();
+}
 
 /* ─────────────────────────────────────────
    ESTADO — preenchido pelo Supabase
@@ -924,6 +921,9 @@ async function init() {
 
     // Carrega assinatura real do Supabase
     await carregarAssinatura(user.id);
+
+    // Sincroniza planos com configurações do admin
+    await sincronizarComAdmin();
 
     renderizarBanner();
     renderizarCards();
