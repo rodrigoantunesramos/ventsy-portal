@@ -411,8 +411,8 @@
                             <input
                                 type="text"
                                 id="ref-codigo"
-                                placeholder="Ex: joao_silva ou abc12345"
-                                maxlength="30"
+                                placeholder="Ex: A3KX92BZ"
+                                maxlength="8"
                                 autocomplete="off"
                                 oninput="validarRefCodigo()"
                             >
@@ -541,14 +541,14 @@ function atualizarRefHint(valor, autoPreenchido) {
     }
 }
 
-// Verifica no banco se o handle do indicador existe
+// Verifica no banco se o seucodigo do indicador existe
 async function verificarRefNobanco(handle) {
     if (!handle) return true; // campo vazio = sem indicação, tudo ok
 
     const { data, error } = await sb
         .from('usuarios')
         .select('id')
-        .or(`usuario.eq.${handle},id.like.${handle}%`)
+        .ilike('seucodigo', handle.trim())  // case-insensitive, igual ao trigger SQL
         .limit(1)
         .single();
 
