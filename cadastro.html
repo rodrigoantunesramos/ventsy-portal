@@ -601,7 +601,19 @@ function validarDoc() {
     const v = document.getElementById('documento').value.replace(/\D/g, '');
     const ok = tipoDoc === 'cpf' ? v.length === 11 : v.length === 14;
     setStatus('doc', ok, ok ? '' : `${tipoDoc.toUpperCase()} inválido ou incompleto.`);
+    if (ok) verificarDocBanco(v);
     return ok;
+}
+
+async function verificarDocBanco(docLimpo) {
+    setStatusVerificando('doc', `Verificando ${tipoDoc.toUpperCase()}...`);
+    const { data, error } = await sb.rpc('verificar_documento', { p_documento: docLimpo });
+    if (error) { limparStatus('doc'); return; }
+    if (data === true) {
+        setStatus('doc', false, `Este ${tipoDoc.toUpperCase()} já está cadastrado. Tente fazer login.`);
+    } else {
+        setStatus('doc', true, `${tipoDoc.toUpperCase()} disponível.`);
+    }
 }
 
 function validarNome() {
@@ -641,12 +653,19 @@ function validarEmail() {
     const v = document.getElementById('email').value.trim();
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
     setStatus('email', ok, ok ? '' : 'Informe um e-mail válido.');
-    if (ok) {
-        const hint = document.getElementById('hint-email');
-        hint.textContent = 'Usado para fazer login na plataforma.';
-        hint.className = 'campo-hint';
-    }
+    if (ok) verificarEmailBanco(v);
     return ok;
+}
+
+async function verificarEmailBanco(email) {
+    setStatusVerificando('email', 'Verificando e-mail...');
+    const { data, error } = await sb.rpc('verificar_email', { p_email: email });
+    if (error) { limparStatus('email'); return; }
+    if (data === true) {
+        setStatus('email', false, 'Este e-mail já está cadastrado. Tente fazer login.');
+    } else {
+        setStatus('email', true, 'E-mail disponível.');
+    }
 }
 
 // ── Usuário ──
@@ -661,7 +680,23 @@ function validarUsuario() {
     setStatus('usuario', ok, '');
     hint.textContent = ok ? '' : 'Entre 3 e 20 caracteres. Apenas letras, números e _.';
     hint.className = ok ? 'campo-hint' : 'campo-hint erro';
+    if (ok) verificarUsuarioBanco(v);
     return ok;
+}
+
+async function verificarUsuarioBanco(usuario) {
+    setStatusVerificando('usuario', 'Verificando disponibilidade...');
+    const { data, error } = await sb.rpc('verificar_usuario', { p_usuario: usuario });
+    if (error) { limparStatus('usuario'); return; }
+    if (data === true) {
+        setStatus('usuario', false, 'Este nome de usuário já está em uso. Escolha outro.');
+        document.getElementById('hint-usuario').className = 'campo-hint erro';
+    } else {
+        setStatus('usuario', true, '');
+        document.getElementById('hint-usuario').innerHTML =
+            '<span class="material-icons" style="color:var(--verde);font-size:.9rem">check_circle</span> Nome de usuário disponível!';
+        document.getElementById('hint-usuario').className = 'campo-hint';
+    }
 }
 
 // ── Senha ──
@@ -700,8 +735,21 @@ function validarSenha2() {
 }
 
 // ── Helpers ──
+function setStatusVerificando(id, msg) {
+    const el = document.getElementById('status-' + id);
+    el.style.animation = 'spin 1s linear infinite';
+    el.textContent  = 'sync';
+    el.className    = 'campo-status material-icons';
+    el.style.display = 'block';
+    el.style.color  = '#bbb';
+    const hint = document.getElementById('hint-' + id);
+    if (hint) { hint.textContent = msg; hint.className = 'campo-hint'; }
+}
+
 function setStatus(id, ok, msg) {
     const el = document.getElementById('status-' + id);
+    el.style.animation = '';
+    el.style.color = '';
     el.textContent = ok ? 'check_circle' : 'error_outline';
     el.className = 'campo-status material-icons ' + (ok ? 'ok' : 'erro');
     const hint = document.getElementById('hint-' + id);
