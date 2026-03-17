@@ -434,6 +434,22 @@
             background: var(--vermelho); color: #fff; border-color: var(--vermelho);
         }
         .ev-item.selected span { filter: none; }
+        .ev-item.selected::after {
+            content: '✓';
+            position: absolute; top: 4px; right: 5px;
+            font-size: .55rem; font-weight: 900; opacity: .85;
+            line-height: 1;
+        }
+        .ev-item { position: relative; }
+
+        /* Badge contador no display */
+        .tipo-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            background: var(--vermelho); color: #fff;
+            border-radius: 20px; font-size: .65rem; font-weight: 800;
+            margin-left: 4px; flex-shrink: 0;
+        }
 
         @media (max-width: 620px) {
             .evento-dropdown { width: calc(100vw - 32px); left: 0; transform: none; }
@@ -1375,7 +1391,7 @@ btnBusca.addEventListener('click', () => {
     const cidade = cidadeInput.value.trim();
     const tipo   = document.getElementById('tipo-espaco')?.value || '';
     const data   = dQuando.textContent.trim();
-    registrarBusca(tipo);
+    if (tipo) tipo.split(',').forEach(t => registrarBusca(t.trim()));
     const url = new URL('buscapropriedade.html', window.location.href);
     url.searchParams.set('estado', estado);
     if (cidade) url.searchParams.set('cidade', cidade);
@@ -1402,29 +1418,62 @@ function toggleEventoDropdown(e) {
     disp.classList.toggle('open', !isOpen);
 }
 
-function selectEvento(el) {
-    const input = document.getElementById('tipo-espaco');
+// Conjunto de eventos selecionados
+const eventosSelecionados = new Set();
+
+function atualizarDisplayEventos() {
     const texto = document.getElementById('tipo-texto');
-    const drop  = document.getElementById('evento-dropdown');
+    const input = document.getElementById('tipo-espaco');
     const disp  = document.getElementById('tipo-display');
+    const count = eventosSelecionados.size;
 
-    // Remove previous selection highlight
-    document.querySelectorAll('.ev-item.selected').forEach(i => i.classList.remove('selected'));
+    // Remove badge antigo se existir
+    const oldBadge = disp.querySelector('.tipo-badge');
+    if (oldBadge) oldBadge.remove();
 
-    if (!el) {
-        // Clear / "Todos os eventos"
-        input.value = '';
+    if (count === 0) {
         texto.textContent = 'Todos os eventos';
-    } else {
-        const v = el.dataset.v;
+        texto.style.color = '';
+        input.value = '';
+    } else if (count === 1) {
+        const v = [...eventosSelecionados][0];
+        const el = document.querySelector(`.ev-item[data-v="${CSS.escape(v)}"]`);
+        const emoji = el ? el.querySelector('span').textContent : '';
+        texto.textContent = emoji + ' ' + v;
+        texto.style.color = '#222';
         input.value = v;
-        const emoji = el.querySelector('span').textContent;
-        texto.textContent = emoji + ' ' + el.textContent.trim().replace(emoji, '').trim();
-        el.classList.add('selected');
+    } else {
+        texto.textContent = 'Eventos';
+        texto.style.color = '#222';
+        input.value = [...eventosSelecionados].join(',');
+        // Adiciona badge com contagem antes do caret
+        const badge = document.createElement('span');
+        badge.className = 'tipo-badge';
+        badge.textContent = count;
+        const caret = disp.querySelector('.tipo-caret');
+        disp.insertBefore(badge, caret);
+    }
+}
+
+function selectEvento(el) {
+    if (!el) {
+        // Limpar tudo
+        eventosSelecionados.clear();
+        document.querySelectorAll('.ev-item.selected').forEach(i => i.classList.remove('selected'));
+        atualizarDisplayEventos();
+        return;
     }
 
-    drop.style.display = 'none';
-    disp.classList.remove('open');
+    const v = el.dataset.v;
+    if (eventosSelecionados.has(v)) {
+        eventosSelecionados.delete(v);
+        el.classList.remove('selected');
+    } else {
+        eventosSelecionados.add(v);
+        el.classList.add('selected');
+    }
+    atualizarDisplayEventos();
+    // Não fecha — permite selecionar múltiplos
 }
 
 // Close dropdown when clicking outside
