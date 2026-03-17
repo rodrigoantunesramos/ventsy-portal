@@ -781,6 +781,45 @@ const PLANOS = [
     }
 ];
 
+// ── SYNC COM ADMIN ──
+// Sobrescreve preços, benefícios e status a partir do que o admin salvou
+(function sincronizarComAdmin() {
+    try {
+        const raw = localStorage.getItem('ventsy_planos_config');
+        if (!raw) return;
+        const cfg = JSON.parse(raw);
+
+        PLANOS.forEach(plano => {
+            const adminPlano = cfg[plano.id];
+            if (!adminPlano) return;
+
+            // Preço e formatação
+            if (typeof adminPlano.preco === 'number') {
+                plano.preco = adminPlano.preco;
+                plano.precoFormatado = adminPlano.preco === 0 ? 'Grátis' : 'R$ ' + adminPlano.preco;
+            }
+
+            // Benefícios (itens de texto viram lista ok:true)
+            if (Array.isArray(adminPlano.items) && adminPlano.items.length) {
+                plano.beneficios = adminPlano.items.map(texto => ({ texto, ok: true }));
+            }
+
+            // Status oculto — remove o plano da lista
+            if (adminPlano.status === 'oculto') {
+                plano._oculto = true;
+            }
+        });
+
+        // Remove planos marcados como ocultos
+        const indices = [];
+        PLANOS.forEach((p, i) => { if (p._oculto) indices.unshift(i); });
+        indices.forEach(i => PLANOS.splice(i, 1));
+
+    } catch (e) {
+        console.warn('[ventsy] Erro ao sincronizar planos do admin:', e);
+    }
+})();
+
 /* ─────────────────────────────────────────
    ESTADO — preenchido pelo Supabase
 ───────────────────────────────────────── */
@@ -1254,6 +1293,3 @@ init();
 </script>
 </body>
 </html>
-
-
-
