@@ -139,6 +139,106 @@
         @media (max-width: 480px) {
             main { padding: 100px 4% 48px; }
         }
+
+        /* ── BLOCO DE INDICAÇÃO ── */
+        .indicacao-bloco {
+            margin-bottom: 24px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #ff385c;
+            background: linear-gradient(135deg, #fff5f7 0%, #fff 60%);
+            box-shadow: 0 4px 20px rgba(255,56,92,0.12);
+        }
+        .indicacao-cabecalho {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(90deg, #ff385c 0%, #ff6b84 100%);
+            padding: 14px 20px;
+        }
+        .indicacao-emoji {
+            font-size: 1.5rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .indicacao-cabecalho-texto strong {
+            display: block;
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+        .indicacao-cabecalho-texto span {
+            color: rgba(255,255,255,0.82);
+            font-size: 0.76rem;
+        }
+        .indicacao-corpo {
+            padding: 18px 20px;
+        }
+        .indicacao-corpo p {
+            font-size: 0.82rem;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+        .indicacao-corpo p strong { color: #0d0d0d; }
+        .indicacao-input-wrap {
+            position: relative;
+        }
+        .indicacao-input-wrap .material-icons.icon-left {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            color: #ff385c;
+            pointer-events: none;
+        }
+        #ref-codigo {
+            width: 100%;
+            padding: 11px 40px 11px 40px;
+            border: 1.5px solid #ffc5d0;
+            border-radius: 11px;
+            font-family: 'DM Sans', inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0d0d0d;
+            background: #fff;
+            outline: none;
+            letter-spacing: 0.04em;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        #ref-codigo:focus {
+            border-color: #ff385c;
+            box-shadow: 0 0 0 3px rgba(255,56,92,0.12);
+        }
+        #ref-codigo.preenchido-auto {
+            background: #f0fdf4;
+            border-color: #22c55e;
+            color: #166534;
+        }
+        .ref-status-icone {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1rem;
+            display: none;
+        }
+        .ref-status-icone.ok    { color: #22c55e; display: block; }
+        .ref-status-icone.aviso { color: #f59e0b; display: block; }
+        .ref-hint {
+            font-size: 0.74rem;
+            margin-top: 7px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #888;
+        }
+        .ref-hint.ok    { color: #22c55e; }
+        .ref-hint.aviso { color: #f59e0b; }
+        .ref-hint .material-icons { font-size: 0.85rem; }
+
     </style>
 </head>
 <body>
@@ -283,6 +383,40 @@
                     <p class="campo-hint" id="hint-senha2"></p>
                 </div>
 
+                <!-- ── BLOCO INDICAÇÃO ── -->
+                <div class="indicacao-bloco" id="bloco-indicacao">
+                    <div class="indicacao-cabecalho">
+                        <div class="indicacao-emoji">🤝</div>
+                        <div class="indicacao-cabecalho-texto">
+                            <strong>Você veio por indicação?</strong>
+                            <span>A gente ama a transparência e o boca a boca. Bem-vindo à equipe VENTSY!</span>
+                        </div>
+                    </div>
+                    <div class="indicacao-corpo">
+                        <p>
+                            Cole abaixo o código de quem te indicou. Se você veio pelo link, ele <strong>preenche sozinho</strong>.
+                            Se estiver em branco, consegue digitar exatamente como a pessoa te passou?
+                            <strong>Não troque maiúsculo por minúsculo</strong> — cole igualzinho. A VENTSY agradece! 💙
+                        </p>
+                        <div class="indicacao-input-wrap">
+                            <span class="material-icons icon-left">card_giftcard</span>
+                            <input
+                                type="text"
+                                id="ref-codigo"
+                                placeholder="Ex: joao_silva ou abc12345"
+                                maxlength="30"
+                                autocomplete="off"
+                                oninput="validarRefCodigo()"
+                            >
+                            <span class="material-icons ref-status-icone" id="ref-status-icone"></span>
+                        </div>
+                        <p class="ref-hint" id="ref-hint">
+                            <span class="material-icons">info</span>
+                            Opcional — deixe em branco se não foi indicado por ninguém.
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Termos -->
                 <div class="termos-linha">
                     <input type="checkbox" id="termos">
@@ -346,6 +480,58 @@ const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
+
+// ── Indicação: captura ?ref= da URL e preenche o campo ──
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) {
+        // Salva também no sessionStorage para sobreviver a troca de dispositivo
+        // (o usuário pode ter copiado o link e aberto no desktop manualmente)
+        sessionStorage.setItem('ventsy_ref', ref);
+    }
+    // Recupera do sessionStorage se não vier pela URL (ex: abriu em outro dispositivo
+    // mas copiou o link manualmente — neste caso o campo fica vazio para o usuário preencher)
+    const refFinal = ref || sessionStorage.getItem('ventsy_ref') || '';
+    if (refFinal) {
+        const campo = document.getElementById('ref-codigo');
+        if (campo) {
+            campo.value = refFinal;
+            campo.classList.add('preenchido-auto');
+            campo.readOnly = false; // deixa editar caso queira corrigir
+            atualizarRefHint(refFinal, true);
+        }
+    }
+})();
+
+function validarRefCodigo() {
+    const campo = document.getElementById('ref-codigo');
+    campo.classList.remove('preenchido-auto');
+    atualizarRefHint(campo.value.trim(), false);
+}
+
+function atualizarRefHint(valor, autoPreenchido) {
+    const icone = document.getElementById('ref-status-icone');
+    const hint  = document.getElementById('ref-hint');
+    if (!valor) {
+        icone.className = 'material-icons ref-status-icone';
+        hint.className  = 'ref-hint';
+        hint.innerHTML  = '<span class="material-icons">info</span> Opcional — deixe em branco se não foi indicado por ninguém.';
+        return;
+    }
+    if (autoPreenchido) {
+        icone.className    = 'material-icons ref-status-icone ok';
+        icone.textContent  = 'check_circle';
+        hint.className     = 'ref-hint ok';
+        hint.innerHTML     = '<span class="material-icons">check_circle</span> Código preenchido automaticamente pelo link de convite!';
+        document.getElementById('ref-codigo').classList.add('preenchido-auto');
+    } else {
+        icone.className    = 'material-icons ref-status-icone aviso';
+        icone.textContent  = 'edit';
+        hint.className     = 'ref-hint aviso';
+        hint.innerHTML     = '<span class="material-icons">warning_amber</span> Digite exatamente como te passaram — maiúsculas e minúsculas importam!';
+    }
+}
 
 // ── Menu ──
 function toggleMenuExtra() {
@@ -625,6 +811,20 @@ async function submeterCadastro() {
                 if (dbError.message.includes('usuario'))   throw new Error('Este nome de usuário já está em uso. Escolha outro.');
             }
             throw dbError;
+        }
+
+        // ✅ Chama registrar_indicacao se houver código de indicação
+        const refCodigo = (document.getElementById('ref-codigo')?.value || '').trim();
+        if (refCodigo && userId) {
+            try {
+                await sb.rpc('registrar_indicacao', {
+                    p_indicado_id: userId,
+                    p_ref_handle:  refCodigo
+                });
+            } catch (refErr) {
+                // Falha silenciosa: não impede o cadastro do usuário
+                console.warn('Indicação não registrada:', refErr.message);
+            }
         }
 
         // ✅ Sucesso
