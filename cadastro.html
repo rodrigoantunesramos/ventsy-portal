@@ -691,7 +691,7 @@ async function verificarEmailBanco(email) {
     }
     setStatus('email', true, 'E-mail disponível.');
     // Salva lead incompleto silenciosamente para remarketing
-    salvarLeadIncompleto();
+    salvarLeadIncompleto().catch(() => {});
 }
 
 // Salva ou atualiza o lead com o que já foi preenchido até agora
@@ -938,10 +938,10 @@ async function submeterCadastro() {
 
     btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Criando conta...';
 
-    // Garante que o lead está salvo antes de criar a conta
-    await salvarLeadIncompleto();
-
     try {
+        // Salva lead (silencioso — nunca impede o cadastro)
+        await salvarLeadIncompleto();
+
         // 1. Criar usuário no Supabase Auth
         const { data: authData, error: authError } = await sb.auth.signUp({
             email,
