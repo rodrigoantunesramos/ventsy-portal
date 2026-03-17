@@ -456,6 +456,196 @@
             .ev-grid { grid-template-columns: repeat(4, 1fr); }
         }
 
+        /* ──────────── ONDE SEARCH (Airbnb-style) ──────────── */
+        .onde-wrap {
+            display: flex; flex-direction: column; justify-content: center;
+            flex: 2; min-width: 0;
+        }
+        .onde-input {
+            border: none; outline: none; font-size: .83rem; color: #222;
+            background: transparent; font-family: inherit;
+            width: 100%; padding: 0; margin-top: 2px;
+        }
+        .onde-input::placeholder { color: #aaa; font-weight: 400; }
+
+        .onde-dropdown {
+            position: absolute;
+            top: calc(100% + 14px);
+            left: 0;
+            width: 460px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.15);
+            border: 1px solid #eee;
+            z-index: 5000;
+            overflow: hidden;
+            animation: dropInLeft .18s ease;
+        }
+        @keyframes dropInLeft {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .onde-group-label {
+            padding: 12px 16px 6px;
+            font-size: .65rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #aaa;
+            border-top: 1px solid #f5f5f5;
+        }
+        .onde-group-label:first-child { border-top: none; padding-top: 14px; }
+        .onde-result {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 16px; cursor: pointer;
+            transition: background .12s;
+        }
+        .onde-result:hover { background: #fafafa; }
+        .onde-result:hover .onde-result-titulo { color: var(--vermelho); }
+        .onde-result-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: #f5f5f5; display: flex; align-items: center;
+            justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+            overflow: hidden;
+        }
+        .onde-result-icon img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 10px;
+        }
+        .onde-result-info { min-width: 0; flex: 1; }
+        .onde-result-titulo {
+            font-size: .85rem; font-weight: 700; color: #222;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            transition: color .12s;
+        }
+        .onde-result-sub {
+            font-size: .72rem; color: #888; margin-top: 1px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .onde-result-badge {
+            font-size: .65rem; font-weight: 700; padding: 2px 7px;
+            border-radius: 20px; flex-shrink: 0;
+        }
+        .badge-prop   { background: #fff0f3; color: var(--vermelho); }
+        .badge-cidade { background: #eff6ff; color: #3b82f6; }
+        .badge-estado { background: #f0fdf4; color: #22c55e; }
+
+        .onde-loading, .onde-empty {
+            padding: 24px 16px; text-align: center;
+            font-size: .84rem; color: #bbb;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .onde-spinner {
+            width: 16px; height: 16px;
+            border: 2px solid #eee; border-top-color: var(--vermelho);
+            border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0;
+        }
+
+        .onde-clear {
+            position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+            background: #eee; border: none; border-radius: 50%;
+            width: 18px; height: 18px; font-size: .65rem; cursor: pointer;
+            display: none; align-items: center; justify-content: center;
+            color: #666; transition: background .15s;
+        }
+        .onde-clear:hover { background: #ddd; }
+        .onde-clear.visible { display: flex; }
+
+        @media (max-width: 620px) {
+            .onde-dropdown { width: calc(100vw - 32px); }
+        }
+
+        /* ──────────── ONDE SEARCH (Airbnb-style) ──────────── */
+        .onde-wrap {
+            display: flex; flex-direction: column; justify-content: center;
+            flex: 2; min-width: 0;
+        }
+        .onde-input {
+            border: none; outline: none; font-size: .83rem; color: #222;
+            background: transparent; font-family: inherit;
+            width: 100%; padding: 0; margin-top: 2px;
+        }
+        .onde-input::placeholder { color: #aaa; font-weight: 400; }
+
+        .onde-dropdown {
+            position: absolute;
+            top: calc(100% + 14px);
+            left: 0;
+            width: 460px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.15);
+            border: 1px solid #eee;
+            z-index: 5000;
+            overflow: hidden;
+            animation: dropInLeft .18s ease;
+        }
+        @keyframes dropInLeft {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .onde-group-label {
+            padding: 12px 16px 6px;
+            font-size: .65rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #aaa;
+            border-top: 1px solid #f5f5f5;
+        }
+        .onde-group-label:first-child { border-top: none; padding-top: 14px; }
+        .onde-result {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 16px; cursor: pointer;
+            transition: background .12s;
+        }
+        .onde-result:hover { background: #fafafa; }
+        .onde-result:hover .onde-result-titulo { color: var(--vermelho); }
+        .onde-result-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: #f5f5f5; display: flex; align-items: center;
+            justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+            overflow: hidden;
+        }
+        .onde-result-icon img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 10px;
+        }
+        .onde-result-info { min-width: 0; flex: 1; }
+        .onde-result-titulo {
+            font-size: .85rem; font-weight: 700; color: #222;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            transition: color .12s;
+        }
+        .onde-result-sub {
+            font-size: .72rem; color: #888; margin-top: 1px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .onde-result-badge {
+            font-size: .65rem; font-weight: 700; padding: 2px 7px;
+            border-radius: 20px; flex-shrink: 0;
+        }
+        .badge-prop   { background: #fff0f3; color: var(--vermelho); }
+        .badge-cidade { background: #eff6ff; color: #3b82f6; }
+        .badge-estado { background: #f0fdf4; color: #22c55e; }
+
+        .onde-loading, .onde-empty {
+            padding: 24px 16px; text-align: center;
+            font-size: .84rem; color: #bbb;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .onde-spinner {
+            width: 16px; height: 16px;
+            border: 2px solid #eee; border-top-color: var(--vermelho);
+            border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0;
+        }
+
+        .onde-clear {
+            position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+            background: #eee; border: none; border-radius: 50%;
+            width: 18px; height: 18px; font-size: .65rem; cursor: pointer;
+            display: none; align-items: center; justify-content: center;
+            color: #666; transition: background .15s;
+        }
+        .onde-clear:hover { background: #ddd; }
+        .onde-clear.visible { display: flex; }
+
+        @media (max-width: 620px) {
+            .onde-dropdown { width: calc(100vw - 32px); }
+        }
+
         /* ──────────── ESTADO DROPDOWN GRID ──────────── */
         .estado-display {
             display: flex; align-items: center; justify-content: space-between;
@@ -718,65 +908,19 @@
     <nav class="header-center">
         <div class="search-container">
             <div class="search-bar">
-                <div class="search-item" id="location-container" style="position:relative;">
-                    <label>Estado</label>
+                <div class="search-item onde-wrap" id="onde-container" style="position:relative; flex:2;">
+                    <label>Onde?</label>
+                    <div style="position:relative; display:flex; align-items:center;">
+                        <input type="text" id="onde-input" class="onde-input"
+                               placeholder="Cidade, estado ou espaço..."
+                               autocomplete="off" spellcheck="false">
+                        <button id="onde-clear" class="onde-clear" onclick="limparOnde()" tabindex="-1">✕</button>
+                    </div>
+                    <!-- hidden fields usados pelo btnBusca -->
                     <input type="hidden" id="location-input" value="">
-                    <div id="estado-display" class="estado-display" onclick="toggleEstadoDropdown(event)">
-                        <span id="estado-texto">Selecionar estado</span>
-                        <svg class="estado-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    <div id="estado-dropdown" class="estado-dropdown" style="display:none;">
-                        <div class="estado-grid-wrap">
-
-                            <div class="est-regiao-label"><span class="regiao-pill pill-norte">🌿 Norte</span></div>
-                            <div class="est-grid">
-                                <div class="est-item est-norte" data-n="Acre" data-s="AC" onclick="selectEstado(this)"><div class="est-sigla">AC</div><div class="est-nome-full">Acre</div></div>
-                                <div class="est-item est-norte" data-n="Amapá" data-s="AP" onclick="selectEstado(this)"><div class="est-sigla">AP</div><div class="est-nome-full">Amapá</div></div>
-                                <div class="est-item est-norte" data-n="Amazonas" data-s="AM" onclick="selectEstado(this)"><div class="est-sigla">AM</div><div class="est-nome-full">Amazonas</div></div>
-                                <div class="est-item est-norte" data-n="Pará" data-s="PA" onclick="selectEstado(this)"><div class="est-sigla">PA</div><div class="est-nome-full">Pará</div></div>
-                                <div class="est-item est-norte" data-n="Rondônia" data-s="RO" onclick="selectEstado(this)"><div class="est-sigla">RO</div><div class="est-nome-full">Rondônia</div></div>
-                                <div class="est-item est-norte" data-n="Roraima" data-s="RR" onclick="selectEstado(this)"><div class="est-sigla">RR</div><div class="est-nome-full">Roraima</div></div>
-                                <div class="est-item est-norte" data-n="Tocantins" data-s="TO" onclick="selectEstado(this)"><div class="est-sigla">TO</div><div class="est-nome-full">Tocantins</div></div>
-                            </div>
-
-                            <div class="est-regiao-label"><span class="regiao-pill pill-nordeste">☀️ Nordeste</span></div>
-                            <div class="est-grid">
-                                <div class="est-item est-nordeste" data-n="Alagoas" data-s="AL" onclick="selectEstado(this)"><div class="est-sigla">AL</div><div class="est-nome-full">Alagoas</div></div>
-                                <div class="est-item est-nordeste" data-n="Bahia" data-s="BA" onclick="selectEstado(this)"><div class="est-sigla">BA</div><div class="est-nome-full">Bahia</div></div>
-                                <div class="est-item est-nordeste" data-n="Ceará" data-s="CE" onclick="selectEstado(this)"><div class="est-sigla">CE</div><div class="est-nome-full">Ceará</div></div>
-                                <div class="est-item est-nordeste" data-n="Maranhão" data-s="MA" onclick="selectEstado(this)"><div class="est-sigla">MA</div><div class="est-nome-full">Maranhão</div></div>
-                                <div class="est-item est-nordeste" data-n="Paraíba" data-s="PB" onclick="selectEstado(this)"><div class="est-sigla">PB</div><div class="est-nome-full">Paraíba</div></div>
-                                <div class="est-item est-nordeste" data-n="Pernambuco" data-s="PE" onclick="selectEstado(this)"><div class="est-sigla">PE</div><div class="est-nome-full">Pernambuco</div></div>
-                                <div class="est-item est-nordeste" data-n="Piauí" data-s="PI" onclick="selectEstado(this)"><div class="est-sigla">PI</div><div class="est-nome-full">Piauí</div></div>
-                                <div class="est-item est-nordeste" data-n="Rio Grande do Norte" data-s="RN" onclick="selectEstado(this)"><div class="est-sigla">RN</div><div class="est-nome-full">Rio Gd. Norte</div></div>
-                                <div class="est-item est-nordeste" data-n="Sergipe" data-s="SE" onclick="selectEstado(this)"><div class="est-sigla">SE</div><div class="est-nome-full">Sergipe</div></div>
-                            </div>
-
-                            <div class="est-regiao-label"><span class="regiao-pill pill-co">🏜️ Centro-Oeste</span></div>
-                            <div class="est-grid">
-                                <div class="est-item est-co" data-n="Distrito Federal" data-s="DF" onclick="selectEstado(this)"><div class="est-sigla">DF</div><div class="est-nome-full">Distrito Federal</div></div>
-                                <div class="est-item est-co" data-n="Goiás" data-s="GO" onclick="selectEstado(this)"><div class="est-sigla">GO</div><div class="est-nome-full">Goiás</div></div>
-                                <div class="est-item est-co" data-n="Mato Grosso" data-s="MT" onclick="selectEstado(this)"><div class="est-sigla">MT</div><div class="est-nome-full">Mato Grosso</div></div>
-                                <div class="est-item est-co" data-n="Mato Grosso do Sul" data-s="MS" onclick="selectEstado(this)"><div class="est-sigla">MS</div><div class="est-nome-full">M. G. do Sul</div></div>
-                            </div>
-
-                            <div class="est-regiao-label"><span class="regiao-pill pill-sudeste">🏙️ Sudeste</span></div>
-                            <div class="est-grid">
-                                <div class="est-item est-sudeste" data-n="Espírito Santo" data-s="ES" onclick="selectEstado(this)"><div class="est-sigla">ES</div><div class="est-nome-full">Espírito Santo</div></div>
-                                <div class="est-item est-sudeste" data-n="Minas Gerais" data-s="MG" onclick="selectEstado(this)"><div class="est-sigla">MG</div><div class="est-nome-full">Minas Gerais</div></div>
-                                <div class="est-item est-sudeste" data-n="Rio de Janeiro" data-s="RJ" onclick="selectEstado(this)"><div class="est-sigla">RJ</div><div class="est-nome-full">Rio de Janeiro</div></div>
-                                <div class="est-item est-sudeste" data-n="São Paulo" data-s="SP" onclick="selectEstado(this)"><div class="est-sigla">SP</div><div class="est-nome-full">São Paulo</div></div>
-                            </div>
-
-                            <div class="est-regiao-label"><span class="regiao-pill pill-sul">🌲 Sul</span></div>
-                            <div class="est-grid">
-                                <div class="est-item est-sul" data-n="Paraná" data-s="PR" onclick="selectEstado(this)"><div class="est-sigla">PR</div><div class="est-nome-full">Paraná</div></div>
-                                <div class="est-item est-sul" data-n="Rio Grande do Sul" data-s="RS" onclick="selectEstado(this)"><div class="est-sigla">RS</div><div class="est-nome-full">Rio Gd. do Sul</div></div>
-                                <div class="est-item est-sul" data-n="Santa Catarina" data-s="SC" onclick="selectEstado(this)"><div class="est-sigla">SC</div><div class="est-nome-full">Santa Catarina</div></div>
-                            </div>
-
-                        </div>
-                    </div>
+                    <input type="hidden" id="cidade-input" value="">
+                    <input type="hidden" id="onde-prop-id" value="">
+                    <div id="onde-dropdown" class="onde-dropdown" style="display:none;"></div>
                 </div>
                 <div class="divider"></div>
                 <div class="search-item" id="range-container">
@@ -875,20 +1019,6 @@
                                 <div class="ev-item" data-v="Exposição" onclick="selectEvento(this)"><span>🏛️</span>Exposição</div>
                             </div>
 
-                        </div>
-                    </div>
-                </div>
-                <div class="divider"></div>
-                <div class="search-item" id="cidade-container" style="position:relative;">
-                    <label>Cidade</label>
-                    <input type="hidden" id="cidade-input" value="">
-                    <div id="cidade-display" class="cidade-display disabled-display" onclick="toggleCidadeDropdown(event)">
-                        <span class="cidade-texto" id="cidade-texto">Todas as cidades</span>
-                        <svg class="cidade-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    <div id="cidade-dropdown" class="cidade-dropdown" style="display:none;">
-                        <div class="cidade-grid-wrap" id="cidade-grid-wrap">
-                            <div class="cid-loading">Selecione um estado primeiro</div>
                         </div>
                     </div>
                 </div>
@@ -1210,59 +1340,203 @@ const ESTADOS = [
 // locInput agora é o hidden field do estado dropdown
 const btnBusca = document.getElementById('main-search-btn');
 
-/* ── Estado Dropdown ── */
-function toggleEstadoDropdown(e) {
-    e.stopPropagation();
-    const drop = document.getElementById('estado-dropdown');
-    const disp = document.getElementById('estado-display');
-    const isOpen = drop.style.display === 'block';
-    drop.style.display = isOpen ? 'none' : 'block';
-    disp.classList.toggle('open', !isOpen);
+/* ══════════════════════════════════════════════════
+   ONDE? — Busca unificada estilo Airbnb
+   Propriedades (live Supabase) + Cidades + Estados
+   ══════════════════════════════════════════════════ */
+const ondeInput  = document.getElementById('onde-input');
+const ondeDrop   = document.getElementById('onde-dropdown');
+const ondeClear  = document.getElementById('onde-clear');
+let ondeDebounce = null;
+let ondeSelected = null; // { tipo: 'prop'|'cidade'|'estado', id?, nome, estado, cidade? }
+
+const ESTADOS_ONDE = [
+    {n:'Acre',s:'AC'},{n:'Alagoas',s:'AL'},{n:'Amapá',s:'AP'},{n:'Amazonas',s:'AM'},
+    {n:'Bahia',s:'BA'},{n:'Ceará',s:'CE'},{n:'Distrito Federal',s:'DF'},
+    {n:'Espírito Santo',s:'ES'},{n:'Goiás',s:'GO'},{n:'Maranhão',s:'MA'},
+    {n:'Mato Grosso',s:'MT'},{n:'Mato Grosso do Sul',s:'MS'},{n:'Minas Gerais',s:'MG'},
+    {n:'Pará',s:'PA'},{n:'Paraíba',s:'PB'},{n:'Paraná',s:'PR'},
+    {n:'Pernambuco',s:'PE'},{n:'Piauí',s:'PI'},{n:'Rio de Janeiro',s:'RJ'},
+    {n:'Rio Grande do Norte',s:'RN'},{n:'Rio Grande do Sul',s:'RS'},
+    {n:'Rondônia',s:'RO'},{n:'Roraima',s:'RR'},{n:'Santa Catarina',s:'SC'},
+    {n:'São Paulo',s:'SP'},{n:'Sergipe',s:'SE'},{n:'Tocantins',s:'TO'},
+];
+
+function norm(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+
+function fecharOndeDrop() {
+    ondeDrop.style.display = 'none';
+    ondeDrop.innerHTML = '';
 }
 
-function selectEstado(el) {
-    const input = document.getElementById('location-input');
-    const texto = document.getElementById('estado-texto');
-    const drop  = document.getElementById('estado-dropdown');
-    const disp  = document.getElementById('estado-display');
-
-    document.querySelectorAll('.est-item.selected').forEach(i => i.classList.remove('selected'));
-
-    const sigla = el.dataset.s;
-    const nome  = el.dataset.n;
-    input.value = nome;
-    texto.textContent = sigla + ' — ' + nome;
-    el.classList.add('selected');
-
-    drop.style.display = 'none';
-    disp.classList.remove('open');
-
-    cidadeInput.value = '';
-    carregarCidades(sigla);
-    checkBusca();
+function abrirOndeDrop(html) {
+    ondeDrop.innerHTML = html;
+    ondeDrop.style.display = 'block';
 }
-
-document.addEventListener('click', e => {
-    if (!e.target.closest('#location-container')) {
-        const drop = document.getElementById('estado-dropdown');
-        const disp = document.getElementById('estado-display');
-        if (drop) drop.style.display = 'none';
-        if (disp) disp.classList.remove('open');
-    }
-});
 
 function checkBusca() {
-    const v = document.getElementById('location-input').value.trim();
-    const ok = !!v;
+    const ok = !!ondeSelected;
     btnBusca.style.opacity       = ok ? '1' : '.3';
     btnBusca.style.pointerEvents = ok ? 'auto' : 'none';
 }
 
-function sem(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+function limparOnde() {
+    ondeInput.value = '';
+    ondeSelected = null;
+    document.getElementById('location-input').value = '';
+    document.getElementById('cidade-input').value   = '';
+    document.getElementById('onde-prop-id').value   = '';
+    ondeClear.classList.remove('visible');
+    fecharOndeDrop();
+    checkBusca();
+}
 
+function selecionarOnde(item) {
+    ondeSelected = item;
+    ondeInput.value = item.label;
+    document.getElementById('location-input').value = item.estado || '';
+    document.getElementById('cidade-input').value   = item.cidade || '';
+    document.getElementById('onde-prop-id').value   = item.id    || '';
+    ondeClear.classList.add('visible');
+    fecharOndeDrop();
+    checkBusca();
 
+    // Se é propriedade, navega direto
+    if (item.tipo === 'prop' && item.id) {
+        window.location.href = `propriedade.html?id=${item.id}`;
+    }
+}
 
-/* Calendário */
+async function buscarOnde(q) {
+    const t = norm(q);
+
+    // Sugestões de estados (local, instantâneo)
+    const estados = ESTADOS_ONDE
+        .filter(e => norm(e.n).includes(t) || e.s.toLowerCase().includes(t))
+        .slice(0, 3);
+
+    // Busca assíncrona: propriedades e cidades no Supabase
+    let props = [], cidades = [];
+    try {
+        const [rProps, rCids] = await Promise.all([
+            _sb.from('propriedades')
+               .select('id, nome, cidade, estado, imagem_url, foto_capa')
+               .eq('publicada', true)
+               .ilike('nome', `%${q}%`)
+               .limit(4),
+            _sb.from('propriedades')
+               .select('cidade, estado')
+               .eq('publicada', true)
+               .ilike('cidade', `%${q}%`)
+               .not('cidade', 'is', null)
+               .limit(20)
+        ]);
+        props  = rProps.data  || [];
+        // Cidades únicas
+        const cidMap = {};
+        (rCids.data || []).forEach(p => {
+            if (p.cidade && !cidMap[p.cidade]) cidMap[p.cidade] = p.estado;
+        });
+        cidades = Object.entries(cidMap).slice(0, 4)
+                        .map(([cidade, estado]) => ({ cidade, estado }));
+    } catch(_) {}
+
+    // Monta HTML
+    let html = '';
+
+    if (props.length) {
+        html += `<div class="onde-group-label">🏠 Espaços</div>`;
+        html += props.map(p => {
+            const img = p.imagem_url || p.foto_capa || '';
+            const sub = [p.cidade, p.estado].filter(Boolean).join(', ');
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'prop',id:'${p.id}',nome:'${(p.nome||'').replace(/'/g,"\\'")}',estado:'${p.estado||''}',cidade:'${p.cidade||''}',label:'${(p.nome||'').replace(/'/g,"\\'")}' })">
+                <div class="onde-result-icon">${img ? `<img src="${img}" alt="">` : '🏠'}</div>
+                <div class="onde-result-info">
+                    <div class="onde-result-titulo">${p.nome || 'Sem nome'}</div>
+                    <div class="onde-result-sub">${sub}</div>
+                </div>
+                <span class="onde-result-badge badge-prop">Espaço</span>
+            </div>`;
+        }).join('');
+    }
+
+    if (cidades.length) {
+        html += `<div class="onde-group-label">🏙️ Cidades</div>`;
+        html += cidades.map(c => {
+            const label = `${c.cidade}, ${c.estado}`;
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'cidade',estado:'${c.estado}',cidade:'${c.cidade}',label:'${label}'})">
+                <div class="onde-result-icon">🏙️</div>
+                <div class="onde-result-info">
+                    <div class="onde-result-titulo">${c.cidade}</div>
+                    <div class="onde-result-sub">${c.estado} · Brasil</div>
+                </div>
+                <span class="onde-result-badge badge-cidade">Cidade</span>
+            </div>`;
+        }).join('');
+    }
+
+    if (estados.length) {
+        html += `<div class="onde-group-label">📍 Estados</div>`;
+        html += estados.map(e => {
+            const label = `${e.n}, BR`;
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'estado',estado:'${e.s}',cidade:'',label:'${label}'})">
+                <div class="onde-result-icon">📍</div>
+                <div class="onde-result-info">
+                    <div class="onde-result-titulo">${e.n}</div>
+                    <div class="onde-result-sub">${e.s} · Brasil</div>
+                </div>
+                <span class="onde-result-badge badge-estado">Estado</span>
+            </div>`;
+        }).join('');
+    }
+
+    if (!html) {
+        html = `<div class="onde-empty">Nenhum resultado para "<strong>${q}</strong>"</div>`;
+    }
+
+    abrirOndeDrop(html);
+}
+
+// Sugestões default ao focar (sem texto) — top estados
+function sugestoesDefault() {
+    const populares = ['RJ','SP','MG','BA','SC','RS','CE','PE'];
+    const estados = ESTADOS_ONDE.filter(e => populares.includes(e.s));
+    let html = `<div class="onde-group-label">🔥 Destinos populares</div>`;
+    html += estados.map(e => {
+        const label = `${e.n}, BR`;
+        return `<div class="onde-result" onclick="selecionarOnde({tipo:'estado',estado:'${e.s}',cidade:'',label:'${label}'})">
+            <div class="onde-result-icon">📍</div>
+            <div class="onde-result-info">
+                <div class="onde-result-titulo">${e.n}</div>
+                <div class="onde-result-sub">${e.s} · Brasil</div>
+            </div>
+            <span class="onde-result-badge badge-estado">Estado</span>
+        </div>`;
+    }).join('');
+    abrirOndeDrop(html);
+}
+
+ondeInput.addEventListener('focus', () => {
+    if (!ondeInput.value.trim()) sugestoesDefault();
+});
+
+ondeInput.addEventListener('input', () => {
+    const q = ondeInput.value.trim();
+    ondeClear.classList.toggle('visible', q.length > 0);
+    ondeSelected = null;
+    checkBusca();
+    clearTimeout(ondeDebounce);
+    if (!q) { sugestoesDefault(); return; }
+    // Mostra spinner imediato
+    abrirOndeDrop(`<div class="onde-loading"><div class="onde-spinner"></div> Buscando...</div>`);
+    ondeDebounce = setTimeout(() => buscarOnde(q), 280);
+});
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('#onde-container')) fecharOndeDrop();
+});
+
+/* ── btnBusca atualizado ── */
 const dQuando = document.getElementById('display-quando');
 const mm = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const fd = d => `${d.getDate()} ${mm[d.getMonth()]}`;
@@ -1280,125 +1554,21 @@ document.getElementById('range-container').addEventListener('click', () =>
     document.getElementById('input-periodo')._flatpickr.open()
 );
 
-/* ── Cidade Dropdown Grid ── */
-const cidadeInput = document.getElementById('cidade-input');
-let listaCidades  = [];
-
-function toggleCidadeDropdown(e) {
-    e.stopPropagation();
-    const disp = document.getElementById('cidade-display');
-    if (disp.classList.contains('disabled-display')) return;
-    const drop = document.getElementById('cidade-dropdown');
-    const isOpen = drop.style.display === 'block';
-    drop.style.display = isOpen ? 'none' : 'block';
-    disp.classList.toggle('open', !isOpen);
-}
-
-function selectCidade(el) {
-    const texto = document.getElementById('cidade-texto');
-    const drop  = document.getElementById('cidade-dropdown');
-    const disp  = document.getElementById('cidade-display');
-
-    document.querySelectorAll('.cid-item.selected').forEach(i => i.classList.remove('selected'));
-
-    if (!el) {
-        cidadeInput.value = '';
-        texto.textContent = 'Todas as cidades';
-        texto.style.color = '';
-    } else {
-        const cidade = el.dataset.c;
-        cidadeInput.value = cidade;
-        texto.textContent = cidade;
-        texto.style.color = '#222';
-        el.classList.add('selected');
-    }
-
-    drop.style.display = 'none';
-    disp.classList.remove('open');
-}
-
-function renderCidadesGrid(lista) {
-    const wrap = document.getElementById('cidade-grid-wrap');
-    if (!lista.length) {
-        wrap.innerHTML = '<div class="cid-empty">🏜️ Nenhuma cidade encontrada</div>';
-        return;
-    }
-    const itens = lista.map(c => {
-        const emoji = emojiCidade(c);
-        return `<div class="cid-item" data-c="${c}" onclick="selectCidade(this)">
-            <div class="cid-icon">${emoji}</div>
-            <div class="cid-nome">${c}</div>
-        </div>`;
-    }).join('');
-    wrap.innerHTML = `
-        <div class="cid-header">
-            <span class="cid-header-title">🏙️ ${lista.length} cidade${lista.length !== 1 ? 's' : ''}</span>
-            <button class="cid-clear-btn" onclick="selectCidade(null)">✕ Todas</button>
-        </div>
-        <div class="cid-grid">${itens}</div>
-    `;
-}
-
-function emojiCidade(nome) {
-    const n = nome.toLowerCase();
-    if (n.includes('são paulo') || n.includes('rio de janeiro') || n.includes('salvador') || n.includes('fortaleza') || n.includes('belo horizonte') || n.includes('manaus') || n.includes('curitiba') || n.includes('recife') || n.includes('porto alegre') || n.includes('belém') || n.includes('goiânia') || n.includes('brasília')) return '🌆';
-    if (n.includes('praia') || n.includes('cabo') || n.includes('litoral') || n.includes('angra') || n.includes('búzios') || n.includes('arraial') || n.includes('guarujá') || n.includes('ubatuba') || n.includes('florianópolis') || n.includes('maceió') || n.includes('natal')) return '🏖️';
-    if (n.includes('petrópolis') || n.includes('gramado') || n.includes('campos do jordão') || n.includes('visconde') || n.includes('serra') || n.includes('nova friburgo') || n.includes('teresópolis')) return '⛰️';
-    if (n.includes('cachoeiras') || n.includes('cachoeiro') || n.includes('cachoeira')) return '💧';
-    if (n.includes('foz') || n.includes('iguaçu')) return '🌊';
-    return '📍';
-}
-
-async function carregarCidades(sigla) {
-    const disp = document.getElementById('cidade-display');
-    const wrap = document.getElementById('cidade-grid-wrap');
-
-    // Reset cidade selecionada
-    cidadeInput.value = '';
-    document.getElementById('cidade-texto').textContent = 'Todas as cidades';
-    document.getElementById('cidade-texto').style.color = '';
-
-    if (!sigla) {
-        listaCidades = [];
-        disp.classList.add('disabled-display');
-        wrap.innerHTML = '<div class="cid-loading">Selecione um estado primeiro</div>';
-        return;
-    }
-
-    disp.classList.remove('disabled-display');
-    wrap.innerHTML = '<div class="cid-loading">Carregando cidades...</div>';
-
-    const { data } = await _sb
-        .from('propriedades').select('cidade')
-        .eq('estado', sigla).eq('publicada', true).not('cidade', 'is', null);
-    listaCidades = data ? [...new Set(data.map(p => p.cidade).filter(Boolean))].sort() : [];
-    renderCidadesGrid(listaCidades);
-}
-
-document.addEventListener('click', e => {
-    if (!e.target.closest('#cidade-container')) {
-        const drop = document.getElementById('cidade-dropdown');
-        const disp = document.getElementById('cidade-display');
-        if (drop) drop.style.display = 'none';
-        if (disp) disp.classList.remove('open');
-    }
-});
-
 btnBusca.addEventListener('click', () => {
-    const nomeEstado = document.getElementById('location-input').value.trim(); if (!nomeEstado) return;
-    const encontrado = ESTADOS.find(e => e.n.toLowerCase() === nomeEstado.toLowerCase());
-    const estado = encontrado ? encontrado.s : nomeEstado;
-    const cidade = cidadeInput.value.trim();
+    if (!ondeSelected) return;
+    const estado = document.getElementById('location-input').value.trim();
+    const cidade = document.getElementById('cidade-input').value.trim();
     const tipo   = document.getElementById('tipo-espaco')?.value || '';
     const data   = dQuando.textContent.trim();
     if (tipo) tipo.split(',').forEach(t => registrarBusca(t.trim()));
     const url = new URL('buscapropriedade.html', window.location.href);
-    url.searchParams.set('estado', estado);
+    if (estado) url.searchParams.set('estado', estado);
     if (cidade) url.searchParams.set('cidade', cidade);
     if (tipo)   url.searchParams.set('evento', tipo);
     if (data && data !== 'Adicionar datas') url.searchParams.set('data', data);
     window.location.href = url.toString();
 });
+
 
 function toggleMenuExtra() {
     const m = document.getElementById('extra-menu');
