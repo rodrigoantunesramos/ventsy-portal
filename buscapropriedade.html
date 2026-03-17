@@ -2201,20 +2201,10 @@ input:checked + .slider-round:before { transform: translateX(20px); }
 
         <div class="divider"></div>
 
-<div class="search-item guest-direct-selector">
-    <label>Convidados</label>
-    <div class="stepper-control">
-        <button type="button" class="btn-step" onclick="alterarQtd(-1)">–</button>
-        
-        <input type="number" 
-               id="qtd-total" 
-               class="qtd-input" 
-               value="1" 
-               min="1" 
-               onchange="validarInput(this)">
-        
-        <button type="button" class="btn-step" onclick="alterarQtd(1)">+</button>
-    </div>
+<div class="search-item" id="cidade-container">
+    <label>Cidade</label>
+    <input type="text" id="cidade-input" placeholder="Todas as cidades" autocomplete="off">
+    <div id="cidade-suggestions" class="suggestions-dropdown"></div>
 </div>
 
         <button class="btn-search" id="main-search-btn" style="opacity: 0.3; pointer-events: none;">
@@ -2303,6 +2293,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
     // Aceita tanto sigla ("RJ") quanto nome completo ("Rio de Janeiro") na URL
     const _estadoParam = params.get('estado') || '';
     const estadoBuscado = estadoParaSigla[_estadoParam] || _estadoParam.toUpperCase() || '';
+    const cidadeBuscada  = params.get('cidade') || '';
 
     // IDs de anunciantes com plano premium ativo — carregado uma vez
     let userIdsPremium = new Set();
@@ -2398,8 +2389,8 @@ input:checked + .slider-round:before { transform: translateX(20px); }
 
         let query = _supabase.from('propriedades').select('*').eq('publicada', true);
         if (estadoBuscado) query = query.eq('estado', estadoBuscado);
+        if (cidadeBuscada) query = query.ilike('cidade', `%${cidadeBuscada}%`);
         if (tipoBuscado)   query = query.eq(`evento_${tipoBuscado}`, true);
-        if (convBuscados)  query = query.gte('capacidade', convBuscados);
 
         const { data: propriedades, error } = await query;
 
@@ -2783,6 +2774,52 @@ input:checked + .slider-round:before { transform: translateX(20px); }
     // Estado selecionado pelo usuário (separado do label exibido)
     let estadoSelecionado = estadoBuscado;
 
+    // ── Autocomplete de Cidade ──
+    const cidadeInput = document.getElementById('cidade-input');
+    const cidadeDrop  = document.getElementById('cidade-suggestions');
+    let listaCidades  = [];
+
+    async function carregarCidadesBarraBusca(sigla) {
+        if (!sigla) { listaCidades = []; cidadeInput.value = ''; cidadeInput.disabled = true; return; }
+        cidadeInput.disabled = false;
+        cidadeInput.placeholder = 'Carregando...';
+        const { data } = await _supabase
+            .from('propriedades').select('cidade')
+            .eq('estado', sigla).eq('publicada', true).not('cidade', 'is', null);
+        listaCidades = data ? [...new Set(data.map(p => p.cidade).filter(Boolean))].sort() : [];
+        cidadeInput.placeholder = listaCidades.length ? 'Todas as cidades' : 'Sem cidades cadastradas';
+        // Preenche se já veio na URL
+        if (cidadeBuscada) cidadeInput.value = cidadeBuscada;
+    }
+
+    function renderCidades(lista) {
+        cidadeDrop.innerHTML = lista.map(c =>
+            `<div class="suggestion-item" data-c="${c}"><span>🏙️</span>${c}</div>`
+        ).join('');
+        cidadeDrop.style.display = lista.length ? 'block' : 'none';
+        cidadeDrop.querySelectorAll('.suggestion-item').forEach(el => {
+            el.addEventListener('mousedown', e => {
+                e.preventDefault();
+                cidadeInput.value = el.dataset.c;
+                cidadeDrop.style.display = 'none';
+            });
+        });
+    }
+
+    cidadeInput.addEventListener('input', () => {
+        const t = cidadeInput.value.trim().toLowerCase();
+        const filtradas = t
+            ? listaCidades.filter(c => c.toLowerCase().includes(t))
+            : listaCidades;
+        renderCidades(filtradas.slice(0, 6));
+    });
+    cidadeInput.addEventListener('focus', () => renderCidades(listaCidades.slice(0, 6)));
+    cidadeInput.addEventListener('blur',  () => setTimeout(() => cidadeDrop.style.display = 'none', 200));
+
+    // Inicializa campo cidade desabilitado até ter estado
+    cidadeInput.disabled = !estadoBuscado;
+    if (estadoBuscado) carregarCidadesBarraBusca(estadoBuscado);
+
     const inputLocal = document.getElementById('location-input');
     const dropdown   = document.getElementById('location-suggestions');
     const btnBusca   = document.getElementById('main-search-btn');
@@ -2803,6 +2840,9 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                     estadoSelecionado = item.estado;
                     dropdown.style.display = 'none';
                     habilitarBusca(true);
+                    // Carrega cidades do estado selecionado
+                    cidadeInput.value = '';
+                    carregarCidadesBarraBusca(item.estado);
                 });
                 dropdown.appendChild(div);
             });
@@ -2872,16 +2912,16 @@ input:checked + .slider-round:before { transform: translateX(20px); }
     btnBusca.addEventListener('click', () => {
         if (!estadoSelecionado) return;
 
-        const tipo       = document.getElementById('tipo-espaco')?.value || '';
-        const convidados = document.getElementById('qtd-total')?.value   || '0';
-        const data       = document.getElementById('display-quando')?.textContent?.trim();
-        const dataVal    = (data && data !== 'Adicionar datas') ? data : '';
+        const tipo    = document.getElementById('tipo-espaco')?.value || '';
+        const cidade  = document.getElementById('cidade-input')?.value.trim() || '';
+        const data    = document.getElementById('display-quando')?.textContent?.trim();
+        const dataVal = (data && data !== 'Adicionar datas') ? data : '';
 
         const url = new URL('buscapropriedade.html', window.location.href);
         url.searchParams.set('estado', estadoSelecionado);
-        if (tipo)       url.searchParams.set('tipo',       tipo);
-        if (convidados && convidados !== '0') url.searchParams.set('convidados', convidados);
-        if (dataVal)    url.searchParams.set('data',       dataVal);
+        if (cidade)  url.searchParams.set('cidade', cidade);
+        if (tipo)    url.searchParams.set('tipo',   tipo);
+        if (dataVal) url.searchParams.set('data',   dataVal);
 
         window.location.href = url.toString();
     });
