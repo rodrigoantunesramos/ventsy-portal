@@ -49,6 +49,10 @@
             transition: background .2s; white-space: nowrap;
         }
         .btn-login:hover { background: #e0304f; }
+        .btn-dashboard-header {
+            background: var(--preto);
+        }
+        .btn-dashboard-header:hover { background: #333; }
 
         .menu-hamburguer-container { position: relative; }
         .btn-menu {
@@ -613,7 +617,9 @@
     </nav>
 
     <div class="header-right">
-        <a href="login.html" class="btn-login">Entrar</a>
+        <!-- Botão alternado por JS: oculto até checar sessão -->
+        <a href="login.html"      id="btn-entrar"    class="btn-login" style="display:none">Entrar</a>
+        <a href="dashboard/index.html"  id="btn-dashboard" class="btn-login btn-dashboard-header" style="display:none">Dashboard</a>
         <div class="menu-hamburguer-container">
             <button class="btn-menu" onclick="toggleMenuExtra()">☰ Menu</button>
             <div id="extra-menu" class="extra-menu-dropdown">
@@ -672,6 +678,20 @@ const _sb = supabase.createClient(
     'https://hxvlfalgrduitevbhqvq.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ'
 );
+
+/* ── Verifica sessão e alterna botão do header ── */
+(async () => {
+    const { data: { session } } = await _sb.auth.getSession();
+    const btnEntrar    = document.getElementById('btn-entrar');
+    const btnDashboard = document.getElementById('btn-dashboard');
+    if (session) {
+        // Usuário logado → mostra Dashboard
+        btnDashboard.style.display = 'inline-flex';
+    } else {
+        // Não logado → mostra Entrar
+        btnEntrar.style.display = 'inline-flex';
+    }
+})();
 
 /* ── Categorias ── */
 const CATS = [
