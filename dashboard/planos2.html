@@ -166,8 +166,13 @@
             padding: 30px 26px;
             position: relative;
             transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+            cursor: default;
         }
         .card-plano:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.07); }
+        .card-plano.selecionado {
+            border-color: #ff385c;
+            box-shadow: 0 0 0 3px rgba(255,56,92,0.15);
+        }
 
         /* Plano em destaque (recomendado) */
         .card-plano.destaque {
@@ -176,6 +181,7 @@
             box-shadow: 0 16px 40px rgba(255,56,92,0.12);
         }
         .card-plano.destaque:hover { transform: translateY(-10px); }
+        .card-plano.destaque.selecionado { transform: translateY(-10px); }
 
         /* Plano ATIVO */
         .card-plano.plano-ativo {
@@ -185,6 +191,9 @@
         .card-plano.plano-ativo.destaque {
             border-color: #1ebc54;
             box-shadow: 0 16px 40px rgba(30,188,84,0.1);
+        }
+        .card-plano.plano-ativo.selecionado {
+            border-color: #ff385c;
         }
 
         /* Badges no topo do card */
@@ -198,6 +207,7 @@
         .badge-popular  { background: #ff385c; color: #fff; }
         .badge-ativo-card { background: #1ebc54; color: #fff; }
         .badge-pendente-card { background: #f9a825; color: #fff; }
+        .badge-selecionado-card { background: #ff385c; color: #fff; }
 
         .plano-header { margin-bottom: 20px; }
         .plano-header h3 { font-size: 1.3rem; font-weight: 800; color: #0d0d0d; margin-bottom: 10px; }
@@ -224,43 +234,228 @@
             cursor: pointer; transition: all 0.2s;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn-card:disabled {
-            cursor: not-allowed;
-        }
-
-        /* Plano atual — cinza */
-        .btn-atual {
-            background: #f0f0f0; color: #999;
-            border: 1px solid #e5e5e5;
-        }
+        .btn-card:disabled { cursor: not-allowed; }
+        .btn-atual { background: #f0f0f0; color: #999; border: 1px solid #e5e5e5; }
         .btn-atual:disabled { opacity: 1; }
-
-        /* Upgrade — verde/vermelho */
-        .btn-upgrade { background: #ff385c; color: #fff; box-shadow: 0 4px 14px rgba(255,56,92,0.25); }
-        .btn-upgrade:hover { background: #e0304f; transform: scale(1.02); }
-
-        /* Upgrade pagar diferença */
-        .btn-upgrade-diferenca { background: #0d0d0d; color: #fff; }
-        .btn-upgrade-diferenca:hover { background: #333; }
-
-        /* Downgrade — outline */
-        .btn-downgrade {
-            background: #fff; color: #888;
-            border: 1px solid #ddd;
-        }
+        .btn-selecionar { background: #ff385c; color: #fff; box-shadow: 0 4px 14px rgba(255,56,92,0.25); }
+        .btn-selecionar:hover { background: #e0304f; transform: scale(1.02); }
+        .btn-selecionado { background: #0d0d0d; color: #fff; }
+        .btn-downgrade { background: #fff; color: #888; border: 1px solid #ddd; }
         .btn-downgrade:hover { border-color: #ff385c; color: #ff385c; }
+        .info-upgrade { font-size: 0.72rem; color: #1ebc54; text-align: center; margin-top: 8px; font-weight: 600; }
+        .info-downgrade-pendente { font-size: 0.72rem; color: #f9a825; text-align: center; margin-top: 8px; font-weight: 600; }
 
-        /* Info de upgrade */
-        .info-upgrade {
-            font-size: 0.72rem; color: #1ebc54; text-align: center;
-            margin-top: 8px; font-weight: 600;
+        /* ── CHECKOUT INLINE ── */
+        .checkout-inline {
+            background: #fff;
+            border-radius: 20px;
+            border: 2px solid #ff385c;
+            margin-top: 32px;
+            overflow: hidden;
+            animation: slideDown 0.35s ease;
+        }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
+        .checkout-inline-header {
+            background: #0d0d0d;
+            padding: 20px 32px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .checkout-inline-header h3 { color: #fff; font-size: 1.1rem; font-weight: 700; }
+        .btn-fechar-checkout {
+            background: rgba(255,255,255,0.1); border: none; color: #fff;
+            width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+            font-size: 1rem; transition: background 0.2s;
+        }
+        .btn-fechar-checkout:hover { background: rgba(255,255,255,0.2); }
+        .checkout-body {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
         }
 
-        /* Pendente downgrade */
-        .info-downgrade-pendente {
-            font-size: 0.72rem; color: #f9a825; text-align: center;
-            margin-top: 8px; font-weight: 600;
+        /* Coluna esquerda — resumo */
+        .col-resumo {
+            padding: 32px;
+            border-right: 1px solid #eee;
+            background: #fcfcfc;
         }
+        .col-resumo h4 { font-size: 0.85rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+
+        /* Seleção de plano no resumo */
+        .resumo-plano-box {
+            background: #fff; border: 2px solid #ff385c;
+            border-radius: 14px; padding: 16px; margin-bottom: 20px;
+        }
+        .resumo-plano-nome { font-size: 0.72rem; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+        .resumo-plano-preco { font-size: 1.6rem; font-weight: 800; color: #0d0d0d; margin: 4px 0 2px; }
+        .resumo-plano-desc { font-size: 0.75rem; color: #aaa; }
+
+        /* Duração */
+        .duracao-label { font-size: 0.8rem; font-weight: 700; color: #444; margin-bottom: 8px; }
+        .duracao-opcoes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .duracao-btn {
+            padding: 8px 16px; border-radius: 10px; border: 2px solid #eee;
+            background: #fff; font-family: inherit; font-size: 0.82rem; font-weight: 600;
+            color: #555; cursor: pointer; transition: all 0.2s; position: relative;
+        }
+        .duracao-btn:hover { border-color: #ff385c; color: #ff385c; }
+        .duracao-btn.ativo { border-color: #ff385c; background: rgba(255,56,92,0.05); color: #ff385c; }
+        .duracao-badge-anual {
+            position: absolute; top: -10px; right: -6px;
+            background: #1ebc54; color: #fff;
+            font-size: 0.6rem; font-weight: 800; padding: 2px 6px;
+            border-radius: 10px; white-space: nowrap;
+        }
+
+        /* Cupom */
+        .cupom-row { display: flex; gap: 8px; margin-bottom: 20px; }
+        .input-cupom {
+            flex: 1; padding: 11px 14px;
+            border: 1.5px solid #ddd; border-radius: 10px;
+            font-family: inherit; font-size: 0.9rem;
+            outline: none; text-transform: uppercase;
+            transition: border-color 0.2s; letter-spacing: 0.05em;
+        }
+        .input-cupom:focus { border-color: #ff385c; }
+        .input-cupom.valido { border-color: #1ebc54; background: #f8fff9; }
+        .input-cupom.invalido { border-color: #ff385c; background: #fff8f8; }
+        .btn-aplicar-cupom {
+            padding: 11px 16px; background: #0d0d0d; color: #fff;
+            border: none; border-radius: 10px; font-family: inherit;
+            font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .btn-aplicar-cupom:hover { background: #333; }
+        .btn-aplicar-cupom:disabled { background: #ccc; cursor: not-allowed; }
+        .cupom-feedback { font-size: 0.78rem; margin-bottom: 14px; margin-top: -12px; font-weight: 600; }
+        .cupom-feedback.ok { color: #1ebc54; }
+        .cupom-feedback.erro { color: #ff385c; }
+
+        /* Linhas de valores */
+        .resumo-linha {
+            display: flex; justify-content: space-between;
+            font-size: 0.84rem; color: #555; padding: 8px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .resumo-linha:last-of-type { border-bottom: none; }
+        .resumo-linha.credito span { color: #1ebc54; }
+        .resumo-linha.desconto span { color: #1ebc54; }
+        .resumo-total {
+            display: flex; justify-content: space-between;
+            font-size: 1.15rem; font-weight: 800; color: #0d0d0d;
+            padding: 14px 0 0; margin-top: 8px;
+            border-top: 2px dashed #eee;
+        }
+        .check-lista-resumo { list-style: none; padding: 0; margin-top: 18px; }
+        .check-lista-resumo li {
+            font-size: 0.79rem; color: #666;
+            padding: 5px 0; display: flex; gap: 8px; align-items: flex-start;
+        }
+
+        /* Coluna direita — pagamento */
+        .col-pagamento { padding: 32px; }
+        .col-pagamento h4 { font-size: 0.85rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+
+        .metodos-pagamento { display: flex; gap: 10px; margin-bottom: 22px; }
+        .metodo-item { flex: 1; }
+        .metodo-item input { display: none; }
+        .metodo-box {
+            padding: 13px 12px; border: 2px solid #eee;
+            border-radius: 12px; cursor: pointer; transition: 0.2s;
+            font-size: 0.85rem; font-weight: 500; color: #555;
+            text-align: center; line-height: 1.4;
+        }
+        .metodo-item input:checked + .metodo-box {
+            border-color: #ff385c; background: rgba(255,56,92,0.04); color: #ff385c; font-weight: 700;
+        }
+
+        .area-pagamento { margin-bottom: 18px; }
+        .input-checkout {
+            width: 100%; padding: 12px 14px;
+            border: 1.5px solid #ddd; border-radius: 10px;
+            font-size: 0.9rem; font-family: inherit;
+            outline: none; margin-bottom: 10px; transition: border-color 0.2s;
+        }
+        .input-checkout:focus { border-color: #ff385c; }
+        .input-duplo { display: flex; gap: 10px; }
+        .input-duplo .input-checkout { flex: 1; }
+        .select-checkout {
+            width: 100%; padding: 12px 14px;
+            border: 1.5px solid #ddd; border-radius: 10px;
+            font-size: 0.9rem; font-family: inherit;
+            outline: none; margin-bottom: 10px; background: #fff;
+            appearance: none; cursor: pointer;
+        }
+        .select-checkout:focus { border-color: #ff385c; }
+
+        /* PIX area */
+        .pix-instrucao {
+            background: #f0fff6; border: 1.5px solid #b7f5d5;
+            border-radius: 12px; padding: 18px; text-align: center;
+        }
+        .pix-instrucao .pix-ico { font-size: 2.4rem; margin-bottom: 8px; }
+        .pix-instrucao p { font-size: 0.84rem; color: #1a7a47; line-height: 1.5; }
+        .pix-instrucao strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+
+        /* Dados NF-e */
+        .nfe-toggle {
+            font-size: 0.8rem; color: #888; cursor: pointer; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 6px; user-select: none;
+        }
+        .nfe-toggle:hover { color: #ff385c; }
+        .nfe-area { display: none; padding: 16px; background: #f9f9f9; border-radius: 12px; margin-bottom: 14px; }
+        .nfe-area.aberto { display: block; }
+        .nfe-area .form-label {
+            font-size: 0.75rem; font-weight: 700; color: #666; margin-bottom: 4px; display: block;
+        }
+        .nfe-row { display: flex; gap: 8px; }
+        .nfe-row .input-checkout { flex: 1; }
+
+        /* Termos */
+        .termos-box {
+            background: #f9f9f9; border: 1.5px solid #eee;
+            border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;
+        }
+        .termos-check-row {
+            display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+        }
+        .termos-check-row input[type="checkbox"] {
+            width: 17px; height: 17px; margin-top: 2px; cursor: pointer;
+            accent-color: #ff385c; flex-shrink: 0;
+        }
+        .termos-check-row span {
+            font-size: 0.8rem; color: #555; line-height: 1.5;
+        }
+        .termos-check-row a { color: #ff385c; font-weight: 700; text-decoration: none; }
+        .termos-check-row a:hover { text-decoration: underline; }
+
+        /* Política de cancelamento */
+        .politica-cancelamento {
+            background: #fff8e1; border: 1px solid #ffe082;
+            border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;
+            font-size: 0.78rem; color: #7d5a00; line-height: 1.6;
+        }
+
+        /* Selos */
+        .selos-seguranca {
+            display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+        }
+        .selo {
+            display: flex; align-items: center; gap: 6px;
+            background: #f4f4f4; border-radius: 8px; padding: 6px 12px;
+            font-size: 0.73rem; color: #555; font-weight: 600;
+        }
+
+        /* Botão finalizar */
+        .btn-finalizar {
+            width: 100%; background: #1ebc54; color: #fff;
+            border: none; padding: 16px; border-radius: 14px;
+            font-family: inherit; font-size: 1.05rem; font-weight: 800;
+            cursor: pointer; transition: background 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-finalizar:hover { background: #18a348; }
+        .btn-finalizar:disabled { background: #ccc; cursor: not-allowed; }
+        .seguranca-aviso { text-align: center; font-size: 0.72rem; color: #bbb; margin-top: 10px; }
 
         /* ── FAQ ── */
         .faq-assinatura {
@@ -269,7 +464,7 @@
         }
         .faq-assinatura a { color: #ff385c; font-weight: 700; text-decoration: none; }
 
-        /* ── MODAIS ── */
+        /* ── MODAL DOWNGRADE ── */
         .modal-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.55);
@@ -277,15 +472,12 @@
             z-index: 9998; backdrop-filter: blur(4px);
         }
         .modal-overlay.aberto { display: flex; }
-
-        /* Modal checkout */
-        .checkout-box {
-            background: #fff; width: 90%; max-width: 780px;
-            border-radius: 22px; position: relative;
-            overflow: hidden; animation: slideUp 0.3s ease;
+        .downgrade-box {
+            background: #fff; width: 90%; max-width: 420px;
+            border-radius: 20px; padding: 36px; position: relative;
+            animation: slideUp 0.3s ease;
         }
         @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
-
         .btn-fechar-modal {
             position: absolute; top: 16px; right: 16px;
             width: 34px; height: 34px; border-radius: 50%;
@@ -293,87 +485,6 @@
             font-size: 1.1rem; z-index: 10; transition: background 0.2s;
         }
         .btn-fechar-modal:hover { background: #eee; }
-
-        .checkout-grid { display: grid; grid-template-columns: 1fr 1.2fr; }
-
-        /* Resumo */
-        .checkout-resumo {
-            background: #fcfcfc; padding: 36px 32px;
-            border-right: 1px solid #eee;
-        }
-        .checkout-resumo h3 { font-size: 1.1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 18px; }
-
-        .resumo-plano-box {
-            background: #fff; border: 1px solid #eee;
-            border-radius: 12px; padding: 16px; margin-bottom: 20px;
-        }
-        .resumo-plano-nome { font-size: 0.8rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-        .resumo-plano-preco { font-size: 1.6rem; font-weight: 800; color: #0d0d0d; margin: 4px 0; }
-        .resumo-plano-desc { font-size: 0.78rem; color: #aaa; }
-
-        /* Linha de valor atual e crédito */
-        .resumo-linha {
-            display: flex; justify-content: space-between;
-            font-size: 0.85rem; color: #555; padding: 8px 0;
-            border-bottom: 1px solid #f5f5f5;
-        }
-        .resumo-linha:last-of-type { border-bottom: none; }
-        .resumo-linha.credito { color: #1ebc54; }
-
-        .resumo-total {
-            display: flex; justify-content: space-between;
-            font-size: 1.1rem; font-weight: 800; color: #0d0d0d;
-            padding: 14px 0 0; margin-top: 8px;
-            border-top: 2px dashed #eee;
-        }
-
-        .check-lista-resumo { list-style: none; padding: 0; margin-top: 16px; }
-        .check-lista-resumo li {
-            font-size: 0.8rem; color: #666;
-            padding: 5px 0; display: flex; gap: 8px;
-        }
-
-        /* Pagamento */
-        .checkout-pagamento { padding: 36px 32px; }
-        .checkout-pagamento h3 { font-size: 1.1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 18px; }
-
-        .metodos-pagamento { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
-        .metodo-item input { display: none; }
-        .metodo-box {
-            padding: 13px 16px; border: 2px solid #eee;
-            border-radius: 12px; cursor: pointer; transition: 0.2s;
-            font-size: 0.9rem; font-weight: 500; color: #444;
-        }
-        .metodo-item input:checked + .metodo-box { border-color: #ff385c; background: rgba(255,56,92,0.03); color: #ff385c; font-weight: 600; }
-
-        .input-checkout {
-            width: 100%; padding: 12px 14px;
-            border: 1px solid #ddd; border-radius: 10px;
-            font-size: 0.9rem; font-family: inherit;
-            outline: none; margin-bottom: 10px; transition: border-color 0.2s;
-        }
-        .input-checkout:focus { border-color: #ff385c; }
-        .input-duplo { display: flex; gap: 10px; }
-        .input-duplo .input-checkout { flex: 1; }
-
-        .btn-finalizar {
-            width: 100%; background: #1ebc54; color: #fff;
-            border: none; padding: 15px; border-radius: 12px;
-            font-family: inherit; font-size: 1rem; font-weight: 700;
-            cursor: pointer; margin-top: 14px; transition: background 0.2s;
-        }
-        .btn-finalizar:hover { background: #18a348; }
-
-        .seguranca-aviso {
-            text-align: center; font-size: 0.75rem; color: #bbb; margin-top: 10px;
-        }
-
-        /* Modal downgrade — confirmação */
-        .downgrade-box {
-            background: #fff; width: 90%; max-width: 420px;
-            border-radius: 20px; padding: 36px; position: relative;
-            animation: slideUp 0.3s ease;
-        }
         .downgrade-box h3 { font-size: 1.1rem; font-weight: 800; color: #0d0d0d; margin-bottom: 10px; }
         .downgrade-box .aviso-downgrade {
             background: #fff8e1; border: 1px solid #ffe082;
@@ -382,7 +493,6 @@
         }
         .downgrade-box .aviso-downgrade strong { display: block; margin-bottom: 4px; font-size: 0.88rem; }
         .downgrade-box p { font-size: 0.85rem; color: #666; line-height: 1.6; margin-bottom: 12px; }
-
         .confirma-digitacao { margin: 16px 0 20px; }
         .confirma-digitacao label { display: block; font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 6px; }
         .confirma-digitacao input {
@@ -391,7 +501,6 @@
             transition: border-color 0.2s;
         }
         .confirma-digitacao input:focus { border-color: #f9a825; }
-
         .modal-acoes { display: flex; gap: 10px; }
         .btn-cancelar-modal {
             flex: 1; background: #f5f5f5; color: #555;
@@ -455,6 +564,10 @@
         }
         .sidebar-overlay.ativo { display: block; }
 
+        @media (max-width: 1100px) {
+            .checkout-body { grid-template-columns: 1fr; }
+            .col-resumo { border-right: none; border-bottom: 1px solid #eee; }
+        }
         @media (max-width: 768px) {
             .btn-sidebar-toggle { display: flex; }
             .dash-sidebar {
@@ -471,9 +584,8 @@
             .dash-header-fixo h2 { font-size: 1.4rem; }
             .container-planos { grid-template-columns: 1fr; }
             .card-plano.destaque { transform: none; }
-            .checkout-grid { grid-template-columns: 1fr; }
-            .checkout-resumo { border-right: none; border-bottom: 1px solid #eee; }
             .footer-container { flex-direction: column; gap: 40px; }
+            .metodos-pagamento { flex-direction: column; }
         }
         @media (max-width: 480px) {
             .logo { height: 44px; }
@@ -496,7 +608,6 @@
         <a href="index.html"><img src="../logovents.png" alt="Logo VENTSY" class="logo"></a>
     </div>
     <div class="header-right">
-        <!-- Botão hamburguer mobile -->
         <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
             <span></span><span></span><span></span>
         </button>
@@ -520,7 +631,7 @@
     </div>
 </header>
 
-<!-- ── OVERLAY SIDEBAR MOBILE ── -->
+<!-- OVERLAY SIDEBAR MOBILE -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- LAYOUT -->
@@ -556,7 +667,7 @@
 
         <div class="dash-header-fixo">
             <h2>💳 Assinaturas e Planos</h2>
-            <p>Escolha o nível de visibilidade ideal para o seu espaço.</p>
+            <p>Selecione o plano ideal, escolha a duração e finalize com segurança.</p>
         </div>
 
         <!-- BANNER PLANO ATIVO -->
@@ -580,6 +691,200 @@
             <!-- Gerado via JS -->
         </div>
 
+        <!-- CHECKOUT INLINE -->
+        <div class="checkout-inline" id="checkout-inline" style="display:none;">
+            <div class="checkout-inline-header">
+                <h3 id="checkout-titulo">🛒 Finalizar Assinatura</h3>
+                <button class="btn-fechar-checkout" onclick="fecharCheckout()">✕</button>
+            </div>
+            <div class="checkout-body">
+
+                <!-- COLUNA ESQUERDA: RESUMO + DURAÇÃO + CUPOM -->
+                <div class="col-resumo">
+                    <h4>Resumo do Pedido</h4>
+
+                    <div class="resumo-plano-box">
+                        <div class="resumo-plano-nome" id="resumo-plano-nome">—</div>
+                        <div class="resumo-plano-preco" id="resumo-plano-preco">R$ —</div>
+                        <div class="resumo-plano-desc" id="resumo-plano-desc">—</div>
+                    </div>
+
+                    <!-- Duração -->
+                    <div class="duracao-label">⏱ Duração da assinatura:</div>
+                    <div class="duracao-opcoes" id="duracao-opcoes">
+                        <button class="duracao-btn ativo" data-meses="1" onclick="selecionarDuracao(1)">1 mês</button>
+                        <button class="duracao-btn" data-meses="3" onclick="selecionarDuracao(3)">3 meses</button>
+                        <button class="duracao-btn" data-meses="6" onclick="selecionarDuracao(6)">6 meses</button>
+                        <button class="duracao-btn" data-meses="12" onclick="selecionarDuracao(12)">
+                            12 meses
+                            <span class="duracao-badge-anual">−20%</span>
+                        </button>
+                    </div>
+
+                    <!-- Cupom de desconto -->
+                    <div class="duracao-label">🎟 Cupom de desconto:</div>
+                    <div class="cupom-row">
+                        <input type="text" class="input-cupom" id="input-cupom" placeholder="CODIGO123" maxlength="30" oninput="this.value=this.value.toUpperCase()">
+                        <button class="btn-aplicar-cupom" id="btn-aplicar-cupom" onclick="aplicarCupom()">Aplicar</button>
+                    </div>
+                    <div class="cupom-feedback" id="cupom-feedback" style="display:none;"></div>
+
+                    <!-- Linhas de valores -->
+                    <div class="resumo-linha" id="linha-subtotal">
+                        <span>Subtotal</span>
+                        <span id="val-subtotal">—</span>
+                    </div>
+                    <div class="resumo-linha" id="linha-desconto-anual" style="display:none;">
+                        <span>🎉 Desconto anual (20%)</span>
+                        <span class="desconto" style="color:#1ebc54;" id="val-desconto-anual">—</span>
+                    </div>
+                    <div class="resumo-linha credito" id="linha-credito" style="display:none;">
+                        <span>💚 Crédito do plano atual</span>
+                        <span id="val-credito">—</span>
+                    </div>
+                    <div class="resumo-linha desconto" id="linha-desconto-cupom" style="display:none;">
+                        <span id="label-desconto-cupom">🎟 Desconto (cupom)</span>
+                        <span style="color:#1ebc54;" id="val-desconto-cupom">—</span>
+                    </div>
+
+                    <div class="resumo-total">
+                        <span>Total a pagar:</span>
+                        <strong id="resumo-total">R$ —</strong>
+                    </div>
+
+                    <ul class="check-lista-resumo">
+                        <li>✅ Acesso imediato após confirmação</li>
+                        <li>✅ Sem taxa de cancelamento antecipado</li>
+                        <li>✅ Suporte durante toda a assinatura</li>
+                        <li>✅ Nota fiscal emitida automaticamente</li>
+                    </ul>
+                </div>
+
+                <!-- COLUNA DIREITA: PAGAMENTO + NF-E + TERMOS -->
+                <div class="col-pagamento">
+                    <h4>Forma de Pagamento</h4>
+
+                    <div class="metodos-pagamento">
+                        <label class="metodo-item">
+                            <input type="radio" name="pagamento" value="pix" checked onchange="trocarMetodo('pix')">
+                            <div class="metodo-box">⚡ Pix<br><small style="font-size:0.7rem;font-weight:400;">Aprovação imediata</small></div>
+                        </label>
+                        <label class="metodo-item">
+                            <input type="radio" name="pagamento" value="cartao" onchange="trocarMetodo('cartao')">
+                            <div class="metodo-box">💳 Cartão<br><small style="font-size:0.7rem;font-weight:400;">Crédito ou débito</small></div>
+                        </label>
+                        <label class="metodo-item">
+                            <input type="radio" name="pagamento" value="boleto" onchange="trocarMetodo('boleto')">
+                            <div class="metodo-box">📄 Boleto<br><small style="font-size:0.7rem;font-weight:400;">Vence em 3 dias</small></div>
+                        </label>
+                    </div>
+
+                    <!-- Área PIX -->
+                    <div class="area-pagamento" id="area-pix">
+                        <div class="pix-instrucao">
+                            <div class="pix-ico">⚡</div>
+                            <strong>Pagamento por Pix</strong>
+                            <p>Ao confirmar, um QR Code será gerado para você escanear.<br>Aprovação em até <strong>1 minuto</strong>.</p>
+                        </div>
+                    </div>
+
+                    <!-- Área Cartão -->
+                    <div class="area-pagamento" id="area-cartao" style="display:none;">
+                        <input type="text" class="input-checkout" id="cartao-numero" placeholder="Número do Cartão" maxlength="19" oninput="mascaraCartao(this)">
+                        <div class="input-duplo">
+                            <input type="text" class="input-checkout" id="cartao-validade" placeholder="Validade (MM/AA)" maxlength="5" oninput="mascaraValidade(this)">
+                            <input type="text" class="input-checkout" id="cartao-cvv" placeholder="CVV" maxlength="4">
+                        </div>
+                        <input type="text" class="input-checkout" id="cartao-nome" placeholder="Nome igual ao cartão">
+                        <div class="input-duplo">
+                            <select class="select-checkout" id="cartao-parcelas">
+                                <option value="1">1x sem juros</option>
+                                <option value="2">2x sem juros</option>
+                                <option value="3">3x sem juros</option>
+                                <option value="6">6x sem juros</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Área Boleto -->
+                    <div class="area-pagamento" id="area-boleto" style="display:none;">
+                        <input type="text" class="input-checkout" id="boleto-cpf" placeholder="CPF ou CNPJ do pagador" maxlength="18" oninput="mascaraCPFCNPJ(this)">
+                    </div>
+
+                    <!-- Dados para NF-e -->
+                    <div class="nfe-toggle" onclick="toggleNFe()">
+                        <span id="nfe-seta">▶</span> 📋 Inserir dados para Nota Fiscal (NF-e) — opcional
+                    </div>
+                    <div class="nfe-area" id="nfe-area">
+                        <label class="form-label">CPF ou CNPJ</label>
+                        <input type="text" class="input-checkout" id="nfe-cpfcnpj" placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18" oninput="mascaraCPFCNPJ(this)">
+                        <label class="form-label">Nome / Razão Social</label>
+                        <input type="text" class="input-checkout" id="nfe-nome" placeholder="Nome completo ou razão social">
+                        <label class="form-label">E-mail para recebimento da NF</label>
+                        <input type="email" class="input-checkout" id="nfe-email" placeholder="seu@email.com">
+                        <div class="nfe-row">
+                            <div style="flex:2;">
+                                <label class="form-label">Endereço</label>
+                                <input type="text" class="input-checkout" id="nfe-endereco" placeholder="Rua, número">
+                            </div>
+                            <div style="flex:1;">
+                                <label class="form-label">CEP</label>
+                                <input type="text" class="input-checkout" id="nfe-cep" placeholder="00000-000" maxlength="9" oninput="mascaraCEP(this)">
+                            </div>
+                        </div>
+                        <div class="nfe-row">
+                            <div style="flex:2;">
+                                <label class="form-label">Cidade</label>
+                                <input type="text" class="input-checkout" id="nfe-cidade" placeholder="Cidade">
+                            </div>
+                            <div style="flex:1;">
+                                <label class="form-label">Estado</label>
+                                <select class="select-checkout" id="nfe-estado">
+                                    <option value="">UF</option>
+                                    <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+                                    <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+                                    <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+                                    <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+                                    <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                                    <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+                                    <option>SP</option><option>SE</option><option>TO</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Política de cancelamento -->
+                    <div class="politica-cancelamento">
+                        ⚠️ <strong>Política de Cancelamento:</strong> Você pode cancelar sua assinatura a qualquer momento. Não há reembolso proporcional do período já pago. Planos anuais não permitem cancelamento parcial com estorno.
+                    </div>
+
+                    <!-- Termos obrigatórios -->
+                    <div class="termos-box">
+                        <label class="termos-check-row">
+                            <input type="checkbox" id="check-termos" onchange="validarBtnFinalizar()">
+                            <span>
+                                Li e aceito os <a href="../termos.html" target="_blank">Termos de Uso</a>
+                                e a <a href="../privacidade.html" target="_blank">Política de Privacidade</a> da VENTSY.
+                                Entendo a política de cancelamento descrita acima.
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Selos de segurança -->
+                    <div class="selos-seguranca">
+                        <div class="selo">🔒 SSL Criptografado</div>
+                        <div class="selo">💳 Mercado Pago</div>
+                        <div class="selo">🛡️ Ambiente Seguro</div>
+                    </div>
+
+                    <button class="btn-finalizar" id="btn-finalizar" disabled onclick="finalizarCompra()">
+                        ✅ Confirmar e Finalizar Pagamento
+                    </button>
+                    <p class="seguranca-aviso">🔒 Pagamento processado com segurança pelo Mercado Pago</p>
+                </div>
+            </div>
+        </div>
+
         <div class="faq-assinatura">
             <p>Precisa de um plano personalizado para redes de espaços? <a href="../fale-conosco.html">Fale com nosso consultor.</a></p>
         </div>
@@ -587,98 +892,22 @@
     </section>
 </main>
 
-<!-- ═══════════════════════════════════════════
-     MODAL CHECKOUT (upgrade / novo)
-════════════════════════════════════════════ -->
-<div class="modal-overlay" id="modal-checkout">
-    <div class="checkout-box">
-        <button class="btn-fechar-modal" onclick="fecharModal('modal-checkout')">✕</button>
-
-        <div class="checkout-grid">
-            <!-- Resumo -->
-            <div class="checkout-resumo">
-                <h3>Resumo da Assinatura</h3>
-                <div class="resumo-plano-box">
-                    <div class="resumo-plano-nome" id="resumo-plano-nome">—</div>
-                    <div class="resumo-plano-preco" id="resumo-plano-preco">R$ —</div>
-                    <div class="resumo-plano-desc" id="resumo-plano-desc">por mês</div>
-                </div>
-
-                <div class="resumo-linha" id="linha-preco-cheio" style="display:none;">
-                    <span>Valor do plano</span>
-                    <span id="val-preco-cheio">—</span>
-                </div>
-                <div class="resumo-linha credito" id="linha-credito" style="display:none;">
-                    <span>💚 Crédito do plano atual</span>
-                    <span id="val-credito">— </span>
-                </div>
-
-                <div class="resumo-total">
-                    <span>Total hoje:</span>
-                    <strong id="resumo-total">R$ —</strong>
-                </div>
-
-                <ul class="check-lista-resumo">
-                    <li>✅ Acesso imediato após confirmação</li>
-                    <li>✅ Sem taxa de cancelamento</li>
-                    <li>✅ Suporte durante toda a assinatura</li>
-                </ul>
-            </div>
-
-            <!-- Pagamento -->
-            <div class="checkout-pagamento">
-                <h3>Forma de Pagamento</h3>
-                <div class="metodos-pagamento">
-                    <label class="metodo-item">
-                        <input type="radio" name="pagamento" value="pix" checked>
-                        <div class="metodo-box">⚡ Pix — Aprovação imediata</div>
-                    </label>
-                    <label class="metodo-item">
-                        <input type="radio" name="pagamento" value="cartao">
-                        <div class="metodo-box">💳 Cartão de Crédito</div>
-                    </label>
-                </div>
-
-                <div id="area-cartao" style="display:none;">
-                    <input type="text" class="input-checkout" placeholder="Número do Cartão" maxlength="19" oninput="mascaraCartao(this)">
-                    <div class="input-duplo">
-                        <input type="text" class="input-checkout" placeholder="Validade (MM/AA)" maxlength="5" oninput="mascaraValidade(this)">
-                        <input type="text" class="input-checkout" placeholder="CVV" maxlength="4">
-                    </div>
-                    <input type="text" class="input-checkout" placeholder="Nome no cartão">
-                </div>
-
-                <button class="btn-finalizar" onclick="finalizarCompra()">
-                    ✅ Confirmar e Ativar Agora
-                </button>
-                <p class="seguranca-aviso">🔒 Ambiente seguro e criptografado</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
-     MODAL DOWNGRADE — confirmação de segurança
-════════════════════════════════════════════ -->
+<!-- MODAL DOWNGRADE -->
 <div class="modal-overlay" id="modal-downgrade">
     <div class="downgrade-box">
         <button class="btn-fechar-modal" onclick="fecharModal('modal-downgrade')">✕</button>
-
         <h3>⬇️ Confirmar Downgrade</h3>
         <p>Você está prestes a fazer o downgrade para o plano <strong id="downgrade-nome-destino">—</strong>.</p>
-
         <div class="aviso-downgrade">
             <strong>⚠️ Leia com atenção antes de confirmar:</strong>
             Seu plano atual (<span id="downgrade-nome-atual">—</span>) continuará <strong>ativo até o fim do período já pago</strong> em <strong id="downgrade-data-fim">—</strong>. Após essa data, o plano será alterado automaticamente.
             <br><br>
             <strong>Não há reembolso</strong> do valor já pago no plano atual.
         </div>
-
         <div class="confirma-digitacao">
             <label>Para confirmar, digite <strong>CONFIRMAR</strong> abaixo:</label>
             <input type="text" id="input-confirma-downgrade" placeholder="Digite CONFIRMAR" oninput="validarConfirmaDowngrade(this.value)">
         </div>
-
         <div class="modal-acoes">
             <button class="btn-cancelar-modal" onclick="fecharModal('modal-downgrade')">Cancelar</button>
             <button class="btn-confirmar-downgrade" id="btn-ok-downgrade" disabled onclick="executarDowngrade()">Confirmar downgrade</button>
@@ -692,7 +921,7 @@
     <span id="toast-msg">OK!</span>
 </div>
 
-<!-- ──────────── FOOTER ──────────── -->
+<!-- FOOTER -->
 <footer class="main-footer">
     <div class="footer-container">
         <div class="footer-column">
@@ -781,54 +1010,22 @@ const PLANOS = [
     }
 ];
 
-// ── SYNC COM ADMIN VIA SUPABASE ──
-// Carregado no init() antes de renderizar os cards
-async function sincronizarComAdmin() {
-    try {
-        const { data, error } = await sb.from('planos_config').select('*');
-        if (error || !data) return;
-
-        const cfg = {};
-        data.forEach(row => { cfg[row.id] = row; });
-
-        // Atualiza o array PLANOS com os dados do admin
-        for (let i = PLANOS.length - 1; i >= 0; i--) {
-            const plano = PLANOS[i];
-            const adminPlano = cfg[plano.id];
-            if (!adminPlano) continue;
-
-            // Remove plano se estiver oculto
-            if (adminPlano.status === 'oculto') {
-                PLANOS.splice(i, 1);
-                continue;
-            }
-
-            // Preço e formatação
-            plano.preco = adminPlano.preco ?? plano.preco;
-            plano.precoFormatado = plano.preco === 0 ? 'Grátis' : 'R$ ' + plano.preco;
-
-            // Benefícios
-            if (Array.isArray(adminPlano.items) && adminPlano.items.length) {
-                plano.beneficios = adminPlano.items.map(texto => ({ texto, ok: true }));
-            }
-        }
-    } catch (e) {
-        console.warn('[ventsy] Erro ao sincronizar planos do admin:', e);
-    }
-}
-
 /* ─────────────────────────────────────────
-   ESTADO — preenchido pelo Supabase
+   ESTADO
 ───────────────────────────────────────── */
 let ESTADO = {
     planoAtivo:        'basico',
     validadeAte:       '—',
     downgradeAgendado: null,
+    status:            null,
 };
 
-let _userId        = null;
-let _planoCheckout = null;
-let _planoDowngrade = null;
+let _userId          = null;
+let _planoCheckout   = null;
+let _planoDowngrade  = null;
+let _mesesSelecionados = 1;
+let _cupomAtivo      = null; // { codigo, tipo, valor, plano }
+let _allCupons       = [];
 
 /* ─────────────────────────────────────────
    HELPERS DE DATA
@@ -838,24 +1035,20 @@ function formatarData(isoDate) {
     const [y, m, d] = isoDate.split('T')[0].split('-');
     return `${d}/${m}/${y}`;
 }
-
-function dataParaISO(dd_mm_yyyy) {
-    const [d, m, y] = dd_mm_yyyy.split('/');
-    return `${y}-${m}-${d}`;
-}
-
 function hoje() {
     return new Date().toISOString().split('T')[0];
 }
-
 function addDias(isoDate, dias) {
     const d = new Date(isoDate);
     d.setDate(d.getDate() + dias);
     return d.toISOString().split('T')[0];
 }
+function fmtBRL(valor) {
+    return 'R$ ' + valor.toFixed(2).replace('.', ',');
+}
 
 /* ─────────────────────────────────────────
-   CARREGAR ASSINATURA DO SUPABASE
+   CARREGAR ASSINATURA
 ───────────────────────────────────────── */
 async function carregarAssinatura(userId) {
     const { data, error } = await sb
@@ -865,7 +1058,6 @@ async function carregarAssinatura(userId) {
         .single();
 
     if (error || !data) {
-        // Usuário sem registro → cria trial Ultra de 30 dias grátis
         await criarTrialUltra(userId);
         return;
     }
@@ -879,21 +1071,48 @@ async function carregarAssinatura(userId) {
 async function criarTrialUltra(userId) {
     const inicio = hoje();
     const fim    = addDias(inicio, 30);
-
     const { error } = await sb.from('assinaturas').insert({
-        usuario_id:      userId,
-        plano_ativo:     'ultra',
-        status:          'trial',
-        valor_pago:      0,
-        inicio_periodo:  inicio,
-        fim_periodo:     fim,
+        usuario_id: userId, plano_ativo: 'ultra', status: 'trial',
+        valor_pago: 0, inicio_periodo: inicio, fim_periodo: fim,
     });
-
     if (!error) {
         ESTADO.planoAtivo  = 'ultra';
         ESTADO.validadeAte = formatarData(fim);
         ESTADO.status      = 'trial';
     }
+}
+
+/* ─────────────────────────────────────────
+   CARREGAR CUPONS
+───────────────────────────────────────── */
+async function carregarCupons() {
+    try {
+        const { data, error } = await sb.from('cupons').select('*').eq('ativo', true);
+        if (!error && data) _allCupons = data;
+    } catch(e) { /* tabela pode não existir ainda */ }
+}
+
+/* ─────────────────────────────────────────
+   SYNC COM ADMIN
+───────────────────────────────────────── */
+async function sincronizarComAdmin() {
+    try {
+        const { data, error } = await sb.from('planos_config').select('*');
+        if (error || !data) return;
+        const cfg = {};
+        data.forEach(row => { cfg[row.id] = row; });
+        for (let i = PLANOS.length - 1; i >= 0; i--) {
+            const plano = PLANOS[i];
+            const adminPlano = cfg[plano.id];
+            if (!adminPlano) continue;
+            if (adminPlano.status === 'oculto') { PLANOS.splice(i, 1); continue; }
+            plano.preco = adminPlano.preco ?? plano.preco;
+            plano.precoFormatado = plano.preco === 0 ? 'Grátis' : 'R$ ' + plano.preco;
+            if (Array.isArray(adminPlano.items) && adminPlano.items.length) {
+                plano.beneficios = adminPlano.items.map(texto => ({ texto, ok: true }));
+            }
+        }
+    } catch (e) { console.warn('[ventsy] Erro ao sincronizar planos:', e); }
 }
 
 /* ─────────────────────────────────────────
@@ -906,7 +1125,6 @@ async function init() {
     const user = session.user;
     _userId = user.id;
 
-    // Perfil do usuário
     const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
     const nome    = perfil?.nome    || user.email;
     const usuario = perfil?.usuario || '';
@@ -919,49 +1137,32 @@ async function init() {
     document.getElementById('sidebar-nome').textContent    = nome;
     document.getElementById('sidebar-handle').textContent  = usuario ? '@' + usuario : '';
 
-    // Carrega assinatura real do Supabase
     await carregarAssinatura(user.id);
-
-    // Sincroniza planos com configurações do admin
     await sincronizarComAdmin();
+    await carregarCupons();
 
     renderizarBanner();
     renderizarCards();
 
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('main-content').style.display   = 'flex';
-
-    // Mostrar/esconder cartão
-    document.querySelectorAll('input[name="pagamento"]').forEach(r => {
-        r.addEventListener('change', e => {
-            document.getElementById('area-cartao').style.display =
-                e.target.value === 'cartao' ? 'block' : 'none';
-        });
-    });
 }
 
 /* ─────────────────────────────────────────
-   BANNER PLANO ATIVO
+   BANNER
 ───────────────────────────────────────── */
 function renderizarBanner() {
     const plano = PLANOS.find(p => p.id === ESTADO.planoAtivo);
-
-    document.getElementById('banner-icone').textContent     = plano.icone;
-    document.getElementById('banner-titulo').textContent    = 'Plano ' + plano.nome + ' — Ativo';
-    document.getElementById('banner-validade').textContent  = 'Válido até ' + ESTADO.validadeAte;
-
-    const chipLabel = plano.preco === 0
-        ? plano.nome
-        : plano.nome + ' — ' + plano.precoFormatado + '/mês';
-    document.getElementById('banner-desc').textContent      = chipLabel;
-
+    document.getElementById('banner-icone').textContent    = plano.icone;
+    document.getElementById('banner-titulo').textContent   = 'Plano ' + plano.nome + ' — Ativo';
+    document.getElementById('banner-validade').textContent = 'Válido até ' + ESTADO.validadeAte;
+    const chipLabel = plano.preco === 0 ? plano.nome : plano.nome + ' — ' + plano.precoFormatado + '/mês';
+    document.getElementById('banner-desc').textContent     = chipLabel;
     const chipSidebar = document.getElementById('sidebar-plano-chip');
     chipSidebar.textContent = plano.icone + ' ' + plano.nome;
     if (ESTADO.validadeAte && ESTADO.validadeAte !== '—') {
         document.getElementById('sidebar-validade').textContent = `Válido até ${ESTADO.validadeAte}`;
     }
-
-    // Badge de downgrade agendado
     if (ESTADO.downgradeAgendado) {
         const downPlan = PLANOS.find(p => p.id === ESTADO.downgradeAgendado);
         document.getElementById('badge-downgrade').style.display = 'inline-flex';
@@ -976,7 +1177,6 @@ function renderizarBanner() {
 function renderizarCards() {
     const container = document.getElementById('container-planos');
     container.innerHTML = '';
-
     const ordemAtivo = PLANOS.findIndex(p => p.id === ESTADO.planoAtivo);
 
     PLANOS.forEach((plano, idx) => {
@@ -984,15 +1184,17 @@ function renderizarCards() {
         const eUpgrade     = idx > ordemAtivo;
         const eDowngrade   = idx < ordemAtivo;
         const eDownPendente = ESTADO.downgradeAgendado === plano.id;
+        const eSelecionado  = _planoCheckout === plano.id;
 
-        // Classes do card
         let classes = 'card-plano';
         if (plano.destaque) classes += ' destaque';
         if (eAtivo)         classes += ' plano-ativo';
+        if (eSelecionado)   classes += ' selecionado';
 
-        // Badge do topo
         let badgeHTML = '';
-        if (eAtivo) {
+        if (eSelecionado) {
+            badgeHTML = `<div class="card-badge-topo badge-selecionado-card">✔ SELECIONADO</div>`;
+        } else if (eAtivo) {
             badgeHTML = `<div class="card-badge-topo badge-ativo-card">✔ SEU PLANO ATUAL</div>`;
         } else if (eDownPendente) {
             badgeHTML = `<div class="card-badge-topo badge-pendente-card">⏳ DOWNGRADE AGENDADO</div>`;
@@ -1000,34 +1202,29 @@ function renderizarCards() {
             badgeHTML = `<div class="card-badge-topo badge-popular">MAIS POPULAR</div>`;
         }
 
-        // Benefícios
         const beneficiosHTML = plano.beneficios.map(b => `
             <li class="${b.ok ? '' : 'bloqueado'}">
                 <span class="check">${b.ok ? '✔' : '✗'}</span> ${b.texto}
             </li>
         `).join('');
 
-        // Botão e info
         let btnHTML = '';
         let infoHTML = '';
 
-        if (eAtivo) {
-            btnHTML = `<button class="btn-card btn-atual" disabled>✔ Plano atual</button>`;
-
+        if (eAtivo && !eSelecionado) {
+            btnHTML = `<button class="btn-card btn-atual" onclick="abrirCheckout('${plano.id}')">🔄 Renovar plano</button>`;
+        } else if (eSelecionado) {
+            btnHTML = `<button class="btn-card btn-selecionado" onclick="fecharCheckout()">✔ Selecionado — ver checkout ↓</button>`;
         } else if (eUpgrade) {
-            // Calcular diferença
             const atualPlano  = PLANOS.find(p => p.id === ESTADO.planoAtivo);
             const diferenca   = plano.preco - atualPlano.preco;
             const labelBtn    = atualPlano.preco > 0
-                ? `⬆️ Upgrade — pagar R$ ${diferenca} agora`
+                ? `⬆️ Upgrade — R$ ${diferenca}/mês`
                 : `⬆️ Assinar ${plano.nome}`;
-            const classeBtn   = atualPlano.preco > 0 ? 'btn-upgrade-diferenca' : 'btn-upgrade';
-
-            btnHTML  = `<button class="btn-card ${classeBtn}" onclick="abrirCheckout('${plano.id}')">${labelBtn}</button>`;
+            btnHTML  = `<button class="btn-card btn-selecionar" onclick="abrirCheckout('${plano.id}')">${labelBtn}</button>`;
             if (atualPlano.preco > 0) {
-                infoHTML = `<div class="info-upgrade">💚 Você paga apenas a diferença (R$ ${diferenca}/mês) pelo restante do período</div>`;
+                infoHTML = `<div class="info-upgrade">💚 Paga apenas a diferença de R$ ${diferenca}/mês</div>`;
             }
-
         } else if (eDowngrade) {
             if (eDownPendente) {
                 btnHTML  = `<button class="btn-card btn-downgrade" disabled>⏳ Downgrade agendado</button>`;
@@ -1037,13 +1234,12 @@ function renderizarCards() {
             }
         }
 
-        // Preço
         const precoExibicao = plano.preco === 0
             ? `<div class="preco">Grátis</div>`
             : `<div class="preco">${plano.precoFormatado}<span>/mês</span></div>`;
 
         container.innerHTML += `
-            <div class="${classes}">
+            <div class="${classes}" id="card-${plano.id}">
                 ${badgeHTML}
                 <div class="plano-header">
                     <h3>${plano.icone} ${plano.nome}</h3>
@@ -1059,57 +1255,295 @@ function renderizarCards() {
 }
 
 /* ─────────────────────────────────────────
-   ABRIR CHECKOUT (upgrade)
+   ABRIR CHECKOUT INLINE
 ───────────────────────────────────────── */
 function abrirCheckout(planoId) {
-    _planoCheckout = planoId;
-    const plano       = PLANOS.find(p => p.id === planoId);
-    const atualPlano  = PLANOS.find(p => p.id === ESTADO.planoAtivo);
-    const eUpgrade    = atualPlano.preco > 0;
-    const diferenca   = plano.preco - atualPlano.preco;
-    const total       = eUpgrade ? diferenca : plano.preco;
+    _planoCheckout      = planoId;
+    _mesesSelecionados  = 1;
+    _cupomAtivo         = null;
 
-    document.getElementById('resumo-plano-nome').textContent   = 'Plano ' + plano.nome;
-    document.getElementById('resumo-plano-preco').textContent  = plano.precoFormatado + (plano.preco > 0 ? '' : '');
-    document.getElementById('resumo-plano-desc').textContent   = plano.preco > 0 ? '/mês após este ciclo' : '';
+    // Limpa cupom
+    document.getElementById('input-cupom').value = '';
+    document.getElementById('input-cupom').className = 'input-cupom';
+    document.getElementById('cupom-feedback').style.display = 'none';
 
-    if (eUpgrade && atualPlano.preco > 0) {
-        document.getElementById('linha-preco-cheio').style.display = 'flex';
-        document.getElementById('linha-credito').style.display     = 'flex';
-        document.getElementById('val-preco-cheio').textContent     = plano.precoFormatado + '/mês';
-        document.getElementById('val-credito').textContent         = '− R$ ' + atualPlano.preco;
-    } else {
-        document.getElementById('linha-preco-cheio').style.display = 'none';
-        document.getElementById('linha-credito').style.display     = 'none';
-    }
+    // Reseta termos
+    document.getElementById('check-termos').checked = false;
+    document.getElementById('btn-finalizar').disabled = true;
 
-    document.getElementById('resumo-total').textContent = 'R$ ' + total + ',00';
-    document.getElementById('modal-checkout').classList.add('aberto');
+    // Reseta duração
+    document.querySelectorAll('.duracao-btn').forEach(b => b.classList.remove('ativo'));
+    document.querySelector('.duracao-btn[data-meses="1"]').classList.add('ativo');
+
+    atualizarResumoCheckout();
+
+    const el = document.getElementById('checkout-inline');
+    el.style.display = 'block';
+    renderizarCards();
+
+    setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+}
+
+function fecharCheckout() {
+    _planoCheckout = null;
+    document.getElementById('checkout-inline').style.display = 'none';
+    renderizarCards();
 }
 
 /* ─────────────────────────────────────────
-   FINALIZAR COMPRA — grava no Supabase
+   SELECIONAR DURAÇÃO
+───────────────────────────────────────── */
+function selecionarDuracao(meses) {
+    _mesesSelecionados = meses;
+    document.querySelectorAll('.duracao-btn').forEach(b => {
+        b.classList.toggle('ativo', parseInt(b.dataset.meses) === meses);
+    });
+    atualizarResumoCheckout();
+}
+
+/* ─────────────────────────────────────────
+   CALCULAR E EXIBIR RESUMO
+───────────────────────────────────────── */
+function atualizarResumoCheckout() {
+    if (!_planoCheckout) return;
+    const plano      = PLANOS.find(p => p.id === _planoCheckout);
+    const atualPlano = PLANOS.find(p => p.id === ESTADO.planoAtivo);
+    const eRenovacao = plano.id === ESTADO.planoAtivo;
+    const eUpgrade   = !eRenovacao && plano.preco > atualPlano.preco && atualPlano.preco > 0;
+
+    const eAnual    = _mesesSelecionados === 12;
+    const subtotal  = plano.preco * _mesesSelecionados;
+    const dsAnual   = eAnual ? subtotal * 0.2 : 0;
+    const credito   = eUpgrade ? atualPlano.preco : 0;
+
+    // Desconto cupom
+    let dsCupom = 0;
+    if (_cupomAtivo) {
+        const base = subtotal - dsAnual - credito;
+        if (_cupomAtivo.tipo === 'percent') {
+            dsCupom = base * (_cupomAtivo.valor / 100);
+        } else {
+            dsCupom = Math.min(_cupomAtivo.valor, base);
+        }
+    }
+
+    const total = Math.max(0, subtotal - dsAnual - credito - dsCupom);
+
+    // Atualiza header do plano
+    document.getElementById('checkout-titulo').textContent =
+        eRenovacao ? '🔄 Renovar Plano ' + plano.nome : '🛒 Assinar Plano ' + plano.nome;
+    document.getElementById('resumo-plano-nome').textContent   = plano.icone + ' Plano ' + plano.nome;
+    document.getElementById('resumo-plano-preco').textContent  = plano.precoFormatado + (plano.preco > 0 ? '/mês' : '');
+    document.getElementById('resumo-plano-desc').textContent   =
+        _mesesSelecionados === 1 ? '1 mês de acesso' :
+        _mesesSelecionados === 12 ? '12 meses (plano anual)' :
+        _mesesSelecionados + ' meses de acesso';
+
+    document.getElementById('val-subtotal').textContent = fmtBRL(subtotal);
+
+    // Desconto anual
+    const elAnual = document.getElementById('linha-desconto-anual');
+    elAnual.style.display = eAnual ? 'flex' : 'none';
+    if (eAnual) document.getElementById('val-desconto-anual').textContent = '− ' + fmtBRL(dsAnual);
+
+    // Crédito
+    const elCredito = document.getElementById('linha-credito');
+    elCredito.style.display = credito > 0 ? 'flex' : 'none';
+    if (credito > 0) document.getElementById('val-credito').textContent = '− ' + fmtBRL(credito);
+
+    // Cupom
+    const elCupom = document.getElementById('linha-desconto-cupom');
+    elCupom.style.display = dsCupom > 0 ? 'flex' : 'none';
+    if (dsCupom > 0) {
+        document.getElementById('val-desconto-cupom').textContent = '− ' + fmtBRL(dsCupom);
+        document.getElementById('label-desconto-cupom').textContent =
+            `🎟 Cupom ${_cupomAtivo.codigo} (${_cupomAtivo.tipo === 'percent' ? _cupomAtivo.valor + '%' : 'R$ ' + _cupomAtivo.valor} off)`;
+    }
+
+    document.getElementById('resumo-total').textContent = fmtBRL(total);
+
+    // Atualiza parcelas do cartão
+    const selParcelas = document.getElementById('cartao-parcelas');
+    if (selParcelas) {
+        selParcelas.innerHTML = '';
+        const opts = [1, 2, 3, 6];
+        opts.forEach(n => {
+            if (n <= _mesesSelecionados || n === 1) {
+                const op = document.createElement('option');
+                op.value = n;
+                op.textContent = n === 1 ? `1x de ${fmtBRL(total)} sem juros` : `${n}x de ${fmtBRL(total / n)} sem juros`;
+                selParcelas.appendChild(op);
+            }
+        });
+    }
+}
+
+/* ─────────────────────────────────────────
+   CUPOM
+───────────────────────────────────────── */
+async function aplicarCupom() {
+    const codigo  = document.getElementById('input-cupom').value.trim().toUpperCase();
+    const fb      = document.getElementById('cupom-feedback');
+    const inputEl = document.getElementById('input-cupom');
+    const btnEl   = document.getElementById('btn-aplicar-cupom');
+
+    if (!codigo) return;
+
+    btnEl.disabled    = true;
+    btnEl.textContent = '...';
+
+    // Busca no banco
+    try {
+        const { data, error } = await sb
+            .from('cupons')
+            .select('*')
+            .eq('codigo', codigo)
+            .single();
+
+        if (error || !data) {
+            mostrarFeedbackCupom('❌ Cupom não encontrado.', 'erro');
+            inputEl.className = 'input-cupom invalido';
+            _cupomAtivo = null;
+            atualizarResumoCheckout();
+            return;
+        }
+
+        // Verificações
+        const agora = new Date();
+        if (data.validade && new Date(data.validade) < agora) {
+            mostrarFeedbackCupom('❌ Este cupom está expirado.', 'erro');
+            inputEl.className = 'input-cupom invalido';
+            _cupomAtivo = null;
+            atualizarResumoCheckout();
+            return;
+        }
+        if (data.ativo === false) {
+            mostrarFeedbackCupom('❌ Este cupom está inativo.', 'erro');
+            inputEl.className = 'input-cupom invalido';
+            _cupomAtivo = null;
+            atualizarResumoCheckout();
+            return;
+        }
+        if (data.limite && data.usos_atual >= data.limite) {
+            mostrarFeedbackCupom('❌ Limite de usos deste cupom atingido.', 'erro');
+            inputEl.className = 'input-cupom invalido';
+            _cupomAtivo = null;
+            atualizarResumoCheckout();
+            return;
+        }
+        if (data.plano && data.plano !== 'todos' && data.plano !== _planoCheckout) {
+            mostrarFeedbackCupom(`❌ Este cupom é válido apenas para o plano ${data.plano}.`, 'erro');
+            inputEl.className = 'input-cupom invalido';
+            _cupomAtivo = null;
+            atualizarResumoCheckout();
+            return;
+        }
+
+        // Cupom válido!
+        _cupomAtivo = { codigo: data.codigo, tipo: data.tipo, valor: data.valor, id: data.id };
+        const desc = data.tipo === 'percent' ? `${data.valor}% off` : `R$ ${data.valor} off`;
+        mostrarFeedbackCupom(`✅ Cupom aplicado: ${desc}`, 'ok');
+        inputEl.className = 'input-cupom valido';
+        atualizarResumoCheckout();
+
+    } catch(e) {
+        mostrarFeedbackCupom('❌ Erro ao verificar cupom. Tente novamente.', 'erro');
+        _cupomAtivo = null;
+        atualizarResumoCheckout();
+    } finally {
+        btnEl.disabled    = false;
+        btnEl.textContent = 'Aplicar';
+    }
+}
+
+function mostrarFeedbackCupom(msg, tipo) {
+    const fb = document.getElementById('cupom-feedback');
+    fb.textContent = msg;
+    fb.className   = 'cupom-feedback ' + tipo;
+    fb.style.display = 'block';
+}
+
+/* ─────────────────────────────────────────
+   TROCAR MÉTODO DE PAGAMENTO
+───────────────────────────────────────── */
+function trocarMetodo(metodo) {
+    document.getElementById('area-pix').style.display    = metodo === 'pix'    ? 'block' : 'none';
+    document.getElementById('area-cartao').style.display = metodo === 'cartao' ? 'block' : 'none';
+    document.getElementById('area-boleto').style.display = metodo === 'boleto' ? 'block' : 'none';
+}
+
+/* ─────────────────────────────────────────
+   NF-e TOGGLE
+───────────────────────────────────────── */
+function toggleNFe() {
+    const area = document.getElementById('nfe-area');
+    const seta = document.getElementById('nfe-seta');
+    const aberto = area.classList.toggle('aberto');
+    seta.textContent = aberto ? '▼' : '▶';
+}
+
+/* ─────────────────────────────────────────
+   VALIDAR BOTÃO FINALIZAR
+───────────────────────────────────────── */
+function validarBtnFinalizar() {
+    const aceitou = document.getElementById('check-termos').checked;
+    document.getElementById('btn-finalizar').disabled = !aceitou;
+}
+
+/* ─────────────────────────────────────────
+   FINALIZAR COMPRA
 ───────────────────────────────────────── */
 async function finalizarCompra() {
     if (!_planoCheckout) return;
+    if (!document.getElementById('check-termos').checked) {
+        mostrarToast('⚠️', 'Aceite os termos de uso para continuar.');
+        return;
+    }
 
-    const btnFinalizar = document.querySelector('.btn-finalizar');
+    const btnFinalizar = document.getElementById('btn-finalizar');
     btnFinalizar.disabled    = true;
     btnFinalizar.textContent = '⏳ Processando...';
 
-    const metodo       = document.querySelector('input[name="pagamento"]:checked')?.value || 'pix';
+    const metodo        = document.querySelector('input[name="pagamento"]:checked')?.value || 'pix';
     const planoAnterior = ESTADO.planoAtivo;
     const planoNovo     = _planoCheckout;
     const planoObj      = PLANOS.find(p => p.id === planoNovo);
     const planoAtualObj = PLANOS.find(p => p.id === planoAnterior);
 
-    // Calcula valor cobrado (diferença se já tem plano pago)
-    const diferenca   = planoObj.preco - planoAtualObj.preco;
-    const valorCobrado = planoAtualObj.preco > 0 ? diferenca : planoObj.preco;
+    const eAnual = _mesesSelecionados === 12;
+    const subtotal = planoObj.preco * _mesesSelecionados;
+    const dsAnual  = eAnual ? subtotal * 0.2 : 0;
+    const credito  = (planoAtualObj.preco > 0 && planoNovo !== planoAnterior) ? planoAtualObj.preco : 0;
 
-    const novoInicio  = hoje();
-    const novoFim     = addDias(novoInicio, 30);
-    const tipoEvento  = planoAnterior === 'basico' ? 'novo' : 'upgrade';
+    let dsCupom = 0;
+    if (_cupomAtivo) {
+        const base = subtotal - dsAnual - credito;
+        dsCupom = _cupomAtivo.tipo === 'percent'
+            ? base * (_cupomAtivo.valor / 100)
+            : Math.min(_cupomAtivo.valor, base);
+    }
+
+    const valorTotal = Math.max(0, subtotal - dsAnual - credito - dsCupom);
+
+    // Dados NF-e
+    const nfeData = {
+        cpfcnpj:  document.getElementById('nfe-cpfcnpj').value.trim()  || null,
+        nome:     document.getElementById('nfe-nome').value.trim()      || null,
+        email:    document.getElementById('nfe-email').value.trim()     || null,
+        endereco: document.getElementById('nfe-endereco').value.trim()  || null,
+        cep:      document.getElementById('nfe-cep').value.trim()       || null,
+        cidade:   document.getElementById('nfe-cidade').value.trim()    || null,
+        estado:   document.getElementById('nfe-estado').value           || null,
+    };
+    const temNFe = Object.values(nfeData).some(v => v);
+
+    const novoInicio = hoje();
+    const novoFim    = addDias(novoInicio, 30 * _mesesSelecionados);
+    const tipoEvento = planoAnterior === 'basico' ? 'novo'
+                     : planoNovo === planoAnterior ? 'renovacao'
+                     : planoObj.preco > planoAtualObj.preco ? 'upgrade' : 'upgrade';
 
     try {
         // 1. Atualiza assinatura
@@ -1121,88 +1555,92 @@ async function finalizarCompra() {
                 inicio_periodo:   novoInicio,
                 fim_periodo:      novoFim,
                 downgrade_para:   null,
-                valor_pago:       planoObj.preco,
+                valor_pago:       valorTotal,
                 metodo_pagamento: metodo,
             })
             .eq('usuario_id', _userId);
 
         if (errUpdate) throw errUpdate;
 
-        // 2. Registra no histórico
+        // 2. Histórico
         await sb.from('historico_assinaturas').insert({
             usuario_id:       _userId,
             tipo_evento:      tipoEvento,
             plano_anterior:   planoAnterior,
             plano_novo:       planoNovo,
-            valor_cobrado:    valorCobrado,
+            valor_cobrado:    valorTotal,
             metodo_pagamento: metodo,
-            observacao:       `Upgrade de ${planoAnterior} para ${planoNovo}`,
+            observacao:       `${tipoEvento} → ${planoNovo} | ${_mesesSelecionados}m | ${metodo}${_cupomAtivo ? ' | cupom: ' + _cupomAtivo.codigo : ''}`,
+            ...(temNFe ? { nfe: nfeData } : {}),
         });
 
-        // 3. Atualiza estado local
+        // 3. Incrementar uso do cupom
+        if (_cupomAtivo) {
+            await sb.from('cupons')
+                .update({ usos_atual: (sb.rpc ? undefined : undefined) })
+                .eq('id', _cupomAtivo.id);
+            // usa RPC incremento se disponível, senão faz manual
+            const { data: cupAtual } = await sb.from('cupons').select('usos_atual').eq('id', _cupomAtivo.id).single();
+            if (cupAtual) {
+                await sb.from('cupons').update({ usos_atual: (cupAtual.usos_atual || 0) + 1 }).eq('id', _cupomAtivo.id);
+            }
+        }
+
+        // 4. Atualiza estado
         ESTADO.planoAtivo        = planoNovo;
         ESTADO.validadeAte       = formatarData(novoFim);
         ESTADO.downgradeAgendado = null;
 
-        fecharModal('modal-checkout');
+        fecharCheckout();
         renderizarBanner();
         renderizarCards();
-        mostrarToast('🎉', 'Plano ' + planoObj.nome + ' ativado com sucesso!');
+        mostrarToast('🎉', 'Plano ' + planoObj.nome + ' ativado! Válido até ' + formatarData(novoFim));
 
     } catch (err) {
         console.error('Erro ao ativar plano:', err);
         mostrarToast('❌', 'Erro ao processar. Tente novamente.');
     } finally {
         btnFinalizar.disabled    = false;
-        btnFinalizar.textContent = '✅ Confirmar e Ativar Agora';
-        _planoCheckout = null;
+        btnFinalizar.innerHTML   = '✅ Confirmar e Finalizar Pagamento';
     }
 }
 
 /* ─────────────────────────────────────────
-   DOWNGRADE — grava no Supabase
+   DOWNGRADE
 ───────────────────────────────────────── */
 function abrirDowngrade(planoId) {
     _planoDowngrade = planoId;
     const destino = PLANOS.find(p => p.id === planoId);
     const atual   = PLANOS.find(p => p.id === ESTADO.planoAtivo);
-
     document.getElementById('downgrade-nome-destino').textContent = destino.nome;
     document.getElementById('downgrade-nome-atual').textContent   = atual.nome;
     document.getElementById('downgrade-data-fim').textContent     = ESTADO.validadeAte;
     document.getElementById('input-confirma-downgrade').value     = '';
     validarConfirmaDowngrade('');
-
     document.getElementById('modal-downgrade').classList.add('aberto');
 }
 
 function validarConfirmaDowngrade(valor) {
     const btn = document.getElementById('btn-ok-downgrade');
-    const ok  = valor.trim().toUpperCase() === 'CONFIRMAR';
-    btn.disabled = !ok;
+    btn.disabled = valor.trim().toUpperCase() !== 'CONFIRMAR';
 }
 
 async function executarDowngrade() {
     if (!_planoDowngrade) return;
-
     const btnOk = document.getElementById('btn-ok-downgrade');
     btnOk.disabled    = true;
     btnOk.textContent = '⏳ Salvando...';
 
     const planoDestino    = _planoDowngrade;
     const planoDestinoObj = PLANOS.find(p => p.id === planoDestino);
-    const planoAtualObj   = PLANOS.find(p => p.id === ESTADO.planoAtivo);
 
     try {
-        // 1. Agenda o downgrade na assinatura
         const { error: errUpdate } = await sb
             .from('assinaturas')
             .update({ downgrade_para: planoDestino })
             .eq('usuario_id', _userId);
-
         if (errUpdate) throw errUpdate;
 
-        // 2. Registra no histórico
         await sb.from('historico_assinaturas').insert({
             usuario_id:     _userId,
             tipo_evento:    'downgrade',
@@ -1212,9 +1650,7 @@ async function executarDowngrade() {
             observacao:     `Downgrade agendado para ${planoDestino}. Efetiva após ${ESTADO.validadeAte}`,
         });
 
-        // 3. Atualiza estado local
         ESTADO.downgradeAgendado = planoDestino;
-
         fecharModal('modal-downgrade');
         renderizarBanner();
         renderizarCards();
@@ -1230,17 +1666,15 @@ async function executarDowngrade() {
     }
 }
 
-/* ── Toggle sidebar mobile ── */
-    function toggleSidebar() {
-        const sidebar = document.querySelector('.dash-sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        sidebar.classList.toggle('aberta');
-        overlay.classList.toggle('ativo');
-    }
+/* ── SIDEBAR MOBILE ── */
+function toggleSidebar() {
+    const sidebar = document.querySelector('.dash-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar.classList.toggle('aberta');
+    overlay.classList.toggle('ativo');
+}
 
-    /* ─────────────────────────────────────────
-   AVATAR / SAIR
-───────────────────────────────────────── */
+/* ── AVATAR ── */
 function toggleAvatar() {
     const m = document.getElementById('avatar-menu');
     m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
@@ -1254,20 +1688,16 @@ async function sair() {
     window.location.href = '../login.html';
 }
 
-/* ─────────────────────────────────────────
-   MODAIS
-───────────────────────────────────────── */
+/* ── MODAIS ── */
 function fecharModal(id) { document.getElementById(id).classList.remove('aberto'); }
-document.querySelectorAll('.modal-overlay').forEach(m => {
-    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('aberto'); });
-});
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.aberto').forEach(m => m.classList.remove('aberto'));
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.aberto').forEach(m => m.classList.remove('aberto'));
+        fecharCheckout();
+    }
 });
 
-/* ─────────────────────────────────────────
-   MÁSCARAS DE CARTÃO
-───────────────────────────────────────── */
+/* ── MÁSCARAS ── */
 function mascaraCartao(el) {
     let v = el.value.replace(/\D/g, '').substring(0, 16);
     el.value = v.replace(/(.{4})/g, '$1 ').trim();
@@ -1277,16 +1707,34 @@ function mascaraValidade(el) {
     if (v.length >= 3) v = v.substring(0,2) + '/' + v.substring(2);
     el.value = v;
 }
+function mascaraCPFCNPJ(el) {
+    let v = el.value.replace(/\D/g, '');
+    if (v.length <= 11) {
+        v = v.replace(/(\d{3})(\d)/, '$1.$2')
+             .replace(/(\d{3})(\d)/, '$1.$2')
+             .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    } else {
+        v = v.substring(0, 14)
+             .replace(/(\d{2})(\d)/, '$1.$2')
+             .replace(/(\d{3})(\d)/, '$1.$2')
+             .replace(/(\d{3})(\d)/, '$1/$2')
+             .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+    }
+    el.value = v;
+}
+function mascaraCEP(el) {
+    let v = el.value.replace(/\D/g, '').substring(0, 8);
+    if (v.length > 5) v = v.substring(0,5) + '-' + v.substring(5);
+    el.value = v;
+}
 
-/* ─────────────────────────────────────────
-   TOAST
-───────────────────────────────────────── */
+/* ── TOAST ── */
 function mostrarToast(icone, msg) {
     document.getElementById('toast-icone').textContent = icone;
     document.getElementById('toast-msg').textContent   = msg;
     const t = document.getElementById('toast');
     t.classList.add('visivel');
-    setTimeout(() => t.classList.remove('visivel'), 4000);
+    setTimeout(() => t.classList.remove('visivel'), 4500);
 }
 
 init();
