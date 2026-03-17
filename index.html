@@ -440,6 +440,111 @@
             .ev-grid { grid-template-columns: repeat(4, 1fr); }
         }
 
+        /* ──────────── ESTADO DROPDOWN GRID ──────────── */
+        .estado-display {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .83rem; color: #555; cursor: pointer;
+            margin-top: 2px; gap: 4px; min-width: 110px;
+        }
+        .estado-display span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .estado-caret { width: 14px; height: 14px; flex-shrink: 0; color: #aaa; transition: transform .2s; }
+        .estado-display.open .estado-caret { transform: rotate(180deg); }
+
+        .estado-dropdown {
+            position: absolute;
+            top: calc(100% + 14px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 560px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.15);
+            border: 1px solid #eee;
+            z-index: 5000;
+            animation: dropIn .18s ease;
+        }
+        .estado-grid-wrap {
+            padding: 16px 18px 18px;
+            max-height: 440px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ddd transparent;
+        }
+        .est-regiao-label {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #aaa; margin: 14px 0 7px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .est-regiao-label::after {
+            content: ''; flex: 1; height: 1px; background: #f0f0f0;
+        }
+        .est-regiao-label:first-of-type { margin-top: 0; }
+        .est-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            margin-bottom: 4px;
+        }
+        .est-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 3px; padding: 8px 4px 7px;
+            border-radius: 11px; cursor: pointer;
+            text-align: center; line-height: 1.25;
+            background: #f9f9f9; border: 1px solid transparent;
+            transition: background .15s, border-color .15s, transform .12s, color .15s;
+            user-select: none; position: relative; overflow: hidden;
+        }
+        .est-sigla {
+            font-size: .82rem; font-weight: 800; color: #222;
+            letter-spacing: .02em; line-height: 1;
+        }
+        .est-nome-full {
+            font-size: .6rem; font-weight: 500; color: #888;
+            line-height: 1.2; max-width: 100%;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            width: 100%;
+        }
+        .est-item:hover {
+            background: #fff5f7; border-color: #ffd6dd; transform: translateY(-2px);
+        }
+        .est-item:hover .est-sigla { color: var(--vermelho); }
+        .est-item:hover .est-nome-full { color: var(--vermelho); }
+        .est-item.selected {
+            background: var(--vermelho); border-color: var(--vermelho);
+        }
+        .est-item.selected .est-sigla,
+        .est-item.selected .est-nome-full { color: #fff; }
+
+        /* Faixa colorida lateral por região */
+        .est-item::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            border-radius: 11px 11px 0 0;
+            opacity: .6;
+        }
+        .est-norte::before   { background: #22c55e; }
+        .est-nordeste::before{ background: #f59e0b; }
+        .est-co::before      { background: #8b5cf6; }
+        .est-sudeste::before { background: #3b82f6; }
+        .est-sul::before     { background: #ef4444; }
+
+        /* Pill de região no label */
+        .regiao-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px; border-radius: 20px;
+            font-size: .67rem; font-weight: 800;
+            letter-spacing: .06em; color: #fff;
+        }
+        .pill-norte    { background: #22c55e; }
+        .pill-nordeste { background: #f59e0b; }
+        .pill-co       { background: #8b5cf6; }
+        .pill-sudeste  { background: #3b82f6; }
+        .pill-sul      { background: #ef4444; }
+
+        @media (max-width: 620px) {
+            .estado-dropdown { width: calc(100vw - 32px); left: 0; transform: none; }
+            .est-grid { grid-template-columns: repeat(4, 1fr); }
+        }
 
             .banner-inner { flex-direction: column; text-align: center; }
             .footer-container { flex-direction: column; gap: 36px; }
@@ -499,11 +604,65 @@
     <nav class="header-center">
         <div class="search-container">
             <div class="search-bar">
-                <div class="search-item" id="location-container">
-                    <label>Localização</label>
-                    <input type="text" id="location-input" placeholder="Estado..." autocomplete="off">
-                    <span id="location-erro" style="display:none;font-size:.68rem;color:var(--vermelho);font-weight:700;margin-top:2px">Selecione da lista</span>
-                    <div id="location-suggestions" class="suggestions-dropdown"></div>
+                <div class="search-item" id="location-container" style="position:relative;">
+                    <label>Estado</label>
+                    <input type="hidden" id="location-input" value="">
+                    <div id="estado-display" class="estado-display" onclick="toggleEstadoDropdown(event)">
+                        <span id="estado-texto">Selecionar estado</span>
+                        <svg class="estado-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div id="estado-dropdown" class="estado-dropdown" style="display:none;">
+                        <div class="estado-grid-wrap">
+
+                            <div class="est-regiao-label"><span class="regiao-pill pill-norte">🌿 Norte</span></div>
+                            <div class="est-grid">
+                                <div class="est-item est-norte" data-n="Acre" data-s="AC" onclick="selectEstado(this)"><div class="est-sigla">AC</div><div class="est-nome-full">Acre</div></div>
+                                <div class="est-item est-norte" data-n="Amapá" data-s="AP" onclick="selectEstado(this)"><div class="est-sigla">AP</div><div class="est-nome-full">Amapá</div></div>
+                                <div class="est-item est-norte" data-n="Amazonas" data-s="AM" onclick="selectEstado(this)"><div class="est-sigla">AM</div><div class="est-nome-full">Amazonas</div></div>
+                                <div class="est-item est-norte" data-n="Pará" data-s="PA" onclick="selectEstado(this)"><div class="est-sigla">PA</div><div class="est-nome-full">Pará</div></div>
+                                <div class="est-item est-norte" data-n="Rondônia" data-s="RO" onclick="selectEstado(this)"><div class="est-sigla">RO</div><div class="est-nome-full">Rondônia</div></div>
+                                <div class="est-item est-norte" data-n="Roraima" data-s="RR" onclick="selectEstado(this)"><div class="est-sigla">RR</div><div class="est-nome-full">Roraima</div></div>
+                                <div class="est-item est-norte" data-n="Tocantins" data-s="TO" onclick="selectEstado(this)"><div class="est-sigla">TO</div><div class="est-nome-full">Tocantins</div></div>
+                            </div>
+
+                            <div class="est-regiao-label"><span class="regiao-pill pill-nordeste">☀️ Nordeste</span></div>
+                            <div class="est-grid">
+                                <div class="est-item est-nordeste" data-n="Alagoas" data-s="AL" onclick="selectEstado(this)"><div class="est-sigla">AL</div><div class="est-nome-full">Alagoas</div></div>
+                                <div class="est-item est-nordeste" data-n="Bahia" data-s="BA" onclick="selectEstado(this)"><div class="est-sigla">BA</div><div class="est-nome-full">Bahia</div></div>
+                                <div class="est-item est-nordeste" data-n="Ceará" data-s="CE" onclick="selectEstado(this)"><div class="est-sigla">CE</div><div class="est-nome-full">Ceará</div></div>
+                                <div class="est-item est-nordeste" data-n="Maranhão" data-s="MA" onclick="selectEstado(this)"><div class="est-sigla">MA</div><div class="est-nome-full">Maranhão</div></div>
+                                <div class="est-item est-nordeste" data-n="Paraíba" data-s="PB" onclick="selectEstado(this)"><div class="est-sigla">PB</div><div class="est-nome-full">Paraíba</div></div>
+                                <div class="est-item est-nordeste" data-n="Pernambuco" data-s="PE" onclick="selectEstado(this)"><div class="est-sigla">PE</div><div class="est-nome-full">Pernambuco</div></div>
+                                <div class="est-item est-nordeste" data-n="Piauí" data-s="PI" onclick="selectEstado(this)"><div class="est-sigla">PI</div><div class="est-nome-full">Piauí</div></div>
+                                <div class="est-item est-nordeste" data-n="Rio Grande do Norte" data-s="RN" onclick="selectEstado(this)"><div class="est-sigla">RN</div><div class="est-nome-full">Rio Gd. Norte</div></div>
+                                <div class="est-item est-nordeste" data-n="Sergipe" data-s="SE" onclick="selectEstado(this)"><div class="est-sigla">SE</div><div class="est-nome-full">Sergipe</div></div>
+                            </div>
+
+                            <div class="est-regiao-label"><span class="regiao-pill pill-co">🏜️ Centro-Oeste</span></div>
+                            <div class="est-grid">
+                                <div class="est-item est-co" data-n="Distrito Federal" data-s="DF" onclick="selectEstado(this)"><div class="est-sigla">DF</div><div class="est-nome-full">Distrito Federal</div></div>
+                                <div class="est-item est-co" data-n="Goiás" data-s="GO" onclick="selectEstado(this)"><div class="est-sigla">GO</div><div class="est-nome-full">Goiás</div></div>
+                                <div class="est-item est-co" data-n="Mato Grosso" data-s="MT" onclick="selectEstado(this)"><div class="est-sigla">MT</div><div class="est-nome-full">Mato Grosso</div></div>
+                                <div class="est-item est-co" data-n="Mato Grosso do Sul" data-s="MS" onclick="selectEstado(this)"><div class="est-sigla">MS</div><div class="est-nome-full">M. G. do Sul</div></div>
+                            </div>
+
+                            <div class="est-regiao-label"><span class="regiao-pill pill-sudeste">🏙️ Sudeste</span></div>
+                            <div class="est-grid">
+                                <div class="est-item est-sudeste" data-n="Espírito Santo" data-s="ES" onclick="selectEstado(this)"><div class="est-sigla">ES</div><div class="est-nome-full">Espírito Santo</div></div>
+                                <div class="est-item est-sudeste" data-n="Minas Gerais" data-s="MG" onclick="selectEstado(this)"><div class="est-sigla">MG</div><div class="est-nome-full">Minas Gerais</div></div>
+                                <div class="est-item est-sudeste" data-n="Rio de Janeiro" data-s="RJ" onclick="selectEstado(this)"><div class="est-sigla">RJ</div><div class="est-nome-full">Rio de Janeiro</div></div>
+                                <div class="est-item est-sudeste" data-n="São Paulo" data-s="SP" onclick="selectEstado(this)"><div class="est-sigla">SP</div><div class="est-nome-full">São Paulo</div></div>
+                            </div>
+
+                            <div class="est-regiao-label"><span class="regiao-pill pill-sul">🌲 Sul</span></div>
+                            <div class="est-grid">
+                                <div class="est-item est-sul" data-n="Paraná" data-s="PR" onclick="selectEstado(this)"><div class="est-sigla">PR</div><div class="est-nome-full">Paraná</div></div>
+                                <div class="est-item est-sul" data-n="Rio Grande do Sul" data-s="RS" onclick="selectEstado(this)"><div class="est-sigla">RS</div><div class="est-nome-full">Rio Gd. do Sul</div></div>
+                                <div class="est-item est-sul" data-n="Santa Catarina" data-s="SC" onclick="selectEstado(this)"><div class="est-sigla">SC</div><div class="est-nome-full">Santa Catarina</div></div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
                 <div class="divider"></div>
                 <div class="search-item" id="range-container">
@@ -926,62 +1085,60 @@ const ESTADOS = [
     {n:'São Paulo',s:'SP'},{n:'Sergipe',s:'SE'},{n:'Tocantins',s:'TO'},
 ];
 
-const locInput = document.getElementById('location-input');
-const locDrop  = document.getElementById('location-suggestions');
-const locErro  = document.getElementById('location-erro');
+// locInput agora é o hidden field do estado dropdown
 const btnBusca = document.getElementById('main-search-btn');
-let locOk = false;
 
-function sem(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
-
-function renderSug(lista) {
-    locDrop.innerHTML = lista.map(e =>
-        `<div class="suggestion-item" data-n="${e.n}">
-            <span>📍</span>${e.n}<small style="color:#bbb;margin-left:6px">${e.s}</small>
-        </div>`
-    ).join('');
-    locDrop.style.display = lista.length ? 'block' : 'none';
-    locDrop.querySelectorAll('.suggestion-item').forEach(el => {
-        el.addEventListener('click', () => {
-            locInput.value = el.dataset.n; locOk = true;
-            locDrop.style.display = 'none'; checkBusca();
-            // Carrega cidades do estado selecionado
-            const sig = ESTADOS.find(e => e.n === el.dataset.n)?.s || '';
-            cidadeInput.value = '';
-            carregarCidades(sig);
-        });
-    });
+/* ── Estado Dropdown ── */
+function toggleEstadoDropdown(e) {
+    e.stopPropagation();
+    const drop = document.getElementById('estado-dropdown');
+    const disp = document.getElementById('estado-display');
+    const isOpen = drop.style.display === 'block';
+    drop.style.display = isOpen ? 'none' : 'block';
+    disp.classList.toggle('open', !isOpen);
 }
 
-locInput.addEventListener('focus', () => {
-    locErro.style.display = 'none';
-    renderSug(locInput.value.trim() ? [] : ESTADOS.slice(0,5));
-});
-locInput.addEventListener('input', () => {
-    locOk = false;
-    const t = sem(locInput.value.trim());
-    renderSug(t ? ESTADOS.filter(e => sem(e.n).startsWith(t) || e.s.toLowerCase().startsWith(t)).slice(0,5) : ESTADOS.slice(0,5));
+function selectEstado(el) {
+    const input = document.getElementById('location-input');
+    const texto = document.getElementById('estado-texto');
+    const drop  = document.getElementById('estado-dropdown');
+    const disp  = document.getElementById('estado-display');
+
+    document.querySelectorAll('.est-item.selected').forEach(i => i.classList.remove('selected'));
+
+    const sigla = el.dataset.s;
+    const nome  = el.dataset.n;
+    input.value = nome;
+    texto.textContent = sigla + ' — ' + nome;
+    el.classList.add('selected');
+
+    drop.style.display = 'none';
+    disp.classList.remove('open');
+
+    cidadeInput.value = '';
+    carregarCidades(sigla);
     checkBusca();
-});
-locInput.addEventListener('blur', () => setTimeout(() => {
-    const v = locInput.value.trim();
-    if (v && !locOk && !ESTADOS.some(e => e.n.toLowerCase() === v.toLowerCase())) {
-        locInput.value = ''; locOk = false;
-        locErro.style.display = 'block'; checkBusca();
-    }
-    locDrop.style.display = 'none';
-}, 160));
+}
+
 document.addEventListener('click', e => {
-    if (!document.getElementById('location-container').contains(e.target))
-        locDrop.style.display = 'none';
+    if (!e.target.closest('#location-container')) {
+        const drop = document.getElementById('estado-dropdown');
+        const disp = document.getElementById('estado-display');
+        if (drop) drop.style.display = 'none';
+        if (disp) disp.classList.remove('open');
+    }
 });
 
 function checkBusca() {
-    const v = locInput.value.trim();
-    const ok = locOk || ESTADOS.some(e => e.n.toLowerCase() === v.toLowerCase());
+    const v = document.getElementById('location-input').value.trim();
+    const ok = !!v;
     btnBusca.style.opacity       = ok ? '1' : '.3';
     btnBusca.style.pointerEvents = ok ? 'auto' : 'none';
 }
+
+function sem(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+
+
 
 /* Calendário */
 const dQuando = document.getElementById('display-quando');
@@ -1039,7 +1196,7 @@ cidadeInput.addEventListener('focus', () => renderCidades(listaCidades.slice(0, 
 cidadeInput.addEventListener('blur',  () => setTimeout(() => cidadeDrop.style.display = 'none', 200));
 
 btnBusca.addEventListener('click', () => {
-    const nomeEstado = locInput.value.trim(); if (!nomeEstado) return;
+    const nomeEstado = document.getElementById('location-input').value.trim(); if (!nomeEstado) return;
     const encontrado = ESTADOS.find(e => e.n.toLowerCase() === nomeEstado.toLowerCase());
     const estado = encontrado ? encontrado.s : nomeEstado;
     const cidade = cidadeInput.value.trim();
