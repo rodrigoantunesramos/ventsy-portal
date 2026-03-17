@@ -525,6 +525,7 @@
         .badge-prop   { background: #fff0f3; color: var(--vermelho); }
         .badge-cidade { background: #eff6ff; color: #3b82f6; }
         .badge-estado { background: #f0fdf4; color: #22c55e; }
+        .badge-cat    { background: #faf5ff; color: #8b5cf6; }
 
         .onde-loading, .onde-empty {
             padding: 24px 16px; text-align: center;
@@ -620,6 +621,7 @@
         .badge-prop   { background: #fff0f3; color: var(--vermelho); }
         .badge-cidade { background: #eff6ff; color: #3b82f6; }
         .badge-estado { background: #f0fdf4; color: #22c55e; }
+        .badge-cat    { background: #faf5ff; color: #8b5cf6; }
 
         .onde-loading, .onde-empty {
             padding: 24px 16px; text-align: center;
@@ -1401,47 +1403,71 @@ function selecionarOnde(item) {
     fecharOndeDrop();
     checkBusca();
 
-    // Se é propriedade, navega direto
+    // Navega direto para a propriedade
     if (item.tipo === 'prop' && item.id) {
         window.location.href = `propriedade.html?id=${item.id}`;
+        return;
+    }
+    // Navega para busca por categoria
+    if (item.tipo === 'categoria') {
+        window.location.href = `buscapropriedade.html?tipo=${encodeURIComponent(item.categoria)}`;
+        return;
     }
 }
+
 
 async function buscarOnde(q) {
     const t = norm(q);
 
-    // Sugestões de estados (local, instantâneo)
+    // Estados — busca local com normalização de acentos
     const estados = ESTADOS_ONDE
         .filter(e => norm(e.n).includes(t) || e.s.toLowerCase().includes(t))
         .slice(0, 3);
 
-    // Busca assíncrona: propriedades e cidades no Supabase
-    let props = [], cidades = [];
+    // Busca no Supabase — propriedades (nome + categoria) e cidades
+    let props = [], cats = [], cidades = [];
     try {
-        const [rProps, rCids] = await Promise.all([
+        // Busca por nome: usa ilike no Supabase, mas também filtra localmente
+        // com norm() para ignorar acentos e maiúsculas
+        const [rNome, rCat, rCids] = await Promise.all([
             _sb.from('propriedades')
-               .select('id, nome, cidade, estado, imagem_url, foto_capa')
+               .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa')
                .eq('publicada', true)
-               .ilike('nome', `%${q}%`)
+               .limit(100),  // traz mais para filtrar localmente
+            _sb.from('propriedades')
+               .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa')
+               .eq('publicada', true)
+               .ilike('categoria', `%${q}%`)
                .limit(4),
             _sb.from('propriedades')
                .select('cidade, estado')
                .eq('publicada', true)
-               .ilike('cidade', `%${q}%`)
                .not('cidade', 'is', null)
-               .limit(20)
+               .limit(500)
         ]);
-        props  = rProps.data  || [];
-        // Cidades únicas
+
+        // Filtra localmente com norm() — ignora acentos e maiúsculas/minúsculas
+        props = (rNome.data || [])
+            .filter(p => p.nome && norm(p.nome).includes(t))
+            .slice(0, 5);
+
+        // Categorias únicas que batem com a busca
+        const catMap = {};
+        (rCat.data || []).forEach(p => {
+            if (p.categoria && !catMap[p.categoria]) catMap[p.categoria] = 0;
+            if (p.categoria) catMap[p.categoria]++;
+        });
+        cats = Object.entries(catMap).slice(0, 3).map(([cat, count]) => ({ cat, count }));
+
+        // Cidades únicas filtradas com norm()
         const cidMap = {};
         (rCids.data || []).forEach(p => {
-            if (p.cidade && !cidMap[p.cidade]) cidMap[p.cidade] = p.estado;
+            if (p.cidade && norm(p.cidade).includes(t) && !cidMap[p.cidade])
+                cidMap[p.cidade] = p.estado;
         });
-        cidades = Object.entries(cidMap).slice(0, 4)
-                        .map(([cidade, estado]) => ({ cidade, estado }));
+        cidades = Object.entries(cidMap).slice(0, 4).map(([cidade, estado]) => ({ cidade, estado }));
     } catch(_) {}
 
-    // Monta HTML
     let html = '';
 
     if (props.length) {
@@ -1449,13 +1475,29 @@ async function buscarOnde(q) {
         html += props.map(p => {
             const img = p.imagem_url || p.foto_capa || '';
             const sub = [p.cidade, p.estado].filter(Boolean).join(', ');
-            return `<div class="onde-result" onclick="selecionarOnde({tipo:'prop',id:'${p.id}',nome:'${(p.nome||'').replace(/'/g,"\\'")}',estado:'${p.estado||''}',cidade:'${p.cidade||''}',label:'${(p.nome||'').replace(/'/g,"\\'")}' })">
-                <div class="onde-result-icon">${img ? `<img src="${img}" alt="">` : '🏠'}</div>
+            const nomeEsc = (p.nome||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'prop',id:'${p.id}',nome:'${nomeEsc}',estado:'${p.estado||''}',cidade:'${p.cidade||''}',label:'${nomeEsc}'})">
+                <div class="onde-result-icon">${img?`<img src="${img}" alt="">`:'🏠'}</div>
                 <div class="onde-result-info">
-                    <div class="onde-result-titulo">${p.nome || 'Sem nome'}</div>
-                    <div class="onde-result-sub">${sub}</div>
+                    <div class="onde-result-titulo">${p.nome||'Sem nome'}</div>
+                    <div class="onde-result-sub">${sub}${p.categoria ? ' · '+p.categoria : ''}</div>
                 </div>
                 <span class="onde-result-badge badge-prop">Espaço</span>
+            </div>`;
+        }).join('');
+    }
+
+    if (cats.length) {
+        html += `<div class="onde-group-label">🏷️ Categorias</div>`;
+        html += cats.map(c => {
+            const catEsc = c.cat.replace(/'/g,"\\'");
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'categoria',categoria:'${catEsc}',label:'${catEsc}'})">
+                <div class="onde-result-icon">🏷️</div>
+                <div class="onde-result-info">
+                    <div class="onde-result-titulo">${c.cat}</div>
+                    <div class="onde-result-sub">${c.count} espaço${c.count!==1?'s':''} disponíve${c.count!==1?'is':'l'}</div>
+                </div>
+                <span class="onde-result-badge badge-cat">Categoria</span>
             </div>`;
         }).join('');
     }
@@ -1490,14 +1532,11 @@ async function buscarOnde(q) {
         }).join('');
     }
 
-    if (!html) {
-        html = `<div class="onde-empty">Nenhum resultado para "<strong>${q}</strong>"</div>`;
-    }
-
+    if (!html) html = `<div class="onde-empty">Nenhum resultado para "<strong>${q}</strong>"</div>`;
     abrirOndeDrop(html);
 }
 
-// Sugestões default ao focar (sem texto) — top estados
+
 function sugestoesDefault() {
     const populares = ['RJ','SP','MG','BA','SC','RS','CE','PE'];
     const estados = ESTADOS_ONDE.filter(e => populares.includes(e.s));
