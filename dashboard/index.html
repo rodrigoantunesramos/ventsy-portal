@@ -189,6 +189,7 @@
             display: flex; align-items: center; gap: 24px;
         }
         .bv-acao { position: relative; z-index: 1; flex-shrink: 0; }
+        .bv-acao { display: flex; flex-direction: column; gap: 10px; }
         .btn-ver-prop {
             display: inline-flex; align-items: center; gap: 8px;
             background: transparent; border: 1.5px solid #ff385c;
@@ -197,6 +198,14 @@
             white-space: nowrap; transition: background .2s, color .2s;
         }
         .btn-ver-prop:hover { background: #ff385c; color: #fff; }
+        .btn-outras-prop {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: transparent; border: 1.5px solid rgba(255,255,255,0.25);
+            color: rgba(255,255,255,0.65); font-size: .82rem; font-weight: 700;
+            padding: 10px 18px; border-radius: 10px; text-decoration: none;
+            white-space: nowrap; transition: background .2s, color .2s, border-color .2s;
+        }
+        .btn-outras-prop:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.5); }
         .boas-vindas::before {
             content: ''; position: absolute;
             width: 400px; height: 400px;
@@ -573,6 +582,10 @@
                 <a id="btn-ver-prop" href="minhapropriedade.html" class="btn-ver-prop" target="_blank">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     <span id="btn-ver-prop-txt">Ver minha propriedade</span>
+                </a>
+                <a href="../index" class="btn-outras-prop">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Analisar outras propriedades
                 </a>
             </div>
         </div>
