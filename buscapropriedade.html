@@ -1221,12 +1221,12 @@
     letter-spacing: 0.02em;
     text-transform: uppercase;
 }
-.card-badge-premium {
+.card-badge-ultra {
     background: linear-gradient(135deg, #1a1a1a, #3d3d3d);
     color: #f0c040;
     border: 1px solid rgba(240,192,64,0.4);
 }
-.card-premium {
+.card-ultra {
     box-shadow: 0 0 0 1.5px rgba(240,192,64,0.35);
 }
 
@@ -2178,17 +2178,16 @@ input:checked + .slider-round:before { transform: translateX(20px); }
     const cidadeBuscada  = params.get('cidade') || '';
 
     // IDs de anunciantes com plano premium ativo — carregado uma vez
-    let userIdsPremium = new Set();
+    let userIdsultra = new Set();
 
-    async function carregarPremiums() {
+    async function carregarultra() {
         const hoje = new Date().toISOString();
         const { data } = await _supabase
             .from('planos_anunciantes')
             .select('user_id')
-            .eq('plano', 'premium')
+            .eq('plano', 'ultra')
             .eq('ativo', true)
-            .gte('validade', hoje);
-        if (data) userIdsPremium = new Set(data.map(p => p.user_id));
+            if (data) userIdsultra = new Set(data.map(p => p.user_id));
     }
 
     function criarCardHTML(prop) {
@@ -2201,7 +2200,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
         const cidade     = prop.cidade     || prop.estado || '';
         const capacidade = prop.capacidade ? `${prop.capacidade} pessoas` : '';
         const categoria  = prop.categoria  || '';
-        const isPremium  = prop.usuario_id && userIdsPremium.has(prop.usuario_id);
+        const isultra  = prop.usuario_id && userIdsultra.has(prop.usuario_id);
 
         const notaHTML = nota ? `
             <span class="card-nota">
@@ -2209,12 +2208,12 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                 ${nota}
             </span>` : '';
 
-        const badgeHTML = isPremium
-            ? `<span class="card-badge card-badge-premium">⭐ Premium</span>`
+        const badgeHTML = isultra
+            ? `<span class="card-badge card-badge-ultra">⭐ Ultra</span>`
             : categoria ? `<span class="card-badge">${categoria}</span>` : '';
 
         return `
-            <div class="card-espaco-vertical${isPremium ? ' card-premium' : ''}"
+            <div class="card-espaco-vertical${isultra ? ' card-ultra' : ''}"
                  style="cursor:pointer"
                  onclick="window.location.href='propriedade.html?id=${prop.id}'">
                 <div class="foto-card-v">
@@ -2345,7 +2344,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             const displayData = document.getElementById('display-quando');
             if (displayData) { displayData.textContent = dataBuscada; displayData.style.color = '#222'; }
         }
-        await carregarPremiums();
+        await carregarultra();
         if (tipoBuscado) registrarBusca(tipoBuscado);
         buscarPropriedades();
 
@@ -2414,7 +2413,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                 estacionamento: document.getElementById('f-estacionamento')?.checked,
                 seguranca:      document.getElementById('f-seguranca')?.checked,
                 espacoAberto:   document.getElementById('f-espaco-aberto')?.checked,
-                premium:        document.getElementById('f-premium')?.checked,
+                ultra:        document.getElementById('f-ultra')?.checked,
                 acessibilidade: document.getElementById('f-acessibilidade')?.checked,
                 somAlto:        document.getElementById('f-som-alto')?.checked,
                 somTarde:       document.getElementById('f-som-tarde')?.checked,
@@ -2442,7 +2441,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             console.log('climatizado:', filtros.climatizado, '| estacionamento:', filtros.estacionamento);
             console.log('seguranca:', filtros.seguranca, '| espacoAberto:', filtros.espacoAberto);
             console.log('somAlto:', filtros.somAlto, '| somTarde:', filtros.somTarde);
-            console.log('acessibilidade:', filtros.acessibilidade, '| premium:', filtros.premium);
+            console.log('acessibilidade:', filtros.acessibilidade, '| ultra:', filtros.ultra);
             console.log('tiposEvento:', filtros.tiposEvento);
             console.log('categorias (tipo propriedade):', filtros.categorias);
             console.groupEnd();
@@ -2496,7 +2495,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             }
 
             // Premium: busca usuario_ids com plano ULTRA ativo na tabela assinaturas
-            if (filtros.premium) {
+            if (filtros.ultra) {
                 const hoje = new Date().toISOString();
                 const { data: planos } = await _supabase
                     .from('assinaturas')
@@ -3467,7 +3466,7 @@ function fecharModalFiltro() {
             <section class="filtro-secao">
                 <h3>Destaques</h3>
                 <div class="grid-checkbox">
-                    <label><input type="checkbox" id="f-premium"> Propriedades premium</label>
+                    <label><input type="checkbox" id="f-ultra"> Propriedades premium</label>
                 </div>
             </section>
 
