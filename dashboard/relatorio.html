@@ -806,7 +806,8 @@ async function renderRanking() {
         });
 
         const ranking = Object.entries(viewsPorProp).sort((a, b) => b[1] - a[1]);
-        const posicao = ranking.findIndex(([id]) => id === PROP_ID) + 1;
+        const idx     = ranking.findIndex(([id]) => id === PROP_ID);
+        const posicao = idx === -1 ? null : idx + 1;
         const total   = ranking.length;
         const meuTotal = viewsPorProp[PROP_ID] || 0;
 
@@ -817,16 +818,18 @@ async function renderRanking() {
 
         const dica = posicao === 1
             ? '🎉 Parabéns! Você está em <strong>1º lugar</strong> na sua categoria e cidade!'
-            : posicao <= 3
+            : posicao !== null && posicao <= 3
             ? '💪 Ótima posição! Continue atualizando seu espaço para manter o ranking.'
             : '💡 Adicione mais fotos e complete os dados do seu espaço para subir no ranking.';
+
+        const posicaoLabel = posicao !== null ? `#${posicao}` : '—';
 
         container.innerHTML = `
             <div class="ranking-posicao">
                 <div class="trofeu-grande">${trofeu}</div>
                 <div class="ranking-texto">
                     <h4>${PROP_TIPO} em ${PROP_CIDADE}</h4>
-                    <div class="ranking-numero"><em>#${posicao}</em></div>
+                    <div class="ranking-numero"><em>${posicaoLabel}</em></div>
                     <p>de ${total} espaço${total !== 1 ? 's' : ''} — ${meuTotal.toLocaleString('pt-BR')} visualizações</p>
                 </div>
             </div>
