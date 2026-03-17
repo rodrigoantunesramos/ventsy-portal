@@ -991,18 +991,8 @@ async function init() {
         }
 
         // Busca a propriedade
-        const { data: prop, error: errProp } = await sb.from('propriedades').select('*').eq('id', propId).maybeSingle();
-
-        if (errProp) {
-            console.error('❌ Erro ao buscar propriedade id=' + propId + ':', errProp.message, errProp);
-            carregarDemostracao();
-            return;
-        }
-        if (!prop) {
-            console.warn('⚠️ Propriedade não encontrada ou não publicada. id=' + propId);
-            carregarDemostracao();
-            return;
-        }
+        const { data: prop } = await sb.from('propriedades').select('*').eq('id', propId).maybeSingle();
+        if (!prop) { carregarDemostracao(); return; }
         PROP = prop;
 
         // Busca o plano do proprietário
@@ -1010,13 +1000,13 @@ async function init() {
             const { data: ass } = await sb.from('assinaturas')
                 .select('plano_ativo')
                 .eq('usuario_id', prop.usuario_id)
-                .single();
+                .maybeSingle();
             PLANO = ass?.plano_ativo || 'basico';
         } catch (_) { PLANO = 'basico'; }
 
         // Dados do responsável (nome_responsavel tem prioridade sobre usuarios.nome)
         try {
-            const { data: usr } = await sb.from('usuarios').select('nome, usuario, criado_em').eq('id', prop.usuario_id).single();
+            const { data: usr } = await sb.from('usuarios').select('nome, usuario, criado_em').eq('id', prop.usuario_id).maybeSingle();
             if (usr) {
                 const nomeExibir = prop.nome_responsavel || usr.nome || '—';
                 document.getElementById('anfitriao-nome').textContent = nomeExibir;
@@ -1092,8 +1082,12 @@ async function init() {
         trackEvento('view');
 
     } catch (err) {
-        console.error('Erro init:', err);
-        carregarDemostracao();
+        console.error('❌ Erro fatal no init — caindo na demo:', err.message, err);
+        // Só cai na demo se não tiver PROP carregado ainda
+        // Se PROP existe, o erro foi na renderização — não sobrescreve com demo
+        if (!PROP) {
+            carregarDemostracao();
+        }
     } finally {
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('main-content').style.display = 'block';
@@ -1410,7 +1404,7 @@ function renderCardLateral() {
                         onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
                         💬 Falar com a VENTSY
                     </a>
-                    <p style="font-size:.72rem;color:#b45309;text-align:center;margin-top:8px;opacity:.8">Código da propriedade: <strong>${PROP?.id ? PROP.id.slice(0,8).toUpperCase() : '—'}</strong></p>
+                    <p style="font-size:.72rem;color:#b45309;text-align:center;margin-top:8px;opacity:.8">Código da propriedade: <strong>${PROP?.id ? String(PROP.id).slice(0,8).toUpperCase() : '—'}</strong></p>
                 </div>
             </div>
         `;
