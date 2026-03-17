@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cofre de Documentos — Espaço Vêneto</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #f5f2ec;
+  --bg2:       #ede9e0;
+  --surface:   #ffffff;
+  --border:    #ddd8cc;
+  --border2:   #c8c2b2;
+  --ink:       #1a1714;
+  --ink2:      #4a4540;
+  --muted:     #8c8478;
+  --gold:      #9a6f2e;
+  --gold-lt:   #c49a50;
+  --gold-bg:   #f7f0e4;
+  --green:     #2e6e4a;
+  --green-bg:  #e8f4ee;
+  --red:       #8b2c2c;
+  --red-bg:    #faeaea;
+  --orange:    #8b5a1a;
+  --orange-bg: #fdf2e3;
+  --blue:      #1e4a7a;
+  --blue-bg:   #e6eef8;
+  --serif:     'Cormorant Garamond', serif;
+  --sans:      'Syne', sans-serif;
+  --mono:      'IBM Plex Mono', monospace;
+  --shadow:    0 2px 12px rgba(26,23,20,.08);
+  --shadow-lg: 0 8px 40px rgba(26,23,20,.14);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed; top: 0; left: 0;
+  width: 240px; height: 100vh;
+  background: var(--ink);
+  display: flex; flex-direction: column;
+  padding: 36px 0;
+  z-index: 100;
+}
+.sidebar-logo { padding: 0 28px 32px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.logo-mark { font-family: var(--serif); font-size: 24px; font-weight: 700; color: #c49a50; line-height: 1.1; }
+.logo-sub  { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.35); margin-top: 5px; }
+
+.nav { padding: 24px 0; flex: 1; }
+.nav-group-label { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,.25); padding: 0 28px 6px; margin-top: 12px; }
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 11px 28px; font-size: 13px; font-weight: 500;
+  color: rgba(255,255,255,.45); cursor: pointer;
+  transition: all .2s; border-left: 3px solid transparent;
+}
+.nav-item:hover { color: rgba(255,255,255,.8); background: rgba(255,255,255,.04); }
+.nav-item.active { color: #c49a50; background: rgba(196,154,80,.08); border-left-color: #c49a50; }
+.nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+.sidebar-bottom { padding: 24px 28px; border-top: 1px solid rgba(255,255,255,.08); }
+.user-row { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,#c49a50,#8b5e20); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 15px; font-weight: 700; color: var(--ink); }
+.user-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.8); }
+.user-role { font-size: 10px; color: rgba(255,255,255,.3); letter-spacing: .5px; }
+
+/* ── MAIN ── */
+.main { margin-left: 240px; min-height: 100vh; padding: 0 44px 80px; }
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 40px 0 32px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.page-title { font-family: var(--serif); font-size: 42px; font-weight: 700; letter-spacing: -1px; line-height: 1; color: var(--ink); }
+.page-title em { color: var(--gold); font-style: italic; }
+.page-sub { font-size: 12px; color: var(--muted); margin-top: 6px; letter-spacing: .5px; }
+.topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border-radius: 6px;
+  font-family: var(--sans); font-size: 12px; font-weight: 700;
+  letter-spacing: .5px; cursor: pointer; border: none; transition: all .2s;
+}
+.btn-primary { background: var(--ink); color: #c49a50; }
+.btn-primary:hover { background: #2e2a24; transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.btn-ghost { background: transparent; border: 1.5px solid var(--border2); color: var(--ink2); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn svg { width: 14px; height: 14px; }
+
+/* ── ALERT BANNER ── */
+.alert-banner {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--red-bg); border: 1px solid #e8b4b4;
+  border-radius: 10px; padding: 16px 20px; margin-bottom: 32px;
+  animation: slideDown .4s ease;
+}
+.alert-banner svg { width: 20px; height: 20px; color: var(--red); flex-shrink: 0; }
+.alert-text strong { font-size: 13px; font-weight: 700; color: var(--red); display: block; }
+.alert-text span { font-size: 12px; color: #a05050; }
+.alert-tag {
+  margin-left: auto; font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: 20px;
+  background: var(--red); color: white;
+}
+
+/* ── SUMMARY STRIP ── */
+.summary-strip {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 14px; margin-bottom: 40px;
+}
+.sum-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px 22px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow);
+  animation: fadeUp .4s ease both;
+}
+.sum-icon {
+  width: 42px; height: 42px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sum-icon svg { width: 20px; height: 20px; }
+.sum-val { font-family: var(--serif); font-size: 28px; font-weight: 700; line-height: 1; }
+.sum-label { font-size: 11px; color: var(--muted); letter-spacing: .5px; margin-top: 3px; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 28px; flex-wrap: wrap;
+}
+.filter-pill {
+  padding: 7px 16px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  border: 1.5px solid var(--border); background: transparent;
+  color: var(--muted); font-family: var(--sans);
+  transition: all .2s;
+}
+.filter-pill:hover { border-color: var(--gold); color: var(--gold); }
+.filter-pill.active { background: var(--ink); border-color: var(--ink); color: #c49a50; }
+.search-box {
+  margin-left: auto; display: flex; align-items: center;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 8px 14px; gap: 8px;
+  transition: border-color .2s;
+}
+.search-box:focus-within { border-color: var(--gold); }
+.search-box svg { width: 14px; height: 14px; color: var(--muted); }
+.search-box input {
+  border: none; outline: none; background: transparent;
+  font-family: var(--sans); font-size: 13px; color: var(--ink);
+  width: 200px;
+}
+
+/* ── DOC GRID ── */
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+/* ── DOC CARD ── */
+.doc-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform .2s, box-shadow .2s;
+  animation: fadeUp .4s ease both;
+  display: flex; flex-direction: column;
+}
+.doc-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.doc-card.expired  { border-color: #e8b4b4; }
+.doc-card.warning  { border-color: #e8d4a0; }
+.doc-card.ok       { border-color: #b4d8c4; }
+.doc-card.no-expiry{ border-color: var(--border); }
+
+/* status stripe */
+.doc-stripe { height: 4px; }
+.doc-stripe.expired  { background: linear-gradient(90deg, var(--red), #c05050); }
+.doc-stripe.warning  { background: linear-gradient(90deg, var(--orange), #c07820); }
+.doc-stripe.ok       { background: linear-gradient(90deg, var(--green), #3a9060); }
+.doc-stripe.no-expiry{ background: linear-gradient(90deg, var(--blue), #2060a0); }
+
+.doc-body { padding: 22px 22px 18px; flex: 1; }
+.doc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.doc-icon-wrap {
+  width: 48px; height: 48px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.doc-icon-wrap svg { width: 24px; height: 24px; }
+.doc-status-badge {
+  font-size: 10px; font-weight: 700; padding: 4px 10px;
+  border-radius: 20px; letter-spacing: .5px; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.doc-status-badge.expired  { background: var(--red-bg);    color: var(--red); }
+.doc-status-badge.warning  { background: var(--orange-bg); color: var(--orange); }
+.doc-status-badge.ok       { background: var(--green-bg);  color: var(--green); }
+.doc-status-badge.no-expiry{ background: var(--blue-bg);   color: var(--blue); }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.doc-name { font-family: var(--serif); font-size: 18px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
+.doc-category { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+
+.doc-meta { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+.doc-meta-row { display: flex; justify-content: space-between; font-size: 12px; }
+.doc-meta-label { color: var(--muted); }
+.doc-meta-val { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--ink2); }
+
+/* expiry countdown */
+.expiry-bar-wrap { margin-top: 14px; }
+.expiry-bar-top { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; }
+.expiry-label { color: var(--muted); }
+.expiry-days   { font-weight: 700; }
+.expiry-track { height: 5px; background: var(--bg2); border-radius: 99px; overflow: hidden; }
+.expiry-fill { height: 100%; border-radius: 99px; transition: width 1s ease; }
+
+/* doc footer */
+.doc-footer {
+  border-top: 1px solid var(--border);
+  padding: 12px 22px;
+  display: flex; align-items: center; gap: 8px;
+}
+.doc-action {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  padding: 7px 0; border-radius: 6px; cursor: pointer;
+  transition: all .2s; border: none; background: none; font-family: var(--sans);
+}
+.doc-action:hover { background: var(--bg2); color: var(--gold); }
+.doc-action svg { width: 13px; height: 13px; }
+.doc-action-sep { width: 1px; height: 24px; background: var(--border); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(26,23,20,.6); backdrop-filter: blur(8px);
+  z-index: 999; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; width: 560px; max-width: 95vw;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  animation: scaleIn .25s ease;
+}
+.modal-header {
+  padding: 32px 32px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.modal-header h2 { font-family: var(--serif); font-size: 26px; font-weight: 700; }
+.modal-header p  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.modal-close { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 24px; line-height: 1; padding: 0; }
+.modal-body { padding: 28px 32px; }
+.modal-footer { padding: 20px 32px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+/* form */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1/-1; }
+.form-group label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.form-group input, .form-group select, .form-group textarea {
+  background: var(--bg); border: 1.5px solid var(--border);
+  color: var(--ink); font-family: var(--sans); font-size: 13px;
+  padding: 10px 14px; border-radius: 8px; outline: none; transition: border-color .2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
+.form-group textarea { min-height: 70px; resize: vertical; }
+
+/* upload zone */
+.upload-zone {
+  border: 2px dashed var(--border2); border-radius: 10px;
+  padding: 28px; text-align: center; cursor: pointer;
+  transition: all .2s; background: var(--bg);
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--gold); background: var(--gold-bg); }
+.upload-zone svg { width: 32px; height: 32px; color: var(--muted); margin-bottom: 8px; }
+.upload-zone p  { font-size: 13px; color: var(--muted); }
+.upload-zone strong { color: var(--gold); cursor: pointer; }
+.upload-zone .ftype { font-size: 11px; color: var(--border2); margin-top: 4px; }
+.file-preview {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--green-bg); border: 1px solid #b4d8c4;
+  border-radius: 8px; padding: 10px 14px; margin-top: 10px;
+  font-size: 12px; color: var(--green);
+}
+.file-preview svg { width: 16px; height: 16px; }
+
+/* view modal */
+.view-modal-content { padding: 32px; }
+.view-doc-name { font-family: var(--serif); font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+.view-doc-cat  { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 24px; }
+.view-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.view-field { background: var(--bg); border-radius: 8px; padding: 14px; }
+.view-field-label { font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+.view-field-val { font-size: 14px; font-weight: 600; color: var(--ink); }
+.doc-file-preview {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 40px;
+  text-align: center; color: var(--muted); font-size: 13px;
+  margin-top: 16px;
+}
+.doc-file-preview svg { width: 48px; height: 48px; margin-bottom: 12px; color: var(--border2); }
+.notes-box { background: var(--bg); border-radius: 8px; padding: 14px; font-size: 13px; color: var(--ink2); line-height: 1.6; }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 80px 0; }
+.empty-state svg { width: 64px; height: 64px; color: var(--border2); margin-bottom: 16px; }
+.empty-state h3 { font-family: var(--serif); font-size: 22px; color: var(--ink2); }
+.empty-state p  { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+/* ── SECTION DIVIDER ── */
+.section-divider {
+  display: flex; align-items: center; gap: 14px; margin: 36px 0 20px;
+}
+.section-divider h3 { font-family: var(--serif); font-size: 18px; font-weight: 600; white-space: nowrap; }
+.divider-line { flex: 1; height: 1px; background: var(--border); }
+.section-count { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: var(--bg2); color: var(--muted); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp   { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:translateY(0) } }
+@keyframes slideDown{ from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:translateY(0) } }
+@keyframes scaleIn  { from { opacity:0; transform:scale(.96) }       to { opacity:1; transform:scale(1) } }
+
+@media (max-width:1100px) { .summary-strip { grid-template-columns: repeat(2,1fr); } }
+@media (max-width:768px) {
+  .sidebar { width: 56px; }
+  .sidebar-logo .logo-mark, .sidebar-logo .logo-sub, .nav-item span, .nav-group-label, .sidebar-bottom .user-name, .sidebar-bottom .user-role { display:none; }
+  .main { margin-left: 56px; padding: 0 18px 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">Espaço<br>Vêneto</div>
+    <div class="logo-sub">Gestão do Espaço</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-group-label">Principal</div>
+    <div class="nav-item" onclick="location.href='financeiro.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Painel Financeiro</span>
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      <span>Documentos</span>
+    </div>
+    <div class="nav-group-label">Gestão</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Eventos</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      <span>Alertas</span>
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-row">
+      <div class="avatar">C</div>
+      <div>
+        <div class="user-name">Carlos M.</div>
+        <div class="user-role">Proprietário</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <h1 class="page-title">Cofre de <em>Documentos</em></h1>
+      <p class="page-sub">Licenças, alvarás e documentos com controle de validade</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" onclick="exportDocs()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportar Lista
+      </button>
+      <button class="btn btn-primary" onclick="openAddModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo Documento
+      </button>
+    </div>
+  </div>
+
+  <!-- ALERT BANNER -->
+  <div class="alert-banner" id="alertBanner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div class="alert-text">
+      <strong id="alertTitle">Atenção: documentos vencidos ou a vencer</strong>
+      <span id="alertDesc">Verifique os documentos destacados abaixo e providencie a renovação.</span>
+    </div>
+    <span class="alert-tag" id="alertCount">3 itens</span>
+  </div>
+
+  <!-- SUMMARY STRIP -->
+  <div class="summary-strip">
+    <div class="sum-card" style="animation-delay:.05s">
+      <div class="sum-icon" style="background:var(--green-bg)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+      </div>
+      <div><div class="sum-val" style="color:var(--green)" id="cnt-ok">0</div><div class="sum-label">Em Dia</div></div>
+    </div>
+    <div class="sum-card" style="animation-delay:.1s">
+      <div class="sum-icon" style="background:var(--orange-bg)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div><div class="sum-val" style="color:var(--orange)" id="cnt-warn">0</div><div class="sum-label">A Vencer (90d)</div></div>
+    </div>
+    <div class="sum-card" style="animation-delay:.15s">
+      <div class="sum-icon" style="background:var(--red-bg)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <div><div class="sum-val" style="color:var(--red)" id="cnt-exp">0</div><div class="sum-label">Vencidos</div></div>
+    </div>
+    <div class="sum-card" style="animation-delay:.2s">
+      <div class="sum-icon" style="background:var(--blue-bg)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <div><div class="sum-val" style="color:var(--blue)" id="cnt-total">0</div><div class="sum-label">Total de Docs</div></div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <button class="filter-pill active" onclick="setFilter('todos',this)">Todos</button>
+    <button class="filter-pill" onclick="setFilter('juridico',this)">Jurídico</button>
+    <button class="filter-pill" onclick="setFilter('licencas',this)">Licenças</button>
+    <button class="filter-pill" onclick="setFilter('fiscal',this)">Fiscal</button>
+    <button class="filter-pill" onclick="setFilter('seguros',this)">Seguros</button>
+    <button class="filter-pill" onclick="setFilter('alvara',this)">Alvarás</button>
+    <button class="filter-pill" onclick="setFilter('outros',this)">Outros</button>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Buscar documento..." oninput="searchDocs(this.value)">
+    </div>
+  </div>
+
+  <!-- DOCS CONTAINER -->
+  <div id="docsContainer"></div>
+
+</main>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="formTitle">Novo Documento</h2>
+        <p>Preencha os dados e anexe o arquivo do documento.</p>
+      </div>
+      <button class="modal-close" onclick="closeAddModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Nome do Documento</label>
+          <input type="text" id="f-nome" placeholder="Ex: Licença do Corpo de Bombeiros">
+        </div>
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="f-cat">
+            <option value="licencas">Licenças</option>
+            <option value="alvara">Alvarás</option>
+            <option value="juridico">Jurídico</option>
+            <option value="fiscal">Fiscal</option>
+            <option value="seguros">Seguros</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Órgão Emissor</label>
+          <input type="text" id="f-orgao" placeholder="Ex: Corpo de Bombeiros">
+        </div>
+        <div class="form-group">
+          <label>Número / Protocolo</label>
+          <input type="text" id="f-numero" placeholder="Ex: 00123456/2024">
+        </div>
+        <div class="form-group">
+          <label>Data de Emissão</label>
+          <input type="date" id="f-emissao">
+        </div>
+        <div class="form-group">
+          <label>Data de Vencimento</label>
+          <input type="date" id="f-vencimento" placeholder="Deixe vazio se não vence">
+        </div>
+        <div class="form-group full">
+          <label>Observações</label>
+          <textarea id="f-obs" placeholder="Informações adicionais, contatos, instruções de renovação..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Arquivo</label>
+          <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p>Arraste aqui ou <strong>clique para selecionar</strong></p>
+            <p class="ftype">PDF, JPG, PNG — até 20 MB</p>
+          </div>
+          <div class="file-preview" id="filePreview" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            <span id="filePreviewName">arquivo.pdf</span>
+          </div>
+          <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this)">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeAddModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveDoc()">Salvar Documento</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="modal-overlay" id="viewModal">
+  <div class="modal" style="width:600px">
+    <div class="modal-header">
+      <div>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px" id="view-cat">—</div>
+        <h2 id="view-nome">—</h2>
+      </div>
+      <button class="modal-close" onclick="closeViewModal()">×</button>
+    </div>
+    <div class="view-modal-content">
+      <div class="view-grid" id="viewGrid"></div>
+      <div class="doc-file-preview" id="viewFile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <p>Pré-visualização não disponível nesta demo</p>
+        <p style="font-size:11px;margin-top:4px;color:var(--muted)" id="viewFileName">—</p>
+      </div>
+      <div id="viewObsWrap" style="margin-top:18px;display:none">
+        <div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Observações</div>
+        <div class="notes-box" id="viewObs"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="editDoc()">Editar</button>
+      <button class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar Arquivo
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── ICONS per category ── */
+const catIcons = {
+  licencas: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  alvara:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>`,
+  juridico: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9,12 11,14 15,10"/></svg>`,
+  fiscal:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`,
+  seguros:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`,
+  outros:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>`,
+};
+const catColors = {
+  licencas: { bg:'var(--red-bg)',    stroke:'var(--red)' },
+  alvara:   { bg:'var(--orange-bg)', stroke:'var(--orange)' },
+  juridico: { bg:'var(--blue-bg)',   stroke:'var(--blue)' },
+  fiscal:   { bg:'var(--gold-bg)',   stroke:'var(--gold)' },
+  seguros:  { bg:'var(--green-bg)',  stroke:'var(--green)' },
+  outros:   { bg:'#f0eee8',          stroke:'var(--muted)' },
+};
+const catLabels = {
+  licencas:'Licenças', alvara:'Alvarás', juridico:'Jurídico',
+  fiscal:'Fiscal', seguros:'Seguros', outros:'Outros'
+};
+
+/* ── INITIAL DATA ── */
+let docs = [
+  { id:1, nome:'Cartão CNPJ',                cat:'fiscal',   orgao:'Receita Federal',          numero:'12.345.678/0001-90', emissao:'2020-03-10', vencimento:null,         obs:'CNPJ da pessoa jurídica. Nunca vence, mas deve ser mantido atualizado.', arquivo:'cartao_cnpj.pdf' },
+  { id:2, nome:'RGI — Registro Geral Imóvel', cat:'juridico', orgao:'Cartório de Registro',     numero:'RGI-2019-00812',    emissao:'2019-06-22', vencimento:null,         obs:'Matrícula do imóvel onde funciona o espaço.', arquivo:'rgi_imovel.pdf' },
+  { id:3, nome:'Licença Corpo de Bombeiros',  cat:'licencas', orgao:'CBMMG',                    numero:'LCI-2024-4471',     emissao:'2024-03-01', vencimento:'2025-03-01', obs:'Renovar com 60 dias de antecedência. Contato: (31) 99000-0000', arquivo:'bombeiros_2024.pdf' },
+  { id:4, nome:'Alvará de Funcionamento',     cat:'alvara',   orgao:'Prefeitura Municipal',     numero:'ALV-2024-00991',    emissao:'2024-01-15', vencimento:'2025-01-15', obs:'Renovar anualmente junto à Prefeitura.', arquivo:'alvara_funcionamento.pdf' },
+  { id:5, nome:'Licença Sanitária (Anvisa)',  cat:'licencas', orgao:'Vigilância Sanitária',     numero:'VS-2023-7812',      emissao:'2023-07-20', vencimento:'2025-07-20', obs:'', arquivo:'licenca_sanitaria.pdf' },
+  { id:6, nome:'Seguro Contra Incêndio',      cat:'seguros',  orgao:'Porto Seguro',             numero:'PSG-2024-112233',   emissao:'2024-06-01', vencimento:'2025-06-01', obs:'Apólice cobre o imóvel e equipamentos. Valor: R$ 1.200.000.', arquivo:'seguro_incendio.pdf' },
+  { id:7, nome:'Contrato Social',             cat:'juridico', orgao:'Junta Comercial',          numero:'NIRE-31-00123456',  emissao:'2019-02-14', vencimento:null,         obs:'Última alteração contratual realizada em 2022.', arquivo:'contrato_social.pdf' },
+  { id:8, nome:'Certificado de Acessibilidade',cat:'licencas',orgao:'Prefeitura / CREA',        numero:'CA-2024-0034',      emissao:'2024-04-10', vencimento:'2026-04-10', obs:'Laudo técnico de acessibilidade para portadores de necessidades especiais.', arquivo:'acessibilidade.pdf' },
+  { id:9, nome:'Alvará de Publicidade',       cat:'alvara',   orgao:'Prefeitura Municipal',     numero:'PUB-2024-0078',     emissao:'2024-01-20', vencimento:'2025-01-20', obs:'Refere-se à placa externa e fachada.', arquivo:'alvara_publicidade.pdf' },
+  { id:10,nome:'Seguro de Responsabilidade Civil',cat:'seguros',orgao:'Bradesco Seguros',       numero:'BRD-2024-55901',    emissao:'2024-09-01', vencimento:'2025-09-01', obs:'Cobre danos a terceiros em eventos. Obrigatório para eventos com mais de 200 pessoas.', arquivo:'seguro_rc.pdf' },
+  { id:11,nome:'Licença Ambiental',           cat:'licencas', orgao:'SEMAD',                   numero:'LA-2023-0091',      emissao:'2023-11-01', vencimento:'2025-11-01', obs:'', arquivo:'licenca_ambiental.pdf' },
+  { id:12,nome:'Certificado de Brigada de Incêndio',cat:'licencas',orgao:'CBMMG',              numero:'CBI-2024-2234',     emissao:'2024-08-15', vencimento:'2025-08-15', obs:'Equipe treinada: 8 colaboradores certificados.', arquivo:'brigada_incendio.pdf' },
+];
+
+let nextId = 13;
+let activeFilter = 'todos';
+let searchQuery  = '';
+let editingId    = null;
+let selectedFile = null;
+
+/* ── STATUS LOGIC ── */
+function getStatus(vencimento) {
+  if (!vencimento) return 'no-expiry';
+  const hoje = new Date();
+  const venc = new Date(vencimento);
+  const diff = Math.ceil((venc - hoje) / (1000*60*60*24));
+  if (diff < 0)   return 'expired';
+  if (diff <= 90) return 'warning';
+  return 'ok';
+}
+function getDaysLeft(vencimento) {
+  if (!vencimento) return null;
+  const diff = Math.ceil((new Date(vencimento) - new Date()) / (1000*60*60*24));
+  return diff;
+}
+function getBarPct(emissao, vencimento) {
+  if (!vencimento || !emissao) return 100;
+  const total = new Date(vencimento) - new Date(emissao);
+  const elapsed = new Date() - new Date(emissao);
+  return Math.max(0, Math.min(100, 100 - (elapsed/total)*100));
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y,m,dd] = d.split('-');
+  return `${dd}/${m}/${y}`;
+}
+const statusLabels = { ok:'Em Dia', warning:'A Vencer', expired:'Vencido', 'no-expiry':'Permanente' };
+const barColors    = { ok:'var(--green)', warning:'var(--orange)', expired:'var(--red)', 'no-expiry':'var(--blue)' };
+
+/* ── COUNTS ── */
+function updateCounts() {
+  let ok=0, warn=0, exp=0;
+  docs.forEach(d => {
+    const s = getStatus(d.vencimento);
+    if (s==='ok') ok++;
+    else if (s==='warning') warn++;
+    else if (s==='expired') exp++;
+  });
+  document.getElementById('cnt-ok').textContent    = ok;
+  document.getElementById('cnt-warn').textContent  = warn;
+  document.getElementById('cnt-exp').textContent   = exp;
+  document.getElementById('cnt-total').textContent = docs.length;
+
+  const issues = warn + exp;
+  const banner = document.getElementById('alertBanner');
+  if (issues === 0) {
+    banner.style.display = 'none';
+  } else {
+    banner.style.display = '';
+    document.getElementById('alertCount').textContent = issues + ' item' + (issues>1?'s':'');
+    if (exp > 0) {
+      document.getElementById('alertTitle').textContent = `${exp} documento${exp>1?'s':''} vencido${exp>1?'s':''}!`;
+      document.getElementById('alertDesc').textContent  = `Regularize imediatamente para evitar problemas legais.`;
+    } else {
+      document.getElementById('alertTitle').textContent = `${warn} documento${warn>1?'s':''} vencem em breve`;
+      document.getElementById('alertDesc').textContent  = `Providencie a renovação com antecedência.`;
+    }
+  }
+}
+
+/* ── RENDER ── */
+function renderDocs() {
+  let list = docs.filter(d => {
+    const catMatch = activeFilter === 'todos' || d.cat === activeFilter;
+    const search   = searchQuery.toLowerCase();
+    const srch     = !search || d.nome.toLowerCase().includes(search) || d.orgao.toLowerCase().includes(search);
+    return catMatch && srch;
+  });
+
+  const container = document.getElementById('docsContainer');
+
+  if (list.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      <h3>Nenhum documento encontrado</h3>
+      <p>Ajuste o filtro ou adicione um novo documento.</p>
+    </div>`;
+    return;
+  }
+
+  // Group by status priority: expired → warning → ok → no-expiry
+  const groups = [
+    { key:'expired',   label:'Vencidos',          items: list.filter(d=>getStatus(d.vencimento)==='expired') },
+    { key:'warning',   label:'A Vencer em 90 dias',items: list.filter(d=>getStatus(d.vencimento)==='warning') },
+    { key:'ok',        label:'Em Dia',             items: list.filter(d=>getStatus(d.vencimento)==='ok') },
+    { key:'no-expiry', label:'Permanentes',        items: list.filter(d=>getStatus(d.vencimento)==='no-expiry') },
+  ].filter(g => g.items.length > 0);
+
+  container.innerHTML = groups.map(g => `
+    <div class="section-divider">
+      <h3>${g.label}</h3>
+      <div class="divider-line"></div>
+      <span class="section-count">${g.items.length}</span>
+    </div>
+    <div class="doc-grid">${g.items.map((d,i) => docCardHTML(d,i)).join('')}</div>
+  `).join('');
+
+  // animate bars after render
+  setTimeout(() => {
+    document.querySelectorAll('.expiry-fill').forEach(el => {
+      el.style.width = el.dataset.w;
+    });
+  }, 100);
+}
+
+function docCardHTML(d, i) {
+  const status  = getStatus(d.vencimento);
+  const daysLeft= getDaysLeft(d.vencimento);
+  const barPct  = getBarPct(d.emissao, d.vencimento);
+  const col     = catColors[d.cat] || catColors.outros;
+
+  let expiryHTML = '';
+  if (d.vencimento) {
+    const dLabel = daysLeft < 0
+      ? `Vencido há ${Math.abs(daysLeft)} dias`
+      : daysLeft === 0 ? 'Vence hoje!'
+      : `${daysLeft} dia${daysLeft!==1?'s':''} restante${daysLeft!==1?'s':''}`;
+    expiryHTML = `
+      <div class="expiry-bar-wrap">
+        <div class="expiry-bar-top">
+          <span class="expiry-label">Validade</span>
+          <span class="expiry-days" style="color:${barColors[status]}">${dLabel}</span>
+        </div>
+        <div class="expiry-track">
+          <div class="expiry-fill" style="width:0%;background:${barColors[status]}" data-w="${barPct}%"></div>
+        </div>
+      </div>`;
+  }
+
+  return `
+    <div class="doc-card ${status}" style="animation-delay:${i*0.05}s">
+      <div class="doc-stripe ${status}"></div>
+      <div class="doc-body">
+        <div class="doc-top">
+          <div class="doc-icon-wrap" style="background:${col.bg}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="${col.stroke}" stroke-width="2" style="width:22px;height:22px">
+              ${catIcons[d.cat]?.match(/<svg[^>]*>(.*)<\/svg>/s)?.[1] || ''}
+            </svg>
+          </div>
+          <span class="doc-status-badge ${status}"><span class="badge-dot"></span>${statusLabels[status]}</span>
+        </div>
+        <div class="doc-name">${d.nome}</div>
+        <div class="doc-category">${catLabels[d.cat]}</div>
+        <div class="doc-meta">
+          <div class="doc-meta-row"><span class="doc-meta-label">Órgão Emissor</span><span class="doc-meta-val">${d.orgao}</span></div>
+          <div class="doc-meta-row"><span class="doc-meta-label">Número</span><span class="doc-meta-val">${d.numero || '—'}</span></div>
+          <div class="doc-meta-row"><span class="doc-meta-label">Emissão</span><span class="doc-meta-val">${fmtDate(d.emissao)}</span></div>
+          <div class="doc-meta-row"><span class="doc-meta-label">Vencimento</span><span class="doc-meta-val" style="color:${barColors[status]}">${d.vencimento ? fmtDate(d.vencimento) : 'Não vence'}</span></div>
+        </div>
+        ${expiryHTML}
+      </div>
+      <div class="doc-footer">
+        <button class="doc-action" onclick="viewDoc(${d.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Ver
+        </button>
+        <div class="doc-action-sep"></div>
+        <button class="doc-action" onclick="openEditModal(${d.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Editar
+        </button>
+        <div class="doc-action-sep"></div>
+        <button class="doc-action" onclick="deleteDoc(${d.id})" style="color:var(--red)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          Excluir
+        </button>
+      </div>
+    </div>`;
+}
+
+/* ── FILTERS ── */
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderDocs();
+}
+function searchDocs(q) {
+  searchQuery = q;
+  renderDocs();
+}
+
+/* ── ADD MODAL ── */
+function openAddModal() {
+  editingId = null;
+  selectedFile = null;
+  document.getElementById('formTitle').textContent = 'Novo Documento';
+  document.getElementById('f-nome').value = '';
+  document.getElementById('f-cat').value  = 'licencas';
+  document.getElementById('f-orgao').value= '';
+  document.getElementById('f-numero').value='';
+  document.getElementById('f-emissao').value = new Date().toISOString().split('T')[0];
+  document.getElementById('f-vencimento').value='';
+  document.getElementById('f-obs').value  = '';
+  document.getElementById('filePreview').style.display='none';
+  document.getElementById('addModal').classList.add('open');
+}
+function openEditModal(id) {
+  const d = docs.find(x=>x.id===id);
+  if (!d) return;
+  editingId = id;
+  document.getElementById('formTitle').textContent = 'Editar Documento';
+  document.getElementById('f-nome').value    = d.nome;
+  document.getElementById('f-cat').value     = d.cat;
+  document.getElementById('f-orgao').value   = d.orgao;
+  document.getElementById('f-numero').value  = d.numero;
+  document.getElementById('f-emissao').value = d.emissao;
+  document.getElementById('f-vencimento').value = d.vencimento || '';
+  document.getElementById('f-obs').value     = d.obs;
+  if (d.arquivo) {
+    document.getElementById('filePreviewName').textContent = d.arquivo;
+    document.getElementById('filePreview').style.display='flex';
+  } else {
+    document.getElementById('filePreview').style.display='none';
+  }
+  closeViewModal();
+  document.getElementById('addModal').classList.add('open');
+}
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+
+function saveDoc() {
+  const nome = document.getElementById('f-nome').value.trim();
+  if (!nome) { document.getElementById('f-nome').focus(); return; }
+
+  const data = {
+    nome,
+    cat:       document.getElementById('f-cat').value,
+    orgao:     document.getElementById('f-orgao').value.trim(),
+    numero:    document.getElementById('f-numero').value.trim(),
+    emissao:   document.getElementById('f-emissao').value,
+    vencimento:document.getElementById('f-vencimento').value || null,
+    obs:       document.getElementById('f-obs').value.trim(),
+    arquivo:   selectedFile ? selectedFile.name : (editingId ? docs.find(d=>d.id===editingId)?.arquivo : null),
+  };
+
+  if (editingId) {
+    const idx = docs.findIndex(d=>d.id===editingId);
+    docs[idx] = { ...docs[idx], ...data };
+  } else {
+    docs.unshift({ id: nextId++, ...data });
+  }
+
+  closeAddModal();
+  renderDocs();
+  updateCounts();
+}
+
+/* ── DELETE ── */
+function deleteDoc(id) {
+  if (!confirm('Tem certeza que deseja excluir este documento?')) return;
+  docs = docs.filter(d=>d.id!==id);
+  renderDocs();
+  updateCounts();
+}
+
+/* ── VIEW MODAL ── */
+function viewDoc(id) {
+  const d = docs.find(x=>x.id===id);
+  if (!d) return;
+  const status = getStatus(d.vencimento);
+  const daysLeft = getDaysLeft(d.vencimento);
+
+  document.getElementById('view-cat').textContent  = catLabels[d.cat];
+  document.getElementById('view-nome').textContent = d.nome;
+  document.getElementById('viewFileName').textContent = d.arquivo || 'Nenhum arquivo';
+
+  let daysStr = d.vencimento
+    ? (daysLeft < 0 ? `Vencido há ${Math.abs(daysLeft)} dias` : `${daysLeft} dias restantes`)
+    : 'Não vence';
+
+  document.getElementById('viewGrid').innerHTML = `
+    <div class="view-field"><div class="view-field-label">Órgão Emissor</div><div class="view-field-val">${d.orgao||'—'}</div></div>
+    <div class="view-field"><div class="view-field-label">Número / Protocolo</div><div class="view-field-val">${d.numero||'—'}</div></div>
+    <div class="view-field"><div class="view-field-label">Data de Emissão</div><div class="view-field-val">${fmtDate(d.emissao)}</div></div>
+    <div class="view-field"><div class="view-field-label">Data de Vencimento</div><div class="view-field-val" style="color:${barColors[status]}">${d.vencimento?fmtDate(d.vencimento):'Não vence'}</div></div>
+    <div class="view-field" style="grid-column:1/-1"><div class="view-field-label">Situação</div><div class="view-field-val" style="color:${barColors[status]}">${statusLabels[status]} — ${daysStr}</div></div>
+  `;
+
+  const obsWrap = document.getElementById('viewObsWrap');
+  if (d.obs) {
+    obsWrap.style.display='block';
+    document.getElementById('viewObs').textContent = d.obs;
+  } else {
+    obsWrap.style.display='none';
+  }
+
+  document.getElementById('viewModal').classList.add('open');
+}
+function closeViewModal() { document.getElementById('viewModal').classList.remove('open'); }
+function editDoc() {
+  const nome = document.getElementById('view-nome').textContent;
+  const d = docs.find(x=>x.nome===nome);
+  if (d) openEditModal(d.id);
+}
+
+/* ── FILE UPLOAD ── */
+function fileSelected(input) {
+  if (input.files[0]) setFile(input.files[0]);
+}
+function setFile(file) {
+  selectedFile = file;
+  document.getElementById('filePreviewName').textContent = file.name;
+  document.getElementById('filePreview').style.display = 'flex';
+}
+function dragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag'); }
+function dragLeave()  { document.getElementById('uploadZone').classList.remove('drag'); }
+function dropFile(e)  { e.preventDefault(); dragLeave(); if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); }
+
+/* ── EXPORT ── */
+function exportDocs() {
+  const rows = ['Nome,Categoria,Órgão,Número,Emissão,Vencimento,Status'];
+  docs.forEach(d => {
+    rows.push([d.nome, catLabels[d.cat], d.orgao, d.numero, fmtDate(d.emissao), d.vencimento?fmtDate(d.vencimento):'Permanente', statusLabels[getStatus(d.vencimento)]].join(','));
+  });
+  const blob = new Blob([rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'documentos_espaco_veneto.csv';
+  a.click();
+}
+
+/* ── CLOSE ON BACKDROP ── */
+['addModal','viewModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+});
+
+/* ── INIT ── */
+renderDocs();
+updateCounts();
+</script>
+</body>
+</html>
