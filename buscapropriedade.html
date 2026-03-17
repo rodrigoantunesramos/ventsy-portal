@@ -2269,6 +2269,19 @@ input:checked + .slider-round:before { transform: translateX(20px); }
         console.log('📦 Primeiras 5 propriedades no banco:', todos);
         console.log('❌ Erro geral:', erroTodos);
 
+        // ── DEBUG: inspeciona a estrutura real do banco ──
+        const { data: amostra } = await _supabase
+            .from('propriedades')
+            .select('*')
+            .eq('publicada', true)
+            .limit(1);
+        if (amostra && amostra.length > 0) {
+            console.group('🗄️ ESTRUTURA REAL DO BANCO (1 registro)');
+            console.log('Todas as colunas:', Object.keys(amostra[0]));
+            console.log('Valores:', amostra[0]);
+            console.groupEnd();
+        }
+
         let query = _supabase.from('propriedades').select('*').eq('publicada', true);
         if (estadoBuscado) query = query.eq('estado', estadoBuscado);
         if (cidadeBuscada) query = query.ilike('cidade', `%${cidadeBuscada}%`);
@@ -2419,6 +2432,19 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             const titulo  = document.getElementById('titulo-resultados');
             const sub     = document.getElementById('subtitulo-resultados');
 
+            // ── DEBUG: mostra o que foi coletado ──
+            console.group('🔎 FILTROS COLETADOS');
+            console.log('precoMin:', filtros.precoMin, '| precoMax:', filtros.precoMax);
+            console.log('capacidade:', filtros.capacidade);
+            console.log('estado (raw):', filtros.estado, '| cidade:', filtros.cidade);
+            console.log('climatizado:', filtros.climatizado, '| estacionamento:', filtros.estacionamento);
+            console.log('seguranca:', filtros.seguranca, '| espacoAberto:', filtros.espacoAberto);
+            console.log('somAlto:', filtros.somAlto, '| somTarde:', filtros.somTarde);
+            console.log('acessibilidade:', filtros.acessibilidade, '| premium:', filtros.premium);
+            console.log('tiposEvento:', filtros.tiposEvento);
+            console.log('categorias (tipo propriedade):', filtros.categorias);
+            console.groupEnd();
+
             // Registra cada tipo de evento selecionado
             filtros.tiposEvento.forEach(t => registrarBusca(t));
 
@@ -2449,11 +2475,13 @@ input:checked + .slider-round:before { transform: translateX(20px); }
 
             // Tipos de evento — filtra por qualquer um dos selecionados
             if (filtros.tiposEvento && filtros.tiposEvento.length > 0) {
+                console.log('🎯 Aplicando filtro tipo_evento IN:', filtros.tiposEvento);
                 query = query.in('tipo_evento', filtros.tiposEvento);
             }
 
             // Tipo de propriedade — se marcou algum, filtra por qualquer um dos marcados
             if (filtros.categorias && filtros.categorias.length > 0) {
+                console.log('🏠 Aplicando filtro categoria IN:', filtros.categorias);
                 query = query.in('categoria', filtros.categorias);
             }
 
@@ -2479,8 +2507,30 @@ input:checked + .slider-round:before { transform: translateX(20px); }
 
             const { data: propriedades, error } = await query;
 
+            // ── DEBUG: mostra o resultado ──
+            console.group('📦 RESULTADO DO SUPABASE');
+            console.log('erro:', error);
+            console.log('total retornado:', propriedades?.length);
+            if (propriedades?.length > 0) {
+                console.log('exemplo de registro (1º):', propriedades[0]);
+                console.log('colunas disponíveis:', Object.keys(propriedades[0]));
+                // Mostra valores únicos dos campos relevantes
+                const categoriaUnicas = [...new Set(propriedades.map(p => p.categoria))];
+                const tipoEventoUnicos = [...new Set(propriedades.map(p => p.tipo_evento))];
+                const climValues      = [...new Set(propriedades.map(p => p.climatizado))];
+                const estacValues     = [...new Set(propriedades.map(p => p.estacionamento))];
+                const somAltoValues   = [...new Set(propriedades.map(p => p.som_alto))];
+                console.log('valores únicos de "categoria":', categoriaUnicas);
+                console.log('valores únicos de "tipo_evento":', tipoEventoUnicos);
+                console.log('valores únicos de "climatizado":', climValues);
+                console.log('valores únicos de "estacionamento":', estacValues);
+                console.log('valores únicos de "som_alto":', somAltoValues);
+            }
+            console.groupEnd();
+
             if (error) {
-                grid.innerHTML = '<p style="color:red;padding:20px">Erro ao filtrar.</p>';
+                console.error('❌ Erro Supabase:', error.message, error.details, error.hint);
+                grid.innerHTML = `<p style="color:red;padding:20px">Erro ao filtrar: ${error.message}</p>`;
                 return;
             }
 
