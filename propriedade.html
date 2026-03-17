@@ -1218,10 +1218,22 @@ function renderPagina(p) {
         document.getElementById('badge-ultra').style.display = 'inline';
     }
 
+    // Banner de plano PRO (identificação visual no topo do card lateral)
+    if (PLANO === 'pro') {
+        // Adiciona um pequeno indicador PRO ao lado do nome
+        const meta = document.querySelector('.prop-meta');
+        if (meta && !document.getElementById('badge-pro')) {
+            const badge = document.createElement('span');
+            badge.id = 'badge-pro';
+            badge.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border-radius:20px;padding:3px 12px;font-size:.74rem;font-weight:700;letter-spacing:.04em">★ PRO</span>`;
+            meta.appendChild(badge);
+        }
+    }
+
     // Avaliações
     renderAvaliacoes();
 
-    // Similares (só básico)
+    // Similares (só básico — serve como upsell para outros espaços)
     if (PLANO === 'basico') {
         document.getElementById('secao-similares').style.display = 'block';
         renderSimilares();
@@ -1252,23 +1264,69 @@ function renderGaleria() {
     const grid = document.getElementById('galeria-grid');
     grid.innerHTML = '';
 
-    // Limite por plano
-    const limite = PLANO === 'basico' ? 5 : FOTOS.length;
-    const fotosExibir = FOTOS.slice(0, Math.max(5, limite));
+    const isBasico = PLANO === 'basico';
+    const isPro    = PLANO === 'pro';
+    const isUltra  = PLANO === 'ultra';
 
-    // Precisamos de exatamente 5 slots para o grid (1 principal + 4)
-    const slots = Math.min(fotosExibir.length, 5);
+    // ── BÁSICO: exibe até 5 fotos no grid, sem vídeos, sem badge ──
+    // ── PRO / ULTRA: exibe até 5 no grid destaque + abre modal com todas ──
+    const fotosDestaque = FOTOS.slice(0, 5);
 
-    fotosExibir.slice(0, slots).forEach((foto, i) => {
+    fotosDestaque.forEach((foto, i) => {
         const div = document.createElement('div');
         div.className = 'foto-slot' + (i === 0 ? ' foto-main' : '');
-        div.innerHTML = `<img src="${foto.url}" alt="${foto.titulo || 'Foto ' + (i+1)}" loading="lazy" onerror="this.src='https://picsum.photos/seed/fallback${i}/800/600'">`;
+
+        // PRO/ULTRA: foto clicável abre galeria completa
+        if (!isBasico) {
+            div.style.cursor = 'pointer';
+            div.onclick = () => abrirModalGaleria();
+        }
+
+        div.innerHTML = `<img src="${foto.url}" alt="${foto.titulo || 'Foto ' + (i+1)}" loading="lazy"
+            onerror="this.src='https://picsum.photos/seed/fallback${i}/800/600'">`;
         grid.appendChild(div);
     });
 
-    // Botão vídeos no ultra
-    if (PLANO === 'ultra' && VIDEOS.length > 0) {
+    // Botão "Ver todos as fotos" — só aparece se tiver mais de 5 fotos E for pro/ultra
+    const btnGaleria = document.querySelector('.btn-galeria:not(#btn-videos)');
+    if (btnGaleria) {
+        if (isBasico) {
+            // Básico: esconde botão de galeria completa (não tem acesso a mais fotos)
+            btnGaleria.style.display = 'none';
+        } else {
+            // Pro/Ultra: mostra quantas fotos tem no total
+            const totalFotos = FOTOS.length;
+            btnGaleria.style.display = 'flex';
+            if (totalFotos > 5) {
+                btnGaleria.textContent = `⊞ Ver todas as ${totalFotos} fotos`;
+            } else {
+                btnGaleria.innerHTML = '⊞ Mostrar todas as fotos';
+            }
+        }
+    }
+
+    // Botão vídeos — somente ultra
+    if (isUltra && VIDEOS.length > 0) {
         document.getElementById('btn-videos').style.display = 'flex';
+    }
+
+    // ── Overlay "mais fotos" no último slot (pro/ultra com > 5 fotos) ──
+    if (!isBasico && FOTOS.length > 5) {
+        const ultimoSlot = grid.querySelector('.foto-slot:last-child');
+        if (ultimoSlot) {
+            const restantes = FOTOS.length - 4;
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position:absolute;inset:0;background:rgba(0,0,0,.5);
+                display:flex;align-items:center;justify-content:center;
+                color:#fff;font-size:1.4rem;font-weight:800;cursor:pointer;
+                border-radius:inherit;
+            `;
+            overlay.textContent = `+${restantes}`;
+            overlay.onclick = () => abrirModalGaleria();
+            ultimoSlot.style.position = 'relative';
+            ultimoSlot.appendChild(overlay);
+        }
     }
 }
 
@@ -1311,11 +1369,43 @@ function renderCardLateral() {
     const card = document.getElementById('card-lateral');
 
     if (PLANO === 'basico') {
+        // Básico: mostra preço base (se houver), mas bloqueia contato direto e formulário
+        const precoBasicoHtml = (VALOR_HORA > 0 || VALOR_DIARIA > 0) ? `
+            <div class="preco-lateral" style="margin-bottom:16px">
+                ${VALOR_HORA > 0 ? `
+                <div class="preco-item">
+                    <span class="preco-item-label">Por hora</span>
+                    <span class="preco-item-valor" style="filter:blur(5px);user-select:none">R$ ${VALOR_HORA.toLocaleString('pt-BR')}<em>/h</em></span>
+                </div>` : ''}
+                ${VALOR_DIARIA > 0 ? `
+                <div class="preco-item">
+                    <span class="preco-item-label">Por diária</span>
+                    <span class="preco-item-valor" style="filter:blur(5px);user-select:none">R$ ${VALOR_DIARIA.toLocaleString('pt-BR')}<em>/dia</em></span>
+                </div>` : ''}
+            </div>
+            <p style="font-size:.72rem;color:#aaa;text-align:center;margin-bottom:16px;letter-spacing:.02em">🔒 Desbloqueie os preços e o contato</p>
+        ` : '';
+
         card.innerHTML = `
+            ${precoBasicoHtml}
             <div class="bloco-basico-cta">
                 <p style="font-size:2rem;margin-bottom:10px">🏡</p>
-                <p>Este espaço está disponível na VENTSY. Para ver preços e entrar em contato com o proprietário, conheça nossos planos.</p>
-                <a href="planos.html" style="display:inline-block;margin-top:14px;background:var(--vermelho);color:#fff;padding:10px 20px;border-radius:8px;font-weight:700;text-decoration:none;font-size:.88rem">Ver planos VENTSY</a>
+                <p>Este espaço está no plano <strong>Básico</strong>. Para ver preços completos, formulário de reserva e contato direto com o proprietário, conheça nossos planos.</p>
+                <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+                    <a href="planos.html" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--vermelho);color:#fff;padding:13px 20px;border-radius:12px;font-weight:700;text-decoration:none;font-size:.92rem">
+                        ✦ Ver planos PRO e ULTRA
+                    </a>
+                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px">
+                        <p style="font-size:.78rem;color:#166534;font-weight:600;margin-bottom:6px">O que você ganha nos planos superiores:</p>
+                        <ul style="list-style:none;font-size:.76rem;color:#15803d;line-height:1.8">
+                            <li>✓ Preços e valores visíveis</li>
+                            <li>✓ Contato direto via WhatsApp</li>
+                            <li>✓ Formulário de reserva completo</li>
+                            <li>✓ Galeria com todas as fotos</li>
+                            <li>✓ Vídeos e tour 360° (Ultra)</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         `;
         return;
