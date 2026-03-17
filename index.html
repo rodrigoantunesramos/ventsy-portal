@@ -526,10 +526,7 @@ const _sb = supabase.createClient(
 /* ── Categorias ── */
 const CATS = [
     { nome: 'Casas de Festas',                 emoji: '🏠' },
-    { nome: 'Sítios',     emoji: '🌳' },
-    { nome: 'Chácaras',     emoji: '🌳' },
-    { nome: 'Fazendas',     emoji: '🌳' },
-    { nome: 'Casa',     emoji: '🌳' },
+    { nome: 'Sítios, Chácaras e Fazendas',     emoji: '🌳' },
     { nome: 'Acampamentos',                    emoji: '⛺' },
     { nome: 'Bares e Restaurantes',            emoji: '🍽️' },
     { nome: 'Beach Clubs',                     emoji: '🏖️' },
@@ -688,7 +685,15 @@ async function render() {
     });
 }
 
+async function registrarBusca(tipoEvento) {
+    if (!tipoEvento) return;
+    try {
+        await _sb.from('buscas').insert({ tipo_evento: tipoEvento });
+    } catch (_) {}
+}
+
 function buscarCat(cat) {
+    registrarBusca(cat);
     const url = new URL('buscapropriedade.html', window.location.href);
     url.searchParams.set('tipo', cat);
     window.location.href = url.toString();
@@ -698,6 +703,21 @@ function toggleFav(btn) {
     btn.classList.toggle('fav-on');
     btn.textContent = btn.classList.contains('fav-on') ? '❤' : '♡';
 }
+
+/* ── Dados demo quando banco estiver vazio ── */
+const DEMO = [
+    {id:'d1',nome:'Chácara Macacu',cidade:'Cachoeiras de Macacu, RJ',preco:3000,nota_media:4.9,_plano:'ultra',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara1/420/320'},
+    {id:'d2',nome:'Sítio Verde Vale',cidade:'Guapimirim, RJ',preco:2200,nota_media:4.7,_plano:'pro',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara2/420/320'},
+    {id:'d3',nome:'Sítio Brisa',cidade:'Petrópolis, RJ',preco:1900,nota_media:4.5,_plano:'pro',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara3/420/320'},
+    {id:'d4',nome:'Chácara das Flores',cidade:'Teresópolis, RJ',preco:1800,nota_media:4.3,_plano:'basico',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara4/420/320'},
+    {id:'d5',nome:'Espaço Aquarela',cidade:'Petrópolis, RJ',preco:3200,nota_media:4.8,_plano:'ultra',categoria:'Casas de Festas',imagem_url:'https://picsum.photos/seed/salao1/420/320'},
+    {id:'d6',nome:'Salão Primavera',cidade:'Nova Friburgo, RJ',preco:1500,nota_media:4.4,_plano:'pro',categoria:'Casas de Festas',imagem_url:'https://picsum.photos/seed/salao2/420/320'},
+    {id:'d7',nome:'Espaço Garden',cidade:'Niterói, RJ',preco:2100,nota_media:4.2,_plano:'basico',categoria:'Casas de Festas',imagem_url:'https://picsum.photos/seed/salao3/420/320'},
+    {id:'d8',nome:'Rooftop 360°',cidade:'Rio de Janeiro, RJ',preco:5000,nota_media:5.0,_plano:'ultra',categoria:'Rooftops',imagem_url:'https://picsum.photos/seed/roof1/420/320'},
+    {id:'d9',nome:'Sky Lounge',cidade:'São Paulo, SP',preco:4200,nota_media:4.9,_plano:'pro',categoria:'Rooftops',imagem_url:'https://picsum.photos/seed/roof2/420/320'},
+    {id:'d10',nome:'Terraço Carioca',cidade:'Rio de Janeiro, RJ',preco:3800,nota_media:4.6,_plano:'basico',categoria:'Rooftops',imagem_url:'https://picsum.photos/seed/roof3/420/320'},
+];
+DEMO.forEach(d => { d._nota = d.nota_media; });
 
 /* ── Estados ── */
 const ESTADOS = [
@@ -788,6 +808,7 @@ btnBusca.addEventListener('click', () => {
     const tipo  = document.getElementById('tipo-espaco')?.value || '';
     const conv  = document.getElementById('qtd-total')?.value   || '0';
     const data  = dQuando.textContent.trim();
+    registrarBusca(tipo);
     const url   = new URL('buscapropriedade.html', window.location.href);
     url.searchParams.set('estado', estado);
     if (tipo)              url.searchParams.set('evento', tipo);
