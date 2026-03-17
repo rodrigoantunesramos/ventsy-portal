@@ -79,8 +79,6 @@
         .senha-forca { display: flex; gap: 5px; margin-top: 8px; }
         .forca-barra { flex: 1; height: 3px; border-radius: 4px; background: var(--cinza-borda); transition: background 0.3s; }
         .forca-label { font-size: 0.72rem; font-weight: 600; margin-top: 4px; color: var(--texto-suave); text-align: right; }
-
-        /* CAMPO EMAIL */
         .input-wrap input.com-toggle { padding-right: 40px; }
 
         /* TERMOS */
@@ -126,127 +124,41 @@
 
         @media (max-width: 540px) {
             .cadastro-card { padding: 28px 20px; }
-            .footer-container { flex-direction: column; gap: 30px; }
+            .footer-container { flex-direction: column; flex-wrap: wrap; gap: 28px; }
+            .tipo-doc { grid-template-columns: 1fr; }
         }
         @media (max-width: 768px) {
             header { height: auto; min-height: 64px; flex-wrap: wrap; padding: 10px 4%; }
             .logo { height: 44px; }
         }
-        @media (max-width: 540px) {
-            .tipo-doc { grid-template-columns: 1fr !important; }
-            .footer-container { flex-wrap: wrap; gap: 28px; }
-        }
-        @media (max-width: 480px) {
-            main { padding: 100px 4% 48px; }
-        }
+        @media (max-width: 480px) { main { padding: 100px 4% 48px; } }
 
-        /* ── BLOCO DE INDICAÇÃO ── */
-        .indicacao-bloco {
-            margin-bottom: 24px;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 2px solid #ff385c;
-            background: linear-gradient(135deg, #fff5f7 0%, #fff 60%);
-            box-shadow: 0 4px 20px rgba(255,56,92,0.12);
-        }
-        .indicacao-cabecalho {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: linear-gradient(90deg, #ff385c 0%, #ff6b84 100%);
-            padding: 14px 20px;
-        }
-        .indicacao-emoji {
-            font-size: 1.5rem;
-            line-height: 1;
-            flex-shrink: 0;
-        }
-        .indicacao-cabecalho-texto strong {
-            display: block;
-            color: #fff;
-            font-size: 0.95rem;
-            font-weight: 700;
-            letter-spacing: 0.01em;
-        }
-        .indicacao-cabecalho-texto span {
-            color: rgba(255,255,255,0.82);
-            font-size: 0.76rem;
-        }
-        .indicacao-corpo {
-            padding: 18px 20px;
-        }
-        .indicacao-corpo p {
-            font-size: 0.82rem;
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 14px;
-        }
+        /* BLOCO INDICAÇÃO */
+        .indicacao-bloco { margin-bottom: 24px; border-radius: 16px; overflow: hidden; border: 2px solid #ff385c; background: linear-gradient(135deg, #fff5f7 0%, #fff 60%); box-shadow: 0 4px 20px rgba(255,56,92,0.12); }
+        .indicacao-cabecalho { display: flex; align-items: center; gap: 12px; background: linear-gradient(90deg, #ff385c 0%, #ff6b84 100%); padding: 14px 20px; }
+        .indicacao-emoji { font-size: 1.5rem; line-height: 1; flex-shrink: 0; }
+        .indicacao-cabecalho-texto strong { display: block; color: #fff; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.01em; }
+        .indicacao-cabecalho-texto span { color: rgba(255,255,255,0.82); font-size: 0.76rem; }
+        .indicacao-corpo { padding: 18px 20px; }
+        .indicacao-corpo p { font-size: 0.82rem; color: #555; line-height: 1.6; margin-bottom: 14px; }
         .indicacao-corpo p strong { color: #0d0d0d; }
-        .indicacao-input-wrap {
-            position: relative;
-        }
-        .indicacao-input-wrap .material-icons.icon-left {
-            position: absolute;
-            left: 13px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.1rem;
-            color: #ff385c;
-            pointer-events: none;
-        }
-        #ref-codigo {
-            width: 100%;
-            padding: 11px 40px 11px 40px;
-            border: 1.5px solid #ffc5d0;
-            border-radius: 11px;
-            font-family: 'DM Sans', inherit;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #0d0d0d;
-            background: #fff;
-            outline: none;
-            letter-spacing: 0.04em;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        #ref-codigo:focus {
-            border-color: #ff385c;
-            box-shadow: 0 0 0 3px rgba(255,56,92,0.12);
-        }
-        #ref-codigo.preenchido-auto {
-            background: #f0fdf4;
-            border-color: #22c55e;
-            color: #166534;
-        }
-        .ref-status-icone {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.1rem;
-            display: none;
-        }
-        .ref-status-icone.ok    { color: #22c55e; display: block; }
+        .indicacao-input-wrap { position: relative; }
+        .indicacao-input-wrap .material-icons.icon-left { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: #ff385c; pointer-events: none; }
+        #ref-codigo { width: 100%; padding: 11px 40px 11px 40px; border: 1.5px solid #ffc5d0; border-radius: 11px; font-family: 'DM Sans', inherit; font-size: 0.95rem; font-weight: 600; color: #0d0d0d; background: #fff; outline: none; letter-spacing: 0.04em; transition: border-color 0.2s, box-shadow 0.2s; }
+        #ref-codigo:focus { border-color: #ff385c; box-shadow: 0 0 0 3px rgba(255,56,92,0.12); }
+        #ref-codigo.preenchido-auto { background: #f0fdf4; border-color: #22c55e; color: #166534; }
+        #ref-codigo.erro { border-color: #ff385c; box-shadow: 0 0 0 3px rgba(255,56,92,0.15); background: #fff0f3; }
+        .ref-status-icone { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; display: none; }
+        .ref-status-icone.ok { color: #22c55e; display: block; }
         .ref-status-icone.aviso { color: #f59e0b; display: block; }
-        .ref-hint {
-            font-size: 0.74rem;
-            margin-top: 7px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            color: #888;
-        }
-        .ref-hint.ok    { color: #22c55e; }
-        .ref-hint.aviso { color: #f59e0b; }
-        .ref-hint .material-icons { font-size: 0.85rem; }
-        .ref-hint.erro  { color: #c0152b; }
         .ref-status-icone.erro { color: #c0152b; display: block; }
-        #ref-codigo.erro {
-            border-color: #ff385c;
-            box-shadow: 0 0 0 3px rgba(255,56,92,0.15);
-            background: #fff0f3;
-        }
-        .indicacao-bloco.validando { opacity: 0.7; pointer-events: none; }
+        .ref-hint { font-size: 0.74rem; margin-top: 7px; display: flex; align-items: center; gap: 5px; color: #888; }
+        .ref-hint.ok { color: #22c55e; }
+        .ref-hint.aviso { color: #f59e0b; }
+        .ref-hint.erro { color: #c0152b; }
+        .ref-hint .material-icons { font-size: 0.85rem; }
 
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -281,16 +193,13 @@
 
         <div class="cadastro-card">
 
-            <!-- FORMULÁRIO -->
             <div id="form-cadastro">
 
-                <!-- Alerta de erro/sucesso -->
                 <div class="alerta" id="alerta">
                     <span class="material-icons" id="alerta-icone"></span>
                     <span id="alerta-msg"></span>
                 </div>
 
-                <!-- Tipo de documento -->
                 <div class="tipo-doc">
                     <button class="tipo-btn ativo" id="btn-cpf" onclick="selecionarDoc('cpf')">
                         <span class="material-icons">person</span> CPF (Pessoa Física)
@@ -300,7 +209,6 @@
                     </button>
                 </div>
 
-                <!-- Documento -->
                 <div class="form-group">
                     <label id="label-doc" for="documento">CPF</label>
                     <div class="input-wrap">
@@ -313,7 +221,6 @@
 
                 <div class="divider"><span>Dados pessoais</span></div>
 
-                <!-- Nome -->
                 <div class="form-group">
                     <label for="nome">Nome completo</label>
                     <div class="input-wrap">
@@ -324,7 +231,6 @@
                     <p class="campo-hint" id="hint-nome"></p>
                 </div>
 
-                <!-- Nascimento -->
                 <div class="form-group">
                     <label for="nascimento">Data de nascimento</label>
                     <div class="input-wrap">
@@ -337,7 +243,6 @@
 
                 <div class="divider"><span>Acesso à plataforma</span></div>
 
-                <!-- E-mail -->
                 <div class="form-group">
                     <label for="email">E-mail</label>
                     <div class="input-wrap">
@@ -348,7 +253,6 @@
                     <p class="campo-hint" id="hint-email">Usado para fazer login na plataforma.</p>
                 </div>
 
-                <!-- Usuário -->
                 <div class="form-group">
                     <label for="usuario">Nome de usuário</label>
                     <div class="input-wrap">
@@ -359,13 +263,12 @@
                     <p class="campo-hint" id="hint-usuario">Letras minúsculas, números e _ (sem espaços).</p>
                 </div>
 
-                <!-- Senha -->
                 <div class="form-group">
                     <label for="senha">Senha</label>
                     <div class="input-wrap">
                         <span class="material-icons icon-left">lock_outline</span>
                         <input type="password" id="senha" class="com-toggle" placeholder="Mínimo 8 caracteres" oninput="avaliarSenha()">
-                        <button type="button" class="toggle-senha" onclick="toggleSenha('senha', 'olho-senha')" tabindex="-1">
+                        <button type="button" class="toggle-senha" onclick="toggleSenha('senha','olho-senha')" tabindex="-1">
                             <span class="material-icons" id="olho-senha">visibility_off</span>
                         </button>
                     </div>
@@ -378,20 +281,18 @@
                     <p class="forca-label" id="forca-label"></p>
                 </div>
 
-                <!-- Confirmar senha -->
                 <div class="form-group">
                     <label for="senha2">Confirmar senha</label>
                     <div class="input-wrap">
                         <span class="material-icons icon-left">lock_outline</span>
                         <input type="password" id="senha2" class="com-toggle" placeholder="Repita a senha" onblur="validarSenha2()">
-                        <button type="button" class="toggle-senha" onclick="toggleSenha('senha2', 'olho-senha2')" tabindex="-1">
+                        <button type="button" class="toggle-senha" onclick="toggleSenha('senha2','olho-senha2')" tabindex="-1">
                             <span class="material-icons" id="olho-senha2">visibility_off</span>
                         </button>
                     </div>
                     <p class="campo-hint" id="hint-senha2"></p>
                 </div>
 
-                <!-- ── BLOCO INDICAÇÃO ── -->
                 <div class="indicacao-bloco" id="bloco-indicacao">
                     <div class="indicacao-cabecalho">
                         <div class="indicacao-emoji">🤝</div>
@@ -408,14 +309,7 @@
                         </p>
                         <div class="indicacao-input-wrap">
                             <span class="material-icons icon-left">card_giftcard</span>
-                            <input
-                                type="text"
-                                id="ref-codigo"
-                                placeholder="Ex: A3KX92BZ"
-                                maxlength="8"
-                                autocomplete="off"
-                                oninput="validarRefCodigo()"
-                            >
+                            <input type="text" id="ref-codigo" placeholder="Ex: A3KX92BZ" maxlength="8" autocomplete="off" oninput="validarRefCodigo()">
                             <span class="material-icons ref-status-icone" id="ref-status-icone"></span>
                         </div>
                         <p class="ref-hint" id="ref-hint">
@@ -425,13 +319,11 @@
                     </div>
                 </div>
 
-                <!-- Termos -->
                 <div class="termos-linha">
                     <input type="checkbox" id="termos">
                     <p>Li e concordo com os <a href="#">Termos de Uso</a> e a <a href="#">Política de Privacidade</a> da VENTSY.</p>
                 </div>
 
-                <!-- Botão -->
                 <button class="btn-cadastrar" id="btn-cadastrar" onclick="submeterCadastro()">
                     <span class="material-icons">arrow_forward</span>
                     Criar minha conta
@@ -439,7 +331,6 @@
 
             </div>
 
-            <!-- SUCESSO -->
             <div class="sucesso-screen" id="sucesso">
                 <div class="sucesso-icone-grande">
                     <span class="material-icons">check</span>
@@ -458,7 +349,6 @@
     </div>
 </main>
 
-<!-- ──────────── FOOTER ──────────── -->
 <footer class="main-footer">
     <div class="footer-container">
         <div class="footer-column">
@@ -481,7 +371,6 @@
     <div class="footer-bottom"><p>&copy; 2026 VENTSY. Todos os direitos reservados.</p></div>
 </footer>
 
-    
 <script>
 // ── Supabase ──
 const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
@@ -489,73 +378,22 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
-// ── Indicação: captura ?ref= da URL e preenche o campo ──
-(function() {
-    const params = new URLSearchParams(window.location.search);
-    const ref = params.get('ref');
-    if (ref) {
-        // Salva também no sessionStorage para sobreviver a troca de dispositivo
-        // (o usuário pode ter copiado o link e aberto no desktop manualmente)
-        sessionStorage.setItem('ventsy_ref', ref);
-    }
-    // Recupera do sessionStorage se não vier pela URL (ex: abriu em outro dispositivo
-    // mas copiou o link manualmente — neste caso o campo fica vazio para o usuário preencher)
+// ── Captura código de indicação da URL ──
+(function () {
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref) sessionStorage.setItem('ventsy_ref', ref);
     const refFinal = ref || sessionStorage.getItem('ventsy_ref') || '';
     if (refFinal) {
         const campo = document.getElementById('ref-codigo');
         if (campo) {
             campo.value = refFinal;
             campo.classList.add('preenchido-auto');
-            campo.readOnly = false; // deixa editar caso queira corrigir
             atualizarRefHint(refFinal, true);
         }
     }
 })();
 
-function validarRefCodigo() {
-    const campo = document.getElementById('ref-codigo');
-    campo.classList.remove('preenchido-auto', 'erro');
-    atualizarRefHint(campo.value.trim(), false);
-}
-
-function atualizarRefHint(valor, autoPreenchido) {
-    const icone = document.getElementById('ref-status-icone');
-    const hint  = document.getElementById('ref-hint');
-    if (!valor) {
-        icone.className = 'material-icons ref-status-icone';
-        hint.className  = 'ref-hint';
-        hint.innerHTML  = '<span class="material-icons">info</span> Opcional — deixe em branco se não foi indicado por ninguém.';
-        return;
-    }
-    if (autoPreenchido) {
-        icone.className    = 'material-icons ref-status-icone ok';
-        icone.textContent  = 'check_circle';
-        hint.className     = 'ref-hint ok';
-        hint.innerHTML     = '<span class="material-icons">check_circle</span> Código preenchido automaticamente pelo link de convite!';
-        document.getElementById('ref-codigo').classList.add('preenchido-auto');
-    } else {
-        icone.className    = 'material-icons ref-status-icone aviso';
-        icone.textContent  = 'edit';
-        hint.className     = 'ref-hint aviso';
-        hint.innerHTML     = '<span class="material-icons">warning_amber</span> Digite exatamente como te passaram — maiúsculas e minúsculas importam!';
-    }
-}
-
-// Verifica se o seucodigo existe via RPC pública (bypassa RLS para anônimos)
-async function verificarRefNobanco(handle) {
-    if (!handle) return true; // campo vazio = sem indicação, tudo ok
-
-    const { data, error } = await sb
-        .rpc('verificar_codigo_indicacao', { p_codigo: handle.trim() });
-
-    if (error) {
-        console.warn('Erro ao verificar código:', error.message);
-        return false;
-    }
-    return data === true;
-}
-
-// ── Menu ──
+// ── Menu hambúrguer ──
 function toggleMenuExtra() {
     const m = document.getElementById('extra-menu');
     m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
@@ -579,7 +417,6 @@ function selecionarDoc(tipo) {
     limparStatus('doc');
 }
 
-// ── Máscara ──
 function mascaraDoc(el) {
     let v = el.value.replace(/\D/g, '');
     if (tipoDoc === 'cpf') {
@@ -601,19 +438,7 @@ function validarDoc() {
     const v = document.getElementById('documento').value.replace(/\D/g, '');
     const ok = tipoDoc === 'cpf' ? v.length === 11 : v.length === 14;
     setStatus('doc', ok, ok ? '' : `${tipoDoc.toUpperCase()} inválido ou incompleto.`);
-    if (ok) verificarDocBanco(v);
     return ok;
-}
-
-async function verificarDocBanco(docLimpo) {
-    setStatusVerificando('doc', `Verificando ${tipoDoc.toUpperCase()}...`);
-    const { data, error } = await sb.rpc('verificar_documento', { p_documento: docLimpo });
-    if (error) { limparStatus('doc'); return; }
-    if (data === true) {
-        setStatus('doc', false, `Este ${tipoDoc.toUpperCase()} já está cadastrado. Tente fazer login.`);
-    } else {
-        setStatus('doc', true, `${tipoDoc.toUpperCase()} disponível.`);
-    }
 }
 
 function validarNome() {
@@ -623,38 +448,27 @@ function validarNome() {
     return ok;
 }
 
-// ── Idade ──
-(function() {
-    const hoje = new Date();
-    hoje.setFullYear(hoje.getFullYear() - 18);
-    document.getElementById('nascimento').max = hoje.toISOString().split('T')[0];
+// ── Limite de idade ──
+(function () {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 18);
+    document.getElementById('nascimento').max = d.toISOString().split('T')[0];
 })();
 
 function validarIdade() {
     const val = document.getElementById('nascimento').value;
     const hint = document.getElementById('hint-nasc');
-    if (!val) {
-        limparStatus('nasc');
-        hint.className = 'campo-hint';
-        hint.innerHTML = 'Apenas maiores de 18 anos podem se cadastrar.';
-        return false;
-    }
+    if (!val) { limparStatus('nasc'); hint.className = 'campo-hint'; hint.innerHTML = 'Apenas maiores de 18 anos podem se cadastrar.'; return false; }
     const nasc = new Date(val + 'T00:00:00');
     const hoje = new Date();
-
-    // Rejeita anos impossíveis (ex: 99999 ou 1800)
     const ano = nasc.getFullYear();
     if (isNaN(nasc.getTime()) || ano < 1900 || ano > hoje.getFullYear()) {
-        setStatus('nasc', false, '');
-        hint.className = 'campo-hint erro';
-        hint.innerHTML = '<span class="material-icons" style="font-size:.9rem">error_outline</span> Data inválida.';
-        return false;
+        setStatus('nasc', false, ''); hint.className = 'campo-hint erro';
+        hint.innerHTML = '<span class="material-icons" style="font-size:.9rem">error_outline</span> Data inválida.'; return false;
     }
-
     let idade = hoje.getFullYear() - nasc.getFullYear();
     const m = hoje.getMonth() - nasc.getMonth();
     if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
-
     const ok = idade >= 18;
     setStatus('nasc', ok, '');
     hint.className = ok ? 'campo-hint' : 'campo-hint erro';
@@ -664,103 +478,28 @@ function validarIdade() {
     return ok;
 }
 
-// ── E-mail ──
-// Versão síncrona: só checa formato (usada no submit)
-function validarEmailFormato() {
-    const v = document.getElementById('email').value.trim();
-    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-    if (!ok) setStatus('email', false, 'Informe um e-mail válido.');
-    return ok;
-}
-// Versão completa com banco: disparada no onblur do campo
+// ── E-mail (só formato, sem consulta ao banco no blur) ──
 function validarEmail() {
     const v = document.getElementById('email').value.trim();
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-    setStatus('email', ok, ok ? '' : 'Informe um e-mail válido.');
-    if (ok) verificarEmailBanco(v);
+    setStatus('email', ok, ok ? 'Usado para fazer login na plataforma.' : 'Informe um e-mail válido.');
     return ok;
 }
 
-async function verificarEmailBanco(email) {
-    setStatusVerificando('email', 'Verificando e-mail...');
-    const { data, error } = await sb.rpc('verificar_email', { p_email: email });
-    if (error) { limparStatus('email'); return; }
-    if (data === true) {
-        setStatus('email', false, 'Este e-mail já está cadastrado. Tente fazer login.');
-        return;
-    }
-    setStatus('email', true, 'E-mail disponível.');
-    // Salva lead incompleto silenciosamente para remarketing
-    salvarLeadIncompleto().catch(() => {});
-}
-
-// Salva ou atualiza o lead com o que já foi preenchido até agora
-// Tem timeout de 3s — nunca trava o cadastro se o banco demorar
-async function salvarLeadIncompleto() {
-    const email = document.getElementById('email').value.trim();
-    if (!email) return;
-    const nome      = document.getElementById('nome')?.value.trim() || null;
-    const docRaw    = document.getElementById('documento')?.value || '';
-    const documento = docRaw.replace(/\D/g, '') || null;
-    const ref       = document.getElementById('ref-codigo')?.value.trim() || null;
-    try {
-        const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 3000);
-        await sb.rpc('salvar_cadastro_incompleto', {
-            p_email:     email,
-            p_nome:      nome || null,
-            p_documento: documento || null,
-            p_tipo_doc:  documento ? tipoDoc : null,
-            p_ref:       ref || null
-        });
-        clearTimeout(tid);
-    } catch (e) {
-        console.warn('Lead incompleto não salvo:', e.message);
-    }
-}
-
-// ── Usuário ──
+// ── Usuário (só formato, sem consulta ao banco no blur) ──
 function formatarUsuario(el) {
     el.value = el.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
 }
-// Versão síncrona: só formato (usada no submit)
-function validarUsuarioFormato() {
-    const v = document.getElementById('usuario').value;
-    const ok = /^[a-z0-9_]{3,20}$/.test(v);
-    if (!ok) {
-        const hint = document.getElementById('hint-usuario');
-        hint.textContent = v ? 'Entre 3 e 20 caracteres. Apenas letras, números e _.' : 'Informe um nome de usuário.';
-        hint.className = 'campo-hint erro';
-        setStatus('usuario', false, '');
-    }
-    return ok;
-}
-// Versão completa com banco: disparada no onblur do campo
+
 function validarUsuario() {
     const v = document.getElementById('usuario').value;
-    const ok = /^[a-z0-9_]{3,20}$/.test(v);
     const hint = document.getElementById('hint-usuario');
     if (!v) { limparStatus('usuario'); hint.textContent = 'Letras minúsculas, números e _ (sem espaços).'; hint.className = 'campo-hint'; return false; }
+    const ok = /^[a-z0-9_]{3,20}$/.test(v);
     setStatus('usuario', ok, '');
     hint.textContent = ok ? '' : 'Entre 3 e 20 caracteres. Apenas letras, números e _.';
     hint.className = ok ? 'campo-hint' : 'campo-hint erro';
-    if (ok) verificarUsuarioBanco(v);
     return ok;
-}
-
-async function verificarUsuarioBanco(usuario) {
-    setStatusVerificando('usuario', 'Verificando disponibilidade...');
-    const { data, error } = await sb.rpc('verificar_usuario', { p_usuario: usuario });
-    if (error) { limparStatus('usuario'); return; }
-    if (data === true) {
-        setStatus('usuario', false, 'Este nome de usuário já está em uso. Escolha outro.');
-        document.getElementById('hint-usuario').className = 'campo-hint erro';
-    } else {
-        setStatus('usuario', true, '');
-        document.getElementById('hint-usuario').innerHTML =
-            '<span class="material-icons" style="color:var(--verde);font-size:.9rem">check_circle</span> Nome de usuário disponível!';
-        document.getElementById('hint-usuario').className = 'campo-hint';
-    }
 }
 
 // ── Senha ──
@@ -779,8 +518,7 @@ function avaliarSenha() {
 }
 
 function toggleSenha(id, olhoId) {
-    const inp = document.getElementById(id);
-    const olho = document.getElementById(olhoId);
+    const inp = document.getElementById(id), olho = document.getElementById(olhoId);
     if (inp.type === 'password') { inp.type = 'text'; olho.textContent = 'visibility'; }
     else { inp.type = 'password'; olho.textContent = 'visibility_off'; }
 }
@@ -798,22 +536,38 @@ function validarSenha2() {
     return ok;
 }
 
-// ── Helpers ──
-function setStatusVerificando(id, msg) {
-    const el = document.getElementById('status-' + id);
-    el.style.animation = 'spin 1s linear infinite';
-    el.textContent  = 'sync';
-    el.className    = 'campo-status material-icons';
-    el.style.display = 'block';
-    el.style.color  = '#bbb';
-    const hint = document.getElementById('hint-' + id);
-    if (hint) { hint.textContent = msg; hint.className = 'campo-hint'; }
+// ── Indicação ──
+function validarRefCodigo() {
+    const campo = document.getElementById('ref-codigo');
+    campo.classList.remove('preenchido-auto', 'erro');
+    atualizarRefHint(campo.value.trim(), false);
 }
 
+function atualizarRefHint(valor, autoPreenchido) {
+    const icone = document.getElementById('ref-status-icone');
+    const hint = document.getElementById('ref-hint');
+    if (!valor) {
+        icone.className = 'material-icons ref-status-icone'; hint.className = 'ref-hint';
+        hint.innerHTML = '<span class="material-icons">info</span> Opcional — deixe em branco se não foi indicado por ninguém.';
+        return;
+    }
+    if (autoPreenchido) {
+        icone.className = 'material-icons ref-status-icone ok'; icone.textContent = 'check_circle';
+        hint.className = 'ref-hint ok';
+        hint.innerHTML = '<span class="material-icons">check_circle</span> Código preenchido automaticamente pelo link de convite!';
+        document.getElementById('ref-codigo').classList.add('preenchido-auto');
+    } else {
+        icone.className = 'material-icons ref-status-icone aviso'; icone.textContent = 'edit';
+        hint.className = 'ref-hint aviso';
+        hint.innerHTML = '<span class="material-icons">warning_amber</span> Digite exatamente como te passaram — maiúsculas e minúsculas importam!';
+    }
+}
+
+// ── Helpers UI ──
 function setStatus(id, ok, msg) {
     const el = document.getElementById('status-' + id);
-    el.style.animation = '';
-    el.style.color = '';
+    if (!el) return;
+    el.style.animation = ''; el.style.color = '';
     el.textContent = ok ? 'check_circle' : 'error_outline';
     el.className = 'campo-status material-icons ' + (ok ? 'ok' : 'erro');
     const hint = document.getElementById('hint-' + id);
@@ -822,7 +576,7 @@ function setStatus(id, ok, msg) {
 
 function limparStatus(id) {
     const el = document.getElementById('status-' + id);
-    if (el) { el.className = 'campo-status'; el.textContent = ''; }
+    if (el) { el.className = 'campo-status'; el.textContent = ''; el.style.animation = ''; }
     const hint = document.getElementById('hint-' + id);
     if (hint) { hint.textContent = ''; hint.className = 'campo-hint'; }
 }
@@ -838,227 +592,171 @@ function destacarCampo(id) {
 
 function mostrarAlerta(tipo, msg) {
     const el = document.getElementById('alerta');
-    const icone = document.getElementById('alerta-icone');
     document.getElementById('alerta-msg').textContent = msg;
     el.className = 'alerta ' + tipo;
-    icone.textContent = tipo === 'erro' ? 'error_outline' : 'check_circle';
+    document.getElementById('alerta-icone').textContent = tipo === 'erro' ? 'error_outline' : 'check_circle';
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function ocultarAlerta() {
-    document.getElementById('alerta').className = 'alerta';
+function ocultarAlerta() { document.getElementById('alerta').className = 'alerta'; }
+
+function btnCarregando(msg) {
+    const btn = document.getElementById('btn-cadastrar');
+    btn.disabled = true;
+    btn.innerHTML = `<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> ${msg}`;
 }
 
-// ── Submit principal ──
+function btnLiberar() {
+    const btn = document.getElementById('btn-cadastrar');
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-icons">arrow_forward</span> Criar minha conta';
+}
+
+// ════════════════════════════════════════
+// SUBMIT PRINCIPAL
+// ════════════════════════════════════════
 let _enviando = false;
+
 async function submeterCadastro() {
     if (_enviando) return;
     _enviando = true;
-
-    const btn = document.getElementById('btn-cadastrar');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Verificando...';
-
-    // Segurança: garante que o botão SEMPRE volta, mesmo se der erro inesperado
-    const liberarBtn = () => {
-        _enviando = false;
-        btn.disabled = false;
-        btn.innerHTML = '<span class="material-icons">arrow_forward</span> Criar minha conta';
-    };
-
     ocultarAlerta();
+    btnCarregando('Verificando...');
 
-    // Validações locais (síncronas — só formato, sem consulta ao banco)
+    // ── 1. Validações locais (sem banco) ──
     const checks = [
-        { fn: validarDoc,     campo: 'documento' },
-        { fn: validarNome,    campo: 'nome' },
-        { fn: validarIdade,   campo: 'nascimento' },
-        { fn: validarEmailFormato, campo: 'email' },
-        { fn: validarUsuarioFormato, campo: 'usuario' },
+        { fn: validarDoc,     id: 'documento' },
+        { fn: validarNome,    id: 'nome' },
+        { fn: validarIdade,   id: 'nascimento' },
+        { fn: validarEmail,   id: 'email' },
+        { fn: validarUsuario, id: 'usuario' },
     ];
 
-    let ok = true;
-    let primeiro = null;
-    checks.forEach(c => { if (!c.fn()) { if (!primeiro) primeiro = c.campo; ok = false; } });
+    let primeiro = null, tudoOk = true;
+    for (const c of checks) {
+        if (!c.fn()) { tudoOk = false; if (!primeiro) primeiro = c.id; }
+    }
 
-    if (document.getElementById('senha').value.length < 8) {
-        if (!primeiro) primeiro = 'senha';
+    const senha = document.getElementById('senha').value;
+    if (senha.length < 8) {
+        tudoOk = false; if (!primeiro) primeiro = 'senha';
         destacarCampo('senha');
-        ok = false;
     }
-
-    if (!validarSenha2()) {
-        if (!primeiro) primeiro = 'senha2';
-        ok = false;
-    }
-
+    if (!validarSenha2()) { tudoOk = false; if (!primeiro) primeiro = 'senha2'; }
     if (!document.getElementById('termos').checked) {
         mostrarAlerta('erro', 'Você precisa aceitar os Termos de Uso para continuar.');
-        ok = false;
+        tudoOk = false;
     }
 
-    if (!ok) {
+    if (!tudoOk) {
         if (primeiro) destacarCampo(primeiro);
         if (document.getElementById('alerta').className === 'alerta')
             mostrarAlerta('erro', 'Corrija os campos em destaque antes de continuar.');
-        liberarBtn();
-        return;
+        _enviando = false; btnLiberar(); return;
     }
 
-    // ── Verifica e-mail e usuário no banco (garante checagem mesmo sem blur) ──
-    btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Verificando disponibilidade...';
-
-    const emailVal   = document.getElementById('email').value.trim();
-    const usuarioVal = document.getElementById('usuario').value.trim();
-
-   
-
-    // Checa usuário
-    const { data: usuarioExiste, error: usuarioErr } = await sb.rpc('verificar_usuario', { p_usuario: usuarioVal });
-    if (!usuarioErr && usuarioExiste === true) {
-        setStatus('usuario', false, 'Este nome de usuário já está em uso. Escolha outro.');
-        destacarCampo('usuario');
-        mostrarAlerta('erro', 'Este nome de usuário já está em uso. Escolha outro.');
-        liberarBtn();
-        return;
-    }
-
-    // ── Valida código de indicação ANTES de criar a conta ──
-    const refCodigo = (document.getElementById('ref-codigo')?.value || '').trim();
-    if (refCodigo) {
-        btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Verificando código...';
-        const refValido = await verificarRefNobanco(refCodigo);
-        if (!refValido) {
-            // Destaca o campo visualmente
-            const campoRef = document.getElementById('ref-codigo');
-            campoRef.classList.add('erro');
-            campoRef.classList.remove('preenchido-auto');
-            const icone = document.getElementById('ref-status-icone');
-            icone.className   = 'material-icons ref-status-icone erro';
-            icone.textContent = 'error_outline';
-            const hint = document.getElementById('ref-hint');
-            hint.className = 'ref-hint erro';
-            hint.innerHTML = '<span class="material-icons">error_outline</span> Usuário não encontrado. Tem certeza que o código está certo? Deixe em branco ou confira com quem te indicou.';
-            // Rola até o bloco de indicação
-            document.getElementById('bloco-indicacao').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            liberarBtn();
-            return;
-        }
-    }
-
-    // Dados coletados
-    const email     = document.getElementById('email').value.trim();
-    const senha     = document.getElementById('senha').value;
-    const nome      = document.getElementById('nome').value.trim();
-    const usuario   = document.getElementById('usuario').value.trim();
-    const nascimento= document.getElementById('nascimento').value;
-    const documento = document.getElementById('documento').value.replace(/\D/g, '');
-
-    btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Criando conta...';
+    // Coleta valores
+    const email      = document.getElementById('email').value.trim();
+    const usuario    = document.getElementById('usuario').value.trim();
+    const nome       = document.getElementById('nome').value.trim();
+    const nascimento = document.getElementById('nascimento').value;
+    const documento  = document.getElementById('documento').value.replace(/\D/g, '');
+    const refCodigo  = (document.getElementById('ref-codigo')?.value || '').trim();
 
     try {
-        // Salva lead (silencioso — nunca impede o cadastro)
-        await salvarLeadIncompleto();
+        // ── 2. Valida código de indicação ──
+        if (refCodigo) {
+            btnCarregando('Verificando código de indicação...');
+            const { data: refOk, error: refErr } = await sb.rpc('verificar_codigo_indicacao', { p_codigo: refCodigo });
+            if (!refErr && refOk !== true) {
+                document.getElementById('ref-codigo').classList.add('erro');
+                document.getElementById('ref-codigo').classList.remove('preenchido-auto');
+                document.getElementById('ref-status-icone').className = 'material-icons ref-status-icone erro';
+                document.getElementById('ref-status-icone').textContent = 'error_outline';
+                const hint = document.getElementById('ref-hint');
+                hint.className = 'ref-hint erro';
+                hint.innerHTML = '<span class="material-icons">error_outline</span> Código não encontrado. Confira com quem te indicou ou deixe em branco.';
+                document.getElementById('bloco-indicacao').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                _enviando = false; btnLiberar(); return;
+            }
+        }
 
-        // 1. Criar usuário no Supabase Auth
+        // ── 3. Cria usuário no Auth ──
+        btnCarregando('Criando conta...');
         const { data: authData, error: authError } = await sb.auth.signUp({
-            email,
-            password: senha,
+            email, password: senha,
             options: { data: { nome, usuario } }
         });
 
-        console.log('AUTH ID:', authData?.user?.id);
-        console.log('IDENTITIES:', JSON.stringify(authData?.user?.identities));
-
-        // Erro explícito do Auth
         if (authError) {
-            try { await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_auth', p_erro_msg: authError.message }); } catch(_){}
-            // Traduz erros conhecidos do Supabase Auth
-            if (authError.message.toLowerCase().includes('already registered') || authError.message.toLowerCase().includes('user already exists')) {
+            const m = authError.message.toLowerCase();
+            if (m.includes('already registered') || m.includes('already exists'))
                 throw new Error('Este e-mail já possui uma conta. Tente fazer login.');
-            }
-            if (authError.message.toLowerCase().includes('password') || authError.message.toLowerCase().includes('senha')) {
-                throw new Error('A senha não atende aos requisitos mínimos. Use ao menos 8 caracteres.');
-            }
-            if (authError.message.toLowerCase().includes('rate limit') || authError.message.toLowerCase().includes('too many')) {
-                throw new Error('Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.');
-            }
-            throw new Error('Erro ao criar conta. Tente novamente. (' + authError.message + ')');
+            if (m.includes('rate limit') || m.includes('too many'))
+                throw new Error('Muitas tentativas. Aguarde alguns minutos e tente novamente.');
+            throw new Error('Erro ao criar conta. Tente novamente.');
         }
 
-        let userId = authData.user?.id;
+        let userId = authData?.user?.id;
 
-        // Supabase retorna identities[] vazio quando o e-mail já existe no Auth
-        // mas sem perfil em usuarios (zumbi de cadastro anterior com falha).
-        // Nesse caso fazemos signIn com a senha atual para recuperar a sessão
-        // e seguimos para inserir o perfil que faltava.
-        if (authData.user?.identities?.length === 0) {
+        // Identities vazio = e-mail já existe no Auth (sem perfil = zumbi)
+        if (authData?.user?.identities?.length === 0) {
             const { data: signInData, error: signInError } = await sb.auth.signInWithPassword({ email, password: senha });
-            if (signInError || !signInData?.user?.id) {
-                // signIn falhou = é uma conta real com senha diferente
-                throw new Error('Este e-mail já possui uma conta. Tente fazer login.');
-            }
+            if (signInError || !signInData?.user?.id)
+                throw new Error('Este e-mail já possui uma conta com outra senha. Tente fazer login ou recupere sua senha.');
             userId = signInData.user.id;
-            // Verifica se já tem perfil completo (conta real, não zumbi)
-            const { data: perfilExiste } = await sb.from('usuarios').select('id').eq('id', userId).single();
-            if (perfilExiste) {
+            const { data: perfilExiste } = await sb.from('usuarios').select('id').eq('id', userId).maybeSingle();
+            if (perfilExiste)
                 throw new Error('Este e-mail já possui uma conta. Tente fazer login.');
-            }
-            // Não tem perfil = zumbi confirmado, segue para INSERT abaixo
+            // Zumbi confirmado — segue para o upsert
         }
 
-        if (!userId) {
-            throw new Error('Erro ao obter ID do usuário. Tente novamente.');
-        }
+        if (!userId) throw new Error('Erro ao obter ID do usuário. Tente novamente.');
 
-        // 2. Salvar perfil na tabela usuarios
+        // ── 4. Salva perfil com UPSERT ──
+        // Upsert evita erro de PK duplicada quando o Supabase reutiliza o mesmo UUID
+        btnCarregando('Salvando dados...');
         const { error: dbError } = await sb
             .from('usuarios')
-            .insert({ id: userId, nome, documento, tipo_doc: tipoDoc, nascimento, usuario });
+            .upsert(
+                { id: userId, nome, documento, tipo_doc: tipoDoc, nascimento, usuario },
+                { onConflict: 'id' }
+            );
 
         if (dbError) {
-            // signUp ok mas INSERT falhou — limpa zumbi para permitir nova tentativa
-            try { await sb.rpc('limpar_zumbi_auth', { p_user_id: userId }); } catch(_){}
-            try { await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_db', p_erro_msg: dbError.message }); } catch(_){}
+            try { await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_db', p_erro_msg: dbError.message }); } catch (_) {}
             if (dbError.code === '23505') {
-                    console.log('CONSTRAINT VIOLADA:', dbError.message, JSON.stringify(dbError));
-                if (dbError.message.includes('documento')) throw new Error('Este CPF/CNPJ já está cadastrado.');
+                if (dbError.message.includes('documento')) throw new Error('Este CPF/CNPJ já está cadastrado em outra conta.');
                 if (dbError.message.includes('usuario'))   throw new Error('Este nome de usuário já está em uso. Escolha outro.');
             }
             throw new Error('Erro ao salvar seus dados. Tente novamente.');
         }
 
-        // 3. Indicação
+        // ── 5. Registra indicação ──
         if (refCodigo && userId) {
-            try { await sb.rpc('registrar_indicacao', { p_indicado_id: userId, p_ref_handle: refCodigo }); } catch(_){}
+            try { await sb.rpc('registrar_indicacao', { p_indicado_id: userId, p_ref_handle: refCodigo }); } catch (_) {}
         }
 
-        // 4. Marca lead como convertido
-        try { await sb.rpc('marcar_cadastro_convertido', { p_email: email }); } catch(_){}
+        // ── 6. Marca lead como convertido ──
+        try { await sb.rpc('marcar_cadastro_convertido', { p_email: email }); } catch (_) {}
 
-        // ✅ Sucesso — mostra tela de confirmação
-        document.getElementById('form-cadastro').style.opacity = '0';
-        document.getElementById('form-cadastro').style.transition = 'opacity 0.3s';
+        // ── ✅ Sucesso ──
+        const form = document.getElementById('form-cadastro');
+        form.style.transition = 'opacity 0.3s';
+        form.style.opacity = '0';
         setTimeout(() => {
-            document.getElementById('form-cadastro').style.display = 'none';
+            form.style.display = 'none';
             const s = document.getElementById('sucesso');
-            s.style.display = 'block';
-            s.style.opacity = '0';
+            s.style.display = 'block'; s.style.opacity = '0';
             setTimeout(() => { s.style.transition = 'opacity 0.4s'; s.style.opacity = '1'; }, 20);
         }, 300);
-        // Não chama liberarBtn aqui — botão some junto com o form
 
     } catch (err) {
-        console.error('Erro no cadastro:', err.message);
-        mostrarAlerta('erro', err.message || 'Ocorreu um erro. Tente novamente.');
-        liberarBtn();
+        mostrarAlerta('erro', err.message || 'Ocorreu um erro inesperado. Tente novamente.');
+        _enviando = false;
+        btnLiberar();
     }
 }
-
-// Animação de loading
-const style = document.createElement('style');
-style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
-document.head.appendChild(style);
 </script>
 </body>
 </html>
