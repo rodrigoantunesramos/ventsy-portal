@@ -1140,6 +1140,14 @@ async function sincronizarFotosPropriedade() {
         const { error: insErr } = await sb.from('fotos_imovel').insert(fotosParaSalvar);
         if (insErr) throw insErr;
     }
+
+    // Atualiza imagem_url na tabela propriedades com a foto nº 1 do destaque
+    const fotoCapa = destaqueState[0] || null;
+    const { error: updErr } = await sb
+        .from('propriedades')
+        .update({ imagem_url: fotoCapa })
+        .eq('id', PROP_ID);
+    if (updErr) throw updErr;
 }
 
 /* ─── CARREGAR ──────────────────────────────────────────── */
