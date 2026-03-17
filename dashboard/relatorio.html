@@ -806,10 +806,10 @@ async function renderRanking() {
         });
 
         const ranking = Object.entries(viewsPorProp).sort((a, b) => b[1] - a[1]);
-        const idx     = ranking.findIndex(([id]) => id === PROP_ID);
+        const idx     = ranking.findIndex(([id]) => String(id) === String(PROP_ID));
         const posicao = idx === -1 ? null : idx + 1;
         const total   = ranking.length;
-        const meuTotal = viewsPorProp[PROP_ID] || 0;
+        const meuTotal = viewsPorProp[PROP_ID] || viewsPorProp[String(PROP_ID)] || 0;
 
         let trofeu = '🏆';
         if (posicao === 1) trofeu = '🥇';
