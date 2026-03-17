@@ -806,91 +806,68 @@
         }
     }
 <script>
-    // ── SYNC COM ADMIN ──
-    // Lê ventsy_planos_config salvo pelo admin e aplica preços/benefícios/status
-    (function () {
-        const DEFAULTS = {
-            basico: { preco: 0,   items: null, status: 'ativo' },
-            pro:    { preco: 79,  items: null, status: 'ativo' },
-            ultra:  { preco: 149, items: null, status: 'ativo' }
-        };
+    // ── SYNC COM ADMIN VIA SUPABASE ──
+    async function aplicarConfigPlanos() {
+        try {
+            const { data, error } = await sb.from('planos_config').select('*');
+            if (error || !data) return;
 
-        function getAdminConfig() {
-            try {
-                const raw = localStorage.getItem('ventsy_planos_config');
-                if (raw) {
-                    const p = JSON.parse(raw);
-                    return {
-                        basico: Object.assign({}, DEFAULTS.basico, p.basico || {}),
-                        pro:    Object.assign({}, DEFAULTS.pro,    p.pro    || {}),
-                        ultra:  Object.assign({}, DEFAULTS.ultra,  p.ultra  || {})
-                    };
-                }
-            } catch(e) {}
-            return DEFAULTS;
-        }
+            const cfg = {};
+            data.forEach(row => { cfg[row.id] = row; });
 
-        function aplicar() {
-            const cfg = getAdminConfig();
-
-            // ── Visibilidade dos cards ──
             ['basico','pro','ultra'].forEach(nome => {
+                const plano = cfg[nome];
+                if (!plano) return;
+
+                // Visibilidade do card
                 document.querySelectorAll(`[data-plano="${nome}"]`).forEach(el => {
-                    el.style.display = cfg[nome].status === 'oculto' ? 'none' : '';
+                    el.style.display = plano.status === 'oculto' ? 'none' : '';
                 });
+
+                // Benefícios
+                const ul = document.querySelector(`[data-plano-items="${nome}"]`);
+                if (ul && plano.items && plano.items.length) {
+                    const liClass = ul.querySelector('li')?.className || 'sim';
+                    ul.innerHTML = plano.items.map(item =>
+                        `<li class="${liClass}"><span class="feat-icon">✔</span> ${item}</li>`
+                    ).join('');
+                }
             });
 
-            // ── Preços ──
-            // Básico
-            const elBasicoPreco = document.querySelector('[data-plano-preco="basico"]');
-            if (elBasicoPreco) {
-                elBasicoPreco.textContent = cfg.basico.preco === 0 ? 'Grátis' : 'R$ ' + cfg.basico.preco;
-                // Esconde/mostra cifrao se necessário
-                const cifrao = elBasicoPreco.closest('.plano-preco')?.querySelector('.cifrao');
-                const periodo = elBasicoPreco.closest('.plano-preco')?.querySelector('.periodo');
-                if (cfg.basico.preco === 0) {
-                    if (cifrao) cifrao.style.display = 'none';
-                    if (periodo) periodo.style.display = 'none';
-                } else {
-                    if (cifrao) cifrao.style.display = '';
-                    if (periodo) periodo.style.display = '';
+            // Preço Básico
+            if (cfg.basico) {
+                const elPreco = document.querySelector('[data-plano-preco="basico"]');
+                if (elPreco) {
+                    const prc = cfg.basico.preco;
+                    elPreco.textContent = prc === 0 ? 'Grátis' : 'R$ ' + prc;
+                    const cifrao  = elPreco.closest('.plano-preco')?.querySelector('.cifrao');
+                    const periodo = elPreco.closest('.plano-preco')?.querySelector('.periodo');
+                    if (cifrao)  cifrao.style.display  = prc === 0 ? 'none' : '';
+                    if (periodo) periodo.style.display = prc === 0 ? 'none' : '';
                 }
             }
 
-            // Pro e Ultra — atualiza base mensal e recalcula anual proporcional
-            window._adminPrecos = { pro: cfg.pro.preco, ultra: cfg.ultra.preco };
-            const elProPreco   = document.getElementById('valor-pro');
-            const elUltraPreco = document.getElementById('valor-ultra');
-            if (elProPreco && !window.isAnual)   elProPreco.textContent   = cfg.pro.preco;
-            if (elUltraPreco && !window.isAnual) elUltraPreco.textContent = cfg.ultra.preco;
-
-            // Atualiza as variáveis de preços do toggle existente
-            if (typeof precosPro !== 'undefined') {
-                precosPro.mensal   = cfg.pro.preco;
-                precosPro.anual    = Math.round(cfg.pro.preco * 0.8);
+            // Preços Pro e Ultra — atualiza valores e o toggle mensal/anual
+            if (cfg.pro) {
+                precosPro.mensal = cfg.pro.preco;
+                precosPro.anual  = Math.round(cfg.pro.preco * 0.8);
             }
-            if (typeof precosUltra !== 'undefined') {
+            if (cfg.ultra) {
                 precosUltra.mensal = cfg.ultra.preco;
                 precosUltra.anual  = Math.round(cfg.ultra.preco * 0.8);
             }
+            // Aplica o valor correto de acordo com o período selecionado
+            const elPro   = document.getElementById('valor-pro');
+            const elUltra = document.getElementById('valor-ultra');
+            if (elPro)   elPro.textContent   = isAnual ? precosPro.anual   : precosPro.mensal;
+            if (elUltra) elUltra.textContent = isAnual ? precosUltra.anual : precosUltra.mensal;
 
-            // ── Benefícios ──
-            ['basico','pro','ultra'].forEach(nome => {
-                const ul = document.querySelector(`[data-plano-items="${nome}"]`);
-                if (!ul || !cfg[nome].items || !cfg[nome].items.length) return;
-                const liClass = ul.querySelector('li')?.className || 'sim';
-                ul.innerHTML = cfg[nome].items.map(item =>
-                    `<li class="${liClass}"><span class="feat-icon">✔</span> ${item}</li>`
-                ).join('');
-            });
+        } catch(e) {
+            console.warn('[ventsy] Erro ao carregar config de planos:', e);
         }
+    }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', aplicar);
-        } else {
-            aplicar();
-        }
-    })();
+    document.addEventListener('DOMContentLoaded', aplicarConfigPlanos);
 </script>
 
 </body>
