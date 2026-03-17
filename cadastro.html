@@ -649,6 +649,14 @@ function validarIdade() {
 }
 
 // ── E-mail ──
+// Versão síncrona: só checa formato (usada no submit)
+function validarEmailFormato() {
+    const v = document.getElementById('email').value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    if (!ok) setStatus('email', false, 'Informe um e-mail válido.');
+    return ok;
+}
+// Versão completa com banco: disparada no onblur do campo
 function validarEmail() {
     const v = document.getElementById('email').value.trim();
     const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -671,6 +679,7 @@ async function verificarEmailBanco(email) {
 }
 
 // Salva ou atualiza o lead com o que já foi preenchido até agora
+// Tem timeout de 3s — nunca trava o cadastro se o banco demorar
 async function salvarLeadIncompleto() {
     const email = document.getElementById('email').value.trim();
     if (!email) return;
@@ -678,20 +687,34 @@ async function salvarLeadIncompleto() {
     const docRaw    = document.getElementById('documento')?.value || '';
     const documento = docRaw.replace(/\D/g, '') || null;
     const ref       = document.getElementById('ref-codigo')?.value.trim() || null;
-    // Silencioso — não trava nada se falhar
-    await sb.rpc('salvar_cadastro_incompleto', {
-        p_email:    email,
-        p_nome:     nome || null,
+    const timeout   = new Promise(resolve => setTimeout(resolve, 3000));
+    const salvar    = sb.rpc('salvar_cadastro_incompleto', {
+        p_email:     email,
+        p_nome:      nome || null,
         p_documento: documento || null,
-        p_tipo_doc: documento ? tipoDoc : null,
-        p_ref:      ref || null
+        p_tipo_doc:  documento ? tipoDoc : null,
+        p_ref:       ref || null
     }).catch(e => console.warn('Lead incompleto não salvo:', e.message));
+    await Promise.race([salvar, timeout]);
 }
 
 // ── Usuário ──
 function formatarUsuario(el) {
     el.value = el.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
 }
+// Versão síncrona: só formato (usada no submit)
+function validarUsuarioFormato() {
+    const v = document.getElementById('usuario').value;
+    const ok = /^[a-z0-9_]{3,20}$/.test(v);
+    if (!ok) {
+        const hint = document.getElementById('hint-usuario');
+        hint.textContent = v ? 'Entre 3 e 20 caracteres. Apenas letras, números e _.' : 'Informe um nome de usuário.';
+        hint.className = 'campo-hint erro';
+        setStatus('usuario', false, '');
+    }
+    return ok;
+}
+// Versão completa com banco: disparada no onblur do campo
 function validarUsuario() {
     const v = document.getElementById('usuario').value;
     const ok = /^[a-z0-9_]{3,20}$/.test(v);
@@ -815,15 +838,22 @@ async function submeterCadastro() {
     btn.disabled = true;
     btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Verificando...';
 
+    // Segurança: garante que o botão SEMPRE volta, mesmo se der erro inesperado
+    const liberarBtn = () => {
+        _enviando = false;
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-icons">arrow_forward</span> Criar minha conta';
+    };
+
     ocultarAlerta();
 
-    // Validações locais
+    // Validações locais (síncronas — só formato, sem consulta ao banco)
     const checks = [
-        { fn: validarDoc, campo: 'documento' },
-        { fn: validarNome, campo: 'nome' },
-        { fn: validarIdade, campo: 'nascimento' },
-        { fn: validarEmail, campo: 'email' },
-        { fn: validarUsuario, campo: 'usuario' },
+        { fn: validarDoc,     campo: 'documento' },
+        { fn: validarNome,    campo: 'nome' },
+        { fn: validarIdade,   campo: 'nascimento' },
+        { fn: validarEmailFormato, campo: 'email' },
+        { fn: validarUsuarioFormato, campo: 'usuario' },
     ];
 
     let ok = true;
@@ -850,10 +880,7 @@ async function submeterCadastro() {
         if (primeiro) destacarCampo(primeiro);
         if (document.getElementById('alerta').className === 'alerta')
             mostrarAlerta('erro', 'Corrija os campos em destaque antes de continuar.');
-        // Libera o botão se validação falhou
-        _enviando = false;
-        btn.disabled = false;
-        btn.innerHTML = '<span class="material-icons">arrow_forward</span> Criar minha conta';
+        liberarBtn();
         return;
     }
 
@@ -875,9 +902,7 @@ async function submeterCadastro() {
             hint.innerHTML = '<span class="material-icons">error_outline</span> Usuário não encontrado. Tem certeza que o código está certo? Deixe em branco ou confira com quem te indicou.';
             // Rola até o bloco de indicação
             document.getElementById('bloco-indicacao').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            _enviando = false;
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-icons">arrow_forward</span> Criar minha conta';
+            liberarBtn();
             return;
         }
     }
@@ -978,9 +1003,7 @@ async function submeterCadastro() {
             msg = err.message;
 
         mostrarAlerta('erro', msg);
-        _enviando = false;
-        btn.disabled = false;
-        btn.innerHTML = '<span class="material-icons">arrow_forward</span> Criar minha conta';
+        liberarBtn();
     }
 }
 
