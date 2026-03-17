@@ -2067,7 +2067,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
         const cidade     = prop.cidade     || prop.estado || '';
         const capacidade = prop.capacidade ? `${prop.capacidade} pessoas` : '';
         const categoria  = prop.categoria  || '';
-        const isPremium  = prop.user_id && userIdsPremium.has(prop.user_id);
+        const isPremium  = prop.usuario_id && userIdsPremium.has(prop.usuario_id);
 
         const notaHTML = nota ? `
             <span class="card-nota">
