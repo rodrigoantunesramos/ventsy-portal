@@ -2194,7 +2194,9 @@ input:checked + .slider-round:before { transform: translateX(20px); }
     function criarCardHTML(prop) {
         const imagem     = prop.imagem_url || 'https://via.placeholder.com/400x300?text=Sem+foto';
         const nome       = prop.nome       || 'Sem nome';
-        const preco      = prop.preco      != null ? `R$ ${Number(prop.preco).toLocaleString('pt-BR')}` : '—';
+        const preco      = prop.valor_hora   != null ? `R$ ${Number(prop.valor_hora).toLocaleString('pt-BR')}` 
+                         : prop.valor_base  != null ? `R$ ${Number(prop.valor_base).toLocaleString('pt-BR')}`
+                         : '—';
         const nota       = prop.avaliacao  ? Number(prop.avaliacao).toFixed(1) : null;
         const cidade     = prop.cidade     || prop.estado || '';
         const capacidade = prop.capacidade ? `${prop.capacidade} pessoas` : '';
@@ -2452,7 +2454,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
 
             let query = _supabase.from('propriedades').select('*').eq('publicada', true);
 
-            // Estado: converte nome completo para sigla (padrão do banco) e usa o da URL como fallback
+            // Estado: usa o do modal, ou cai para o da URL como fallback
             const _estadoFiltroRaw = filtros.estado || '';
             const estadoFiltro = _estadoFiltroRaw
                 ? (estadoParaSigla[_estadoFiltroRaw] || _estadoFiltroRaw.toUpperCase())
@@ -2460,29 +2462,33 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             if (estadoFiltro) query = query.eq('estado', estadoFiltro);
             if (filtros.cidade) query = query.eq('cidade', filtros.cidade);
 
-            // Só filtra preço se o usuário mexeu nos sliders
-            if (filtros.precoMin > 0)     query = query.gte('preco', filtros.precoMin);
-            if (filtros.precoMax < 10000) query = query.lte('preco', filtros.precoMax);
+            // Preço — usa valor_hora como referência (coluna real do banco)
+            if (filtros.precoMin > 0)     query = query.gte('valor_hora', filtros.precoMin);
+            if (filtros.precoMax < 10000) query = query.lte('valor_hora', filtros.precoMax);
             if (filtros.capacidade > 0)   query = query.gte('capacidade', filtros.capacidade);
 
-            if (filtros.climatizado)    query = query.eq('climatizado', true);
-            if (filtros.estacionamento) query = query.eq('estacionamento', true);
-            if (filtros.seguranca)      query = query.eq('seguranca', true);
-            if (filtros.espacoAberto)   query = query.eq('espaco_aberto', true);
-            if (filtros.acessibilidade) query = query.eq('acessibilidade', true);
-            if (filtros.somAlto)        query = query.eq('som_alto',        true);
-            if (filtros.somTarde)       query = query.eq('som_tarde',       true);
+            // Booleanos — testa true E também 1 (por segurança)
+            if (filtros.climatizado)    query = query.or('climatizado.eq.true,climatizado.eq.1');
+            if (filtros.estacionamento) query = query.or('estacionamento.eq.true,estacionamento.eq.1');
+            if (filtros.seguranca)      query = query.or('seguranca.eq.true,seguranca.eq.1');
+            if (filtros.espacoAberto)   query = query.or('espaco_aberto.eq.true,espaco_aberto.eq.1');
+            if (filtros.acessibilidade) query = query.or('acessibilidade.eq.true,acessibilidade.eq.1');
+            if (filtros.somAlto)        query = query.or('som_alto.eq.true,som_alto.eq.1');
+            if (filtros.somTarde)       query = query.or('som_tarde.eq.true,som_tarde.eq.1');
 
-            // Tipos de evento — filtra por qualquer um dos selecionados
+            // Tipos de evento — coluna é "tipo_evento" (texto/array)
             if (filtros.tiposEvento && filtros.tiposEvento.length > 0) {
                 console.log('🎯 Aplicando filtro tipo_evento IN:', filtros.tiposEvento);
                 query = query.in('tipo_evento', filtros.tiposEvento);
             }
 
-            // Tipo de propriedade — se marcou algum, filtra por qualquer um dos marcados
+            // Tipo de propriedade — tenta coluna "tipo_propriedade" E "categoria" (ambas existem no banco)
             if (filtros.categorias && filtros.categorias.length > 0) {
-                console.log('🏠 Aplicando filtro categoria IN:', filtros.categorias);
-                query = query.in('categoria', filtros.categorias);
+                console.log('🏠 Aplicando filtro tipo_propriedade/categoria IN:', filtros.categorias);
+                // Monta filtro OR: tipo_propriedade.in.(x,y),categoria.in.(x,y)
+                const vals = filtros.categorias.map(v => v.replace(/'/g, "''")); // escapa aspas
+                const orStr = vals.flatMap(v => [`tipo_propriedade.eq.${v}`, `categoria.eq.${v}`]).join(',');
+                query = query.or(orStr);
             }
 
             // Premium: busca user_ids com plano premium ativo
@@ -3173,7 +3179,7 @@ function toggleFaq(elemento) {
 
         // Adiciona pins de preço para cada propriedade
         marcadores = comCoordenadas.map(prop => {
-            const preco = prop.preco ? `R$ ${prop.preco}` : 'Ver preço';
+        const preco = (prop.valor_hora ?? prop.valor_base) ? `R$ ${Number(prop.valor_hora ?? prop.valor_base).toLocaleString('pt-BR')}` : 'Ver preço';
 
             const icone = L.divIcon({
                 className: '',
