@@ -541,18 +541,18 @@ function atualizarRefHint(valor, autoPreenchido) {
     }
 }
 
-// Verifica no banco se o seucodigo do indicador existe
+// Verifica se o seucodigo existe via RPC pública (bypassa RLS para anônimos)
 async function verificarRefNobanco(handle) {
     if (!handle) return true; // campo vazio = sem indicação, tudo ok
 
     const { data, error } = await sb
-        .from('usuarios')
-        .select('id')
-        .ilike('seucodigo', handle.trim())  // case-insensitive, igual ao trigger SQL
-        .limit(1)
-        .single();
+        .rpc('verificar_codigo_indicacao', { p_codigo: handle.trim() });
 
-    return !error && data;
+    if (error) {
+        console.warn('Erro ao verificar código:', error.message);
+        return false;
+    }
+    return data === true;
 }
 
 // ── Menu ──
