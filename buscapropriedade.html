@@ -219,6 +219,21 @@
         .ev-item span { font-size: 1.25rem; line-height: 1; }
         .ev-item:hover { background: #fff5f7; border-color: #ffd6dd; color: var(--vermelho); transform: translateY(-2px); }
         .ev-item.selected { background: var(--vermelho); color: #fff; border-color: var(--vermelho); }
+        .ev-item.selected::after {
+            content: '✓';
+            position: absolute; top: 4px; right: 5px;
+            font-size: .55rem; font-weight: 900; opacity: .85; line-height: 1;
+        }
+        .ev-item { position: relative; }
+
+        /* Badge contador no display */
+        .tipo-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            background: var(--vermelho); color: #fff;
+            border-radius: 20px; font-size: .65rem; font-weight: 800;
+            margin-left: 4px; flex-shrink: 0;
+        }
 
 .destinos-container {
     padding: 20px 5%;
@@ -2555,12 +2570,8 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                 acessibilidade: document.getElementById('f-acessibilidade')?.checked,
                 somAlto:        document.getElementById('f-som-alto')?.checked,
                 somTarde:       document.getElementById('f-som-tarde')?.checked,
-                formatura:      document.getElementById('f-formatura')?.checked,
-                aniversario:    document.getElementById('f-aniversario')?.checked,
-                casamento:      document.getElementById('f-casamento')?.checked,
-                corporativo:    document.getElementById('f-corporativo')?.checked,
-                show:           document.getElementById('f-show')?.checked,
-                retiro:         document.getElementById('f-retiro')?.checked,
+                // Tipos de evento — vem do Set centralizado
+                tiposEvento:    [...eventosSelecionados],
                 // Tipos de propriedade — coleta todos os marcados
                 categorias: [...document.querySelectorAll('#modalFiltro input[id^="f-cat-"]:checked')]
                                 .map(cb => cb.value),
@@ -2575,15 +2586,8 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             const titulo  = document.getElementById('titulo-resultados');
             const sub     = document.getElementById('subtitulo-resultados');
 
-            // Registra cada tipo de evento selecionado no modal
-            const mapaEventos = {
-                formatura: 'Formatura', aniversario: 'Festa de Aniversário',
-                casamento: 'Casamento', corporativo: 'Festa Corporativa',
-                show: 'Show e Festival', retiro: 'Retiro'
-            };
-            for (const [key, label] of Object.entries(mapaEventos)) {
-                if (filtros[key]) registrarBusca(label);
-            }
+            // Registra cada tipo de evento selecionado
+            filtros.tiposEvento.forEach(t => registrarBusca(t));
 
             grid.innerHTML = '<p style="color:#aaa;padding:20px">Filtrando...</p>';
 
@@ -2610,13 +2614,10 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             if (filtros.somAlto)        query = query.eq('som_alto',        true);
             if (filtros.somTarde)       query = query.eq('som_tarde',       true);
 
-            // Tipos de evento — cada marcado filtra independentemente
-            if (filtros.formatura)   query = query.eq('evento_formatura',   true);
-            if (filtros.aniversario) query = query.eq('evento_aniversario', true);
-            if (filtros.casamento)   query = query.eq('evento_casamento',   true);
-            if (filtros.corporativo) query = query.eq('evento_corporativo', true);
-            if (filtros.show)        query = query.eq('evento_show',        true);
-            if (filtros.retiro)      query = query.eq('evento_retiro',      true);
+            // Tipos de evento — filtra por qualquer um dos selecionados
+            if (filtros.tiposEvento && filtros.tiposEvento.length > 0) {
+                query = query.in('tipo_evento', filtros.tiposEvento);
+            }
 
             // Tipo de propriedade — se marcou algum, filtra por qualquer um dos marcados
             if (filtros.categorias && filtros.categorias.length > 0) {
@@ -2675,10 +2676,17 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             selectEstado.value = estadoBuscado;
             carregarCidades(estadoBuscado);
         }
-        // Pré-seleciona tipo de evento
+        // Pré-seleciona tipo(s) de evento vindos da URL (pode ser vírgula-separado)
         if (tipoBuscado) {
-            const chipTipo = document.getElementById(`f-${tipoBuscado}`);
-            if (chipTipo) chipTipo.checked = true;
+            tipoBuscado.split(',').map(t => t.trim()).filter(Boolean).forEach(t => {
+                eventosSelecionados.add(t);
+            });
+            // Sincroniza depois que o DOM já está completo
+            setTimeout(() => {
+                sincronizarEvItems();
+                sincronizarChipsModal();
+                atualizarDisplayEventos();
+            }, 0);
         }
         // Pré-preenche capacidade
         if (convBuscados > 0) {
@@ -2736,6 +2744,10 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             if (sliderOne) { sliderOne.value = 0;     inputMin.value = 0; }
             if (sliderTwo) { sliderTwo.value = 10000; inputMax.value = 10000; }
             if (sliderCap) { sliderCap.value = 0; inputCap.value = 0; atualizarLabelCapacidade(0); }
+            // Reseta eventos selecionados
+            eventosSelecionados.clear();
+            sincronizarEvItems();
+            atualizarDisplayEventos();
             // Reseta localização para o estado da URL
             selectEstado.value = estadoBuscado || '';
             selectCidade.innerHTML = '<option value="">Todas as cidades</option>';
@@ -3046,28 +3058,80 @@ function toggleEventoDropdown(e) {
     disp.classList.toggle('open', !isOpen);
 }
 
-function selectEvento(el) {
-    const input = document.getElementById('tipo-espaco');
+// ── Conjunto central de eventos selecionados ──
+const eventosSelecionados = new Set();
+
+function atualizarDisplayEventos() {
     const texto = document.getElementById('tipo-texto');
-    const drop  = document.getElementById('evento-dropdown');
+    const input = document.getElementById('tipo-espaco');
     const disp  = document.getElementById('tipo-display');
+    const count = eventosSelecionados.size;
 
-    document.querySelectorAll('.ev-item.selected').forEach(i => i.classList.remove('selected'));
+    const oldBadge = disp.querySelector('.tipo-badge');
+    if (oldBadge) oldBadge.remove();
 
-    if (!el) {
-        input.value = '';
+    if (count === 0) {
         texto.textContent = 'Todos os eventos';
+        texto.style.color = '';
+        input.value = '';
+    } else if (count === 1) {
+        const v = [...eventosSelecionados][0];
+        const el = document.querySelector(`.ev-item[data-v="${CSS.escape(v)}"]`);
+        const emoji = el ? el.querySelector('span').textContent : '';
+        texto.textContent = emoji + ' ' + v;
+        texto.style.color = '#222';
+        input.value = v;
+    } else {
+        texto.textContent = 'Eventos';
+        texto.style.color = '#222';
+        input.value = [...eventosSelecionados].join(',');
+        const badge = document.createElement('span');
+        badge.className = 'tipo-badge';
+        badge.textContent = count;
+        const caret = disp.querySelector('.tipo-caret');
+        disp.insertBefore(badge, caret);
+    }
+}
+
+// Sincroniza chips do modal → a partir do Set
+function sincronizarChipsModal() {
+    document.querySelectorAll('#modalFiltro .grid-eventos .evento-chip input[type="checkbox"]')
+        .forEach(cb => { cb.checked = eventosSelecionados.has(cb.value); });
+}
+
+// Sincroniza ev-items do header → a partir do Set
+function sincronizarEvItems() {
+    document.querySelectorAll('.ev-item').forEach(el => {
+        el.classList.toggle('selected', eventosSelecionados.has(el.dataset.v));
+    });
+}
+
+// Toggle via header dropdown
+function selectEvento(el) {
+    if (!el) {
+        eventosSelecionados.clear();
     } else {
         const v = el.dataset.v;
-        input.value = v;
-        const emoji = el.querySelector('span').textContent;
-        texto.textContent = emoji + ' ' + el.textContent.trim().replace(emoji, '').trim();
-        el.classList.add('selected');
+        eventosSelecionados.has(v) ? eventosSelecionados.delete(v) : eventosSelecionados.add(v);
     }
-
-    drop.style.display = 'none';
-    disp.classList.remove('open');
+    sincronizarEvItems();
+    sincronizarChipsModal();
+    atualizarDisplayEventos();
+    // Não fecha — permite múltipla seleção
 }
+
+// Toggle via chips do modal — chamado pelo change dos checkboxes
+function onChipModalChange(cb) {
+    cb.checked ? eventosSelecionados.add(cb.value) : eventosSelecionados.delete(cb.value);
+    sincronizarEvItems();
+    atualizarDisplayEventos();
+}
+
+// Aplica listeners nos chips do modal após DOM pronto
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#modalFiltro .grid-eventos .evento-chip input[type="checkbox"]')
+        .forEach(cb => cb.addEventListener('change', () => onChipModalChange(cb)));
+});
 
 function toggleFaq(elemento) {
     const item = elemento.parentElement;
