@@ -1416,8 +1416,28 @@ function selecionarOnde(item) {
 }
 
 
+// Cache de todas as propriedades para busca local (carregado uma vez)
+let _cacheProps = null;
+let _cachePropsTs = 0;
+
+async function getTodasProps(client) {
+    const agora = Date.now();
+    // Reusa cache por 5 minutos
+    if (_cacheProps && (agora - _cachePropsTs) < 300_000) return _cacheProps;
+    const { data, error } = await client
+        .from('propriedades')
+        .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa')
+        .eq('publicada', true)
+        .limit(1000);
+    if (error) { console.error('[onde] cache erro:', error); return []; }
+    _cacheProps = data || [];
+    _cachePropsTs = agora;
+    console.log('[onde] cache carregado:', _cacheProps.length, 'propriedades');
+    return _cacheProps;
+}
+
 async function buscarOnde(q) {
-    const t = norm(q); // ex: "chacara macacu"
+    const t = norm(q); // sem acentos, minúsculo — ex: "chacara macacu"
 
     // ── Estados: busca local instantânea ──
     const estadosMatch = ESTADOS_ONDE
@@ -1427,67 +1447,46 @@ async function buscarOnde(q) {
     let props = [], cats = [], cidades = [];
 
     try {
-        // Monta termos de busca: original + sem acentos + primeira palavra de cada
-        const termos = [...new Set([
-            q,          // original digitado
-            t,          // sem acentos/maiúsculas
-            ...t.split(' ').filter(w => w.length >= 3)  // palavras individuais
-        ])];
-
-        // Executa buscas em paralelo para todos os termos
-        const buscasNome = termos.map(termo =>
-            _sb.from('propriedades')
-                .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa')
-                .eq('publicada', true)
-                .ilike('nome', `%${termo}%`)
-                .limit(6)
-        );
-        const buscasCat = termos.map(termo =>
-            _sb.from('propriedades')
-                .select('id, nome, cidade, estado, categoria')
-                .eq('publicada', true)
-                .ilike('categoria', `%${termo}%`)
-                .limit(20)
-        );
-        const buscasCid = termos.map(termo =>
+        // Busca todas as propriedades (com cache) + cidades via ilike
+        const [todasProps, rCids] = await Promise.all([
+            getTodasProps(_sb),
             _sb.from('propriedades')
                 .select('cidade, estado')
                 .eq('publicada', true)
-                .ilike('cidade', `%${termo}%`)
                 .not('cidade', 'is', null)
-                .limit(30)
-        );
+                .ilike('cidade', `%${q}%`)
+                .limit(50)
+        ]);
 
-        const todos = await Promise.all([...buscasNome, ...buscasCat, ...buscasCid]);
-        const n = termos.length;
-        const rNomes = todos.slice(0, n);
-        const rCats  = todos.slice(n, n * 2);
-        const rCids  = todos.slice(n * 2);
+        // Filtra localmente por nome E categoria usando norm()
+        // Isso garante match mesmo com acentos diferentes: "chacara" == "Chácara"
+        const palavras = t.split(/\s+/).filter(w => w.length >= 2);
+        const matchNome = p => p.nome && palavras.every(w => norm(p.nome).includes(w));
+        const matchCat  = p => p.categoria && palavras.every(w => norm(p.categoria).includes(w));
 
-        // Log de debug (remova em produção)
-        console.log('[onde] termos:', termos);
-        console.log('[onde] nome hits:', rNomes.map(r => (r.data||[]).length));
-        console.log('[onde] cat  hits:', rCats.map(r => (r.data||[]).length));
-        if (rNomes[0]?.error) console.error('[onde] erro:', rNomes[0].error);
+        props = todasProps.filter(matchNome).slice(0, 5);
 
-        // Deduplica por id
-        const propMap = {};
-        rNomes.forEach(r => (r.data||[]).forEach(p => { if (p.id) propMap[p.id] = p; }));
-        props = Object.values(propMap).slice(0, 5);
-
-        // Categorias únicas com contagem
+        // Categorias únicas que batem
         const catMap = {};
-        rCats.forEach(r => (r.data||[]).forEach(p => {
-            if (p.categoria) catMap[p.categoria] = (catMap[p.categoria] || 0) + 1;
-        }));
-        cats = Object.entries(catMap).slice(0, 3).map(([cat, count]) => ({ cat, count }));
+        todasProps.filter(matchCat).forEach(p => {
+            catMap[p.categoria] = (catMap[p.categoria] || 0) + 1;
+        });
+        cats = Object.entries(catMap).slice(0, 4).map(([cat, count]) => ({ cat, count }));
 
-        // Cidades únicas
+        // Cidades via ilike (acentos geralmente coincidem em cidades)
+        // Também filtra localmente para cobrir variações
+        const cidadesFiltradas = (rCids.data || []);
+        // Complementa com filtro local do cache
+        todasProps.forEach(p => {
+            if (p.cidade && norm(p.cidade).includes(t)) cidadesFiltradas.push(p);
+        });
         const cidMap = {};
-        rCids.forEach(r => (r.data||[]).forEach(p => {
+        cidadesFiltradas.forEach(p => {
             if (p.cidade && !cidMap[p.cidade]) cidMap[p.cidade] = p.estado;
-        }));
+        });
         cidades = Object.entries(cidMap).slice(0, 4).map(([cidade, estado]) => ({ cidade, estado }));
+
+        console.log('[onde] t="%s" props=%d cats=%d cidades=%d', t, props.length, cats.length, cidades.length);
 
     } catch(err) {
         console.error('[onde] exceção:', err);
