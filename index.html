@@ -1416,82 +1416,102 @@ function selecionarOnde(item) {
 }
 
 
-// Cache de todas as propriedades para busca local (carregado uma vez)
+// ═══════════════════════════════════════════════════════════
+// CACHE LOCAL — carrega todas as props uma vez, filtra no JS
+// Resolve o problema de ilike não ignorar acentos no Postgres
+// ═══════════════════════════════════════════════════════════
 let _cacheProps = null;
 let _cachePropsTs = 0;
 
 async function getTodasProps(client) {
     const agora = Date.now();
-    // Reusa cache por 5 minutos
     if (_cacheProps && (agora - _cachePropsTs) < 300_000) return _cacheProps;
+
+    // Sem filtro publicada aqui — filtramos depois; evita problema de tipo boolean vs int
     const { data, error } = await client
         .from('propriedades')
-        .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa')
-        .eq('publicada', true)
+        .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa, publicada')
         .limit(1000);
-    if (error) { console.error('[onde] cache erro:', error); return []; }
-    _cacheProps = data || [];
+
+    if (error) {
+        console.error('[onde] erro ao carregar cache:', error);
+        return [];
+    }
+
+    // Aceita publicada = true, 1, "true", "1", ou ausente (null/undefined = inclui)
+    _cacheProps = (data || []).filter(p => {
+        const pub = p.publicada;
+        return pub === true || pub === 1 || pub === 'true' || pub === '1' || pub == null;
+    });
+
     _cachePropsTs = agora;
-    console.log('[onde] cache carregado:', _cacheProps.length, 'propriedades');
+    console.log('[onde] cache:', _cacheProps.length, 'propriedades carregadas');
     return _cacheProps;
 }
 
 async function buscarOnde(q) {
-    const t = norm(q); // sem acentos, minúsculo — ex: "chacara macacu"
+    if (!q || !q.trim()) return;
+    const t = norm(q.trim()); // remove acentos e caixa — ex: "chacara macacu"
 
-    // ── Estados: busca local instantânea ──
+    // ── 1. Estados: instantâneo, sem banco ──
     const estadosMatch = ESTADOS_ONDE
-        .filter(e => norm(e.n).includes(t) || e.s.toLowerCase().startsWith(t))
+        .filter(e => norm(e.n).includes(t) || norm(e.s).startsWith(t))
         .slice(0, 3);
 
     let props = [], cats = [], cidades = [];
 
     try {
-        // Busca todas as propriedades (com cache) + cidades via ilike
-        const [todasProps, rCids] = await Promise.all([
-            getTodasProps(_sb),
-            _sb.from('propriedades')
-                .select('cidade, estado')
-                .eq('publicada', true)
-                .not('cidade', 'is', null)
-                .ilike('cidade', `%${q}%`)
-                .limit(50)
-        ]);
+        const todasProps = await getTodasProps(_sb);
 
-        // Filtra localmente por nome E categoria usando norm()
-        // Isso garante match mesmo com acentos diferentes: "chacara" == "Chácara"
+        // Termos de busca: cada palavra individualmente (mínimo 2 chars)
+        // Ex: "chacara macacu" → ["chacara", "macacu"]
+        // Ex: "sitio" → ["sitio"]
         const palavras = t.split(/\s+/).filter(w => w.length >= 2);
-        const matchNome = p => p.nome && palavras.every(w => norm(p.nome).includes(w));
-        const matchCat  = p => p.categoria && palavras.every(w => norm(p.categoria).includes(w));
 
-        props = todasProps.filter(matchNome).slice(0, 5);
+        if (palavras.length === 0) {
+            abrirOndeDrop('<div class="onde-empty">Digite ao menos 2 caracteres</div>');
+            return;
+        }
 
-        // Categorias únicas que batem
+        // Match: TODAS as palavras devem aparecer no campo (ordem não importa)
+        const match = (campo) => {
+            if (!campo) return false;
+            const c = norm(campo);
+            return palavras.every(w => c.includes(w));
+        };
+
+        // ── Propriedades por nome ──
+        props = todasProps.filter(p => match(p.nome)).slice(0, 5);
+
+        // ── Categorias únicas ──
+        // Match mais flexível: QUALQUER palavra basta (OR) para categoria
+        const matchCatOr = (campo) => {
+            if (!campo) return false;
+            const c = norm(campo);
+            return palavras.some(w => c.includes(w));
+        };
         const catMap = {};
-        todasProps.filter(matchCat).forEach(p => {
+        todasProps.filter(p => matchCatOr(p.categoria)).forEach(p => {
             catMap[p.categoria] = (catMap[p.categoria] || 0) + 1;
         });
         cats = Object.entries(catMap).slice(0, 4).map(([cat, count]) => ({ cat, count }));
 
-        // Cidades via ilike (acentos geralmente coincidem em cidades)
-        // Também filtra localmente para cobrir variações
-        const cidadesFiltradas = (rCids.data || []);
-        // Complementa com filtro local do cache
-        todasProps.forEach(p => {
-            if (p.cidade && norm(p.cidade).includes(t)) cidadesFiltradas.push(p);
-        });
+        // ── Cidades ──
         const cidMap = {};
-        cidadesFiltradas.forEach(p => {
-            if (p.cidade && !cidMap[p.cidade]) cidMap[p.cidade] = p.estado;
+        todasProps.forEach(p => {
+            if (p.cidade && match(p.cidade) && !cidMap[p.cidade])
+                cidMap[p.cidade] = p.estado;
         });
         cidades = Object.entries(cidMap).slice(0, 4).map(([cidade, estado]) => ({ cidade, estado }));
 
-        console.log('[onde] t="%s" props=%d cats=%d cidades=%d', t, props.length, cats.length, cidades.length);
+        console.log('[onde] "%s" → props=%d cats=%d cidades=%d estados=%d',
+            t, props.length, cats.length, cidades.length, estadosMatch.length);
 
     } catch(err) {
         console.error('[onde] exceção:', err);
     }
 
+    // ── Monta HTML ──
     let html = '';
 
     if (props.length) {
@@ -1499,12 +1519,12 @@ async function buscarOnde(q) {
         html += props.map(p => {
             const img = p.imagem_url || p.foto_capa || '';
             const sub = [p.cidade, p.estado].filter(Boolean).join(', ');
-            const nomeEsc = (p.nome||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-            return `<div class="onde-result" onclick="selecionarOnde({tipo:'prop',id:'${p.id}',nome:'${nomeEsc}',estado:'${p.estado||''}',cidade:'${p.cidade||''}',label:'${nomeEsc}'})">
-                <div class="onde-result-icon">${img ? `<img src="${img}" alt="">` : '🏠'}</div>
+            const ne  = (p.nome||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'prop',id:'${p.id}',nome:'${ne}',estado:'${p.estado||''}',cidade:'${p.cidade||''}',label:'${ne}'})">
+                <div class="onde-result-icon">${img?`<img src="${img}" alt="">`:'🏠'}</div>
                 <div class="onde-result-info">
-                    <div class="onde-result-titulo">${p.nome || 'Sem nome'}</div>
-                    <div class="onde-result-sub">${sub}${p.categoria ? ' · ' + p.categoria : ''}</div>
+                    <div class="onde-result-titulo">${p.nome||'Sem nome'}</div>
+                    <div class="onde-result-sub">${sub}${p.categoria?' · '+p.categoria:''}</div>
                 </div>
                 <span class="onde-result-badge badge-prop">Espaço</span>
             </div>`;
@@ -1514,12 +1534,12 @@ async function buscarOnde(q) {
     if (cats.length) {
         html += `<div class="onde-group-label">🏷️ Categorias</div>`;
         html += cats.map(c => {
-            const catEsc = c.cat.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-            return `<div class="onde-result" onclick="selecionarOnde({tipo:'categoria',categoria:'${catEsc}',label:'${catEsc}'})">
+            const ce = c.cat.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'categoria',categoria:'${ce}',label:'${ce}'})">
                 <div class="onde-result-icon">🏷️</div>
                 <div class="onde-result-info">
                     <div class="onde-result-titulo">${c.cat}</div>
-                    <div class="onde-result-sub">${c.count} espaço${c.count !== 1 ? 's' : ''} disponíve${c.count !== 1 ? 'is' : 'l'}</div>
+                    <div class="onde-result-sub">${c.count} espaço${c.count!==1?'s':''} disponíve${c.count!==1?'is':'l'}</div>
                 </div>
                 <span class="onde-result-badge badge-cat">Categoria</span>
             </div>`;
