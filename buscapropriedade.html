@@ -1927,6 +1927,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
         .badge-prop   { background: #fff0f3; color: var(--vermelho); }
         .badge-cidade { background: #eff6ff; color: #3b82f6; }
         .badge-estado { background: #f0fdf4; color: #22c55e; }
+        .badge-cat    { background: #faf5ff; color: #8b5cf6; }
 
         .onde-loading, .onde-empty {
             padding: 24px 16px; text-align: center;
@@ -1991,6 +1992,96 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                     <input type="hidden" id="onde-prop-id" value="">
                     <div id="onde-dropdown" class="onde-dropdown" style="display:none;"></div>
                 </div>
+                <div class="divider"></div>
+                <div class="search-item" id="range-container">
+                    <label>Quando</label>
+                    <span class="date-text" id="display-quando">Adicionar datas</span>
+                    <input type="text" id="input-periodo" style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;">
+                </div>
+                <div class="divider"></div>
+                <div class="search-item" id="tipo-container" style="position:relative;">
+                    <label>Evento</label>
+                    <input type="hidden" id="tipo-espaco" value="">
+                    <div id="tipo-display" class="tipo-display" onclick="toggleEventoDropdown(event)">
+                        <span id="tipo-texto">Todos os eventos</span>
+                        <svg class="tipo-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div id="evento-dropdown" class="evento-dropdown" style="display:none;">
+                        <div class="evento-grid-wrap">
+                            <button class="ev-clear" onclick="selectEvento(null)">✕ Todos os eventos</button>
+                            <div class="ev-cat-label">🏢 Corporativo</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Workshop" onclick="selectEvento(this)"><span>💼</span>Workshop</div>
+                                <div class="ev-item" data-v="Treinamento" onclick="selectEvento(this)"><span>📋</span>Treinamento</div>
+                                <div class="ev-item" data-v="Seminários" onclick="selectEvento(this)"><span>🎙️</span>Seminários</div>
+                                <div class="ev-item" data-v="Congresso" onclick="selectEvento(this)"><span>🏛️</span>Congresso</div>
+                                <div class="ev-item" data-v="Networking" onclick="selectEvento(this)"><span>🤝</span>Networking</div>
+                                <div class="ev-item" data-v="Happy Hour" onclick="selectEvento(this)"><span>🥂</span>Happy Hour</div>
+                                <div class="ev-item" data-v="Confraternização" onclick="selectEvento(this)"><span>🎉</span>Confraternização</div>
+                                <div class="ev-item" data-v="Lançamento de Produto" onclick="selectEvento(this)"><span>🚀</span>Lançamento</div>
+                                <div class="ev-item" data-v="Field Day" onclick="selectEvento(this)"><span>🌤️</span>Field Day</div>
+                                <div class="ev-item" data-v="Pop-up Store" onclick="selectEvento(this)"><span>🛍️</span>Pop-up Store</div>
+                            </div>
+                            <div class="ev-cat-label">🐴 Cavalo</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Provas Hípicas" onclick="selectEvento(this)"><span>🏇</span>Provas Hípicas</div>
+                                <div class="ev-item" data-v="Torneios" onclick="selectEvento(this)"><span>🏆</span>Torneios</div>
+                                <div class="ev-item" data-v="Leilão" onclick="selectEvento(this)"><span>🔨</span>Leilão</div>
+                                <div class="ev-item" data-v="Dia de Campo" onclick="selectEvento(this)"><span>🌾</span>Dia de Campo</div>
+                            </div>
+                            <div class="ev-cat-label">🎣 Pescaria</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Pescaria" onclick="selectEvento(this)"><span>🎣</span>Pescaria</div>
+                                <div class="ev-item" data-v="Acampamento" onclick="selectEvento(this)"><span>⛺</span>Acampamento</div>
+                                <div class="ev-item" data-v="Retiro" onclick="selectEvento(this)"><span>🌿</span>Retiro</div>
+                            </div>
+                            <div class="ev-cat-label">🪂 Radicais</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Radical" onclick="selectEvento(this)"><span>🪂</span>Radical</div>
+                                <div class="ev-item" data-v="Encontro de Motos" onclick="selectEvento(this)"><span>🏍️</span>Motos</div>
+                                <div class="ev-item" data-v="Futebol" onclick="selectEvento(this)"><span>⚽</span>Futebol</div>
+                            </div>
+                            <div class="ev-cat-label">🥂 Sociais & Celebrações</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Casamento" onclick="selectEvento(this)"><span>💍</span>Casamento</div>
+                                <div class="ev-item" data-v="Noivado" onclick="selectEvento(this)"><span>💒</span>Noivado</div>
+                                <div class="ev-item" data-v="Renovação de Votos" onclick="selectEvento(this)"><span>🌹</span>Renovação</div>
+                                <div class="ev-item" data-v="Bodas" onclick="selectEvento(this)"><span>👫</span>Bodas</div>
+                                <div class="ev-item" data-v="Festa de Aniversário" onclick="selectEvento(this)"><span>🎂</span>Aniversário</div>
+                                <div class="ev-item" data-v="Festa Infantil" onclick="selectEvento(this)"><span>🎈</span>Festa Infantil</div>
+                                <div class="ev-item" data-v="Debutante" onclick="selectEvento(this)"><span>👑</span>Debutante</div>
+                                <div class="ev-item" data-v="Chá de Bebê" onclick="selectEvento(this)"><span>👶</span>Chá de Bebê</div>
+                                <div class="ev-item" data-v="Chá Revelação" onclick="selectEvento(this)"><span>🎀</span>Chá Revelação</div>
+                            </div>
+                            <div class="ev-cat-label">🎓 Acadêmico</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Formatura" onclick="selectEvento(this)"><span>🎓</span>Formatura</div>
+                                <div class="ev-item" data-v="Colação de Grau" onclick="selectEvento(this)"><span>📜</span>Colação de Grau</div>
+                                <div class="ev-item" data-v="Amostras" onclick="selectEvento(this)"><span>🔬</span>Amostras</div>
+                                <div class="ev-item" data-v="Apresentações" onclick="selectEvento(this)"><span>📊</span>Apresentações</div>
+                            </div>
+                            <div class="ev-cat-label">✝️ Religioso</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Batizado" onclick="selectEvento(this)"><span>🕊️</span>Batizado</div>
+                                <div class="ev-item" data-v="Vigilia" onclick="selectEvento(this)"><span>🕯️</span>Vigília</div>
+                                <div class="ev-item" data-v="Encontro Religioso" onclick="selectEvento(this)"><span>🙏</span>Enc. Religioso</div>
+                            </div>
+                            <div class="ev-cat-label">🎵 Entretenimento</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Show" onclick="selectEvento(this)"><span>🎵</span>Show</div>
+                                <div class="ev-item" data-v="Festival" onclick="selectEvento(this)"><span>🎪</span>Festival</div>
+                                <div class="ev-item" data-v="Apresentações" onclick="selectEvento(this)"><span>🎭</span>Teatro</div>
+                            </div>
+                            <div class="ev-cat-label">✨ Estilo de Vida</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Ensaio Fotográfico" onclick="selectEvento(this)"><span>📸</span>Ensaio</div>
+                                <div class="ev-item" data-v="Vernissage" onclick="selectEvento(this)"><span>🖼️</span>Vernissage</div>
+                                <div class="ev-item" data-v="Exposição" onclick="selectEvento(this)"><span>🏛️</span>Exposição</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="divider"></div>
                                 <button class="btn-search" id="main-search-btn" style="opacity:.3;pointer-events:none;">&#128269;</button>
             </div>
         </div>
@@ -2592,7 +2683,6 @@ input:checked + .slider-round:before { transform: translateX(20px); }
         const selEstado = document.getElementById('f-estado');
         const selCidade = document.getElementById('f-cidade');
         if (selEstado && item.estado) {
-            // Tenta valor como sigla ou nome
             const estadoNomes = {
                 'AC':'Acre','AL':'Alagoas','AP':'Amapá','AM':'Amazonas','BA':'Bahia',
                 'CE':'Ceará','DF':'Distrito Federal','ES':'Espírito Santo','GO':'Goiás',
@@ -2604,96 +2694,148 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             };
             const nomeEstado = estadoNomes[item.estado] || item.estado;
             selEstado.value = nomeEstado;
-            // Dispara o change para carregar cidades no modal
             selEstado.dispatchEvent(new Event('change'));
         }
         if (selCidade && item.cidade) {
             setTimeout(() => { selCidade.value = item.cidade; }, 400);
         }
 
-        // Navega direto se for propriedade
+        // Navega direto para a propriedade
         if (item.tipo === 'prop' && item.id) {
             window.location.href = `propriedade.html?id=${item.id}`;
+            return;
+        }
+        // Navega para busca por categoria
+        if (item.tipo === 'categoria') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('tipo', item.categoria);
+            url.searchParams.delete('estado');
+            url.searchParams.delete('cidade');
+            window.location.href = url.toString();
+            return;
         }
     }
 
     async function buscarOnde(q) {
-        const t = norm(q);
-        const estados = ESTADOS_ONDE
-            .filter(e => norm(e.n).includes(t) || e.s.toLowerCase().includes(t))
-            .slice(0, 3);
+    const t = norm(q);
 
-        let props = [], cidades = [];
-        try {
-            const [rProps, rCids] = await Promise.all([
-                _supabase.from('propriedades')
-                   .select('id, nome, cidade, estado, imagem_url, foto_capa')
-                   .eq('publicada', true)
-                   .ilike('nome', `%${q}%`)
-                   .limit(4),
-                _supabase.from('propriedades')
-                   .select('cidade, estado')
-                   .eq('publicada', true)
-                   .ilike('cidade', `%${q}%`)
-                   .not('cidade', 'is', null)
-                   .limit(20)
-            ]);
-            props = rProps.data || [];
-            const cidMap = {};
-            (rCids.data || []).forEach(p => {
-                if (p.cidade && !cidMap[p.cidade]) cidMap[p.cidade] = p.estado;
-            });
-            cidades = Object.entries(cidMap).slice(0,4).map(([cidade,estado]) => ({cidade,estado}));
-        } catch(_) {}
+    // Estados — busca local com normalização de acentos
+    const estados = ESTADOS_ONDE
+        .filter(e => norm(e.n).includes(t) || e.s.toLowerCase().includes(t))
+        .slice(0, 3);
 
-        let html = '';
-        if (props.length) {
-            html += `<div class="onde-group-label">🏠 Espaços</div>`;
-            html += props.map(p => {
-                const img = p.imagem_url || p.foto_capa || '';
-                const sub = [p.cidade, p.estado].filter(Boolean).join(', ');
-                const nomeEsc = (p.nome||'').replace(/'/g,"\\'");
-                return `<div class="onde-result" onclick="selecionarOnde({tipo:'prop',id:'${p.id}',nome:'${nomeEsc}',estado:'${p.estado||''}',cidade:'${p.cidade||''}',label:'${nomeEsc}'})">
-                    <div class="onde-result-icon">${img?`<img src="${img}" alt="">`:'🏠'}</div>
-                    <div class="onde-result-info">
-                        <div class="onde-result-titulo">${p.nome||'Sem nome'}</div>
-                        <div class="onde-result-sub">${sub}</div>
-                    </div>
-                    <span class="onde-result-badge badge-prop">Espaço</span>
-                </div>`;
-            }).join('');
-        }
-        if (cidades.length) {
-            html += `<div class="onde-group-label">🏙️ Cidades</div>`;
-            html += cidades.map(c => {
-                const label = `${c.cidade}, ${c.estado}`;
-                return `<div class="onde-result" onclick="selecionarOnde({tipo:'cidade',estado:'${c.estado}',cidade:'${c.cidade}',label:'${label}'})">
-                    <div class="onde-result-icon">🏙️</div>
-                    <div class="onde-result-info">
-                        <div class="onde-result-titulo">${c.cidade}</div>
-                        <div class="onde-result-sub">${c.estado} · Brasil</div>
-                    </div>
-                    <span class="onde-result-badge badge-cidade">Cidade</span>
-                </div>`;
-            }).join('');
-        }
-        if (estados.length) {
-            html += `<div class="onde-group-label">📍 Estados</div>`;
-            html += estados.map(e => {
-                const label = `${e.n}, BR`;
-                return `<div class="onde-result" onclick="selecionarOnde({tipo:'estado',estado:'${e.s}',cidade:'',label:'${label}'})">
-                    <div class="onde-result-icon">📍</div>
-                    <div class="onde-result-info">
-                        <div class="onde-result-titulo">${e.n}</div>
-                        <div class="onde-result-sub">${e.s} · Brasil</div>
-                    </div>
-                    <span class="onde-result-badge badge-estado">Estado</span>
-                </div>`;
-            }).join('');
-        }
-        if (!html) html = `<div class="onde-empty">Nenhum resultado para "<strong>${q}</strong>"</div>`;
-        abrirOndeDrop(html);
+    // Busca no Supabase — propriedades (nome + categoria) e cidades
+    let props = [], cats = [], cidades = [];
+    try {
+        // Busca por nome: usa ilike no Supabase, mas também filtra localmente
+        // com norm() para ignorar acentos e maiúsculas
+        const [rNome, rCat, rCids] = await Promise.all([
+            _sb.from('propriedades')
+               .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa')
+               .eq('publicada', true)
+               .limit(100),  // traz mais para filtrar localmente
+            _sb.from('propriedades')
+               .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa')
+               .eq('publicada', true)
+               .ilike('categoria', `%${q}%`)
+               .limit(4),
+            _sb.from('propriedades')
+               .select('cidade, estado')
+               .eq('publicada', true)
+               .not('cidade', 'is', null)
+               .limit(500)
+        ]);
+
+        // Filtra localmente com norm() — ignora acentos e maiúsculas/minúsculas
+        props = (rNome.data || [])
+            .filter(p => p.nome && norm(p.nome).includes(t))
+            .slice(0, 5);
+
+        // Categorias únicas que batem com a busca
+        const catMap = {};
+        (rCat.data || []).forEach(p => {
+            if (p.categoria && !catMap[p.categoria]) catMap[p.categoria] = 0;
+            if (p.categoria) catMap[p.categoria]++;
+        });
+        cats = Object.entries(catMap).slice(0, 3).map(([cat, count]) => ({ cat, count }));
+
+        // Cidades únicas filtradas com norm()
+        const cidMap = {};
+        (rCids.data || []).forEach(p => {
+            if (p.cidade && norm(p.cidade).includes(t) && !cidMap[p.cidade])
+                cidMap[p.cidade] = p.estado;
+        });
+        cidades = Object.entries(cidMap).slice(0, 4).map(([cidade, estado]) => ({ cidade, estado }));
+    } catch(_) {}
+
+    let html = '';
+
+    if (props.length) {
+        html += `<div class="onde-group-label">🏠 Espaços</div>`;
+        html += props.map(p => {
+            const img = p.imagem_url || p.foto_capa || '';
+            const sub = [p.cidade, p.estado].filter(Boolean).join(', ');
+            const nomeEsc = (p.nome||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'prop',id:'${p.id}',nome:'${nomeEsc}',estado:'${p.estado||''}',cidade:'${p.cidade||''}',label:'${nomeEsc}'})">
+                <div class="onde-result-icon">${img?`<img src="${img}" alt="">`:'🏠'}</div>
+                <div class="onde-result-info">
+                    <div class="onde-result-titulo">${p.nome||'Sem nome'}</div>
+                    <div class="onde-result-sub">${sub}${p.categoria ? ' · '+p.categoria : ''}</div>
+                </div>
+                <span class="onde-result-badge badge-prop">Espaço</span>
+            </div>`;
+        }).join('');
     }
+
+    if (cats.length) {
+        html += `<div class="onde-group-label">🏷️ Categorias</div>`;
+        html += cats.map(c => {
+            const catEsc = c.cat.replace(/'/g,"\\'");
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'categoria',categoria:'${catEsc}',label:'${catEsc}'})">
+                <div class="onde-result-icon">🏷️</div>
+                <div class="onde-result-info">
+                    <div class="onde-result-titulo">${c.cat}</div>
+                    <div class="onde-result-sub">${c.count} espaço${c.count!==1?'s':''} disponíve${c.count!==1?'is':'l'}</div>
+                </div>
+                <span class="onde-result-badge badge-cat">Categoria</span>
+            </div>`;
+        }).join('');
+    }
+
+    if (cidades.length) {
+        html += `<div class="onde-group-label">🏙️ Cidades</div>`;
+        html += cidades.map(c => {
+            const label = `${c.cidade}, ${c.estado}`;
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'cidade',estado:'${c.estado}',cidade:'${c.cidade}',label:'${label}'})">
+                <div class="onde-result-icon">🏙️</div>
+                <div class="onde-result-info">
+                    <div class="onde-result-titulo">${c.cidade}</div>
+                    <div class="onde-result-sub">${c.estado} · Brasil</div>
+                </div>
+                <span class="onde-result-badge badge-cidade">Cidade</span>
+            </div>`;
+        }).join('');
+    }
+
+    if (estados.length) {
+        html += `<div class="onde-group-label">📍 Estados</div>`;
+        html += estados.map(e => {
+            const label = `${e.n}, BR`;
+            return `<div class="onde-result" onclick="selecionarOnde({tipo:'estado',estado:'${e.s}',cidade:'',label:'${label}'})">
+                <div class="onde-result-icon">📍</div>
+                <div class="onde-result-info">
+                    <div class="onde-result-titulo">${e.n}</div>
+                    <div class="onde-result-sub">${e.s} · Brasil</div>
+                </div>
+                <span class="onde-result-badge badge-estado">Estado</span>
+            </div>`;
+        }).join('');
+    }
+
+    if (!html) html = `<div class="onde-empty">Nenhum resultado para "<strong>${q}</strong>"</div>`;
+    abrirOndeDrop(html);
+}
+
 
     function sugestoesDefault() {
         const populares = ['RJ','SP','MG','BA','SC','RS','CE','PE'];
