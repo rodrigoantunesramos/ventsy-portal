@@ -2503,8 +2503,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                     .select('usuario_id')
                     .eq('plano_ativo', 'ultra')
                     .eq('status', 'ativa')
-                    .gte('fim_periodo', hoje);
-
+        
                 if (planos && planos.length > 0) {
                     const ids = planos.map(p => p.usuario_id);
                     query = query.in('usuario_id', ids);
