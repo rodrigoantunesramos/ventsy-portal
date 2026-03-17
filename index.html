@@ -546,6 +546,104 @@
             .est-grid { grid-template-columns: repeat(4, 1fr); }
         }
 
+        /* ──────────── CIDADE DROPDOWN GRID ──────────── */
+        .cidade-display {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .83rem; color: #555; cursor: pointer;
+            margin-top: 2px; gap: 4px; min-width: 110px;
+        }
+        .cidade-display span.cidade-texto { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cidade-caret { width: 14px; height: 14px; flex-shrink: 0; color: #aaa; transition: transform .2s; }
+        .cidade-display.open .cidade-caret { transform: rotate(180deg); }
+        .cidade-display.disabled-display { opacity: .4; cursor: not-allowed; pointer-events: none; }
+
+        .cidade-dropdown {
+            position: absolute;
+            top: calc(100% + 14px);
+            right: 0;
+            width: 420px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.15);
+            border: 1px solid #eee;
+            z-index: 5000;
+            animation: dropIn .18s ease;
+        }
+        .cidade-grid-wrap {
+            padding: 16px 18px 18px;
+            max-height: 380px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ddd transparent;
+        }
+        .cid-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .cid-header-title {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #aaa;
+        }
+        .cid-clear-btn {
+            background: #f7f7f7; border: 1px solid #eee;
+            border-radius: 8px; padding: 4px 10px;
+            font-size: .75rem; font-weight: 600; color: #666;
+            cursor: pointer; font-family: inherit;
+            transition: background .15s, color .15s;
+        }
+        .cid-clear-btn:hover { background: #fee; color: var(--vermelho); border-color: #fcc; }
+        .cid-loading {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 28px 0;
+            font-size: .85rem; color: #aaa;
+        }
+        .cid-loading::before {
+            content: ''; width: 18px; height: 18px;
+            border: 2px solid #eee; border-top-color: var(--vermelho);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .cid-empty {
+            text-align: center; padding: 28px 0;
+            font-size: .85rem; color: #bbb;
+        }
+        .cid-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .cid-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; padding: 10px 6px 8px;
+            border-radius: 12px; cursor: pointer;
+            text-align: center; line-height: 1.25;
+            background: #f9f9f9; border: 1px solid transparent;
+            transition: background .15s, border-color .15s, transform .12s, color .15s;
+            user-select: none;
+        }
+        .cid-icon { font-size: 1.1rem; line-height: 1; }
+        .cid-nome {
+            font-size: .73rem; font-weight: 700; color: #333;
+            line-height: 1.2; max-width: 100%;
+            overflow: hidden; display: -webkit-box;
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        }
+        .cid-item:hover {
+            background: #fff5f7; border-color: #ffd6dd; transform: translateY(-2px);
+        }
+        .cid-item:hover .cid-nome { color: var(--vermelho); }
+        .cid-item.selected {
+            background: var(--vermelho); border-color: var(--vermelho);
+        }
+        .cid-item.selected .cid-nome,
+        .cid-item.selected .cid-icon { color: #fff; filter: none; }
+
+        @media (max-width: 620px) {
+            .cidade-dropdown { width: calc(100vw - 32px); right: 0; left: auto; }
+            .cid-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
             .banner-inner { flex-direction: column; text-align: center; }
             .footer-container { flex-direction: column; gap: 36px; }
             .hero h1 { font-size: 1.9rem; }
@@ -765,10 +863,18 @@
                     </div>
                 </div>
                 <div class="divider"></div>
-                <div class="search-item" id="cidade-container">
+                <div class="search-item" id="cidade-container" style="position:relative;">
                     <label>Cidade</label>
-                    <input type="text" id="cidade-input" placeholder="Todas as cidades" autocomplete="off" disabled>
-                    <div id="cidade-suggestions" class="suggestions-dropdown"></div>
+                    <input type="hidden" id="cidade-input" value="">
+                    <div id="cidade-display" class="cidade-display disabled-display" onclick="toggleCidadeDropdown(event)">
+                        <span class="cidade-texto" id="cidade-texto">Todas as cidades</span>
+                        <svg class="cidade-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div id="cidade-dropdown" class="cidade-dropdown" style="display:none;">
+                        <div class="cidade-grid-wrap" id="cidade-grid-wrap">
+                            <div class="cid-loading">Selecione um estado primeiro</div>
+                        </div>
+                    </div>
                 </div>
                 <button class="btn-search" id="main-search-btn" style="opacity:.3;pointer-events:none;">&#128269;</button>
             </div>
@@ -1158,42 +1264,109 @@ document.getElementById('range-container').addEventListener('click', () =>
     document.getElementById('input-periodo')._flatpickr.open()
 );
 
-/* ── Autocomplete de Cidade ── */
+/* ── Cidade Dropdown Grid ── */
 const cidadeInput = document.getElementById('cidade-input');
-const cidadeDrop  = document.getElementById('cidade-suggestions');
 let listaCidades  = [];
 
+function toggleCidadeDropdown(e) {
+    e.stopPropagation();
+    const disp = document.getElementById('cidade-display');
+    if (disp.classList.contains('disabled-display')) return;
+    const drop = document.getElementById('cidade-dropdown');
+    const isOpen = drop.style.display === 'block';
+    drop.style.display = isOpen ? 'none' : 'block';
+    disp.classList.toggle('open', !isOpen);
+}
+
+function selectCidade(el) {
+    const texto = document.getElementById('cidade-texto');
+    const drop  = document.getElementById('cidade-dropdown');
+    const disp  = document.getElementById('cidade-display');
+
+    document.querySelectorAll('.cid-item.selected').forEach(i => i.classList.remove('selected'));
+
+    if (!el) {
+        cidadeInput.value = '';
+        texto.textContent = 'Todas as cidades';
+        texto.style.color = '';
+    } else {
+        const cidade = el.dataset.c;
+        cidadeInput.value = cidade;
+        texto.textContent = cidade;
+        texto.style.color = '#222';
+        el.classList.add('selected');
+    }
+
+    drop.style.display = 'none';
+    disp.classList.remove('open');
+}
+
+function renderCidadesGrid(lista) {
+    const wrap = document.getElementById('cidade-grid-wrap');
+    if (!lista.length) {
+        wrap.innerHTML = '<div class="cid-empty">🏜️ Nenhuma cidade encontrada</div>';
+        return;
+    }
+    const itens = lista.map(c => {
+        const emoji = emojiCidade(c);
+        return `<div class="cid-item" data-c="${c}" onclick="selectCidade(this)">
+            <div class="cid-icon">${emoji}</div>
+            <div class="cid-nome">${c}</div>
+        </div>`;
+    }).join('');
+    wrap.innerHTML = `
+        <div class="cid-header">
+            <span class="cid-header-title">🏙️ ${lista.length} cidade${lista.length !== 1 ? 's' : ''}</span>
+            <button class="cid-clear-btn" onclick="selectCidade(null)">✕ Todas</button>
+        </div>
+        <div class="cid-grid">${itens}</div>
+    `;
+}
+
+function emojiCidade(nome) {
+    const n = nome.toLowerCase();
+    if (n.includes('são paulo') || n.includes('rio de janeiro') || n.includes('salvador') || n.includes('fortaleza') || n.includes('belo horizonte') || n.includes('manaus') || n.includes('curitiba') || n.includes('recife') || n.includes('porto alegre') || n.includes('belém') || n.includes('goiânia') || n.includes('brasília')) return '🌆';
+    if (n.includes('praia') || n.includes('cabo') || n.includes('litoral') || n.includes('angra') || n.includes('búzios') || n.includes('arraial') || n.includes('guarujá') || n.includes('ubatuba') || n.includes('florianópolis') || n.includes('maceió') || n.includes('natal')) return '🏖️';
+    if (n.includes('petrópolis') || n.includes('gramado') || n.includes('campos do jordão') || n.includes('visconde') || n.includes('serra') || n.includes('nova friburgo') || n.includes('teresópolis')) return '⛰️';
+    if (n.includes('cachoeiras') || n.includes('cachoeiro') || n.includes('cachoeira')) return '💧';
+    if (n.includes('foz') || n.includes('iguaçu')) return '🌊';
+    return '📍';
+}
+
 async function carregarCidades(sigla) {
-    if (!sigla) { listaCidades = []; cidadeInput.value = ''; cidadeInput.disabled = true; return; }
-    cidadeInput.disabled = false;
-    cidadeInput.placeholder = 'Carregando...';
+    const disp = document.getElementById('cidade-display');
+    const wrap = document.getElementById('cidade-grid-wrap');
+
+    // Reset cidade selecionada
+    cidadeInput.value = '';
+    document.getElementById('cidade-texto').textContent = 'Todas as cidades';
+    document.getElementById('cidade-texto').style.color = '';
+
+    if (!sigla) {
+        listaCidades = [];
+        disp.classList.add('disabled-display');
+        wrap.innerHTML = '<div class="cid-loading">Selecione um estado primeiro</div>';
+        return;
+    }
+
+    disp.classList.remove('disabled-display');
+    wrap.innerHTML = '<div class="cid-loading">Carregando cidades...</div>';
+
     const { data } = await _sb
         .from('propriedades').select('cidade')
         .eq('estado', sigla).eq('publicada', true).not('cidade', 'is', null);
     listaCidades = data ? [...new Set(data.map(p => p.cidade).filter(Boolean))].sort() : [];
-    cidadeInput.placeholder = listaCidades.length ? 'Todas as cidades' : 'Sem cidades';
+    renderCidadesGrid(listaCidades);
 }
 
-function renderCidades(lista) {
-    cidadeDrop.innerHTML = lista.map(c =>
-        `<div class="suggestion-item" data-c="${c}"><span>🏙️</span>${c}</div>`
-    ).join('');
-    cidadeDrop.style.display = lista.length ? 'block' : 'none';
-    cidadeDrop.querySelectorAll('.suggestion-item').forEach(el => {
-        el.addEventListener('mousedown', e => {
-            e.preventDefault();
-            cidadeInput.value = el.dataset.c;
-            cidadeDrop.style.display = 'none';
-        });
-    });
-}
-
-cidadeInput.addEventListener('input', () => {
-    const t = cidadeInput.value.trim().toLowerCase();
-    renderCidades((t ? listaCidades.filter(c => c.toLowerCase().includes(t)) : listaCidades).slice(0, 6));
+document.addEventListener('click', e => {
+    if (!e.target.closest('#cidade-container')) {
+        const drop = document.getElementById('cidade-dropdown');
+        const disp = document.getElementById('cidade-display');
+        if (drop) drop.style.display = 'none';
+        if (disp) disp.classList.remove('open');
+    }
 });
-cidadeInput.addEventListener('focus', () => renderCidades(listaCidades.slice(0, 6)));
-cidadeInput.addEventListener('blur',  () => setTimeout(() => cidadeDrop.style.display = 'none', 200));
 
 btnBusca.addEventListener('click', () => {
     const nomeEstado = document.getElementById('location-input').value.trim(); if (!nomeEstado) return;
