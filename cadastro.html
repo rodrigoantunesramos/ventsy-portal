@@ -329,7 +329,7 @@
                     <label for="nascimento">Data de nascimento</label>
                     <div class="input-wrap">
                         <span class="material-icons icon-left">cake</span>
-                        <input type="date" id="nascimento" onchange="validarIdade()" max="">
+                        <input type="date" id="nascimento" onchange="validarIdade()" onblur="validarIdade()" oninput="validarIdade()" max="">
                         <span class="campo-status material-icons" id="status-nasc"></span>
                     </div>
                     <p class="campo-hint" id="hint-nasc">Apenas maiores de 18 anos podem se cadastrar.</p>
@@ -632,15 +632,31 @@ function validarNome() {
 
 function validarIdade() {
     const val = document.getElementById('nascimento').value;
-    if (!val) { limparStatus('nasc'); return false; }
-    const nasc = new Date(val);
+    const hint = document.getElementById('hint-nasc');
+    if (!val) {
+        limparStatus('nasc');
+        hint.className = 'campo-hint';
+        hint.innerHTML = 'Apenas maiores de 18 anos podem se cadastrar.';
+        return false;
+    }
+    const nasc = new Date(val + 'T00:00:00');
     const hoje = new Date();
+
+    // Rejeita anos impossíveis (ex: 99999 ou 1800)
+    const ano = nasc.getFullYear();
+    if (isNaN(nasc.getTime()) || ano < 1900 || ano > hoje.getFullYear()) {
+        setStatus('nasc', false, '');
+        hint.className = 'campo-hint erro';
+        hint.innerHTML = '<span class="material-icons" style="font-size:.9rem">error_outline</span> Data inválida.';
+        return false;
+    }
+
     let idade = hoje.getFullYear() - nasc.getFullYear();
     const m = hoje.getMonth() - nasc.getMonth();
     if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
+
     const ok = idade >= 18;
     setStatus('nasc', ok, '');
-    const hint = document.getElementById('hint-nasc');
     hint.className = ok ? 'campo-hint' : 'campo-hint erro';
     hint.innerHTML = ok
         ? '<span class="material-icons" style="color:var(--verde);font-size:.9rem">check_circle</span> Idade confirmada.'
@@ -925,65 +941,48 @@ async function submeterCadastro() {
         const { data: authData, error: authError } = await sb.auth.signUp({
             email,
             password: senha,
-            options: {
-                data: { nome, usuario }
-            }
+            options: { data: { nome, usuario } }
         });
 
+        // Erro explícito do Auth
         if (authError) {
-            // Registra o erro para diagnóstico (lead já está salvo)
-            await sb.rpc('registrar_erro_cadastro', {
-                p_email:    email,
-                p_status:   'erro_auth',
-                p_erro_msg: authError.message
-            }).catch(() => {});
-            throw authError;
+            await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_auth', p_erro_msg: authError.message }).catch(() => {});
+            throw new Error('Este e-mail já está cadastrado. Tente fazer login.');
         }
 
+        // Supabase retorna sucesso mas com identities[] vazio quando e-mail já existe
+        // (comportamento quando "Confirm email" está desativado no projeto)
         const userId = authData.user?.id;
-        if (!userId) throw new Error('Erro ao obter ID do usuário.');
+        const jaExistia = authData.user?.identities?.length === 0;
+        if (jaExistia || !userId) {
+            throw new Error('Este e-mail já está cadastrado. Tente fazer login.');
+        }
 
         // 2. Salvar perfil na tabela usuarios
         const { error: dbError } = await sb
             .from('usuarios')
-            .insert({
-                id:         userId,
-                nome:       nome,
-                documento:  documento,
-                tipo_doc:   tipoDoc,
-                nascimento: nascimento,
-                usuario:    usuario
-            });
+            .insert({ id: userId, nome, documento, tipo_doc: tipoDoc, nascimento, usuario });
 
         if (dbError) {
-            // ⚠️ signUp funcionou mas o INSERT falhou — limpa o zumbi do Auth
-            // para que a pessoa possa tentar de novo sem bloqueio
+            // signUp ok mas INSERT falhou — limpa zumbi para permitir nova tentativa
             await sb.rpc('limpar_zumbi_auth', { p_user_id: userId }).catch(() => {});
-            await sb.rpc('registrar_erro_cadastro', {
-                p_email:    email,
-                p_status:   'erro_db',
-                p_erro_msg: dbError.message
-            }).catch(() => {});
-
+            await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_db', p_erro_msg: dbError.message }).catch(() => {});
             if (dbError.code === '23505') {
                 if (dbError.message.includes('documento')) throw new Error('Este CPF/CNPJ já está cadastrado.');
                 if (dbError.message.includes('usuario'))   throw new Error('Este nome de usuário já está em uso. Escolha outro.');
             }
-            throw dbError;
+            throw new Error('Erro ao salvar seus dados. Tente novamente.');
         }
 
-        // ✅ Registra indicação
+        // 3. Indicação
         if (refCodigo && userId) {
-            await sb.rpc('registrar_indicacao', {
-                p_indicado_id: userId,
-                p_ref_handle:  refCodigo
-            }).catch(e => console.warn('Indicação pós-cadastro falhou:', e.message));
+            await sb.rpc('registrar_indicacao', { p_indicado_id: userId, p_ref_handle: refCodigo }).catch(() => {});
         }
 
-        // ✅ Marca lead como convertido (sai da fila de remarketing)
+        // 4. Marca lead como convertido
         await sb.rpc('marcar_cadastro_convertido', { p_email: email }).catch(() => {});
 
-        // ✅ Sucesso
+        // ✅ Sucesso — mostra tela de confirmação
         document.getElementById('form-cadastro').style.opacity = '0';
         document.getElementById('form-cadastro').style.transition = 'opacity 0.3s';
         setTimeout(() => {
@@ -993,16 +992,11 @@ async function submeterCadastro() {
             s.style.opacity = '0';
             setTimeout(() => { s.style.transition = 'opacity 0.4s'; s.style.opacity = '1'; }, 20);
         }, 300);
+        // Não chama liberarBtn aqui — botão some junto com o form
 
     } catch (err) {
-        console.error(err);
-        let msg = 'Ocorreu um erro. Tente novamente.';
-        if (err.message?.includes('already registered') || err.message?.includes('already been registered'))
-            msg = 'Este e-mail já está cadastrado. Tente fazer login.';
-        else if (err.message)
-            msg = err.message;
-
-        mostrarAlerta('erro', msg);
+        console.error('Erro no cadastro:', err.message);
+        mostrarAlerta('erro', err.message || 'Ocorreu um erro. Tente novamente.');
         liberarBtn();
     }
 }
