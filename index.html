@@ -811,7 +811,7 @@ async function render() {
         lista.forEach(p => { p._plano = p._plano || 'basico'; p._nota = p.avaliacao || p.nota_media || 0; });
     } else {
         lista.forEach(p => {
-            p._plano = (p.user_id && planos[p.user_id]) || 'basico';
+            p._plano = (p.usuario_id && planos[p.usuario_id]) || 'basico';
             p._nota  = parseFloat(p.avaliacao || 0);
         });
     }
