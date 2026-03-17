@@ -134,6 +134,88 @@
         .dash-header-fixo h2 { font-size: 1.6rem; font-weight: 700; color: #222; }
         .dash-header-fixo p  { font-size: 0.82rem; color: #999; margin-top: 4px; }
 
+
+        /* ── CARD SEU CÓDIGO ── */
+        .card-seu-codigo {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 20px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+        }
+        .card-seu-codigo-esquerda {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .codigo-icone-wrap {
+            width: 52px; height: 52px;
+            background: rgba(255,56,92,0.08);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+        .codigo-texto label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+        .codigo-valor {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .codigo-valor span {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #0d0d0d;
+            letter-spacing: 0.18em;
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+        }
+        .btn-copiar-codigo {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,56,92,0.08);
+            color: #ff385c;
+            border: 1px solid rgba(255,56,92,0.2);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+        .btn-copiar-codigo:hover { background: rgba(255,56,92,0.14); transform: scale(1.03); }
+        .btn-copiar-codigo.copiado { background: #e8faf0; color: #1ebc54; border-color: rgba(30,188,84,0.25); }
+        .codigo-dica {
+            font-size: 0.78rem;
+            color: #aaa;
+            line-height: 1.5;
+            max-width: 260px;
+        }
+        .codigo-dica strong { color: #888; }
+
+        @media (max-width: 600px) {
+            .card-seu-codigo { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .codigo-dica { max-width: 100%; }
+            .codigo-valor span { font-size: 1.4rem; }
+        }
+
         /* ── CARD HERO ── */
         .card-hero {
             background: #0d0d0d;
@@ -472,6 +554,26 @@
             <p>Indique espaços, ganhe benefícios exclusivos na sua assinatura.</p>
         </div>
 
+        <!-- CARD SEU CÓDIGO -->
+        <div class="card-seu-codigo">
+            <div class="card-seu-codigo-esquerda">
+                <div class="codigo-icone-wrap">🎟️</div>
+                <div class="codigo-texto">
+                    <label>Seu código de indicação</label>
+                    <div class="codigo-valor">
+                        <span id="seu-codigo-valor">——————</span>
+                        <button class="btn-copiar-codigo" id="btn-copiar-codigo" onclick="copiarCodigo()">
+                            📋 Copiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p class="codigo-dica">
+                Passe este código para quem você quer indicar.<br>
+                <strong>Funciona tanto pelo link quanto digitando na hora do cadastro.</strong>
+            </p>
+        </div>
+
         <!-- CARD HERO -->
         <div class="card-hero">
             <div class="badge-promo">PROGRAMA DE PARCEIROS</div>
@@ -630,9 +732,10 @@ async function init() {
             `Válido até ${d.toLocaleDateString('pt-BR')}`;
     }
 
-    // Link de referência personalizado
-    const handle = usuario || user.id.slice(0, 8);
-    document.getElementById('link-ref').value = `ventsy.com/anunciar?ref=${handle}`;
+    // Código de indicação individual
+    const seuCodigo = perfil?.seucodigo || '???';
+    document.getElementById('seu-codigo-valor').textContent = seuCodigo;
+    document.getElementById('link-ref').value = `ventsy.com/anunciar?ref=${seuCodigo}`;
 
     // ── Busca indicações reais da view ──
     const { data: indicacoes, error } = await sb
@@ -698,6 +801,21 @@ function renderizarIndicacoes(lista) {
             </td>
         </tr>
     `).join('');
+}
+
+/* ── COPIAR CÓDIGO ── */
+function copiarCodigo() {
+    const codigo = document.getElementById('seu-codigo-valor').textContent;
+    const btn    = document.getElementById('btn-copiar-codigo');
+    navigator.clipboard.writeText(codigo).then(() => {
+        btn.textContent = '✅ Copiado!';
+        btn.classList.add('copiado');
+        mostrarToast('🎟️', 'Código copiado! Agora é só passar para quem você quer indicar.');
+        setTimeout(() => {
+            btn.textContent = '📋 Copiar';
+            btn.classList.remove('copiado');
+        }, 2500);
+    });
 }
 
 /* ── COPIAR LINK ── */
