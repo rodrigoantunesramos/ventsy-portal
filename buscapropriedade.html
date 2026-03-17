@@ -2730,7 +2730,7 @@ async function getTodasProps(client) {
     // Sem filtro publicada aqui — filtramos depois; evita problema de tipo boolean vs int
     const { data, error } = await client
         .from('propriedades')
-        .select('id, nome, cidade, estado, categoria, imagem_url, foto_capa, publicada')
+        .select('*')
         .limit(1000);
 
     if (error) {
@@ -2738,11 +2738,7 @@ async function getTodasProps(client) {
         return [];
     }
 
-    // Aceita publicada = true, 1, "true", "1", ou ausente (null/undefined = inclui)
-    _cacheProps = (data || []).filter(p => {
-        const pub = p.publicada;
-        return pub === true || pub === 1 || pub === 'true' || pub === '1' || pub == null;
-    });
+    _cacheProps = data || [];
 
     _cachePropsTs = agora;
     console.log('[onde] cache:', _cacheProps.length, 'propriedades carregadas');
