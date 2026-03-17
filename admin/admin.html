@@ -2295,6 +2295,20 @@ function carregarPlanos() {
   if (el('plano-basico-preco')) el('plano-basico-preco').value = p.basico;
   if (el('plano-pro-preco'))    el('plano-pro-preco').value    = p.pro;
   if (el('plano-ultra-preco'))  el('plano-ultra-preco').value  = p.ultra;
+
+  // Carrega benefícios e status do localStorage se disponível
+  try {
+    const saved = localStorage.getItem('ventsy_planos_config');
+    if (saved) {
+      const cfg = JSON.parse(saved);
+      ['basico','pro','ultra'].forEach(nome => {
+        const itemsEl  = el(`plano-${nome}-items`);
+        const statusEl = el(`plano-${nome}-status`);
+        if (itemsEl  && cfg[nome]?.items)  itemsEl.value  = cfg[nome].items.join('\n');
+        if (statusEl && cfg[nome]?.status) statusEl.value = cfg[nome].status;
+      });
+    }
+  } catch(e) {}
 }
 
 function salvarPlanos() {
@@ -2304,8 +2318,30 @@ function salvarPlanos() {
   const prices = { basico, pro, ultra };
   savePlanPrices(prices);
   PLAN_PRICES = prices;
-  addLog('sistema', 'Preços de planos atualizados', `Básico R$${basico} · Pro R$${pro} · Ultra R$${ultra}`);
-  toast('💾 Configurações de planos salvas! MRR será recalculado automaticamente.', 'success');
+
+  // Salva configuração completa (preço + benefícios + status) para planos.html / planos2.html
+  const planosConfig = {
+    basico: {
+      preco: basico,
+      items: (document.getElementById('plano-basico-items').value || '').split('\n').map(s => s.trim()).filter(Boolean),
+      status: document.getElementById('plano-basico-status').value || 'ativo'
+    },
+    pro: {
+      preco: pro,
+      items: (document.getElementById('plano-pro-items').value || '').split('\n').map(s => s.trim()).filter(Boolean),
+      status: document.getElementById('plano-pro-status').value || 'ativo'
+    },
+    ultra: {
+      preco: ultra,
+      items: (document.getElementById('plano-ultra-items').value || '').split('\n').map(s => s.trim()).filter(Boolean),
+      status: document.getElementById('plano-ultra-status').value || 'ativo'
+    },
+    _atualizado: new Date().toISOString()
+  };
+  localStorage.setItem('ventsy_planos_config', JSON.stringify(planosConfig));
+
+  addLog('sistema', 'Planos atualizados', `Básico R$${basico} · Pro R$${pro} · Ultra R$${ultra}`);
+  toast('💾 Planos salvos! As páginas planos.html e planos2.html serão atualizadas automaticamente.', 'success');
 }
 
 // ══════════════════════════════════════════════
