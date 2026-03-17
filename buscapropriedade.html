@@ -2468,18 +2468,22 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             if (filtros.capacidade > 0)   query = query.gte('capacidade', filtros.capacidade);
 
             // Booleanos — testa true E também 1 (por segurança)
-            if (filtros.climatizado)    query = query.or('climatizado.eq.true,climatizado.eq.1');
-            if (filtros.estacionamento) query = query.or('estacionamento.eq.true,estacionamento.eq.1');
-            if (filtros.seguranca)      query = query.or('seguranca.eq.true,seguranca.eq.1');
-            if (filtros.espacoAberto)   query = query.or('espaco_aberto.eq.true,espaco_aberto.eq.1');
-            if (filtros.acessibilidade) query = query.or('acessibilidade.eq.true,acessibilidade.eq.1');
-            if (filtros.somAlto)        query = query.or('som_alto.eq.true,som_alto.eq.1');
-            if (filtros.somTarde)       query = query.or('som_tarde.eq.true,som_tarde.eq.1');
+            if (filtros.acessibilidade) query = query.eq('acessibilidade', true);
+            if (filtros.somAlto)        query = query.eq('som_alto', true);
+            if (filtros.somTarde)       query = query.eq('som_tarde', true);
 
-            // Tipos de evento — coluna é "tipo_evento" (texto/array)
+            // Serviços/Comodidades — comodidades é um array no banco (cs = contains)
+            if (filtros.climatizado)    query = query.contains('comodidades', ['climatizado']);
+            if (filtros.estacionamento) query = query.contains('comodidades', ['estacionamento']);
+            if (filtros.seguranca)      query = query.contains('comodidades', ['seguranca']);
+            if (filtros.espacoAberto)   query = query.contains('comodidades', ['espaco-aberto']);
+
+            // Tipos de evento — tipo_evento é texto "casamento, infantil, ..." → usar ilike para cada
             if (filtros.tiposEvento && filtros.tiposEvento.length > 0) {
-                console.log('🎯 Aplicando filtro tipo_evento IN:', filtros.tiposEvento);
-                query = query.in('tipo_evento', filtros.tiposEvento);
+                console.log('🎯 Aplicando filtro tipo_evento ilike:', filtros.tiposEvento);
+                // Monta OR: tipo_evento.ilike.%casamento%,tipo_evento.ilike.%infantil%,...
+                const orStr = filtros.tiposEvento.map(t => `tipo_evento.ilike.%${t}%`).join(',');
+                query = query.or(orStr);
             }
 
             // Tipo de propriedade — tenta coluna "tipo_propriedade" E "categoria" (ambas existem no banco)
@@ -2491,21 +2495,21 @@ input:checked + .slider-round:before { transform: translateX(20px); }
                 query = query.or(orStr);
             }
 
-            // Premium: busca user_ids com plano premium ativo
+            // Premium: busca usuario_ids com plano ULTRA ativo na tabela assinaturas
             if (filtros.premium) {
                 const hoje = new Date().toISOString();
                 const { data: planos } = await _supabase
-                    .from('planos_anunciantes')
-                    .select('user_id')
-                    .eq('plano', 'premium')
-                    .eq('ativo', true)
-                    .gte('validade', hoje);
+                    .from('assinaturas')
+                    .select('usuario_id')
+                    .eq('plano_ativo', 'ultra')
+                    .eq('status', 'ativo')
+                    .gte('fim_periodo', hoje);
 
                 if (planos && planos.length > 0) {
-                    const ids = planos.map(p => p.user_id);
-                    query = query.in('user_id', ids);
+                    const ids = planos.map(p => p.usuario_id);
+                    query = query.in('usuario_id', ids);
                 } else {
-                    // Nenhum anunciante premium ativo — retorna vazio
+                    // Nenhum anunciante ultra ativo — retorna vazio
                     grid.innerHTML = '<p style="color:#aaa;padding:20px">Nenhum espaço premium disponível no momento.</p>';
                     return;
                 }
