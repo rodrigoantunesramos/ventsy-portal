@@ -569,19 +569,6 @@
             <button class="btn-visualizar" id="btn-visualizar" onclick="verAnuncio()">👁 Ver Anúncio Público</button>
         </header>
 
-        <!-- TERMÔMETRO DO ANÚNCIO -->
-        <div class="termometro-card" id="termometro-card">
-            <div class="termometro-header">
-                <div class="termometro-titulo">🌡️ Força do seu anúncio</div>
-                <div class="termometro-pct" id="termo-pct" style="color:#ff385c;">—</div>
-            </div>
-            <div class="termometro-bar-wrap">
-                <div class="termometro-bar-fill" id="termo-bar" style="width:0%;"></div>
-            </div>
-            <div class="termometro-msg" id="termo-msg">Calculando...</div>
-            <div class="termometro-itens" id="termo-itens"></div>
-        </div>
-
         <!-- ABAS -->
         <nav class="sub-menu-propriedade">
             <button class="tab-link active" onclick="openTab(event, 'contato')">1. Contato</button>
@@ -591,6 +578,7 @@
             <button class="tab-link" onclick="openTab(event, 'eventos')">5. Eventos</button>
             <button class="tab-link" onclick="openTab(event, 'faq')">6. FAQ</button>
             <button class="tab-link" onclick="openTab(event, 'servicos')">7. Serviços</button>
+            <button class="tab-link" onclick="openTab(event, 'forca')">⚡ Força do Anúncio</button>
         </nav>
 
         <div class="container-abas">
@@ -958,6 +946,21 @@
                 </div>
             </div>
 
+            <!-- ── ABA 8: FORÇA DO ANÚNCIO ── -->
+            <div id="forca" class="tab-content">
+                <div class="termometro-card" id="termometro-card" style="margin-bottom:0;">
+                    <div class="termometro-header">
+                        <div class="termometro-titulo">🌡️ Força do seu anúncio</div>
+                        <div class="termometro-pct" id="termo-pct" style="color:#ff385c;">—</div>
+                    </div>
+                    <div class="termometro-bar-wrap">
+                        <div class="termometro-bar-fill" id="termo-bar" style="width:0%;"></div>
+                    </div>
+                    <div class="termometro-msg" id="termo-msg">Calculando...</div>
+                    <div class="termometro-itens" id="termo-itens"></div>
+                </div>
+            </div>
+
         </div><!-- /container-abas -->
 
         <!-- FOOTER AÇÕES -->
@@ -1275,11 +1278,14 @@
             }
 
             atualizarBtnAnuncio();
-            // Calcula e exibe o termômetro do anúncio
+            // Guarda prop para uso ao abrir a aba "Força do Anúncio"
+            window._propCache = prop;
+            // Calcula e exibe o termômetro (ficará pronto quando o usuário abrir a aba)
             await calcularTermometro(prop);
             // Mapa carrega quando o usuário abre a aba Endereço (evita inicializar em container oculto)
         } else {
             // Sem propriedade ainda — mostra termômetro zerado com mensagem de início
+            window._propCache = null;
             document.getElementById('termo-pct').textContent = '0%';
             document.getElementById('termo-pct').style.color = '#ff385c';
             document.getElementById('termo-msg').textContent = '⚡ Preencha os dados abaixo para ativar seu anúncio e começar a receber clientes!';
@@ -1376,6 +1382,9 @@
         if (tabName === 'endereco') {
             if (_mapa) setTimeout(() => _mapa.invalidateSize(), 150);
             else if (document.getElementById('cidade')?.value) setTimeout(atualizarMapa, 200);
+        }
+        if (tabName === 'forca' && window._propCache) {
+            calcularTermometro(window._propCache);
         }
     }
 
@@ -1667,7 +1676,7 @@
     init().then(() => {
         // Abre aba diretamente se vier com hash (ex: minhapropriedade.html#sobre)
         const hash = window.location.hash.slice(1);
-        const abas = ['contato','sobre','valores','endereco','eventos','faq','servicos'];
+        const abas = ['contato','sobre','valores','endereco','eventos','faq','servicos','forca'];
         if (abas.includes(hash)) {
             document.querySelectorAll('.tab-content').forEach(t => { t.style.display = 'none'; t.classList.remove('active'); });
             document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
