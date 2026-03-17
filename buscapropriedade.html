@@ -2353,6 +2353,14 @@ input:checked + .slider-round:before { transform: translateX(20px); }
         `;
     }
 
+        // Registra busca por tipo de evento na tabela buscas
+        async function registrarBusca(tipoEvento) {
+            if (!tipoEvento) return;
+            try {
+                await _supabase.from('buscas').insert({ tipo_evento: tipoEvento });
+            } catch (_) {}
+        }
+
     async function buscarPropriedades() {
         const grid      = document.getElementById('grid-resultados');
         const titulo    = document.getElementById('titulo-resultados');
@@ -2393,26 +2401,10 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             titulo.textContent = `Nenhum espaço encontrado em ${estadoBuscado}`;
             subtitulo.textContent = 'Tente buscar em outro estado.';
             grid.innerHTML = '';
-            // Registra busca sem resultado no banco
-            try {
-                await _supabase.from('buscas_log').insert({
-                    termo: estadoBuscado || 'sem_estado',
-                    resultados: 0,
-                    criado_em: new Date().toISOString()
-                });
-            } catch(e) { /* silencioso */ }
             return;
         }
 
         subtitulo.textContent = `${propriedades.length} ${propriedades.length === 1 ? 'espaço encontrado' : 'espaços encontrados'}`;
-        // Registra busca com resultado
-        try {
-            await _supabase.from('buscas_log').insert({
-                termo: estadoBuscado || 'sem_estado',
-                resultados: propriedades.length,
-                criado_em: new Date().toISOString()
-            });
-        } catch(e) { /* silencioso */ }
         grid.innerHTML = propriedades.map(criarCardHTML).join('');
 
         // Inicia o mapa com os pins das propriedades encontradas
@@ -2445,6 +2437,7 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             if (displayData) { displayData.textContent = dataBuscada; displayData.style.color = '#222'; }
         }
         await carregarPremiums();
+        if (tipoBuscado) registrarBusca(tipoBuscado);
         buscarPropriedades();
 
         // ==========================================================
@@ -2535,6 +2528,16 @@ input:checked + .slider-round:before { transform: translateX(20px); }
             const grid    = document.getElementById('grid-resultados');
             const titulo  = document.getElementById('titulo-resultados');
             const sub     = document.getElementById('subtitulo-resultados');
+
+            // Registra cada tipo de evento selecionado no modal
+            const mapaEventos = {
+                formatura: 'Formatura', aniversario: 'Festa de Aniversário',
+                casamento: 'Casamento', corporativo: 'Festa Corporativa',
+                show: 'Show e Festival', retiro: 'Retiro'
+            };
+            for (const [key, label] of Object.entries(mapaEventos)) {
+                if (filtros[key]) registrarBusca(label);
+            }
 
             grid.innerHTML = '<p style="color:#aaa;padding:20px">Filtrando...</p>';
 
