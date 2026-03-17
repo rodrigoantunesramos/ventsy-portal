@@ -804,7 +804,10 @@ document.getElementById('range-container').addEventListener('click', () =>
 );
 
 btnBusca.addEventListener('click', () => {
-    const estado = locInput.value.trim(); if (!estado) return;
+    const nomeEstado = locInput.value.trim(); if (!nomeEstado) return;
+    // Busca a sigla correspondente ao nome selecionado
+    const encontrado = ESTADOS.find(e => e.n.toLowerCase() === nomeEstado.toLowerCase());
+    const estado = encontrado ? encontrado.s : nomeEstado; // envia sigla (ex: "RJ")
     const tipo  = document.getElementById('tipo-espaco')?.value || '';
     const conv  = document.getElementById('qtd-total')?.value   || '0';
     const data  = dQuando.textContent.trim();
