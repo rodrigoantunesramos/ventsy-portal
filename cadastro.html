@@ -1026,6 +1026,7 @@ async function submeterCadastro() {
             try { await sb.rpc('limpar_zumbi_auth', { p_user_id: userId }); } catch(_){}
             try { await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_db', p_erro_msg: dbError.message }); } catch(_){}
             if (dbError.code === '23505') {
+                    console.log('CONSTRAINT VIOLADA:', dbError.message, JSON.stringify(dbError));
                 if (dbError.message.includes('documento')) throw new Error('Este CPF/CNPJ já está cadastrado.');
                 if (dbError.message.includes('usuario'))   throw new Error('Este nome de usuário já está em uso. Escolha outro.');
             }
