@@ -3,728 +3,651 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — VENTSY</title>
+    <title>VENTSY — Encontre o espaço perfeito para seu evento</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        :root {
+            --preto:       #0d0d0d;
+            --vermelho:    #ff385c;
+            --cinza:       #f5f5f5;
+            --borda:       #e8e8e8;
+            --texto:       #3a3a3a;
+            --suave:       #888;
+            --ouro:        #f59e0b;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            margin: 0 auto;
-            background-color: #f0f2f5;
-            padding: 0;
+            font-family: 'DM Sans', Arial, sans-serif;
+            background: #fafafa;
+            color: var(--texto);
+            min-height: 100vh;
         }
 
-        /* ─────────────────────────────────────────
-           LOADING SCREEN
-        ───────────────────────────────────────── */
-        #loading-screen {
-            position: fixed; inset: 0; background: #fff;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 99999; flex-direction: column; gap: 16px;
-        }
-        .loading-logo { font-size: 2rem; font-weight: 900; color: #0d0d0d; letter-spacing: -1px; }
-        .loading-logo em { font-style: normal; color: #ff385c; }
-        .loading-dots { display: flex; gap: 6px; }
-        .loading-dots span {
-            width: 8px; height: 8px; background: #ff385c;
-            border-radius: 50%; animation: bounce 1.2s ease-in-out infinite;
-        }
-        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-            40%            { transform: scale(1);   opacity: 1; }
-        }
-
-        /* ─────────────────────────────────────────
-           HEADER
-        ───────────────────────────────────────── */
+        /* ──────────── HEADER ──────────── */
         header {
-            width: 100%; height: 80px;
-            background-color: #ffffff;
-            display: flex; align-items: center;
-            padding: 0 5%;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 100%; height: 80px; background: #fff;
+            display: flex; align-items: center; padding: 0 5%;
+            box-shadow: 0 2px 8px rgba(0,0,0,.07);
             position: fixed; top: 0; z-index: 9999;
-            box-sizing: border-box; overflow: visible !important;
+            box-sizing: border-box; overflow: visible;
         }
-        .header-left, .header-right { flex: 1; display: flex; }
-        .header-right {
-            align-items: center; gap: 15px; justify-content: flex-end;
-        }
+        .header-left { flex: 0 0 auto; display: flex; align-items: center; margin-right: 16px; }
         .logo { height: 56px; width: auto; cursor: pointer; }
+        .header-center { flex: 3; display: flex; justify-content: center; overflow: visible; }
+        .header-right  { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; margin-left: 16px; }
 
-        /* Avatar com inicial */
-        .avatar-container { position: relative; }
-
-        .avatar-btn {
-            width: 42px; height: 42px; border-radius: 50%;
-            background: #ff385c; color: #fff;
-            border: none; font-size: 1.05rem; font-weight: 700;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 10px rgba(255,56,92,0.35);
-            transition: transform 0.2s, box-shadow 0.2s;
+        .btn-login {
+            background: var(--vermelho); color: #fff;
+            padding: 9px 20px; border-radius: 8px;
+            text-decoration: none; font-weight: 600; font-size: .88rem;
+            transition: background .2s; white-space: nowrap;
         }
-        .avatar-btn:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(255,56,92,0.4); }
+        .btn-login:hover { background: #e0304f; }
+        .btn-dashboard-header {
+            background: var(--preto);
+        }
+        .btn-dashboard-header:hover { background: #333; }
 
-        .avatar-dropdown {
-            position: absolute; top: 54px; right: 0;
-            width: 210px; background: white;
-            border-radius: 14px;
-            box-shadow: 0 6px 28px rgba(0,0,0,0.13);
+        .menu-hamburguer-container { position: relative; }
+        .btn-menu {
+            background: #fff; border: 1px solid #ddd;
+            border-radius: 20px; padding: 8px 14px;
+            cursor: pointer; font-size: .88rem;
+            display: flex; align-items: center; gap: 6px;
+            transition: box-shadow .2s;
+        }
+        .btn-menu:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+        .extra-menu-dropdown {
+            position: absolute; top: 50px; right: 0; width: 215px;
+            background: #fff; border-radius: 14px;
+            box-shadow: 0 8px 28px rgba(0,0,0,.13);
             display: none; flex-direction: column;
-            padding: 8px 0; z-index: 1001;
+            padding: 8px 0; z-index: 2000;
             border: 1px solid #f0f0f0;
         }
-        .drop-header {
-            padding: 12px 18px 10px;
-            border-bottom: 1px solid #f0f0f0;
-            margin-bottom: 4px;
+        .extra-menu-dropdown a {
+            padding: 12px 20px; text-decoration: none;
+            color: #444; font-size: .88rem; display: block;
+            transition: background .15s;
         }
-        .drop-header strong { display: block; font-size: 0.92rem; color: #0d0d0d; margin-bottom: 2px; }
-        .drop-header span   { font-size: 0.78rem; color: #999; }
+        .extra-menu-dropdown a:hover { background: #f7f7f7; }
 
-        .avatar-dropdown a,
-        .avatar-dropdown button {
-            padding: 11px 18px; text-decoration: none;
-            color: #444; font-size: 0.88rem;
-            display: flex; align-items: center; gap: 10px;
-            background: none; border: none; font-family: inherit;
-            cursor: pointer; width: 100%; text-align: left;
-            transition: background 0.15s;
+        /* ──────────── SEARCH BAR ──────────── */
+        .search-container { width: 100%; display: flex; justify-content: center; }
+        .search-bar {
+            background: #fff; display: flex; align-items: center;
+            padding: 6px 8px 6px 18px; border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            border: 1px solid #ddd; max-width: 960px; width: 100%;
         }
-        .avatar-dropdown a:hover, .avatar-dropdown button:hover { background: #f7f7f7; }
-        .drop-sair { color: #ff385c !important; border-top: 1px solid #f0f0f0; margin-top: 4px; }
-
-        /* ─────────────────────────────────────────
-           LAYOUT PRINCIPAL
-        ───────────────────────────────────────── */
-        .dashboard-container {
-            display: flex; min-height: 100vh;
-            background: #f0f2f5; margin-top: 80px;
-        }
-
-        /* ─────────────────────────────────────────
-           SIDEBAR
-        ───────────────────────────────────────── */
-        .dash-sidebar {
-            width: 350px; background: #fff;
-            padding: 30px 20px;
-            border-right: 1px solid #eee;
+        .search-item {
             display: flex; flex-direction: column;
-            position: sticky; top: 80px;
-            height: calc(100vh - 80px); overflow-y: auto;
-            flex-shrink: 0;
+            min-width: 0; flex: 1; padding: 5px 10px; position: relative; cursor: pointer;
         }
+        .search-item label {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            color: #222; pointer-events: none; letter-spacing: .05em;
+        }
+        .date-text { font-size: .83rem; color: #717171; margin-top: 2px; pointer-events: none; }
+        .search-item input, .search-item select {
+            border: none; outline: none; font-size: .83rem;
+            color: #555; background: transparent; font-family: inherit;
+        }
+        .divider { width: 1px; height: 30px; background: #eee; flex-shrink: 0; }
+        .btn-search {
+            background: var(--vermelho); border: none;
+            width: 42px; height: 42px; border-radius: 50%; color: #fff;
+            font-size: 1rem; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            transition: transform .2s, background .2s; margin-left: 8px; flex-shrink: 0;
+        }
+        .btn-search:hover { background: #e31c5f; transform: scale(1.07); }
+        #location-container { position: relative; }
+        .suggestions-dropdown {
+            position: absolute; top: 100%; left: 0; width: 240px;
+            background: #fff; border-radius: 14px; margin-top: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.12);
+            display: none; overflow: hidden; z-index: 3000; border: 1px solid #eee;
+        }
+        .suggestion-item {
+            padding: 12px 18px; display: flex; align-items: center; gap: 10px;
+            cursor: pointer; transition: background .15s; font-size: .86rem; color: #333;
+        }
+        .suggestion-item:hover { background: #f7f7f7; }
+        .guest-direct-selector { flex: 0 0 auto; min-width: 90px; }
+        .stepper-control {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f7f7f7; border-radius: 25px; padding: 3px 8px;
+            border: 1px solid #eee; margin-top: 4px;
+        }
+        .btn-step {
+            width: 24px; height: 24px; border-radius: 50%; border: 1px solid #ddd;
+            background: #fff; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            font-size: .95rem; color: #444; transition: all .2s; padding: 0;
+        }
+        .btn-step:hover { border-color: var(--vermelho); color: var(--vermelho); }
+        .qtd-input {
+            width: 34px; border: none; background: transparent; text-align: center;
+            font-size: .9rem; font-weight: 700; color: #222; outline: none;
+            -webkit-appearance: none; appearance: textfield;
+        }
+        .qtd-input::-webkit-outer-spin-button,
+        .qtd-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-        .perfil-resumo { text-align: center; margin-bottom: 36px; }
-
-        /* Avatar grande na sidebar */
-        .sidebar-avatar {
-            width: 72px; height: 72px; border-radius: 50%;
-            background: #ff385c; color: #fff;
-            font-size: 1.9rem; font-weight: 700;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 12px; overflow: hidden;
-        }
-        .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
-        .perfil-resumo h3 { font-size: 1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 0; }
-        .perfil-resumo .handle { font-size: 0.78rem; color: #717171; display: block; margin-bottom: 2px; }
-        .plano-validade { font-size: 0.7rem; color: #aaa; margin-top: 2px; }
-
-        .plano-chip {
-            display: inline-flex; align-items: center; gap: 5px;
-            margin-top: 10px;
-            background: rgba(255,56,92,0.08);
-            border: 1px solid rgba(255,56,92,0.2);
-            border-radius: 20px; padding: 3px 12px;
-            font-size: 0.72rem; font-weight: 700; color: #ff385c;
-        }
-
-        .dash-menu { display: flex; flex-direction: column; width: 100%; }
-        .menu-section-label {
-            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.08em; color: #bbb; padding: 14px 14px 4px;
-        }
-        .dash-menu a {
-            display: flex; align-items: center; gap: 10px;
-            padding: 12px 14px; color: #666; text-decoration: none;
-            border-radius: 8px; margin-bottom: 4px;
-            font-size: 0.9rem; transition: all 0.2s ease;
-        }
-        .dash-menu a:hover { background: #f7f7f7; color: #0d0d0d; }
-        .dash-menu a.active { background: rgba(255,56,92,0.08); color: #ff385c; font-weight: 600; }
-
-        /* ─────────────────────────────────────────
-           CONTEÚDO PRINCIPAL
-        ───────────────────────────────────────── */
-        .dash-content {
-            overflow-y: visible;
-            padding: 0 40px 60px 40px;
-            width: 100%;
-        }
-
-        .dash-header-fixo {
-            position: sticky; top: 0; z-index: 100;
-            background: #f0f2f5;
-            display: flex; padding: 24px 0 20px;
-            justify-content: space-between; align-items: center;
-            margin-bottom: 10px; border: none;
-        }
-        .dash-header-fixo h2 { font-size: 1.8rem; font-weight: 700; color: #222; margin: 0; }
-        .nome-propriedade { font-size: 0.95rem; color: #717171; }
-
-        /* ─────────────────────────────────────────
-           BOAS-VINDAS
-        ───────────────────────────────────────── */
-        .boas-vindas {
-            background: #0d0d0d; border-radius: 18px;
-            padding: 30px 36px; margin-bottom: 26px;
-            position: relative; overflow: hidden;
-            display: flex; align-items: center; gap: 24px;
-        }
-        .bv-acao { position: relative; z-index: 1; flex-shrink: 0; }
-        .btn-ver-prop {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: transparent; border: 1.5px solid #ff385c;
-            color: #ff385c; font-size: .82rem; font-weight: 700;
-            padding: 10px 18px; border-radius: 10px; text-decoration: none;
-            white-space: nowrap; transition: background .2s, color .2s;
-        }
-        .btn-ver-prop:hover { background: #ff385c; color: #fff; }
-        .boas-vindas::before {
-            content: ''; position: absolute;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(255,56,92,0.18) 0%, transparent 65%);
-            top: -120px; right: -60px; pointer-events: none;
-        }
-        .bv-inner { position: relative; z-index: 1; flex: 1; }
-        .bv-tag {
-            font-size: 0.68rem; font-weight: 700; color: #ff385c;
-            text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;
-        }
-        .boas-vindas h3 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 5px; }
-        .boas-vindas h3 em { font-style: normal; color: #ff385c; }
-        .boas-vindas p { font-size: 0.85rem; color: #aaa; line-height: 1.6; }
-
-        /* ─────────────────────────────────────────
-           MÉTRICAS
-        ───────────────────────────────────────── */
-        .grid-metricas {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 20px; margin-bottom: 26px;
-        }
-        .card-metrica {
-            background: #fff; padding: 20px; border-radius: 12px;
-            display: flex; align-items: center; gap: 15px;
-            border: 1px solid #eee; transition: box-shadow 0.2s;
-        }
-        .card-metrica:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
-        .card-metrica .icon { font-size: 2rem; }
-        .card-metrica p { color: #666; font-size: 0.9rem; margin: 0; }
-        .card-metrica h3 { font-size: 1.5rem; font-weight: 700; margin: 5px 0 0; color: #222; }
-
-        /* ─────────────────────────────────────────
-           GRÁFICO (largura total)
-        ───────────────────────────────────────── */
-        .container-duas-colunas {
-            display: block;
-            width: 100%;
-            margin-bottom: 26px;
-        }
-        .secao-dash {
-            background: #fff; padding: 25px; border-radius: 16px;
-            border: 1px solid #eee; margin-bottom: 20px;
-        }
-        .secao-dash h3 { margin-top: 0; font-size: 1.05rem; font-weight: 700; margin-bottom: 20px; color: #222; }
+        /* ──────────── CORPO ──────────── */
+        main { width: 100%; margin-top: 88px; }
 
 
-
-        /* ─────────────────────────────────────────
-           PASSO A PASSO
-        ───────────────────────────────────────── */
-        .passos-titulo {
-            font-size: 1.15rem; font-weight: 700; color: #222;
-            margin-bottom: 14px;
+        /* ──────────── SEÇÃO CATEGORIA ──────────── */
+        .secao {
+            max-width: 1440px; margin: 0 auto;
+            padding: 5px 5% 0;
+        }
+        .secao-header {
             display: flex; align-items: center; gap: 12px;
+            margin-bottom: 10px;
         }
-        .passos-progresso {
-            font-size: 0.78rem; font-weight: 600; color: #999;
-            background: #f0f0f0; border-radius: 20px; padding: 3px 10px;
+        .secao-emoji { font-size: 1.1rem; line-height: 1; }
+        .secao-titulo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem; font-weight: 900;
+            color: var(--preto); letter-spacing: -.025em;
         }
-        .passos-progresso.completo-total { background: rgba(12,166,120,0.12); color: #0ca678; }
-        .passo-lista { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+        .btn-ver-todos {
+            margin-left: auto;
+            background: var(--preto); color: #fff; border: none;
+            border-radius: 20px; padding: 8px 20px;
+            font-family: inherit; font-size: .8rem; font-weight: 700;
+            cursor: pointer; white-space: nowrap;
+            display: flex; align-items: center; gap: 6px;
+            transition: background .2s, transform .15s;
+        }
+        .btn-ver-todos:hover { background: var(--vermelho); transform: scale(1.03); }
+        .btn-ver-todos svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.5; }
 
-        .passo-item {
-            background: #fff; border-radius: 12px;
-            border: 1px solid #eee; padding: 18px 22px;
-            display: flex; align-items: center; gap: 18px;
-            transition: box-shadow 0.2s, transform 0.15s;
+        /* ──────────── CARROSSEL ──────────── */
+        .carrossel {
+            display: flex; gap: 14px;
+            overflow-x: auto; padding-bottom: 18px;
+            scrollbar-width: none;
         }
-        .passo-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); transform: translateY(-1px); }
-        .passo-item.completo { border-color: #bbf7d0; background: #f0fdf4; }
+        .carrossel::-webkit-scrollbar { display: none; }
 
-        .passo-num {
-            width: 40px; height: 40px; border-radius: 10px;
-            background: #f5f5f5; display: flex; align-items: center;
-            justify-content: center; flex-shrink: 0;
-            font-size: 1rem; font-weight: 700; color: #999;
-        }
-        .passo-item.completo .passo-num {
-            background: rgba(12,166,120,0.12); color: #0ca678;
-        }
+        /* ──────────── CARDS ──────────── */
 
-        .passo-info { flex: 1; }
-        .passo-info h4 { font-size: 0.9rem; font-weight: 700; color: #0d0d0d; margin-bottom: 3px; }
-        .passo-info p  { font-size: 0.8rem; color: #717171; line-height: 1.5; }
-
-        .passo-acao {
-            padding: 8px 16px; border-radius: 8px; font-family: inherit;
-            font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none;
-            text-decoration: none; display: inline-flex; align-items: center;
-            gap: 5px; flex-shrink: 0; transition: all 0.2s;
+        /* --- BÁSICO --- */
+        .card {
+            flex: 0 0 auto; width: 188px;
+            border-radius: 14px; overflow: hidden;
+            background: #fff; border: 1px solid var(--borda);
+            cursor: pointer; position: relative;
+            transition: transform .25s, box-shadow .25s;
+            animation: fadeUp .35s ease both;
         }
-        .passo-acao.vermelho { background: #ff385c; color: #fff; }
-        .passo-acao.vermelho:hover { background: #e0304f; }
-        .passo-acao.verde { background: rgba(12,166,120,0.12); color: #0ca678; cursor: default; }
-
-        /* Grupo de ações do passo */
-        .passo-acoes-grupo {
-            display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;
-        }
-
-        /* Aviso de passos incompletos */
-        .solicitar-aviso {
-            background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px;
-            padding: 12px 18px; font-size: 0.82rem; color: #7a6200;
-            margin-bottom: 16px; display: block;
-        }
-        .solicitar-aviso.oculto { display: none; }
-
-        /* ─────────────────────────────────────────
-           CARD SOLICITAÇÃO
-        ───────────────────────────────────────── */
-        .card-solicitar {
-            background: #fff; border-radius: 16px;
-            border: 1px solid #eee; padding: 36px 32px;
-            text-align: center; margin-bottom: 30px;
-        }
-        .card-solicitar .tag {
-            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.1em; color: #ff385c; margin-bottom: 8px;
-        }
-        .card-solicitar h3 { font-size: 1.2rem; font-weight: 700; color: #0d0d0d; margin-bottom: 8px; }
-        .card-solicitar p { font-size: 0.85rem; color: #717171; line-height: 1.65; margin-bottom: 28px; }
-
-        .btn-solicitar {
-            width: 100%; padding: 17px;
-            background: #ff385c; color: #fff; border: none;
-            border-radius: 12px; font-family: inherit;
-            font-size: 1rem; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            box-shadow: 0 4px 18px rgba(255,56,92,0.28);
-            transition: background 0.2s, transform 0.15s;
-        }
-        .btn-solicitar:hover:not(:disabled) { background: #e0304f; transform: scale(1.01); }
-        .btn-solicitar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-solicitar.enviado { background: #0ca678; box-shadow: 0 4px 18px rgba(12,166,120,0.25); }
-
-        .solicitar-hint {
-            font-size: 0.76rem; color: #717171;
-            margin-top: 12px; line-height: 1.6;
+        .card:hover { transform: translateY(-6px); box-shadow: 0 14px 32px rgba(0,0,0,.11); }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ─────────────────────────────────────────
-           TOAST
-        ───────────────────────────────────────── */
-        .toast {
-            position: fixed; bottom: 30px; left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: #0d0d0d; color: #fff;
-            padding: 14px 26px; border-radius: 12px;
-            font-size: 0.88rem; font-weight: 500;
-            box-shadow: 0 8px 28px rgba(0,0,0,0.22);
-            z-index: 9999; display: flex; align-items: center; gap: 10px;
-            transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
-            opacity: 0;
+        .card-foto {
+            width: 100%; height: 120px; overflow: hidden; position: relative;
         }
-        .toast.visivel { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .card-foto img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform .4s ease; display: block;
+        }
+        .card:hover .card-foto img { transform: scale(1.07); }
 
-        /* ─────────────────────────────────────────
-           FOOTER
-        ───────────────────────────────────────── */
+        .card-fav {
+            position: absolute; top: 9px; right: 9px;
+            background: rgba(255,255,255,.82); backdrop-filter: blur(4px);
+            border: none; width: 28px; height: 28px; border-radius: 50%;
+            font-size: .95rem; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            color: #aaa; transition: all .2s; z-index: 2;
+        }
+        .card-fav:hover { color: var(--vermelho); transform: scale(1.18); background: #fff; }
+        .card-fav.fav-on { color: var(--vermelho); }
+
+        .card-body { padding: 11px 12px 13px; }
+        .card-nome {
+            font-size: .86rem; font-weight: 700; color: var(--preto);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 3px;
+        }
+        .card-cidade { font-size: .73rem; color: var(--suave); margin-bottom: 8px; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .card-preco { font-size: .76rem; color: var(--texto); }
+        .card-preco strong { font-weight: 700; color: var(--preto); }
+        .card-nota {
+            font-size: .75rem; font-weight: 700; color: var(--preto);
+            display: flex; align-items: center; gap: 2px;
+        }
+        .card-nota svg { width: 10px; height: 10px; fill: var(--ouro); }
+
+        /* Badge no canto superior esquerdo da foto */
+        .card-badge {
+            position: absolute; top: 9px; left: 9px; z-index: 2;
+            border-radius: 20px; padding: 3px 9px;
+            font-size: .64rem; font-weight: 800;
+            letter-spacing: .05em; text-transform: uppercase;
+            backdrop-filter: blur(4px);
+        }
+        .badge-pro {
+            background: rgba(13,13,13,.78); color: #fff;
+            border: 1px solid rgba(255,255,255,.2);
+        }
+
+        /* --- PRO: borda sutil + sombra azulada --- */
+        .card-pro {
+            border: 1.5px solid #0d0d0d22;
+            box-shadow: 0 2px 12px rgba(13,13,13,.06);
+        }
+        .card-pro:hover {
+            box-shadow: 0 14px 36px rgba(13,13,13,.14);
+        }
+
+        /* --- ULTRA / PREMIUM --- */
+        .card-ultra {
+            width: 208px;
+            /* Borda gradiente dourada */
+            border: 2px solid transparent;
+            background:
+                linear-gradient(#fff, #fff) padding-box,
+                linear-gradient(135deg, #f0c040 0%, #ff385c 50%, #f0c040 100%) border-box;
+            box-shadow: 0 4px 18px rgba(240,192,64,.2);
+        }
+        .card-ultra:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 18px 44px rgba(240,192,64,.3);
+        }
+        .card-ultra .card-foto { height: 132px; }
+
+        /* Faixa dourada topo */
+        .card-ultra::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #f0c040, #ff385c, #f0c040);
+            z-index: 3;
+        }
+        /* Ribbon "PREMIUM" diagonal */
+        .ribbon {
+            position: absolute; top: 16px; right: -24px;
+            background: linear-gradient(135deg, #f0c040, #d4a000);
+            color: #1a1a1a; font-size: .58rem; font-weight: 900;
+            padding: 3px 30px; transform: rotate(35deg);
+            letter-spacing: .1em; text-transform: uppercase;
+            box-shadow: 0 2px 6px rgba(0,0,0,.25); z-index: 4;
+            pointer-events: none;
+        }
+        /* Badge ultra dourado */
+        .badge-ultra {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: #f0c040;
+            border: 1px solid rgba(240,192,64,.35);
+            font-size: .62rem;
+        }
+
+        /* ──────────── BANNER ANUNCIE ──────────── */
+        .banner-anuncie {
+            max-width: 1440px; margin: 48px auto;
+            padding: 0 5%;
+        }
+        .banner-inner {
+            background: var(--preto);
+            border-radius: 24px; padding: 44px 52px;
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 32px;
+            position: relative; overflow: hidden;
+        }
+        .banner-inner::after {
+            content: '';
+            position: absolute; right: -100px; top: -100px;
+            width: 380px; height: 380px;
+            background: radial-gradient(circle, rgba(255,56,92,.28) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        .banner-txt { position: relative; z-index: 1; }
+        .banner-txt p {
+            font-size: .72rem; font-weight: 800; color: var(--vermelho);
+            text-transform: uppercase; letter-spacing: .12em; margin-bottom: 8px;
+        }
+        .banner-txt h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem; font-weight: 900; color: #fff;
+            letter-spacing: -.02em; margin-bottom: 6px;
+        }
+        .banner-txt span { font-size: .86rem; color: #666; }
+        .btn-banner {
+            background: var(--vermelho); color: #fff; border: none;
+            padding: 15px 30px; border-radius: 12px; font-family: inherit;
+            font-size: .92rem; font-weight: 700; cursor: pointer;
+            white-space: nowrap; position: relative; z-index: 1;
+            text-decoration: none; display: inline-block;
+            transition: background .2s, transform .15s;
+        }
+        .btn-banner:hover { background: #e0304f; transform: scale(1.02); }
+
+        /* ──────────── FOOTER ──────────── */
         .main-footer {
-            background-color: #f7f7f7; border-top: 1px solid #dddddd;
-            padding: 60px 0 30px; margin-top: 50px; width: 100%;
+            background: #f7f7f7; border-top: 1px solid #ddd;
+            padding: 54px 0 28px; margin-top: 20px;
         }
         .footer-container {
             max-width: 1200px; margin: 0 auto;
-            display: flex; padding: 0 5%; gap: 150px;
+            display: flex; padding: 0 5%; gap: 120px;
         }
         .footer-column h3 {
-            font-size: 0.9rem; font-weight: 700; text-transform: uppercase;
-            color: #222; margin-bottom: 20px; letter-spacing: 0.5px;
+            font-size: .86rem; font-weight: 700; text-transform: uppercase;
+            color: #222; margin-bottom: 18px; letter-spacing: .04em;
         }
-        .footer-column ul { list-style: none; padding: 0; }
-        .footer-column ul li { margin-bottom: 12px; }
+        .footer-column ul { list-style: none; }
+        .footer-column ul li { margin-bottom: 11px; }
         .footer-column ul li a {
-            text-decoration: none; color: #484848; font-size: 0.95rem;
-            transition: text-decoration 0.2s;
+            text-decoration: none; color: #555; font-size: .88rem;
+            transition: color .2s;
         }
-        .footer-column ul li a:hover { text-decoration: underline; color: #000; }
+        .footer-column ul li a:hover { color: var(--preto); text-decoration: underline; }
         .footer-bottom {
-            max-width: 1200px; margin: 40px auto 0;
-            padding: 25px 5% 0; border-top: 1px solid #ebebeb;
-            color: #717171; font-size: 0.85rem;
+            max-width: 1200px; margin: 32px auto 0;
+            padding: 20px 5% 0; border-top: 1px solid #ebebeb;
+            color: #aaa; font-size: .8rem;
         }
 
-        /* ─────────────────────────────────────────
-           RESPONSIVO
-        ───────────────────────────────────────── */
-        /* ── MOBILE SIDEBAR TOGGLE ── */
-        .btn-sidebar-toggle {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-            width: 40px; height: 40px;
-            background: none; border: 1px solid #eee;
-            border-radius: 8px; cursor: pointer; padding: 8px;
+        /* ──────────── EVENTO DROPDOWN GRID ──────────── */
+        .tipo-display {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .83rem; color: #555; cursor: pointer;
+            margin-top: 2px; gap: 4px; min-width: 120px;
         }
-        .btn-sidebar-toggle span {
-            display: block; width: 18px; height: 2px;
-            background: #444; border-radius: 2px;
-            transition: all 0.2s;
+        .tipo-display span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tipo-caret { width: 14px; height: 14px; flex-shrink: 0; color: #aaa; transition: transform .2s; }
+        .tipo-display.open .tipo-caret { transform: rotate(180deg); }
+
+        .evento-dropdown {
+            position: absolute;
+            top: calc(100% + 14px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 540px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.15);
+            border: 1px solid #eee;
+            z-index: 5000;
+            animation: dropIn .18s ease;
+        }
+        @keyframes dropIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        .evento-grid-wrap {
+            padding: 16px 18px 18px;
+            max-height: 420px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ddd transparent;
+        }
+        .ev-clear {
+            width: 100%; background: #f7f7f7; border: 1px solid #eee;
+            border-radius: 10px; padding: 8px 14px;
+            font-size: .8rem; font-weight: 600; color: #666;
+            cursor: pointer; text-align: left; margin-bottom: 14px;
+            transition: background .15s, color .15s; font-family: inherit;
+        }
+        .ev-clear:hover { background: #fee; color: var(--vermelho); border-color: #fcc; }
+        .ev-cat-label {
+            font-size: .68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: .08em; color: #aaa; margin: 12px 0 7px;
+        }
+        .ev-cat-label:first-of-type { margin-top: 0; }
+        .ev-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        .ev-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; padding: 8px 6px 7px;
+            border-radius: 12px; cursor: pointer;
+            font-size: .72rem; font-weight: 600; color: #444;
+            text-align: center; line-height: 1.2;
+            background: #f9f9f9; border: 1px solid transparent;
+            transition: background .15s, border-color .15s, transform .12s, color .15s;
+            user-select: none;
+        }
+        .ev-item span { font-size: 1.25rem; line-height: 1; }
+        .ev-item:hover {
+            background: #fff5f7; border-color: #ffd6dd; color: var(--vermelho);
+            transform: translateY(-2px);
+        }
+        .ev-item.selected {
+            background: var(--vermelho); color: #fff; border-color: var(--vermelho);
+        }
+        .ev-item.selected span { filter: none; }
+
+        @media (max-width: 620px) {
+            .evento-dropdown { width: calc(100vw - 32px); left: 0; transform: none; }
+            .ev-grid { grid-template-columns: repeat(4, 1fr); }
         }
 
-        /* ── OVERLAY ── */
-        .sidebar-overlay {
-            display: none;
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 9998;
-        }
-        .sidebar-overlay.ativo { display: block; }
 
-        @media (max-width: 1100px) {
-            .grid-metricas { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 768px) {
-            .btn-sidebar-toggle { display: flex; }
-            .dash-sidebar {
-                display: flex !important;
-                position: fixed; top: 80px; left: 0;
-                width: 280px; height: calc(100vh - 80px);
-                z-index: 9999;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-                box-shadow: 4px 0 20px rgba(0,0,0,0.15);
-            }
-            .dash-sidebar.aberta { transform: translateX(0); }
-            .dash-content { padding: 0 16px 40px; }
-            .dash-header-fixo h2 { font-size: 1.4rem; }
-            .boas-vindas { padding: 22px 20px; }
-            .boas-vindas h3 { font-size: 1.2rem; }
+            .banner-inner { flex-direction: column; text-align: center; }
             .footer-container { flex-direction: column; gap: 36px; }
-            .passo-item { flex-wrap: wrap; gap: 12px; padding: 14px 16px; }
-            .passo-acoes-grupo { width: 100%; flex-direction: row; justify-content: flex-end; }
-            .card-solicitar { padding: 24px 20px; }
+            .hero h1 { font-size: 1.9rem; }
+        }
+        @media (max-width: 620px) {
+            .search-bar { border-radius: 18px; padding: 10px; flex-wrap: wrap; gap: 6px; }
+            .divider { display: none; }
+            .search-item { min-width: calc(50% - 8px); }
+        }
+        /* ── MOBILE HEADER ── */
+        @media (max-width: 768px) {
+            header {
+                height: auto;
+                min-height: 64px;
+                flex-wrap: wrap;
+                padding: 10px 4%;
+                gap: 8px;
+            }
+            .header-left { flex: 0 0 auto; margin-right: 0; }
+            .logo { height: 44px; }
+            .header-right { flex: 0 0 auto; margin-left: auto; gap: 8px; }
+            .btn-login { padding: 8px 14px; font-size: .82rem; }
+            .header-center { order: 3; width: 100%; flex: 0 0 100%; justify-content: stretch; }
+            .search-container { width: 100%; }
+            .search-bar { max-width: 100%; border-radius: 14px; flex-wrap: wrap; padding: 8px 10px; gap: 6px; }
+            .search-item { min-width: calc(50% - 8px); }
+            .divider { display: none; }
+            .search-item label { font-size: .75rem; }
+            main { margin-top: 4px; }
+            .secao { padding: 6px 4% 0; }
+            .footer-container { flex-wrap: wrap; gap: 36px; }
+            .banner-inner { padding: 28px 24px; }
+            .banner-txt h3 { font-size: 1.4rem; }
         }
         @media (max-width: 480px) {
-            .grid-metricas { grid-template-columns: 1fr 1fr; gap: 12px; }
-            .card-metrica { padding: 14px 12px; gap: 10px; }
-            .card-metrica .icon { font-size: 1.5rem; }
-            .card-metrica h3 { font-size: 1.2rem; }
-            .card-metrica p { font-size: 0.8rem; }
+            .search-bar { flex-direction: column; gap: 4px; border-radius: 12px; }
+            .search-item { min-width: 100%; border-bottom: 1px solid #f0f0f0; padding-bottom: 6px; }
+            .search-item:last-of-type { border-bottom: none; }
+            .guest-direct-selector { min-width: auto; }
+            .btn-step { width: 36px; height: 36px; font-size: 1.1rem; }
+            .btn-search { width: 100%; border-radius: 10px; height: 44px; }
+            .secao-titulo { font-size: 1rem; }
         }
-        @media (max-width: 360px) {
-            .grid-metricas { grid-template-columns: 1fr; }
-        }
-
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* ── ANALYTICS TABS ── */
-        .analytics-header {
-            display: flex; align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
-        }
-        .analytics-header h3 { margin: 0; }
-        .analytics-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-        .tab-btn {
-            padding: 7px 14px; border-radius: 20px;
-            border: 1.5px solid #e8e8e8; background: none;
-            font-family: inherit; font-size: 0.78rem; font-weight: 600;
-            color: #888; cursor: pointer; transition: all 0.2s; white-space: nowrap;
-        }
-        .tab-btn[data-tipo="view"].ativo       { background: #ff385c; border-color: #ff385c; color: #fff; }
-        .tab-btn[data-tipo="whatsapp"].ativo   { background: #25D366; border-color: #25D366; color: #fff; }
-        .tab-btn[data-tipo="formulario"].ativo { background: #1a73e8; border-color: #1a73e8; color: #fff; }
-        .tab-btn[data-tipo="nota"].ativo       { background: #f59e0b; border-color: #f59e0b; color: #fff; }
-        .tab-btn[data-tipo="view"]:not(.ativo):hover       { border-color: #ff385c; color: #ff385c; }
-        .tab-btn[data-tipo="whatsapp"]:not(.ativo):hover   { border-color: #25D366; color: #25D366; }
-        .tab-btn[data-tipo="formulario"]:not(.ativo):hover { border-color: #1a73e8; color: #1a73e8; }
-        .tab-btn[data-tipo="nota"]:not(.ativo):hover       { border-color: #f59e0b; color: #f59e0b; }
-        .grafico-vazio {
-            display: none; text-align: center; padding: 16px 0 4px;
-            color: #bbb; font-size: 0.85rem;
-        }
-        /* Skeleton loader para métricas */
-        .card-metrica h3.loading {
-            color: transparent; background: #f0f0f0;
-            border-radius: 6px; animation: shimmer 1.4s ease infinite;
-        }
-        @keyframes shimmer {
-            0%,100% { opacity: 1; } 50% { opacity: 0.4; }
-        }
-
     </style>
 </head>
 <body>
 
-<!-- ── LOADING ── -->
-<div id="loading-screen">
-    <div class="loading-logo"><em>VENTSY</em></div>
-    <div class="loading-dots"><span></span><span></span><span></span></div>
-</div>
-
-<!-- ── HEADER ── -->
+<!-- ──────────── HEADER ──────────── -->
 <header>
     <div class="header-left">
         <a href="index.html">
-            <img src="../logovents.png" alt="Logo VENTSY" class="logo">
+            <img src="logovents.png" alt="VENTSY" class="logo">
         </a>
     </div>
-    <div class="header-right">
-        <!-- Botão hamburguer mobile -->
-        <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
-            <span></span><span></span><span></span>
-        </button>
-        <!-- Avatar com dropmenu -->
-        <div class="avatar-container">
-            <button class="avatar-btn" id="avatar-btn" onclick="toggleAvatar()">
-                <span id="avatar-inicial">?</span>
-            </button>
-            <div class="avatar-dropdown" id="avatar-menu">
-                <div class="drop-header">
-                    <strong id="drop-nome">Carregando...</strong>
-                    <span id="drop-email"></span>
+
+    <nav class="header-center">
+        <div class="search-container">
+            <div class="search-bar">
+                <div class="search-item" id="location-container">
+                    <label>Localização</label>
+                    <input type="text" id="location-input" placeholder="Estado..." autocomplete="off">
+                    <span id="location-erro" style="display:none;font-size:.68rem;color:var(--vermelho);font-weight:700;margin-top:2px">Selecione da lista</span>
+                    <div id="location-suggestions" class="suggestions-dropdown"></div>
                 </div>
-                <a href="index.html">🏠 Dashboard</a>
-                <a href="minhapropriedade.html">🏡 Minha Propriedade</a>
-                <a href="configuracoes.html">⚙️ Configurações</a>
-                <a href="planos2.html">💳 Planos Ventsy</a>
-                <a href="../fale-conosco.html">❓ Ajuda</a>
-                <button class="drop-sair" onclick="sair()">🚪 Sair da conta</button>
+                <div class="divider"></div>
+                <div class="search-item" id="range-container">
+                    <label>Quando</label>
+                    <span class="date-text" id="display-quando">Adicionar datas</span>
+                    <input type="text" id="input-periodo" style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;">
+                </div>
+                <div class="divider"></div>
+                <div class="search-item" id="tipo-container" style="position:relative;">
+                    <label>Evento</label>
+                    <input type="hidden" id="tipo-espaco" value="">
+                    <div id="tipo-display" class="tipo-display" onclick="toggleEventoDropdown(event)">
+                        <span id="tipo-texto">Todos os eventos</span>
+                        <svg class="tipo-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div id="evento-dropdown" class="evento-dropdown" style="display:none;">
+                        <div class="evento-grid-wrap">
+
+                            <button class="ev-clear" onclick="selectEvento(null)">✕ Todos os eventos</button>
+
+                            <div class="ev-cat-label">🏢 Corporativo</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Workshop" onclick="selectEvento(this)"><span>💼</span>Workshop</div>
+                                <div class="ev-item" data-v="Treinamento" onclick="selectEvento(this)"><span>📋</span>Treinamento</div>
+                                <div class="ev-item" data-v="Seminários" onclick="selectEvento(this)"><span>🎙️</span>Seminários</div>
+                                <div class="ev-item" data-v="Congresso" onclick="selectEvento(this)"><span>🏛️</span>Congresso</div>
+                                <div class="ev-item" data-v="Networking" onclick="selectEvento(this)"><span>🤝</span>Networking</div>
+                                <div class="ev-item" data-v="Happy Hour" onclick="selectEvento(this)"><span>🥂</span>Happy Hour</div>
+                                <div class="ev-item" data-v="Confraternização" onclick="selectEvento(this)"><span>🎉</span>Confraternização</div>
+                                <div class="ev-item" data-v="Lançamento de Produto" onclick="selectEvento(this)"><span>🚀</span>Lançamento</div>
+                                <div class="ev-item" data-v="Field Day" onclick="selectEvento(this)"><span>🌤️</span>Field Day</div>
+                                <div class="ev-item" data-v="Pop-up Store" onclick="selectEvento(this)"><span>🛍️</span>Pop-up Store</div>
+                            </div>
+
+                            <div class="ev-cat-label">🐴 Cavalo</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Provas Hípicas" onclick="selectEvento(this)"><span>🏇</span>Provas Hípicas</div>
+                                <div class="ev-item" data-v="Torneios" onclick="selectEvento(this)"><span>🏆</span>Torneios</div>
+                                <div class="ev-item" data-v="Leilão" onclick="selectEvento(this)"><span>🔨</span>Leilão</div>
+                                <div class="ev-item" data-v="Dia de Campo" onclick="selectEvento(this)"><span>🌾</span>Dia de Campo</div>
+                            </div>
+
+                            <div class="ev-cat-label">🎣 Pescaria</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Pescaria" onclick="selectEvento(this)"><span>🎣</span>Pescaria</div>
+                                <div class="ev-item" data-v="Acampamento" onclick="selectEvento(this)"><span>⛺</span>Acampamento</div>
+                                <div class="ev-item" data-v="Retiro" onclick="selectEvento(this)"><span>🌿</span>Retiro</div>
+                            </div>
+
+                            <div class="ev-cat-label">🪂 Radicais</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Radical" onclick="selectEvento(this)"><span>🪂</span>Radical</div>
+                                <div class="ev-item" data-v="Encontro de Motos" onclick="selectEvento(this)"><span>🏍️</span>Motos</div>
+                                <div class="ev-item" data-v="Futebol" onclick="selectEvento(this)"><span>⚽</span>Futebol</div>
+                            </div>
+
+                            <div class="ev-cat-label">🥂 Sociais & Celebrações</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Casamento" onclick="selectEvento(this)"><span>💍</span>Casamento</div>
+                                <div class="ev-item" data-v="Noivado" onclick="selectEvento(this)"><span>💒</span>Noivado</div>
+                                <div class="ev-item" data-v="Renovação de Votos" onclick="selectEvento(this)"><span>🌹</span>Renovação Votos</div>
+                                <div class="ev-item" data-v="Bodas" onclick="selectEvento(this)"><span>👫</span>Bodas</div>
+                                <div class="ev-item" data-v="Festa de Aniversário" onclick="selectEvento(this)"><span>🎂</span>Aniversário</div>
+                                <div class="ev-item" data-v="Festa Infantil" onclick="selectEvento(this)"><span>🎈</span>Festa Infantil</div>
+                                <div class="ev-item" data-v="Debutante" onclick="selectEvento(this)"><span>👑</span>Debutante</div>
+                                <div class="ev-item" data-v="Chá de Bebê" onclick="selectEvento(this)"><span>👶</span>Chá de Bebê</div>
+                                <div class="ev-item" data-v="Chá Revelação" onclick="selectEvento(this)"><span>🎀</span>Chá Revelação</div>
+                            </div>
+
+                            <div class="ev-cat-label">🎓 Acadêmico</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Formatura" onclick="selectEvento(this)"><span>🎓</span>Formatura</div>
+                                <div class="ev-item" data-v="Colação de Grau" onclick="selectEvento(this)"><span>📜</span>Colação de Grau</div>
+                                <div class="ev-item" data-v="Amostras" onclick="selectEvento(this)"><span>🔬</span>Amostras</div>
+                                <div class="ev-item" data-v="Apresentações" onclick="selectEvento(this)"><span>📊</span>Apresentações</div>
+                            </div>
+
+                            <div class="ev-cat-label">✝️ Religioso</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Batizado" onclick="selectEvento(this)"><span>🕊️</span>Batizado</div>
+                                <div class="ev-item" data-v="Vigilia" onclick="selectEvento(this)"><span>🕯️</span>Vigília</div>
+                                <div class="ev-item" data-v="Encontro Religioso" onclick="selectEvento(this)"><span>🙏</span>Encontro Religioso</div>
+                            </div>
+
+                            <div class="ev-cat-label">🎵 Entretenimento</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Show" onclick="selectEvento(this)"><span>🎵</span>Show</div>
+                                <div class="ev-item" data-v="Festival" onclick="selectEvento(this)"><span>🎪</span>Festival</div>
+                                <div class="ev-item" data-v="Apresentações" onclick="selectEvento(this)"><span>🎭</span>Teatro</div>
+                            </div>
+
+                            <div class="ev-cat-label">✨ Estilo de Vida</div>
+                            <div class="ev-grid">
+                                <div class="ev-item" data-v="Ensaio Fotográfico" onclick="selectEvento(this)"><span>📸</span>Ensaio</div>
+                                <div class="ev-item" data-v="Vernissage" onclick="selectEvento(this)"><span>🖼️</span>Vernissage</div>
+                                <div class="ev-item" data-v="Exposição" onclick="selectEvento(this)"><span>🏛️</span>Exposição</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="search-item" id="cidade-container">
+                    <label>Cidade</label>
+                    <input type="text" id="cidade-input" placeholder="Todas as cidades" autocomplete="off" disabled>
+                    <div id="cidade-suggestions" class="suggestions-dropdown"></div>
+                </div>
+                <button class="btn-search" id="main-search-btn" style="opacity:.3;pointer-events:none;">&#128269;</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="header-right">
+        <!-- Botão alternado por JS: oculto até checar sessão -->
+        <a href="login.html"      id="btn-entrar"    class="btn-login" style="display:none">Entrar</a>
+        <a href="dashboard.html"  id="btn-dashboard" class="btn-login btn-dashboard-header" style="display:none">Dashboard</a>
+        <div class="menu-hamburguer-container">
+            <button class="btn-menu" onclick="toggleMenuExtra()">☰ Menu</button>
+            <div id="extra-menu" class="extra-menu-dropdown">
+                <a href="cadastro.html">✏️ Cadastre seu espaço</a>
+                <a href="planos.html">💳 Planos</a>
+                <a href="como-funciona.html">💡 Como Funciona</a>
+                <a href="fale-conosco.html">💬 Fale Conosco</a>
             </div>
         </div>
     </div>
 </header>
 
-<!-- ── OVERLAY SIDEBAR MOBILE ── -->
-<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<!-- ──────────── MAIN ──────────── -->
+<main id="main-content">
+    <div id="container-cats"></div>
 
-<!-- ── LAYOUT PRINCIPAL ── -->
-<main class="dashboard-container" id="main-content" style="display:none;">
-
-    <!-- SIDEBAR -->
-    <aside class="dash-sidebar">
-        <div class="perfil-resumo">
-            <div class="sidebar-avatar" id="sidebar-avatar">?</div>
-            <h3 id="sidebar-nome">Carregando...</h3>
-            <span class="handle" id="sidebar-handle"></span>
-            <div class="plano-chip" id="sidebar-plano-chip">⭐ Carregando...</div>
-            <div class="plano-validade" id="sidebar-validade"></div>
+    <!-- Banner anuncie -->
+    <div class="banner-anuncie" id="banner-anuncie" style="display:none">
+        <div class="banner-inner">
+            <div class="banner-txt">
+                <p>Para proprietários</p>
+                <h3>Anuncie seu espaço na VENTSY</h3>
+                <span>Alcance milhares de pessoas que buscam o espaço ideal para seu evento.</span>
+            </div>
+            <a href="cadastro.html" class="btn-banner">Começar agora →</a>
         </div>
-        <nav class="dash-menu">
-            <a href="index.html" class="active">🏠 Dashboard</a>
-            <span class="menu-section-label">Minha Propriedade</span>
-            <a href="minhapropriedade.html">🏡 Dados do Espaço</a>
-            <a href="fotos.html">📸 Fotos</a>
-            <span class="menu-section-label">Gestão</span>
-            <a href="leads.html">💬 Contatos / Leads</a>
-            <a href="calendario.html">📅 Disponibilidade</a>
-            <a href="relatorio.html">📊 Relatório</a>
-            <span class="menu-section-label">Conta</span>
-            <a href="indique.html">🎁 Programa de Indicação</a>
-            <a href="planos2.html">💳 Planos Ventsy</a>
-            <a href="configuracoes.html">⚙️ Configurações</a>
-        </nav>
-    </aside>
-
-    <!-- CONTEÚDO -->
-    <section class="dash-content">
-
-       
-        <!-- ── BOAS-VINDAS ── -->
-        <div class="boas-vindas">
-            <div class="bv-inner">
-                <p class="bv-tag">Área do proprietário(a)</p>
-                <h3>Bem-vindo(a), <em id="hero-nome">...</em>!</h3>
-                <p>Aqui você acompanha o desempenho da sua propriedade e gerencia tudo na VENTSY.</p>
-            </div>
-            <div class="bv-acao">
-                <a id="btn-ver-prop" href="minhapropriedade.html" class="btn-ver-prop" target="_blank">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <span id="btn-ver-prop-txt">Ver minha propriedade</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- ── MÉTRICAS ── -->
-        <div class="grid-metricas">
-            <div class="card-metrica">
-                <span class="icon">👁</span>
-                <div><p>Visualizações (30d)</p><h3 id="m-views" class="loading">—</h3></div>
-            </div>
-            <div class="card-metrica">
-                <span class="icon">📱</span>
-                <div><p>Cliques WhatsApp (30d)</p><h3 id="m-whatsapp" class="loading">—</h3></div>
-            </div>
-            <div class="card-metrica">
-                <span class="icon">💬</span>
-                <div><p>Cliques Formulário (30d)</p><h3 id="m-formulario" class="loading">—</h3></div>
-            </div>
-            <div class="card-metrica">
-                <span class="icon">⭐</span>
-                <div><p>Avaliação Média</p><h3 id="m-nota" class="loading">—</h3></div>
-            </div>
-        </div>
-
-        <!-- ── GRÁFICO + LATERAL ── -->
-        <div class="container-duas-colunas">
-            <div class="secao-dash">
-                <div class="analytics-header">
-                    <h3>Desempenho — últimos 30 dias</h3>
-                    <div class="analytics-tabs">
-                        <button class="tab-btn ativo" data-tipo="view"       onclick="mudarTab(this)">👁 Visualizações</button>
-                        <button class="tab-btn"        data-tipo="whatsapp"   onclick="mudarTab(this)">📱 WhatsApp</button>
-                        <button class="tab-btn"        data-tipo="formulario" onclick="mudarTab(this)">💬 Formulário</button>
-                        <button class="tab-btn"        data-tipo="nota"       onclick="mudarTab(this)">⭐ Avaliações</button>
-                    </div>
-                </div>
-                <div style="position:relative; height:300px; width:100%">
-                    <canvas id="graficoAnalytics"></canvas>
-                </div>
-                <p class="grafico-vazio" id="grafico-vazio">Ainda não há dados para este período.</p>
-            </div>
-
-
-        </div>
-
-        <!-- ── PASSO A PASSO ── -->
-        <p class="passos-titulo">📋 Complete seu perfil <span class="passos-progresso" id="passos-progresso">0 de 6 concluídos</span></p>
-        <div class="passo-lista">
-
-            <!-- Passo 1: sempre completo (conta criada) -->
-            <div class="passo-item completo" id="passo-1">
-                <div class="passo-num">✓</div>
-                <div class="passo-info">
-                    <h4>Conta criada com sucesso</h4>
-                    <p>Seu cadastro foi concluído. Bem-vindo à VENTSY!</p>
-                </div>
-                <span class="passo-acao verde">✓ Concluído</span>
-            </div>
-
-            <!-- Passo 2: Fotos -->
-            <div class="passo-item" id="passo-2">
-                <div class="passo-num">2</div>
-                <div class="passo-info">
-                    <h4>Adicione as fotos da sua propriedade</h4>
-                    <p>Obrigatório: 5 fotos em destaque na galeria principal.</p>
-                </div>
-                <a href="fotos.html" class="passo-acao vermelho">Adicionar fotos</a>
-            </div>
-
-            <!-- Passo 3: Sobre -->
-            <div class="passo-item" id="passo-3">
-                <div class="passo-num">3</div>
-                <div class="passo-info">
-                    <h4>Descreva seu espaço</h4>
-                    <p>Preencha a aba "Sobre" com uma descrição do seu espaço.</p>
-                </div>
-                <a href="minhapropriedade.html#sobre" class="passo-acao vermelho">Preencher descrição</a>
-            </div>
-
-            <!-- Passo 4: Endereço -->
-            <div class="passo-item" id="passo-4">
-                <div class="passo-num">4</div>
-                <div class="passo-info">
-                    <h4>Informe o endereço completo</h4>
-                    <p>Obrigatório: CEP, rua, número, bairro, cidade e estado.</p>
-                </div>
-                <a href="minhapropriedade.html#endereco" class="passo-acao vermelho">Adicionar endereço</a>
-            </div>
-
-            <!-- Passo 5: Contato -->
-            <div class="passo-item" id="passo-5">
-                <div class="passo-num">5</div>
-                <div class="passo-info">
-                    <h4>Adicione as informações de contato</h4>
-                    <p>Obrigatório: nome, tipo, capacidade, WhatsApp, e-mail, responsável e foto.</p>
-                </div>
-                <a href="minhapropriedade.html#contato" class="passo-acao vermelho">Preencher contato</a>
-            </div>
-
-            <!-- Passo 6: Valores -->
-            <div class="passo-item" id="passo-6">
-                <div class="passo-num">6</div>
-                <div class="passo-info">
-                    <h4>Adicione os valores dos eventos</h4>
-                    <p>Obrigatório: pelo menos o valor por hora ou o valor de diária.</p>
-                </div>
-                <a href="minhapropriedade.html#valores" class="passo-acao vermelho">Adicionar valores</a>
-            </div>
-
-            <!-- Passo 7: Eventos -->
-            <div class="passo-item" id="passo-7">
-                <div class="passo-num">7</div>
-                <div class="passo-info">
-                    <h4>Selecione os tipos de eventos</h4>
-                    <p>Obrigatório: pelo menos 1 tipo de evento que a propriedade oferece.</p>
-                </div>
-                <a href="minhapropriedade.html#eventos" class="passo-acao vermelho">Selecionar eventos</a>
-            </div>
-
-        </div>
-
-        <!-- ── CARD SOLICITAÇÃO ── -->
-        <div class="card-solicitar">
-            <p class="tag">Último passo</p>
-            <h3>Pronto para ir ao ar? 🚀</h3>
-            <p>
-                Após preencher todos os dados acima, clique no botão abaixo para solicitar
-                a publicação da sua propriedade na plataforma. Nossa equipe fará a revisão
-                em até <strong>48 horas úteis</strong> e você receberá um e-mail com o resultado.
-            </p>
-
-            <!-- Aviso quando incompleto -->
-            <div class="solicitar-aviso" id="solicitar-aviso">
-                ⚠️ Complete todos os <strong>4 passos</strong> acima para liberar o botão.
-            </div>
-
-            <button class="btn-solicitar" id="btn-solicitar" onclick="solicitarLiberacao()" disabled>
-                🚀 Solicitar liberação de propriedade na plataforma VENTSY
-            </button>
-            <p class="solicitar-hint" id="solicitar-hint">
-                Após a solicitação, nossa equipe entrará em contato para confirmar os dados.
-            </p>
-        </div>
-
-    </section>
+    </div>
 </main>
-
-<!-- ── TOAST ── -->
-<div class="toast" id="toast">
-    <span>✅</span>
-    <span id="toast-msg">Mensagem</span>
-</div>
 
 <!-- ──────────── FOOTER ──────────── -->
 <footer class="main-footer">
@@ -749,444 +672,442 @@
     <div class="footer-bottom"><p>&copy; 2026 VENTSY. Todos os direitos reservados.</p></div>
 </footer>
 
-<!-- ── SCRIPTS ── -->
 <script>
-    /* ── Supabase ── */
-    const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
-    const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
-    const { createClient } = supabase;
-    const sb = createClient(SUPA_URL, SUPA_KEY);
+/* ── Supabase ── */
+const _sb = supabase.createClient(
+    'https://hxvlfalgrduitevbhqvq.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ'
+);
 
-    /* ── Init ── */
-    async function init() {
-        try {
-            const { data: { session } } = await sb.auth.getSession();
-            if (!session) { window.location.href = '../login.html'; return; }
-
-            const user = session.user;
-            let nome = user.email, usuario = '';
-
-            try {
-                const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
-                if (perfil) {
-                    nome    = perfil.nome    || user.email;
-                    usuario = perfil.usuario || '';
-                }
-            } catch (_) {}
-
-            const primeiroNome = nome.split(' ')[0];
-            const inicial      = primeiroNome[0]?.toUpperCase() || '?';
-
-            // Header
-            document.getElementById('avatar-inicial').textContent = inicial;
-            document.getElementById('drop-nome').textContent      = nome;
-            document.getElementById('drop-email').textContent     = user.email;
-
-            // Sidebar
-            document.getElementById('sidebar-nome').textContent   = nome;
-            document.getElementById('sidebar-handle').textContent = usuario ? '@' + usuario : '';
-
-            // Foto do responsável no avatar
-            try {
-                const { data: prop } = await sb.from('propriedades').select('foto_responsavel').eq('usuario_id', user.id).single();
-                const avatarEl = document.getElementById('sidebar-avatar');
-                if (prop?.foto_responsavel) {
-                    avatarEl.innerHTML = `<img src="${prop.foto_responsavel}" alt="Foto">`;
-                } else {
-                    avatarEl.textContent = inicial;
-                }
-            } catch (_) {
-                document.getElementById('sidebar-avatar').textContent = inicial;
-            }
-
-            // Boas-vindas
-            document.getElementById('hero-nome').textContent = primeiroNome;
-
-            // Plano
-            try {
-                const { data: ass } = await sb.from('assinaturas')
-                    .select('plano_ativo, status, fim_periodo')
-                    .eq('usuario_id', user.id).single();
-                const pl = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
-                const plNome = { basico: 'Básico', pro: 'Pro', ultra: 'Ultra' };
-                document.getElementById('sidebar-plano-chip').textContent = pl[ass?.plano_ativo] || '🏷️ Básico';
-
-                if (ass?.fim_periodo) {
-                    const d = new Date(ass.fim_periodo);
-                    const dataFormatada = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    document.getElementById('sidebar-validade').textContent = `Válido até ${dataFormatada}`;
-                }
-            } catch (_) {
-                document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
-
-            }
-
-            /* Busca ID da propriedade do usuário */
-            try {
-                const { data: prop } = await sb
-                    .from('propriedades').select('id')
-                    .eq('usuario_id', user.id).limit(1).maybeSingle();
-                propIdDash = prop?.id || null;
-            } catch (_) {}
-
-            /* Botão "Ver minha propriedade" */
-            const btnVer = document.getElementById('btn-ver-prop');
-            if (btnVer) {
-                if (propIdDash) {
-                    btnVer.href = '../propriedade.html?id=' + propIdDash;
-                    btnVer.target = '_blank';
-                } else {
-                    btnVer.href = 'minhapropriedade.html';
-                    btnVer.target = '_self';
-                    const txt = document.getElementById('btn-ver-prop-txt');
-                    if (txt) txt.textContent = 'Cadastrar propriedade';
-                }
-            }
-
-            /* Verifica passos de perfil */
-            verificarPassos(user.id);
-
-            /* Carrega métricas e gráfico inicial */
-            if (propIdDash) {
-                carregarMetricas(propIdDash);
-            } else {
-                ['m-views','m-whatsapp','m-formulario','m-nota'].forEach(id => {
-                    const el = document.getElementById(id);
-                    el.textContent = '—'; el.classList.remove('loading');
-                });
-            }
-            buscarDados30Dias('view').then(dados => montarGrafico('view', dados));
-
-        } catch (err) {
-            console.error('Erro no init:', err);
-        } finally {
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('main-content').style.display   = 'flex';
-        }
+/* ── Verifica sessão e alterna botão do header ── */
+(async () => {
+    const { data: { session } } = await _sb.auth.getSession();
+    const btnEntrar    = document.getElementById('btn-entrar');
+    const btnDashboard = document.getElementById('btn-dashboard');
+    if (session) {
+        // Usuário logado → mostra Dashboard
+        btnDashboard.style.display = 'inline-flex';
+    } else {
+        // Não logado → mostra Entrar
+        btnEntrar.style.display = 'inline-flex';
     }
+})();
 
-    /* ── Toggle sidebar mobile ── */
-    function toggleSidebar() {
-        const sidebar  = document.querySelector('.dash-sidebar');
-        const overlay  = document.getElementById('sidebar-overlay');
-        sidebar.classList.toggle('aberta');
-        overlay.classList.toggle('ativo');
-    }
+/* ── Categorias ── */
+const CATS = [
+    { nome: 'Casas de Festas',                 emoji: '🏠' },
+    { nome: 'Sítios',     emoji: '🌳' },
+    { nome: 'Acampamentos',                    emoji: '⛺' },
+    { nome: 'Bares e Restaurantes',            emoji: '🍽️' },
+    { nome: 'Beach Clubs',                     emoji: '🏖️' },
+    { nome: 'Centros de Convenções e Galpões', emoji: '🏭' },
+    { nome: 'Clubes',                          emoji: '🏊' },
+    { nome: 'Hotéis, Pousadas e Resorts',      emoji: '🏨' },
+    { nome: 'Rooftops',                        emoji: '🌆' },
+    { nome: 'Teatros',                         emoji: '🎭' },
+    { nome: 'Chácaras',                         emoji: '🎭' },
+    { nome: 'Fazendas',                         emoji: '🎭' },
+    { nome: 'Casa',                         emoji: '🎭' },
+    { nome: 'Salão de Festas',                         emoji: '🎭' },
+    { nome: 'Mansões',                         emoji: '🎭' },
+    { nome: 'Espaço Gourmet',                         emoji: '🎭' },
+    { nome: 'Lofts',                         emoji: '🎭' },
+    { nome: 'Espaço Industrial',                         emoji: '🎭' },
+    { nome: 'Arena',                         emoji: '🎭' },
+    { nome: 'Estádios',                         emoji: '🎭' },
+    { nome: 'Auditórios',                         emoji: '🎭' },
+    { nome: 'Coworkings',                         emoji: '🎭' },
+    { nome: 'Galeria de Arte',                         emoji: '🎭' },
+    { nome: 'Museus',                         emoji: '🎭' },
+    { nome: 'Vinicolas',                         emoji: '🎭' },
+    { nome: 'Iates',                         emoji: '🎭' },
+    { nome: 'Lanchas',                         emoji: '🎭' },
+    { nome: 'Escuna',                         emoji: '🎭' },
+    { nome: 'Haras',                         emoji: '🎭' },
+    
 
-    /* ── Toggle dropmenu ── */
-    function toggleAvatar() {
-        const m = document.getElementById('avatar-menu');
-        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
-    }
-    document.addEventListener('click', e => {
-        const c = document.querySelector('.avatar-container');
-        if (c && !c.contains(e.target))
-            document.getElementById('avatar-menu').style.display = 'none';
+
+    
+
+];
+
+/* ── Ordenação: 1º plano (ultra>pro>basico), 2º nota desc, 3º alfabético ── */
+function pesoPlano(p) { return p === 'ultra' ? 0 : p === 'pro' ? 1 : 2; }
+
+function ordenar(lista) {
+    return [...lista].sort((a, b) => {
+        const dp = pesoPlano(a._plano) - pesoPlano(b._plano);
+        if (dp !== 0) return dp;
+        const dn = parseFloat(b._nota) - parseFloat(a._nota);
+        if (dn !== 0) return dn;
+        return (a.nome || '').localeCompare(b.nome || '', 'pt-BR');
     });
+}
 
-    /* ── Sair ── */
-    async function sair() {
-        await sb.auth.signOut();
-        window.location.href = '../login.html';
-    }
+/* ── HTML de um card ── */
+function cardHTML(prop, delay) {
+    const plano  = prop._plano;
+    const isUltra = plano === 'ultra';
+    const isPro   = plano === 'pro';
 
-    /* ── Solicitar liberação ── */
-    function solicitarLiberacao() {
-        const btn  = document.getElementById('btn-solicitar');
-        if (btn.disabled) return;
-        const hint = document.getElementById('solicitar-hint');
+    const img   = prop.imagem_url || prop.foto_capa
+                  || `https://picsum.photos/seed/${prop.id}/420/320`;
+    const nome  = prop.nome || 'Sem nome';
+    const cid   = prop.cidade ? `📍 ${prop.cidade}` : (prop.estado || '');
+    const preco = prop.preco ?? prop.valor_base;
+    const nota  = prop._nota;
+    const id    = prop.id || '';
 
-        btn.disabled = true;
-        btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite">⏳</span>&nbsp;Enviando solicitação...';
+    const badgeHtml = isUltra
+        ? `<div class="card-badge badge-ultra">✦ Premium</div>`
+        : isPro
+        ? `<div class="card-badge badge-pro">Pro</div>`
+        : '';
 
-        // Aqui você pode chamar um endpoint/webhook real no futuro
-        setTimeout(() => {
-            btn.innerHTML = '✅ Solicitação enviada com sucesso!';
-            btn.classList.add('enviado');
-            hint.innerHTML = 'Nossa equipe recebeu o pedido e revisará sua propriedade em até <strong>48 horas úteis</strong>. Você receberá um e-mail com o resultado.';
-            mostrarToast('Solicitação enviada! Aguarde a revisão da equipe VENTSY.');
-        }, 1800);
-    }
+    const ribbonHtml = isUltra ? `<div class="ribbon">Premium</div>` : '';
 
-    /* ── Verificação automática dos passos ── */
-    let _passosCount = 0;
+    const notaHtml = nota
+        ? `<span class="card-nota">
+               <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+               ${parseFloat(nota).toFixed(1)}
+           </span>`
+        : '';
 
-    function _marcarPasso(num) {
-        const item = document.getElementById('passo-' + num);
-        if (!item || item.classList.contains('completo')) return;
-        item.classList.add('completo');
-        item.querySelector('.passo-num').textContent = '✓';
-        const acao = item.querySelector('.passo-acao');
-        if (acao) acao.outerHTML = '<span class="passo-acao verde">✓ Concluído</span>';
-        _passosCount++;
-    }
+    const precoHtml = preco != null
+        ? `<span class="card-preco">A partir de <strong>R$ ${Number(preco).toLocaleString('pt-BR')}</strong></span>`
+        : `<span class="card-preco" style="color:#ccc">Sob consulta</span>`;
 
-    function atualizarProgresso() {
-        const total = 6; // passos 2–7
-        const prog  = document.getElementById('passos-progresso');
-        prog.textContent = _passosCount + ' de ' + total + ' concluídos';
-        prog.classList.toggle('completo-total', _passosCount === total);
-        const btn   = document.getElementById('btn-solicitar');
-        const aviso = document.getElementById('solicitar-aviso');
-        btn.disabled = _passosCount < total;
-        aviso.classList.toggle('oculto', _passosCount >= total);
-    }
+    const cls = `card${isUltra ? ' card-ultra' : isPro ? ' card-pro' : ''}`;
 
-    async function verificarPassos(userId) {
-        try {
-            /* ── 1. Busca dados da propriedade (query original, sem alteração) ── */
-            const { data: prop } = await sb.from('propriedades')
-                .select('id, descricao, cep, rua, numero, bairro, cidade, estado, nome, tipo_propriedade, capacidade, whatsapp, email_contato, nome_responsavel, foto_responsavel, valor_hora, valor_base, tipo_evento')
-                .eq('usuario_id', userId).maybeSingle();
+    return `
+        <div class="${cls}"
+             style="animation-delay:${delay}s"
+             onclick="window.location.href='propriedade.html?id=${id}'"
+             title="${nome}">
+            ${ribbonHtml}
+            <div class="card-foto">
+                <img src="${img}" alt="${nome}" loading="lazy"
+                     onerror="this.src='https://picsum.photos/seed/err${id}/420/320'">
+                ${badgeHtml}
+                <button class="card-fav" onclick="event.stopPropagation();toggleFav(this)">♡</button>
+            </div>
+            <div class="card-body">
+                <div class="card-nome">${nome}</div>
+                ${cid ? `<div class="card-cidade">${cid}</div>` : ''}
+                <div class="card-footer">${precoHtml}${notaHtml}</div>
+            </div>
+        </div>
+    `;
+}
 
-            /* ── 2. Verifica status de publicação em query separada (não quebra se coluna não existir) ── */
-            let statusAtual = '';
-            try {
-                const { data: statusProp } = await sb.from('propriedades')
-                    .select('status_publicacao')
-                    .eq('usuario_id', userId).maybeSingle();
-                statusAtual = (statusProp?.status_publicacao || '').toLowerCase();
-            } catch (_) {}
+/* ── Busca plano de cada proprietário ── */
+async function planosMap() {
+    try {
+        const { data } = await _sb.from('assinaturas')
+            .select('usuario_id, plano_ativo, status');
+        const m = {};
+        (data || []).forEach(a => {
+            if (a.status === 'ativa' || a.status === 'trial')
+                m[a.usuario_id] = a.plano_ativo;
+        });
+        return m;
+    } catch { return {}; }
+}
 
-            const statusAprovado   = ['aprovada', 'publicada', 'ativo', 'ativa', 'aprovado'].includes(statusAtual);
-            const statusAguardando = ['aguardando', 'pendente', 'em_revisao', 'em revisao', 'solicitado'].includes(statusAtual);
+/* ── Render principal ── */
+async function render() {
+    const container = document.getElementById('container-cats');
 
-            /* Se aprovada: oculta toda a seção de setup */
-            if (statusAprovado) {
-                const secaoPassos   = document.querySelector('.passo-lista');
-                const tituloPassos  = document.querySelector('.passos-titulo');
-                const cardSolicitar = document.querySelector('.card-solicitar');
-                if (secaoPassos)   secaoPassos.style.display   = 'none';
-                if (tituloPassos)  tituloPassos.style.display  = 'none';
-                if (cardSolicitar) cardSolicitar.style.display = 'none';
-                return;
-            }
+    const [{ data: props, error }, planos] = await Promise.all([
+        _sb.from('propriedades').select('*').eq('publicada', true),
+        planosMap()
+    ]);
 
-            /* Se aguardando revisão: mostra botão no estado "enviado" */
-            if (statusAguardando) {
-                const btn   = document.getElementById('btn-solicitar');
-                const hint  = document.getElementById('solicitar-hint');
-                const aviso = document.getElementById('solicitar-aviso');
-                if (btn) {
-                    btn.disabled  = true;
-                    btn.innerHTML = '⏳ Aguardando revisão da equipe VENTSY...';
-                    btn.style.background = '#888';
-                    btn.style.boxShadow  = 'none';
-                }
-                if (hint) hint.innerHTML = 'Sua solicitação foi recebida e está em análise. Nossa equipe revisará em até <strong>48 horas úteis</strong>.';
-                if (aviso) aviso.classList.add('oculto');
-            }
+    let lista = props || [];
 
-            /* ── 3. Verifica passos de perfil (lógica original intacta) ── */
-            if (prop?.id) {
-                const { data: fotos } = await sb.from('fotos_imovel')
-                    .select('id').eq('propriedade_id', prop.id).eq('secao', '__destaque__');
-                if ((fotos || []).length >= 5) _marcarPasso(2);
-            }
-
-            const t = v => !!(v && String(v).trim());
-            if (t(prop?.descricao))  _marcarPasso(3);
-            if (t(prop?.cep) && t(prop?.rua) && t(prop?.numero) && t(prop?.bairro) && t(prop?.cidade) && t(prop?.estado)) _marcarPasso(4);
-            if (t(prop?.nome) && t(prop?.tipo_propriedade) && t(prop?.capacidade) && t(prop?.whatsapp) && t(prop?.email_contato) && t(prop?.nome_responsavel) && t(prop?.foto_responsavel)) _marcarPasso(5);
-            if (prop?.valor_hora || prop?.valor_base)  _marcarPasso(6);
-            if (t(prop?.tipo_evento))                  _marcarPasso(7);
-        } catch (_) {}
-        atualizarProgresso();
-    }
-
-    // Inicializa botão como desabilitado
-    document.addEventListener('DOMContentLoaded', () => {
-        atualizarProgresso();
-    });
-
-    /* ── Toast ── */
-    function mostrarToast(msg) {
-        const t = document.getElementById('toast');
-        document.getElementById('toast-msg').textContent = msg;
-        t.classList.add('visivel');
-        setTimeout(() => t.classList.remove('visivel'), 5000);
-    }
-
-    /* ── Analytics: variáveis globais ── */
-    let graficoInst  = null;
-    let dadosCache   = {};
-    let propIdDash   = null;
-    let tabAtiva     = 'view';
-
-    const COR_CHART = {
-        view:       '#ff385c',
-        whatsapp:   '#25D366',
-        formulario: '#1a73e8',
-        nota:       '#f59e0b'
-    };
-    const LABEL_CHART = {
-        view:       'Visualizações',
-        whatsapp:   'Cliques WhatsApp',
-        formulario: 'Cliques Formulário',
-        nota:       'Avaliação média'
-    };
-
-    /* Gera labels e chaves ISO dos últimos 30 dias */
-    const { LABELS_30D, KEYS_30D } = (() => {
-        const LABELS_30D = [], KEYS_30D = [], hoje = new Date();
-        for (let i = 29; i >= 0; i--) {
-            const d = new Date(hoje);
-            d.setDate(hoje.getDate() - i);
-            LABELS_30D.push(`${d.getDate()}/${d.getMonth() + 1}`);
-            KEYS_30D.push(d.toISOString().split('T')[0]);
-        }
-        return { LABELS_30D, KEYS_30D };
-    })();
-
-    /* Array de zeros para quando não há dados reais */
-    const ZEROS_30D = new Array(30).fill(0);
-
-    /* ── Carrega totais dos cards de métricas ── */
-    async function carregarMetricas(propId) {
-        const inicio = new Date();
-        inicio.setDate(inicio.getDate() - 30);
-        try {
-            const { data } = await sb
-                .from('analytics_eventos')
-                .select('evento_tipo')
-                .eq('propriedade_id', propId)
-                .gte('created_at', inicio.toISOString());
-
-            const c = { view: 0, whatsapp: 0, formulario: 0 };
-            (data || []).forEach(e => { if (c[e.evento_tipo] !== undefined) c[e.evento_tipo]++; });
-
-            ['views','whatsapp','formulario'].forEach(id => {
-                const el = document.getElementById('m-' + id);
-                el.textContent = c[id === 'views' ? 'view' : id];
-                el.classList.remove('loading');
-            });
-        } catch (_) {
-            ['m-views','m-whatsapp','m-formulario'].forEach(id => {
-                const el = document.getElementById(id);
-                el.textContent = '—'; el.classList.remove('loading');
-            });
-        }
-
-        /* Avaliação média — tenta coluna 'avaliacao' em propriedades */
-        try {
-            const { data: prop } = await sb
-                .from('propriedades').select('avaliacao').eq('id', propId).single();
-            const nota = prop?.avaliacao;
-            const el = document.getElementById('m-nota');
-            el.textContent = nota ? Number(nota).toFixed(1) : '—';
-            el.classList.remove('loading');
-        } catch (_) {
-            const el = document.getElementById('m-nota');
-            el.textContent = '—'; el.classList.remove('loading');
-        }
-    }
-
-    /* ── Busca 30 dias de um tipo de evento (com cache) ── */
-    async function buscarDados30Dias(tipo) {
-        if (dadosCache[tipo]) return dadosCache[tipo];
-        if (!propIdDash) { dadosCache[tipo] = ZEROS_30D; return ZEROS_30D; }
-
-        const inicio = new Date();
-        inicio.setDate(inicio.getDate() - 30);
-        let valores = new Array(30).fill(0);
-
-        try {
-            if (tipo === 'nota') {
-                const { data } = await sb
-                    .from('avaliacoes')
-                    .select('nota, criado_em')
-                    .eq('propriedade_id', propIdDash)
-                    .gte('criado_em', inicio.toISOString());
-
-                const cnt = {}, soma = {};
-                KEYS_30D.forEach(k => { cnt[k] = 0; soma[k] = 0; });
-                (data || []).forEach(a => {
-                    const k = a.criado_em?.split('T')[0];
-                    if (cnt[k] !== undefined) { cnt[k]++; soma[k] += Number(a.nota) || 0; }
-                });
-                valores = KEYS_30D.map(k => cnt[k] > 0 ? +(soma[k] / cnt[k]).toFixed(2) : null);
-            } else {
-                const { data } = await sb
-                    .from('analytics_eventos')
-                    .select('created_at')
-                    .eq('propriedade_id', propIdDash)
-                    .eq('evento_tipo', tipo)
-                    .gte('created_at', inicio.toISOString());
-
-                const cnt = {};
-                KEYS_30D.forEach(k => { cnt[k] = 0; });
-                (data || []).forEach(e => {
-                    const k = e.created_at?.split('T')[0];
-                    if (cnt[k] !== undefined) cnt[k]++;
-                });
-                valores = KEYS_30D.map(k => cnt[k]);
-            }
-        } catch (_) {}
-
-        dadosCache[tipo] = valores;
-        return valores;
-    }
-
-    /* ── Troca aba e atualiza gráfico ── */
-    async function mudarTab(btn) {
-        const tipo = btn.dataset.tipo;
-        if (tipo === tabAtiva) return;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo'));
-        btn.classList.add('ativo');
-        tabAtiva = tipo;
-        const dados = await buscarDados30Dias(tipo);
-        montarGrafico(tipo, dados);
-    }
-
-    /* ── Renderiza / atualiza o gráfico ── */
-    function montarGrafico(tipo, dados) {
-        const ctx = document.getElementById('graficoAnalytics').getContext('2d');
-        const cor = COR_CHART[tipo];
-
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, cor + '33');
-        gradient.addColorStop(1, cor + '00');
-
-        const temDados = dados.some(v => v !== null && v > 0);
-        document.getElementById('grafico-vazio').style.display = temDados ? 'none' : 'block';
-
-        if (graficoInst) { graficoInst.destroy(); graficoInst = null; }
-
-        graficoInst = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: LABELS_30D,
-                datasets: [{
-                    label: LABEL_CHART[tipo],
-                    data: dados,
-                    borderColor: cor, borderWidth: 2.5,
-                    fill: true, backgroundColor: gradient,
-                    tension: 0.4,
-                    pointRadius: temDados ? 3 : 0,
-                    pointBackgroundColor: cor,
-                    spanGaps: tipo === 'nota'
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: {
-                        beginAtZero: tipo !== 'nota',
-                        min: tipo === 'nota' ? 0 : undefined,
-                        max: tipo === 'nota' ? 5 : undefined,
-                        grid: { color: '#f0f0f0' },
-                        ticks: { color: '#999', stepSize: tipo === 'nota' ? 1 : undefined }
-                    },
-                    x: { grid: { display: false }, ticks: { color: '#999', maxTicksLimit: 10 } }
-                }
-            }
+    /* Se banco vazio → demo */
+    if (!lista.length || error) {
+        lista = DEMO;
+        lista.forEach(p => { p._plano = p._plano || 'basico'; p._nota = p.avaliacao || p.nota_media || 0; });
+    } else {
+        lista.forEach(p => {
+            p._plano = (p.usuario_id && planos[p.usuario_id]) || 'basico';
+            p._nota  = parseFloat(p.avaliacao || 0);
         });
     }
 
-    /* Arranca tudo */
-    init();
-</script>
+    /* Agrupa por categoria */
+    const grupos = {};
+    CATS.forEach(c => { grupos[c.nome] = []; });
+    lista.forEach(p => { if (grupos[p.categoria]) grupos[p.categoria].push(p); });
 
+    container.innerHTML = '';
+    let secoesRenderizadas = 0;
+
+    CATS.forEach((cat, ci) => {
+        const grupo = ordenar(grupos[cat.nome] || []);
+        if (!grupo.length) return;
+
+        /* Máx 7 no carrossel */
+        const exibir = grupo.slice(0, 7);
+
+        const sec = document.createElement('div');
+        sec.className = 'secao';
+        sec.innerHTML = `
+            <div class="secao-header">
+                <span class="secao-emoji">${cat.emoji}</span>
+                <h2 class="secao-titulo">${cat.nome}</h2>
+                <button class="btn-ver-todos" onclick="buscarCat('${cat.nome.replace(/'/g,"\\'")}')">
+                    Ver todos
+                    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+            <div class="carrossel">
+                ${exibir.map((p, i) => cardHTML(p, i * 0.055)).join('')}
+            </div>
+        `;
+        container.appendChild(sec);
+
+        secoesRenderizadas++;
+
+        /* Banner após 3ª seção */
+        if (secoesRenderizadas === 3) {
+            const banner = document.getElementById('banner-anuncie');
+            banner.style.display = 'block';
+            container.appendChild(banner);
+        }
+    });
+}
+
+async function registrarBusca(tipoEvento) {
+    if (!tipoEvento) return;
+    try {
+        await _sb.from('buscas').insert({ tipo_evento: tipoEvento });
+    } catch (_) {}
+}
+
+function buscarCat(cat) {
+    registrarBusca(cat);
+    const url = new URL('buscapropriedade.html', window.location.href);
+    url.searchParams.set('tipo', cat);
+    window.location.href = url.toString();
+}
+
+function toggleFav(btn) {
+    btn.classList.toggle('fav-on');
+    btn.textContent = btn.classList.contains('fav-on') ? '❤' : '♡';
+}
+
+/* ── Dados demo quando banco estiver vazio ── */
+const DEMO = [
+    {id:'d1',nome:'Chácara Macacu',cidade:'Cachoeiras de Macacu, RJ',preco:3000,nota_media:4.9,_plano:'ultra',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara1/420/320'},
+    {id:'d2',nome:'Sítio Verde Vale',cidade:'Guapimirim, RJ',preco:2200,nota_media:4.7,_plano:'pro',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara2/420/320'},
+    {id:'d3',nome:'Sítio Brisa',cidade:'Petrópolis, RJ',preco:1900,nota_media:4.5,_plano:'pro',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara3/420/320'},
+    {id:'d4',nome:'Chácara das Flores',cidade:'Teresópolis, RJ',preco:1800,nota_media:4.3,_plano:'basico',categoria:'Sítios, Chácaras e Fazendas',imagem_url:'https://picsum.photos/seed/chacara4/420/320'},
+    {id:'d5',nome:'Espaço Aquarela',cidade:'Petrópolis, RJ',preco:3200,nota_media:4.8,_plano:'ultra',categoria:'Casas de Festas',imagem_url:'https://picsum.photos/seed/salao1/420/320'},
+    {id:'d6',nome:'Salão Primavera',cidade:'Nova Friburgo, RJ',preco:1500,nota_media:4.4,_plano:'pro',categoria:'Casas de Festas',imagem_url:'https://picsum.photos/seed/salao2/420/320'},
+    {id:'d7',nome:'Espaço Garden',cidade:'Niterói, RJ',preco:2100,nota_media:4.2,_plano:'basico',categoria:'Casas de Festas',imagem_url:'https://picsum.photos/seed/salao3/420/320'},
+    {id:'d8',nome:'Rooftop 360°',cidade:'Rio de Janeiro, RJ',preco:5000,nota_media:5.0,_plano:'ultra',categoria:'Rooftops',imagem_url:'https://picsum.photos/seed/roof1/420/320'},
+    {id:'d9',nome:'Sky Lounge',cidade:'São Paulo, SP',preco:4200,nota_media:4.9,_plano:'pro',categoria:'Rooftops',imagem_url:'https://picsum.photos/seed/roof2/420/320'},
+    {id:'d10',nome:'Terraço Carioca',cidade:'Rio de Janeiro, RJ',preco:3800,nota_media:4.6,_plano:'basico',categoria:'Rooftops',imagem_url:'https://picsum.photos/seed/roof3/420/320'},
+];
+DEMO.forEach(d => { d._nota = d.nota_media; });
+
+/* ── Estados ── */
+const ESTADOS = [
+    {n:'Acre',s:'AC'},{n:'Alagoas',s:'AL'},{n:'Amapá',s:'AP'},{n:'Amazonas',s:'AM'},
+    {n:'Bahia',s:'BA'},{n:'Ceará',s:'CE'},{n:'Distrito Federal',s:'DF'},
+    {n:'Espírito Santo',s:'ES'},{n:'Goiás',s:'GO'},{n:'Maranhão',s:'MA'},
+    {n:'Mato Grosso',s:'MT'},{n:'Mato Grosso do Sul',s:'MS'},{n:'Minas Gerais',s:'MG'},
+    {n:'Pará',s:'PA'},{n:'Paraíba',s:'PB'},{n:'Paraná',s:'PR'},
+    {n:'Pernambuco',s:'PE'},{n:'Piauí',s:'PI'},{n:'Rio de Janeiro',s:'RJ'},
+    {n:'Rio Grande do Norte',s:'RN'},{n:'Rio Grande do Sul',s:'RS'},
+    {n:'Rondônia',s:'RO'},{n:'Roraima',s:'RR'},{n:'Santa Catarina',s:'SC'},
+    {n:'São Paulo',s:'SP'},{n:'Sergipe',s:'SE'},{n:'Tocantins',s:'TO'},
+];
+
+const locInput = document.getElementById('location-input');
+const locDrop  = document.getElementById('location-suggestions');
+const locErro  = document.getElementById('location-erro');
+const btnBusca = document.getElementById('main-search-btn');
+let locOk = false;
+
+function sem(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
+
+function renderSug(lista) {
+    locDrop.innerHTML = lista.map(e =>
+        `<div class="suggestion-item" data-n="${e.n}">
+            <span>📍</span>${e.n}<small style="color:#bbb;margin-left:6px">${e.s}</small>
+        </div>`
+    ).join('');
+    locDrop.style.display = lista.length ? 'block' : 'none';
+    locDrop.querySelectorAll('.suggestion-item').forEach(el => {
+        el.addEventListener('click', () => {
+            locInput.value = el.dataset.n; locOk = true;
+            locDrop.style.display = 'none'; checkBusca();
+            // Carrega cidades do estado selecionado
+            const sig = ESTADOS.find(e => e.n === el.dataset.n)?.s || '';
+            cidadeInput.value = '';
+            carregarCidades(sig);
+        });
+    });
+}
+
+locInput.addEventListener('focus', () => {
+    locErro.style.display = 'none';
+    renderSug(locInput.value.trim() ? [] : ESTADOS.slice(0,5));
+});
+locInput.addEventListener('input', () => {
+    locOk = false;
+    const t = sem(locInput.value.trim());
+    renderSug(t ? ESTADOS.filter(e => sem(e.n).startsWith(t) || e.s.toLowerCase().startsWith(t)).slice(0,5) : ESTADOS.slice(0,5));
+    checkBusca();
+});
+locInput.addEventListener('blur', () => setTimeout(() => {
+    const v = locInput.value.trim();
+    if (v && !locOk && !ESTADOS.some(e => e.n.toLowerCase() === v.toLowerCase())) {
+        locInput.value = ''; locOk = false;
+        locErro.style.display = 'block'; checkBusca();
+    }
+    locDrop.style.display = 'none';
+}, 160));
+document.addEventListener('click', e => {
+    if (!document.getElementById('location-container').contains(e.target))
+        locDrop.style.display = 'none';
+});
+
+function checkBusca() {
+    const v = locInput.value.trim();
+    const ok = locOk || ESTADOS.some(e => e.n.toLowerCase() === v.toLowerCase());
+    btnBusca.style.opacity       = ok ? '1' : '.3';
+    btnBusca.style.pointerEvents = ok ? 'auto' : 'none';
+}
+
+/* Calendário */
+const dQuando = document.getElementById('display-quando');
+const mm = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const fd = d => `${d.getDate()} ${mm[d.getMonth()]}`;
+
+flatpickr('#input-periodo', {
+    mode:'range', minDate:'today', dateFormat:'Y-m-d',
+    locale:'pt', showMonths:2, disableMobile:true,
+    onChange(ds) {
+        if (!ds.length) { dQuando.textContent='Adicionar datas'; dQuando.style.color=''; }
+        else if (ds.length===1) { dQuando.textContent=`${fd(ds[0])} → ...`; dQuando.style.color='#222'; }
+        else { const a=fd(ds[0]),b=fd(ds[1]); dQuando.textContent=a===b?a:`${a} → ${b}`; dQuando.style.color='#222'; }
+    }
+});
+document.getElementById('range-container').addEventListener('click', () =>
+    document.getElementById('input-periodo')._flatpickr.open()
+);
+
+/* ── Autocomplete de Cidade ── */
+const cidadeInput = document.getElementById('cidade-input');
+const cidadeDrop  = document.getElementById('cidade-suggestions');
+let listaCidades  = [];
+
+async function carregarCidades(sigla) {
+    if (!sigla) { listaCidades = []; cidadeInput.value = ''; cidadeInput.disabled = true; return; }
+    cidadeInput.disabled = false;
+    cidadeInput.placeholder = 'Carregando...';
+    const { data } = await _sb
+        .from('propriedades').select('cidade')
+        .eq('estado', sigla).eq('publicada', true).not('cidade', 'is', null);
+    listaCidades = data ? [...new Set(data.map(p => p.cidade).filter(Boolean))].sort() : [];
+    cidadeInput.placeholder = listaCidades.length ? 'Todas as cidades' : 'Sem cidades';
+}
+
+function renderCidades(lista) {
+    cidadeDrop.innerHTML = lista.map(c =>
+        `<div class="suggestion-item" data-c="${c}"><span>🏙️</span>${c}</div>`
+    ).join('');
+    cidadeDrop.style.display = lista.length ? 'block' : 'none';
+    cidadeDrop.querySelectorAll('.suggestion-item').forEach(el => {
+        el.addEventListener('mousedown', e => {
+            e.preventDefault();
+            cidadeInput.value = el.dataset.c;
+            cidadeDrop.style.display = 'none';
+        });
+    });
+}
+
+cidadeInput.addEventListener('input', () => {
+    const t = cidadeInput.value.trim().toLowerCase();
+    renderCidades((t ? listaCidades.filter(c => c.toLowerCase().includes(t)) : listaCidades).slice(0, 6));
+});
+cidadeInput.addEventListener('focus', () => renderCidades(listaCidades.slice(0, 6)));
+cidadeInput.addEventListener('blur',  () => setTimeout(() => cidadeDrop.style.display = 'none', 200));
+
+btnBusca.addEventListener('click', () => {
+    const nomeEstado = locInput.value.trim(); if (!nomeEstado) return;
+    const encontrado = ESTADOS.find(e => e.n.toLowerCase() === nomeEstado.toLowerCase());
+    const estado = encontrado ? encontrado.s : nomeEstado;
+    const cidade = cidadeInput.value.trim();
+    const tipo   = document.getElementById('tipo-espaco')?.value || '';
+    const data   = dQuando.textContent.trim();
+    registrarBusca(tipo);
+    const url = new URL('buscapropriedade.html', window.location.href);
+    url.searchParams.set('estado', estado);
+    if (cidade) url.searchParams.set('cidade', cidade);
+    if (tipo)   url.searchParams.set('evento', tipo);
+    if (data && data !== 'Adicionar datas') url.searchParams.set('data', data);
+    window.location.href = url.toString();
+});
+
+function toggleMenuExtra() {
+    const m = document.getElementById('extra-menu');
+    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.menu-hamburguer-container'))
+        document.getElementById('extra-menu').style.display = 'none';
+});
+
+function toggleEventoDropdown(e) {
+    e.stopPropagation();
+    const drop = document.getElementById('evento-dropdown');
+    const disp = document.getElementById('tipo-display');
+    const isOpen = drop.style.display === 'block';
+    drop.style.display = isOpen ? 'none' : 'block';
+    disp.classList.toggle('open', !isOpen);
+}
+
+function selectEvento(el) {
+    const input = document.getElementById('tipo-espaco');
+    const texto = document.getElementById('tipo-texto');
+    const drop  = document.getElementById('evento-dropdown');
+    const disp  = document.getElementById('tipo-display');
+
+    // Remove previous selection highlight
+    document.querySelectorAll('.ev-item.selected').forEach(i => i.classList.remove('selected'));
+
+    if (!el) {
+        // Clear / "Todos os eventos"
+        input.value = '';
+        texto.textContent = 'Todos os eventos';
+    } else {
+        const v = el.dataset.v;
+        input.value = v;
+        const emoji = el.querySelector('span').textContent;
+        texto.textContent = emoji + ' ' + el.textContent.trim().replace(emoji, '').trim();
+        el.classList.add('selected');
+    }
+
+    drop.style.display = 'none';
+    disp.classList.remove('open');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', e => {
+    if (!e.target.closest('#tipo-container')) {
+        const drop = document.getElementById('evento-dropdown');
+        const disp = document.getElementById('tipo-display');
+        if (drop) drop.style.display = 'none';
+        if (disp) disp.classList.remove('open');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', render);
+</script>
 </body>
 </html>
