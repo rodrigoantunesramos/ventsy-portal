@@ -1302,40 +1302,38 @@
         // Auto-save comodidades e servicos_extras ao marcar/desmarcar
         document.querySelectorAll('#servicos .amenidade-check input').forEach(cb => {
             cb.addEventListener('change', async () => {
-                if (!PROP_ID) return;
+                if (!PROP_ID) { console.warn('[AUTO-SAVE servicos] PROP_ID nulo — salve primeiro'); return; }
                 const comodidades = Array.from(
                     document.querySelectorAll('#servicos .amenidade-check input:not(.svc-extra):checked')
                 ).map(c => c.value);
                 const servicosExtras = Array.from(
                     document.querySelectorAll('#servicos .svc-extra:checked')
                 ).map(c => c.value);
-                const { error } = await sb.from('propriedades')
+                const res = await sb.from('propriedades')
                     .update({ comodidades, servicos_extras: servicosExtras })
-                    .eq('id', PROP_ID);
-                if (error) console.error('[AUTO-SAVE servicos] erro:', error);
-                else {
-                    console.log('[AUTO-SAVE servicos] ok — comodidades:', comodidades, '| extras:', servicosExtras);
-                    if (window._propCache) { window._propCache.comodidades = comodidades; window._propCache.servicos_extras = servicosExtras; }
-                }
+                    .eq('id', PROP_ID)
+                    .select('id');
+                if (res.error) console.error('[AUTO-SAVE servicos] erro:', JSON.stringify(res.error));
+                else if (!res.data?.length) console.warn('[AUTO-SAVE servicos] 0 linhas afetadas — checar RLS. PROP_ID:', PROP_ID);
+                else console.log('[AUTO-SAVE servicos] ok — id:', PROP_ID, '| comodidades:', comodidades, '| extras:', servicosExtras);
             });
         });
 
         // Auto-save eventos ao marcar/desmarcar
         document.querySelectorAll('input[name="tipo_evento"]').forEach(cb => {
             cb.addEventListener('change', async () => {
-                if (!PROP_ID) return;
+                if (!PROP_ID) { console.warn('[AUTO-SAVE eventos] PROP_ID nulo — salve primeiro'); return; }
                 const tipos = Array.from(
                     document.querySelectorAll('input[name="tipo_evento"]:checked')
                 ).map(c => c.value);
                 const tipoEventoStr = tipos.join(', ');
-                const { error } = await sb.from('propriedades')
+                const res = await sb.from('propriedades')
                     .update({ tipo_evento: tipoEventoStr || null })
-                    .eq('id', PROP_ID);
-                if (error) console.error('[AUTO-SAVE eventos] erro:', error);
-                else {
-                    console.log('[AUTO-SAVE eventos] ok —', tipoEventoStr);
-                    if (window._propCache) window._propCache.tipo_evento = tipoEventoStr;
-                }
+                    .eq('id', PROP_ID)
+                    .select('id');
+                if (res.error) console.error('[AUTO-SAVE eventos] erro:', JSON.stringify(res.error));
+                else if (!res.data?.length) console.warn('[AUTO-SAVE eventos] 0 linhas afetadas — checar RLS. PROP_ID:', PROP_ID);
+                else console.log('[AUTO-SAVE eventos] ok — id:', PROP_ID, '| tipos:', tipoEventoStr);
             });
         });
 
@@ -1417,9 +1415,11 @@
         btn.textContent = '💾 Salvando...';
 
         try {
-            const { data: { session } } = await sb.auth.getSession();
+            const { data: { session }, error: sessionError } = await sb.auth.getSession();
+            console.log('[SAVE] session:', session, '| sessionError:', sessionError);
             if (!session) throw new Error('Sessão expirada. Faça login novamente.');
             const userId = session.user.id;
+            console.log('[SAVE] userId:', userId, '| PROP_ID global:', PROP_ID);
 
             // Coleta Aba 1
             const nome           = document.getElementById('nome-espaco').value.trim();
@@ -1487,9 +1487,19 @@
                 resposta: item.querySelector('textarea')?.value.trim() || ''
             })).filter(f => f.pergunta);
 
-            const dados = {
+            // Sempre busca o ID mais recente da propriedade antes de salvar
+            const { data: existing, error: fetchError } = await sb
+                .from('propriedades')
+                .select('id')
+                .eq('usuario_id', userId)
+                .maybeSingle();
 
-                usuario_id:       userId,
+            console.log('[SAVE] fetch existing — data:', existing, '| error:', fetchError);
+
+            if (fetchError) throw fetchError;
+
+            // Monta payload SEM usuario_id para o update (evita conflito com RLS)
+            const dadosUpdate = {
                 nome:             nome              || null,
                 categoria:        tipoPropriedade   || null,
                 descricao:        descricao   || null,
@@ -1503,7 +1513,6 @@
                 servicos_extras:  servicosExtras,
                 custos_extras:    custosExtras,
                 endereco:         endereco    || null,
-                // Campos extras (adicionados à tabela conforme necessidade)
                 email_contato:    emailContato || null,
                 telefone:         telefone    || null,
                 instagram:        instagram   || null,
@@ -1521,45 +1530,41 @@
                 numero:           numero      || null,
                 complemento:      complemento || null,
                 bairro:           bairro      || null,
-
-              
                 faq:              faq
             };
-
-            // Verifica se já existe uma propriedade para este usuário
-            const { data: existing } = await sb
-                .from('propriedades')
-                .select('id')
-
-                .eq('usuario_id', userId)
-
-                .single();
 
             let saveError;
             if (existing?.id) {
                 PROP_ID = existing.id;
-
-                const res = await sb.from('propriedades').update(dados).eq('id', PROP_ID);
-                console.log('[SAVE] update result:', res);
+                console.log('[SAVE] fazendo UPDATE no id:', PROP_ID);
+                const res = await sb.from('propriedades')
+                    .update(dadosUpdate)
+                    .eq('id', PROP_ID)
+                    .select('id');
+                console.log('[SAVE] update result — data:', res.data, '| error:', res.error, '| status:', res.status);
                 saveError = res.error;
+                if (!res.data?.length && !res.error) {
+                    console.warn('[SAVE] UPDATE retornou 0 linhas — possível problema de RLS. Verifique se a policy UPDATE da tabela propriedades permite auth.uid() = usuario_id');
+                }
             } else {
-                const res = await sb.from('propriedades').insert(dados).select('id').single();
-                console.log('[SAVE] insert result:', res);
+                console.log('[SAVE] fazendo INSERT (nova propriedade)');
+                const dadosInsert = { ...dadosUpdate, usuario_id: userId };
+                const res = await sb.from('propriedades').insert(dadosInsert).select('id').single();
+                console.log('[SAVE] insert result — data:', res.data, '| error:', res.error);
                 saveError = res.error;
                 if (res.data?.id) PROP_ID = res.data.id;
             }
 
             if (saveError) {
-                console.error('[SAVE] saveError:', saveError);
-                throw saveError;
+                console.error('[SAVE] saveError completo:', JSON.stringify(saveError));
+                throw new Error(saveError.message || saveError.details || JSON.stringify(saveError));
             }
 
             mostrarToast('✅', 'Alterações salvas com sucesso!');
-
             atualizarBtnAnuncio();
 
         } catch (err) {
-            console.error('Erro ao salvar propriedade:', err);
+            console.error('[SAVE] Erro ao salvar propriedade:', err);
             mostrarToast('❌', err.message || 'Erro ao salvar. Verifique o console.');
         } finally {
             btn.disabled = false;
