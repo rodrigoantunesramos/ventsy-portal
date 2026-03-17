@@ -911,15 +911,7 @@ async function submeterCadastro() {
     const emailVal   = document.getElementById('email').value.trim();
     const usuarioVal = document.getElementById('usuario').value.trim();
 
-    // Checa e-mail
-    const { data: emailExiste, error: emailErr } = await sb.rpc('verificar_email', { p_email: emailVal });
-    if (!emailErr && emailExiste === true) {
-        setStatus('email', false, 'Este e-mail já está cadastrado. Tente fazer login.');
-        destacarCampo('email');
-        mostrarAlerta('erro', 'Este e-mail já possui uma conta. Tente fazer login.');
-        liberarBtn();
-        return;
-    }
+   
 
     // Checa usuário
     const { data: usuarioExiste, error: usuarioErr } = await sb.rpc('verificar_usuario', { p_usuario: usuarioVal });
