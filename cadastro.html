@@ -663,9 +663,29 @@ async function verificarEmailBanco(email) {
     if (error) { limparStatus('email'); return; }
     if (data === true) {
         setStatus('email', false, 'Este e-mail já está cadastrado. Tente fazer login.');
-    } else {
-        setStatus('email', true, 'E-mail disponível.');
+        return;
     }
+    setStatus('email', true, 'E-mail disponível.');
+    // Salva lead incompleto silenciosamente para remarketing
+    salvarLeadIncompleto();
+}
+
+// Salva ou atualiza o lead com o que já foi preenchido até agora
+async function salvarLeadIncompleto() {
+    const email = document.getElementById('email').value.trim();
+    if (!email) return;
+    const nome      = document.getElementById('nome')?.value.trim() || null;
+    const docRaw    = document.getElementById('documento')?.value || '';
+    const documento = docRaw.replace(/\D/g, '') || null;
+    const ref       = document.getElementById('ref-codigo')?.value.trim() || null;
+    // Silencioso — não trava nada se falhar
+    await sb.rpc('salvar_cadastro_incompleto', {
+        p_email:    email,
+        p_nome:     nome || null,
+        p_documento: documento || null,
+        p_tipo_doc: documento ? tipoDoc : null,
+        p_ref:      ref || null
+    }).catch(e => console.warn('Lead incompleto não salvo:', e.message));
 }
 
 // ── Usuário ──
@@ -872,17 +892,28 @@ async function submeterCadastro() {
 
     btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Criando conta...';
 
+    // Garante que o lead está salvo antes de criar a conta
+    await salvarLeadIncompleto();
+
     try {
         // 1. Criar usuário no Supabase Auth
         const { data: authData, error: authError } = await sb.auth.signUp({
             email,
             password: senha,
             options: {
-                data: { nome, usuario } // metadata no auth
+                data: { nome, usuario }
             }
         });
 
-        if (authError) throw authError;
+        if (authError) {
+            // Registra o erro para diagnóstico (lead já está salvo)
+            await sb.rpc('registrar_erro_cadastro', {
+                p_email:    email,
+                p_status:   'erro_auth',
+                p_erro_msg: authError.message
+            }).catch(() => {});
+            throw authError;
+        }
 
         const userId = authData.user?.id;
         if (!userId) throw new Error('Erro ao obter ID do usuário.');
@@ -900,7 +931,15 @@ async function submeterCadastro() {
             });
 
         if (dbError) {
-            // Trata erros específicos de duplicidade
+            // ⚠️ signUp funcionou mas o INSERT falhou — limpa o zumbi do Auth
+            // para que a pessoa possa tentar de novo sem bloqueio
+            await sb.rpc('limpar_zumbi_auth', { p_user_id: userId }).catch(() => {});
+            await sb.rpc('registrar_erro_cadastro', {
+                p_email:    email,
+                p_status:   'erro_db',
+                p_erro_msg: dbError.message
+            }).catch(() => {});
+
             if (dbError.code === '23505') {
                 if (dbError.message.includes('documento')) throw new Error('Este CPF/CNPJ já está cadastrado.');
                 if (dbError.message.includes('usuario'))   throw new Error('Este nome de usuário já está em uso. Escolha outro.');
@@ -908,13 +947,16 @@ async function submeterCadastro() {
             throw dbError;
         }
 
-        // ✅ Registra indicação (código já foi validado antes, falha aqui é improvável)
+        // ✅ Registra indicação
         if (refCodigo && userId) {
             await sb.rpc('registrar_indicacao', {
                 p_indicado_id: userId,
                 p_ref_handle:  refCodigo
             }).catch(e => console.warn('Indicação pós-cadastro falhou:', e.message));
         }
+
+        // ✅ Marca lead como convertido (sai da fila de remarketing)
+        await sb.rpc('marcar_cadastro_convertido', { p_email: email }).catch(() => {});
 
         // ✅ Sucesso
         document.getElementById('form-cadastro').style.opacity = '0';
