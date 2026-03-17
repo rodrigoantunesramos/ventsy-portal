@@ -2948,9 +2948,17 @@ function renderCupons() {
           🔢 ${c.usos_atual||0}/${c.limite||'∞'} usos
         </div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
-        <span class="badge ${expirado?'badge-red':'badge-green'}">${expirado?'Expirado':'Ativo'}</span>
-        <button class="btn btn-danger btn-sm" onclick="deletarCupom('${c.id}')">🗑️ Excluir</button>
+      <span class="badge ${expirado ? 'badge-red' : c.ativo ? 'badge-green' : 'badge-yellow'}">${expirado ? 'Expirado' : c.ativo ? 'Ativo' : 'Inativo'}</span>
+<button class="btn btn-sm" style="background:${c.ativo?'var(--yellow-dim)':'var(--green-dim)'};" onclick="toggleCupom('${c.id}', ${c.ativo})">${c.ativo ? '⏸ Pausar' : '▶ Ativar'}</button>
+<button class="btn btn-danger btn-sm" onclick="deletarCupom('${c.id}')">🗑️ Excluir</button>
+
+async function toggleCupom(id, ativoAtual) {
+  const { error } = await sb.from('cupons').update({ ativo: !ativoAtual }).eq('id', id);
+  if (error) { toast('Erro: ' + error.message, 'error'); return; }
+  toast(ativoAtual ? '⏸ Cupom pausado' : '▶ Cupom ativado', 'info');
+  await loadCupons();
+  renderCupons();
+}
       </div>
     </div>`;
   }).join('');
@@ -2967,7 +2975,7 @@ async function criarCupom() {
   if (!codigo || !valor) { toast('Preencha código e valor do desconto', 'error'); return; }
 
   const { error } = await sb.from('cupons').insert({
-    codigo, valor, tipo, plano, limite, validade, descricao, usos_atual:0, criado_em: new Date().toISOString()
+    codigo, valor, tipo, plano, limite, validade, descricao, usos_atual:0, ativo:true, criado_em: new Date().toISOString()
   });
   if (error) {
     if (error.code === '42P01') toast('Tabela "cupons" não existe. Crie-a no Supabase SQL Editor primeiro.', 'error');
