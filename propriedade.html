@@ -991,8 +991,18 @@ async function init() {
         }
 
         // Busca a propriedade
-        const { data: prop } = await sb.from('propriedades').select('*').eq('id', propId).single();
-        if (!prop) { carregarDemostracao(); return; }
+        const { data: prop, error: errProp } = await sb.from('propriedades').select('*').eq('id', propId).maybeSingle();
+
+        if (errProp) {
+            console.error('❌ Erro ao buscar propriedade id=' + propId + ':', errProp.message, errProp);
+            carregarDemostracao();
+            return;
+        }
+        if (!prop) {
+            console.warn('⚠️ Propriedade não encontrada ou não publicada. id=' + propId);
+            carregarDemostracao();
+            return;
+        }
         PROP = prop;
 
         // Busca o plano do proprietário
