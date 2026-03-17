@@ -955,12 +955,26 @@ async function submeterCadastro() {
             throw new Error('Este e-mail já está cadastrado. Tente fazer login.');
         }
 
-        // Supabase retorna sucesso mas com identities[] vazio quando e-mail já existe
-        // (comportamento quando "Confirm email" está desativado no projeto)
-        const userId = authData.user?.id;
-        const jaExistia = authData.user?.identities?.length === 0;
-        if (jaExistia || !userId) {
-            throw new Error('Este e-mail já está cadastrado. Tente fazer login.');
+        let userId = authData.user?.id;
+
+        // Supabase retorna sucesso mas identities[] vazio = e-mail existe no Auth
+        // sem perfil em usuarios (zumbi de cadastro anterior com falha).
+        // Solução: limpa o zumbi e tenta o signUp de novo — desta vez funciona.
+        if (authData.user?.identities?.length === 0 && userId) {
+            try { await sb.rpc('limpar_zumbi_auth', { p_user_id: userId }); } catch(_){}
+            // Segunda tentativa após limpeza
+            const { data: authData2, error: authError2 } = await sb.auth.signUp({
+                email, password: senha, options: { data: { nome, usuario } }
+            });
+            if (authError2 || !authData2?.user?.id || authData2.user?.identities?.length === 0) {
+                // Se ainda falhar, é um cadastro real — manda para login
+                throw new Error('Este e-mail já está cadastrado. Tente fazer login.');
+            }
+            userId = authData2.user.id;
+        }
+
+        if (!userId) {
+            throw new Error('Erro ao obter ID do usuário. Tente novamente.');
         }
 
         // 2. Salvar perfil na tabela usuarios
