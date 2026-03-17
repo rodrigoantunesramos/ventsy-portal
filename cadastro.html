@@ -905,6 +905,32 @@ async function submeterCadastro() {
         return;
     }
 
+    // ── Verifica e-mail e usuário no banco (garante checagem mesmo sem blur) ──
+    btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> Verificando disponibilidade...';
+
+    const emailVal   = document.getElementById('email').value.trim();
+    const usuarioVal = document.getElementById('usuario').value.trim();
+
+    // Checa e-mail
+    const { data: emailExiste, error: emailErr } = await sb.rpc('verificar_email', { p_email: emailVal });
+    if (!emailErr && emailExiste === true) {
+        setStatus('email', false, 'Este e-mail já está cadastrado. Tente fazer login.');
+        destacarCampo('email');
+        mostrarAlerta('erro', 'Este e-mail já possui uma conta. Tente fazer login.');
+        liberarBtn();
+        return;
+    }
+
+    // Checa usuário
+    const { data: usuarioExiste, error: usuarioErr } = await sb.rpc('verificar_usuario', { p_usuario: usuarioVal });
+    if (!usuarioErr && usuarioExiste === true) {
+        setStatus('usuario', false, 'Este nome de usuário já está em uso. Escolha outro.');
+        destacarCampo('usuario');
+        mostrarAlerta('erro', 'Este nome de usuário já está em uso. Escolha outro.');
+        liberarBtn();
+        return;
+    }
+
     // ── Valida código de indicação ANTES de criar a conta ──
     const refCodigo = (document.getElementById('ref-codigo')?.value || '').trim();
     if (refCodigo) {
@@ -952,7 +978,17 @@ async function submeterCadastro() {
         // Erro explícito do Auth
         if (authError) {
             try { await sb.rpc('registrar_erro_cadastro', { p_email: email, p_status: 'erro_auth', p_erro_msg: authError.message }); } catch(_){}
-            throw new Error('Erro ao criar conta. Tente novamente.');
+            // Traduz erros conhecidos do Supabase Auth
+            if (authError.message.toLowerCase().includes('already registered') || authError.message.toLowerCase().includes('user already exists')) {
+                throw new Error('Este e-mail já possui uma conta. Tente fazer login.');
+            }
+            if (authError.message.toLowerCase().includes('password') || authError.message.toLowerCase().includes('senha')) {
+                throw new Error('A senha não atende aos requisitos mínimos. Use ao menos 8 caracteres.');
+            }
+            if (authError.message.toLowerCase().includes('rate limit') || authError.message.toLowerCase().includes('too many')) {
+                throw new Error('Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.');
+            }
+            throw new Error('Erro ao criar conta. Tente novamente. (' + authError.message + ')');
         }
 
         let userId = authData.user?.id;
