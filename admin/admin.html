@@ -2289,29 +2289,30 @@ async function saveAss() {
 // ══════════════════════════════════════════════
 // ─── EDITOR DE PLANOS ───
 // ══════════════════════════════════════════════
-function carregarPlanos() {
+async function carregarPlanos() {
   const p = getPlanPrices();
   const el = (id) => document.getElementById(id);
   if (el('plano-basico-preco')) el('plano-basico-preco').value = p.basico;
   if (el('plano-pro-preco'))    el('plano-pro-preco').value    = p.pro;
   if (el('plano-ultra-preco'))  el('plano-ultra-preco').value  = p.ultra;
 
-  // Carrega benefícios e status do localStorage se disponível
+  // Carrega benefícios e status do Supabase
   try {
-    const saved = localStorage.getItem('ventsy_planos_config');
-    if (saved) {
-      const cfg = JSON.parse(saved);
-      ['basico','pro','ultra'].forEach(nome => {
-        const itemsEl  = el(`plano-${nome}-items`);
-        const statusEl = el(`plano-${nome}-status`);
-        if (itemsEl  && cfg[nome]?.items)  itemsEl.value  = cfg[nome].items.join('\n');
-        if (statusEl && cfg[nome]?.status) statusEl.value = cfg[nome].status;
+    const { data, error } = await sb.from('planos_config').select('*');
+    if (!error && data) {
+      data.forEach(row => {
+        const itemsEl  = el(`plano-${row.id}-items`);
+        const statusEl = el(`plano-${row.id}-status`);
+        const precoEl  = el(`plano-${row.id}-preco`);
+        if (precoEl)  precoEl.value  = row.preco;
+        if (itemsEl)  itemsEl.value  = (row.items || []).join('\n');
+        if (statusEl) statusEl.value = row.status || 'ativo';
       });
     }
-  } catch(e) {}
+  } catch(e) { console.warn('Erro ao carregar planos:', e); }
 }
 
-function salvarPlanos() {
+async function salvarPlanos() {
   const basico = Number(document.getElementById('plano-basico-preco').value) || 0;
   const pro    = Number(document.getElementById('plano-pro-preco').value) || 99;
   const ultra  = Number(document.getElementById('plano-ultra-preco').value) || 249;
@@ -2319,29 +2320,44 @@ function salvarPlanos() {
   savePlanPrices(prices);
   PLAN_PRICES = prices;
 
-  // Salva configuração completa (preço + benefícios + status) para planos.html / planos2.html
-  const planosConfig = {
-    basico: {
+  const btn = document.querySelector('[onclick="salvarPlanos()"]');
+  if (btn) { btn.textContent = '⏳ Salvando...'; btn.disabled = true; }
+
+  const registros = [
+    {
+      id: 'basico',
       preco: basico,
       items: (document.getElementById('plano-basico-items').value || '').split('\n').map(s => s.trim()).filter(Boolean),
-      status: document.getElementById('plano-basico-status').value || 'ativo'
+      status: document.getElementById('plano-basico-status').value || 'ativo',
+      atualizado_em: new Date().toISOString()
     },
-    pro: {
+    {
+      id: 'pro',
       preco: pro,
       items: (document.getElementById('plano-pro-items').value || '').split('\n').map(s => s.trim()).filter(Boolean),
-      status: document.getElementById('plano-pro-status').value || 'ativo'
+      status: document.getElementById('plano-pro-status').value || 'ativo',
+      atualizado_em: new Date().toISOString()
     },
-    ultra: {
+    {
+      id: 'ultra',
       preco: ultra,
       items: (document.getElementById('plano-ultra-items').value || '').split('\n').map(s => s.trim()).filter(Boolean),
-      status: document.getElementById('plano-ultra-status').value || 'ativo'
-    },
-    _atualizado: new Date().toISOString()
-  };
-  localStorage.setItem('ventsy_planos_config', JSON.stringify(planosConfig));
+      status: document.getElementById('plano-ultra-status').value || 'ativo',
+      atualizado_em: new Date().toISOString()
+    }
+  ];
+
+  const { error } = await sb.from('planos_config').upsert(registros, { onConflict: 'id' });
+
+  if (btn) { btn.textContent = '💾 Salvar configurações de planos'; btn.disabled = false; }
+
+  if (error) {
+    toast('Erro ao salvar planos: ' + error.message, 'error');
+    return;
+  }
 
   addLog('sistema', 'Planos atualizados', `Básico R$${basico} · Pro R$${pro} · Ultra R$${ultra}`);
-  toast('💾 Planos salvos! As páginas planos.html e planos2.html serão atualizadas automaticamente.', 'success');
+  toast('💾 Planos salvos! As páginas planos.html e planos2.html foram atualizadas.', 'success');
 }
 
 // ══════════════════════════════════════════════
