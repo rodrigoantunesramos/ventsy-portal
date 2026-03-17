@@ -595,34 +595,6 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
-/* ── DADOS DE EXEMPLO (substituir por query real quando tiver tabela de indicações) ── */
-const INDICACOES_MOCK = [
-    {
-        propriedade: 'Sítio Recanto Feliz',
-        data: '10/03/2026',
-        status: 'concluido',
-        statusLabel: 'Plano Comprado',
-        recompensa: 'ganho',
-        recompensaLabel: '+1 Mês Grátis',
-    },
-    {
-        propriedade: 'Espaço Boulevard',
-        data: '05/03/2026',
-        status: 'analise',
-        statusLabel: 'Em Teste (Trial)',
-        recompensa: 'espera',
-        recompensaLabel: 'Aguardando 1ª Compra',
-    },
-    {
-        propriedade: 'Chácara das Palmeiras',
-        data: '28/02/2026',
-        status: 'pendente',
-        statusLabel: 'Aguardando Cadastro',
-        recompensa: 'espera',
-        recompensaLabel: 'Pendente',
-    },
-];
-
 /* ── INIT ── */
 async function init() {
     const { data: { session } } = await sb.auth.getSession();
@@ -645,31 +617,51 @@ async function init() {
     document.getElementById('sidebar-handle').textContent  = usuario ? '@' + usuario : '';
 
     // Chip de plano
-    const { data: assinatura } = await sb.from('assinaturas').select('plano_ativo, status, fim_periodo').eq('usuario_id', user.id).single();
+    const { data: assinatura } = await sb.from('assinaturas')
+        .select('plano_ativo, status, fim_periodo')
+        .eq('usuario_id', user.id)
+        .single();
     const planosLabel = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
     document.getElementById('sidebar-plano-chip').textContent =
         planosLabel[assinatura?.plano_ativo] || '🏷️ Básico';
     if (assinatura?.fim_periodo) {
         const d = new Date(assinatura.fim_periodo);
-        document.getElementById('sidebar-validade').textContent = `Válido até ${d.toLocaleDateString('pt-BR')}`;
+        document.getElementById('sidebar-validade').textContent =
+            `Válido até ${d.toLocaleDateString('pt-BR')}`;
     }
 
     // Link de referência personalizado
     const handle = usuario || user.id.slice(0, 8);
     document.getElementById('link-ref').value = `ventsy.com/anunciar?ref=${handle}`;
 
-    // Renderiza tabela
-    renderizarIndicacoes(INDICACOES_MOCK);
+    // ── Busca indicações reais da view ──
+    const { data: indicacoes, error } = await sb
+        .from('v_indicacoes_dashboard')
+        .select('*')
+        .eq('indicador_id', user.id)
+        .order('data', { ascending: false });
+
+    if (error) console.error('Erro ao carregar indicações:', error.message);
+
+    const lista = (indicacoes || []).map(i => ({
+        propriedade:     i.propriedade,
+        data:            i.data,
+        status:          i.status,
+        statusLabel:     i.status_label,
+        recompensa:      i.recompensa,
+        recompensaLabel: i.recompensa_label,
+    }));
+
+    renderizarIndicacoes(lista);
 
     // Contadores
-    const total       = INDICACOES_MOCK.length;
-    // "Publicaram" = quem já saiu do status pendente (trial ou comprou)
-    const publicaram  = INDICACOES_MOCK.filter(i => i.status !== 'pendente').length;
-    // Crédito só na primeira compra (status concluido + recompensa ganho)
-    const creditos    = INDICACOES_MOCK.filter(i => i.recompensa === 'ganho').length;
+    const total      = lista.length;
+    const publicaram = lista.filter(i => i.status !== 'pendente').length;
+    const creditos   = lista.filter(i => i.recompensa === 'ganho').length;
     document.getElementById('total-indicados').textContent   = total;
     document.getElementById('total-cadastrados').textContent = publicaram;
-    document.getElementById('total-creditos').textContent    = creditos + (creditos === 1 ? ' Mês' : ' Meses');
+    document.getElementById('total-creditos').textContent    =
+        creditos + (creditos === 1 ? ' Mês' : ' Meses');
 
     // Exibe página
     document.getElementById('loading-screen').style.display = 'none';
