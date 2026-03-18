@@ -28,6 +28,8 @@ import { init as initLeads      } from '../modules/leads.js';
 import { init as initPlanos } from '../modules/planos.js';
 import { init as initRelatorio } from '../modules/relatorio.js';
 import { init as initIndique } from '../modules/indique.js';
+import { init as initConfiguracoes } from '../modules/configuracoes.js';
+
 
 // ── Registra inicializadores no router ────────────────
 registrarModulo('financeiro', initFinanceiro);
@@ -40,8 +42,7 @@ registrarModulo('leads', initLeads);
 registrarModulo('planos', initPlanos);
 registrarModulo('relatorio', initRelatorio);
 registrarModulo('indique', initIndique);
-
-
+registrarModulo('configuracoes', initConfiguracoes);
 
 
 // ── Expor globais para HTML inline ────────────────────
