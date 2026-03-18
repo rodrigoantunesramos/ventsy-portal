@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — VENTSY</title>
+
+    <!-- CDN deps -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- App (ES modules) -->
+    <script type="module" src="js/app.js"></script>
+</head>
+<body>
+
+<!-- ── LOADING ── -->
+<div id="loading-screen">
+    <div class="loading-logo"><em>VENTSY</em></div>
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- ── HEADER ── -->
+<header>
+    <div class="header-left">
+        <a href="index.html">
+            <img src="../logovents.png" alt="Logo VENTSY" class="logo">
+        </a>
+    </div>
+    <div class="header-right">
+        <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="avatar-container">
+            <button class="avatar-btn" id="avatar-btn" onclick="toggleAvatar()">
+                <span id="avatar-inicial">?</span>
+            </button>
+            <div class="avatar-dropdown" id="avatar-menu">
+                <div class="drop-header">
+                    <strong id="drop-nome">Carregando...</strong>
+                    <span id="drop-email"></span>
+                </div>
+                <a href="index.html">🏠 Dashboard</a>
+                <a href="minhapropriedade.html">🏡 Minha Propriedade</a>
+                <a href="configuracoes.html">⚙️ Configurações</a>
+                <a href="planos2.html">💳 Planos Ventsy</a>
+                <a href="../fale-conosco.html">❓ Ajuda</a>
+                <button class="drop-sair" onclick="sair()">🚪 Sair da conta</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ── OVERLAY SIDEBAR MOBILE ── -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ── LAYOUT PRINCIPAL ── -->
+<main class="dashboard-container" id="main-content" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="dash-sidebar">
+        <div class="perfil-resumo">
+            <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+            <h3 id="sidebar-nome">Carregando...</h3>
+            <span class="handle" id="sidebar-handle"></span>
+            <div class="plano-chip" id="sidebar-plano-chip">⭐ Carregando...</div>
+            <div class="plano-validade" id="sidebar-validade"></div>
+        </div>
+        <nav class="dash-menu">
+            <a data-rota="dashboard" onclick="navegar('dashboard')" class="active">🏠 Dashboard</a>
+            <span class="menu-section-label">Minha Propriedade</span>
+            <a href="minhapropriedade.html">🏡 Dados do Espaço</a>
+            <a href="fotos.html">📸 Fotos</a>
+            <span class="menu-section-label">Gestão</span>
+            <a href="leads.html">💬 Contatos / Leads</a>
+            <a href="calendario.html">📅 Disponibilidade</a>
+            <a href="relatorio.html">📊 Relatório</a>
+            <a data-rota="financeiro" onclick="navegar('financeiro')">💰 Financeiro</a>
+            <a data-rota="documentos" onclick="navegar('documentos')">📄 Documentos</a>
+            <a data-rota="equipe" onclick="navegar('equipe')">👥 Equipe & Folha</a>
+            <span class="menu-section-label">Conta</span>
+            <a href="indique.html">🎁 Programa de Indicação</a>
+            <a href="planos2.html">💳 Planos Ventsy</a>
+            <a href="configuracoes.html">⚙️ Configurações</a>
+        </nav>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <section class="dash-content">
+
+        <!-- ════════════════════════════════════
+             PÁGINA: DASHBOARD (original)
+        ════════════════════════════════════ -->
+        <div class="page-section ativa" id="pagina-dashboard">
+
+            <div class="boas-vindas">
+                <div class="bv-inner">
+                    <p class="bv-tag">Área do proprietário(a)</p>
+                    <h3>Bem-vindo(a), <em id="hero-nome">...</em>!</h3>
+                    <p>Aqui você acompanha o desempenho da sua propriedade e gerencia tudo na VENTSY.</p>
+                </div>
+                <div class="bv-acao">
+                    <a id="btn-ver-prop" href="minhapropriedade.html" class="btn-ver-prop" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span id="btn-ver-prop-txt">Ver minha propriedade</span>
+                    </a>
+                    <a href="../index.html" class="btn-outras-prop">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        Analisar outras propriedades
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid-metricas">
+                <div class="card-metrica">
+                    <span class="icon">👁</span>
+                    <div><p>Visualizações (30d)</p><h3 id="m-views" class="loading">—</h3></div>
+                </div>
+                <div class="card-metrica">
+                    <span class="icon">📱</span>
+                    <div><p>Cliques WhatsApp (30d)</p><h3 id="m-whatsapp" class="loading">—</h3></div>
+                </div>
+                <div class="card-metrica">
+                    <span class="icon">💬</span>
+                    <div><p>Cliques Formulário (30d)</p><h3 id="m-formulario" class="loading">—</h3></div>
+                </div>
+                <div class="card-metrica">
+                    <span class="icon">⭐</span>
+                    <div><p>Avaliação Média</p><h3 id="m-nota" class="loading">—</h3></div>
+                </div>
+            </div>
+
+            <div class="container-duas-colunas">
+                <div class="secao-dash">
+                    <div class="analytics-header">
+                        <h3>Desempenho — últimos 30 dias</h3>
+                        <div class="analytics-tabs">
+                            <button class="tab-btn ativo" data-tipo="view"       onclick="mudarTab(this)">👁 Visualizações</button>
+                            <button class="tab-btn"        data-tipo="whatsapp"   onclick="mudarTab(this)">📱 WhatsApp</button>
+                            <button class="tab-btn"        data-tipo="formulario" onclick="mudarTab(this)">💬 Formulário</button>
+                            <button class="tab-btn"        data-tipo="nota"       onclick="mudarTab(this)">⭐ Avaliações</button>
+                        </div>
+                    </div>
+                    <div style="position:relative; height:300px; width:100%">
+                        <canvas id="graficoAnalytics"></canvas>
+                    </div>
+                    <p class="grafico-vazio" id="grafico-vazio">Ainda não há dados para este período.</p>
+                </div>
+            </div>
+
+            <p class="passos-titulo">📋 Complete seu perfil <span class="passos-progresso" id="passos-progresso">0 de 6 concluídos</span></p>
+            <div class="passo-lista">
+
+                <div class="passo-item completo" id="passo-1">
+                    <div class="passo-num">✓</div>
+                    <div class="passo-info">
+                        <h4>Conta criada com sucesso</h4>
+                        <p>Seu cadastro foi concluído. Bem-vindo à VENTSY!</p>
+                    </div>
+                    <span class="passo-acao verde">✓ Concluído</span>
+                </div>
+
+                <div class="passo-item" id="passo-2">
+                    <div class="passo-num">2</div>
+                    <div class="passo-info">
+                        <h4>Adicione as fotos da sua propriedade</h4>
+                        <p>Obrigatório: 5 fotos em destaque na galeria principal.</p>
+                    </div>
+                    <a href="fotos.html" class="passo-acao vermelho">Adicionar fotos</a>
+                </div>
+
+                <div class="passo-item" id="passo-3">
+                    <div class="passo-num">3</div>
+                    <div class="passo-info">
+                        <h4>Descreva seu espaço</h4>
+                        <p>Preencha a aba "Sobre" com uma descrição do seu espaço.</p>
+                    </div>
+                    <a href="minhapropriedade.html#sobre" class="passo-acao vermelho">Preencher descrição</a>
+                </div>
+
+                <div class="passo-item" id="passo-4">
+                    <div class="passo-num">4</div>
+                    <div class="passo-info">
+                        <h4>Informe o endereço completo</h4>
+                        <p>Obrigatório: CEP, rua, número, bairro, cidade e estado.</p>
+                    </div>
+                    <a href="minhapropriedade.html#endereco" class="passo-acao vermelho">Adicionar endereço</a>
+                </div>
+
+                <div class="passo-item" id="passo-5">
+                    <div class="passo-num">5</div>
+                    <div class="passo-info">
+                        <h4>Adicione as informações de contato</h4>
+                        <p>Obrigatório: nome, tipo, capacidade, WhatsApp, e-mail, responsável e foto.</p>
+                    </div>
+                    <a href="minhapropriedade.html#contato" class="passo-acao vermelho">Preencher contato</a>
+                </div>
+
+                <div class="passo-item" id="passo-6">
+                    <div class="passo-num">6</div>
+                    <div class="passo-info">
+                        <h4>Adicione os valores dos eventos</h4>
+                        <p>Obrigatório: pelo menos o valor por hora ou o valor de diária.</p>
+                    </div>
+                    <a href="minhapropriedade.html#valores" class="passo-acao vermelho">Adicionar valores</a>
+                </div>
+
+                <div class="passo-item" id="passo-7">
+                    <div class="passo-num">7</div>
+                    <div class="passo-info">
+                        <h4>Selecione os tipos de eventos</h4>
+                        <p>Obrigatório: pelo menos 1 tipo de evento que a propriedade oferece.</p>
+                    </div>
+                    <a href="minhapropriedade.html#eventos" class="passo-acao vermelho">Selecionar eventos</a>
+                </div>
+
+            </div>
+
+            <div class="card-solicitar">
+                <p class="tag">Último passo</p>
+                <h3>Pronto para ir ao ar? 🚀</h3>
+                <p>
+                    Após preencher todos os dados acima, clique no botão abaixo para solicitar
+                    a publicação da sua propriedade na plataforma. Nossa equipe fará a revisão
+                    em até <strong>48 horas úteis</strong> e você receberá um e-mail com o resultado.
+                </p>
+                <div class="solicitar-aviso" id="solicitar-aviso">
+                    ⚠️ Complete todos os <strong>4 passos</strong> acima para liberar o botão.
+                </div>
+                <button class="btn-solicitar" id="btn-solicitar" onclick="solicitarLiberacao()" disabled>
+                    🚀 Solicitar liberação de propriedade na plataforma VENTSY
+                </button>
+                <p class="solicitar-hint" id="solicitar-hint">
+                    Após a solicitação, nossa equipe entrará em contato para confirmar os dados.
+                </p>
+            </div>
+
+        </div><!-- /pagina-dashboard -->
+
+
+        <!-- ════════════════════════════════════
+             PÁGINA: FINANCEIRO
+        ════════════════════════════════════ -->
+        <div class="page-section" id="pagina-financeiro">
+
+            <!-- Header fixo da seção -->
+            <div class="fin-header">
+                <div>
+                    <h2>💰 Financeiro</h2>
+                    <div class="nome-propriedade" id="fin-data-atual"></div>
+                </div>
+                <div class="fin-header-right">
+                    <select class="fin-select" onchange="finUpdatePeriod(this.value)">
+                        <option value="mes">Este Mês</option>
+                        <option value="trimestre">Trimestre</option>
+                        <option value="ano">Este Ano</option>
+                    </select>
+                    <button class="btn-fin btn-fin-ghost" onclick="finOpenModal('despesa')">+ Despesa</button>
+                    <button class="btn-fin btn-fin-primary" onclick="finOpenModal('receita')">+ Receita</button>
+                </div>
+            </div>
+
+            <!-- Sub-abas internas -->
+            <div class="fin-tabs">
+                <button class="fin-tab-btn ativo" onclick="finMudarAba('painel', this)">📊 Painel</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('receitas', this)">💚 Receitas</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('despesas', this)">🔴 Despesas</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('eventos', this)">📅 Eventos</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('relatorios', this)">📋 Relatórios</button>
+            </div>
+
+            <!-- ── ABA: PAINEL ── -->
+            <div class="fin-tab-content ativo" id="fin-painel">
+
+                <!-- KPIs -->
+                <div class="fin-kpi-grid">
+                    <div class="fin-kpi-card verde" style="animation: fadeUp .3s ease both">
+                        <div class="fin-kpi-label">Receita Total</div>
+                        <div class="fin-kpi-value verde" id="fin-kpi-receita">R$ 48.700</div>
+                        <div class="fin-delta up">↑ 12% vs mês anterior</div>
+                    </div>
+                    <div class="fin-kpi-card vermelho" style="animation: fadeUp .35s ease both">
+                        <div class="fin-kpi-label">Despesas Totais</div>
+                        <div class="fin-kpi-value vermelho" id="fin-kpi-despesa">R$ 19.350</div>
+                        <div class="fin-delta down">↑ 4% vs mês anterior</div>
+                    </div>
+                    <div class="fin-kpi-card gold" style="animation: fadeUp .4s ease both">
+                        <div class="fin-kpi-label">Lucro Líquido</div>
+                        <div class="fin-kpi-value gold" id="fin-kpi-lucro">R$ 29.350</div>
+                        <div class="fin-delta up">↑ 18% vs mês anterior</div>
+                    </div>
+                    <div class="fin-kpi-card azul" style="animation: fadeUp .45s ease both">
+                        <div class="fin-kpi-label">Eventos no Mês</div>
+                        <div class="fin-kpi-value azul" id="fin-kpi-eventos">14</div>
+                        <div class="fin-delta up">↑ 2 vs mês anterior</div>
+                    </div>
+                </div>
+
+                <!-- Grid meio -->
+                <div class="fin-mid-grid">
+
+                    <!-- Gráfico de barras -->
+                    <div class="fin-section" style="animation: fadeUp .4s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Receitas × Despesas</div>
+                                <div class="fin-section-sub">Últimos 6 meses</div>
+                            </div>
+                            <span class="fin-badge">2025</span>
+                        </div>
+                        <canvas id="finBarChart" height="160"></canvas>
+                    </div>
+
+                    <!-- Donut -->
+                    <div class="fin-section" style="animation: fadeUp .45s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Fontes de Receita</div>
+                                <div class="fin-section-sub">Distribuição por categoria</div>
+                            </div>
+                        </div>
+                        <div class="fin-donut-wrap">
+                            <canvas id="finDonutChart" width="140" height="140"></canvas>
+                            <div class="fin-donut-legend" id="finDonutLegend"></div>
+                        </div>
+                    </div>
+
+                    <!-- Metas -->
+                    <div class="fin-section" style="animation: fadeUp .5s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Metas Mensais</div>
+                                <div class="fin-section-sub">Progresso até agora</div>
+                            </div>
+                            <button class="btn-fin btn-fin-ghost" style="font-size:0.78rem;padding:6px 14px" onclick="finOpenModal('meta')">Editar</button>
+                        </div>
+                        <div class="fin-goal-list" id="finGoalList"></div>
+                    </div>
+
+                    <!-- Próximos Eventos -->
+                    <div class="fin-section" style="animation: fadeUp .55s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Próximos Eventos</div>
+                                <div class="fin-section-sub">Previsão de entrada</div>
+                            </div>
+                        </div>
+                        <div class="fin-cf-row">
+                            <div class="fin-cf-box">
+                                <div class="fin-cf-label">Confirmados</div>
+                                <div class="fin-cf-val" style="color:#0ca678">R$ 22.400</div>
+                            </div>
+                            <div class="fin-cf-box">
+                                <div class="fin-cf-label">Em Negociação</div>
+                                <div class="fin-cf-val" style="color:#f59e0b">R$ 8.900</div>
+                            </div>
+                            <div class="fin-cf-box">
+                                <div class="fin-cf-label">Pendente Pag.</div>
+                                <div class="fin-cf-val" style="color:#ff385c">R$ 5.200</div>
+                            </div>
+                        </div>
+                        <div class="fin-event-list" id="finEventList"></div>
+                    </div>
+
+                    <!-- Lançamentos -->
+                    <div class="fin-section fin-wide" style="animation: fadeUp .6s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Lançamentos Recentes</div>
+                                <div class="fin-section-sub">Todas as movimentações do mês</div>
+                            </div>
+                            <div style="display:flex;gap:8px">
+                                <select class="fin-select" style="font-size:0.78rem;padding:6px 12px" onchange="finFilterTable(this.value)">
+                                    <option value="todos">Todos</option>
+                                    <option value="receita">Receitas</option>
+                                    <option value="despesa">Despesas</option>
+                                    <option value="pendente">Pendentes</option>
+                                </select>
+                                <button class="btn-fin btn-fin-ghost" style="font-size:0.78rem;padding:6px 14px">Exportar</button>
+                            </div>
+                        </div>
+                        <div class="fin-table-wrap">
+                            <table class="fin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Descrição</th>
+                                        <th>Categoria</th>
+                                        <th>Tipo de Evento</th>
+                                        <th>Status</th>
+                                        <th style="text-align:right">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="finTransTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div><!-- /fin-painel -->
+
+            <!-- ── ABA: RECEITAS ── -->
+            <div class="fin-tab-content" id="fin-receitas">
+                <div class="fin-section">
+                    <div class="fin-section-header">
+                        <div>
+                            <div class="fin-section-title">💚 Receitas do Período</div>
+                            <div class="fin-section-sub">Todas as entradas registradas</div>
+                        </div>
+                        <button class="btn-fin btn-fin-primary" onclick="finOpenModal('receita')">+ Nova Receita</button>
+                    </div>
+                    <div class="fin-table-wrap">
+                        <table class="fin-table">
+                            <thead>
+                                <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Evento</th><th>Status</th><th style="text-align:right">Valor</th></tr>
+                            </thead>
+                            <tbody id="finReceitasTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ABA: DESPESAS ── -->
+            <div class="fin-tab-content" id="fin-despesas">
+                <div class="fin-section">
+                    <div class="fin-section-header">
+                        <div>
+                            <div class="fin-section-title">🔴 Despesas do Período</div>
+                            <div class="fin-section-sub">Todas as saídas registradas</div>
+                        </div>
+                        <button class="btn-fin btn-fin-ghost" onclick="finOpenModal('despesa')">+ Nova Despesa</button>
+                    </div>
+                    <div class="fin-table-wrap">
+                        <table class="fin-table">
+                            <thead>
+                                <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Evento</th><th>Status</th><th style="text-align:right">Valor</th></tr>
+                            </thead>
+                            <tbody id="finDespesasTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ABA: EVENTOS ── -->
+            <div class="fin-tab-content" id="fin-eventos">
+                <div class="fin-section">
+                    <div class="fin-section-header">
+                        <div>
+                            <div class="fin-section-title">📅 Eventos com Movimentação</div>
+                            <div class="fin-section-sub">Receitas vinculadas a eventos</div>
+                        </div>
+                    </div>
+                    <div class="fin-event-list" id="finEventListFull" style="max-height:500px;overflow-y:auto;"></div>
+                </div>
+            </div>
+
+            <!-- ── ABA: RELATÓRIOS ── -->
+            <div class="fin-tab-content" id="fin-relatorios">
+                <div class="fin-mid-grid">
+                    <div class="fin-section">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">📋 Resumo do Mês</div>
+                                <div class="fin-section-sub">Visão consolidada</div>
+                            </div>
+                        </div>
+                        <div class="fin-cf-row" style="flex-direction:column;gap:14px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:#f7f7f7;border-radius:10px;border:1px solid #eee;">
+                                <span style="font-size:0.88rem;color:#444;font-weight:600;">Total Receitas</span>
+                                <span style="font-weight:700;color:#0ca678;font-size:1rem;" id="rel-receita">R$ 48.700</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:#f7f7f7;border-radius:10px;border:1px solid #eee;">
+                                <span style="font-size:0.88rem;color:#444;font-weight:600;">Total Despesas</span>
+                                <span style="font-weight:700;color:#ff385c;font-size:1rem;" id="rel-despesa">R$ 19.350</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:rgba(255,56,92,0.04);border-radius:10px;border:1px solid rgba(255,56,92,0.15);">
+                                <span style="font-size:0.88rem;color:#444;font-weight:700;">Lucro Líquido</span>
+                                <span style="font-weight:700;color:#f59e0b;font-size:1.1rem;" id="rel-lucro">R$ 29.350</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fin-section">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">🎯 Metas vs Realizado</div>
+                                <div class="fin-section-sub">Performance do mês</div>
+                            </div>
+                        </div>
+                        <div class="fin-goal-list" id="finGoalListRel"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /pagina-financeiro -->
+
+
+        <!-- ════════════════════════════════════
+             PÁGINA: DOCUMENTOS
+        ════════════════════════════════════ -->
+        <div class="page-section" id="pagina-documentos">
+
+            <div class="docs-header">
+                <div>
+                    <h2>📄 Documentos</h2>
+                    <div class="nome-propriedade">Licenças, alvarás e documentos com controle de validade</div>
+                </div>
+                <div class="docs-header-right">
+                    <button class="btn-fin btn-fin-ghost" onclick="docsExport()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Exportar Lista
+                    </button>
+                    <button class="btn-fin btn-fin-primary" onclick="docsOpenAddModal()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Novo Documento
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alert banner -->
+            <div class="docs-alert" id="docsAlertBanner" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div class="docs-alert-text">
+                    <strong id="docsAlertTitle">Atenção</strong>
+                    <span id="docsAlertDesc">Verifique os documentos abaixo.</span>
+                </div>
+                <span class="docs-alert-tag" id="docsAlertCount">0 itens</span>
+            </div>
+
+            <!-- Summary -->
+            <div class="docs-summary">
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#f0fdf4">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#16a34a" id="docsCntOk">0</div><div class="docs-sum-label">Em Dia</div></div>
+                </div>
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#fffbeb">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#d97706" id="docsCntWarn">0</div><div class="docs-sum-label">A Vencer (90d)</div></div>
+                </div>
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#fef2f2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#dc2626" id="docsCntExp">0</div><div class="docs-sum-label">Vencidos</div></div>
+                </div>
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#eff6ff">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#1a73e8" id="docsCntTotal">0</div><div class="docs-sum-label">Total de Docs</div></div>
+                </div>
+            </div>
+
+            <!-- Filter bar -->
+            <div class="docs-filter-bar">
+                <button class="docs-filter-pill active" onclick="docsSetFilter('todos',this)">Todos</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('juridico',this)">Jurídico</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('licencas',this)">Licenças</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('fiscal',this)">Fiscal</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('seguros',this)">Seguros</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('alvara',this)">Alvarás</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('outros',this)">Outros</button>
+                <div class="docs-search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" placeholder="Buscar documento..." oninput="docsSearch(this.value)">
+                </div>
+            </div>
+
+            <!-- Docs container -->
+            <div id="docsContainer"></div>
+
+        </div><!-- /pagina-documentos -->
+
+
+        <!-- ════════════════════════════════════
+             PÁGINA: EQUIPE & FOLHA
+        ════════════════════════════════════ -->
+        <div class="page-section" id="pagina-equipe">
+
+            <div class="eq-header">
+                <div>
+                    <h2>👥 Equipe & Folha</h2>
+                    <div class="nome-propriedade">Gestão de funcionários, contracheques e encargos</div>
+                </div>
+                <div class="eq-header-right">
+                    <button class="btn-fin btn-fin-ghost" onclick="eqSwitchTab('impostos')">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M20 12h-2M17.66 17.66l-1.41-1.41M12 20v-2M6.34 17.66l-1.41-1.41M4 12H2M6.34 6.34L4.93 4.93"/></svg>
+                        Configurar Encargos
+                    </button>
+                    <button class="btn-fin btn-fin-primary" onclick="eqOpenEmpModal()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Novo Funcionário
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI strip -->
+            <div class="eq-kpi-grid">
+                <div class="eq-kpi t"><div class="eq-kpi-label">Total Funcionários</div><div class="eq-kpi-val" id="eq-kpi-total">0</div><div class="eq-kpi-sub" id="eq-kpi-ativos-sub">— ativos</div></div>
+                <div class="eq-kpi a"><div class="eq-kpi-label">Folha Bruta / Mês</div><div class="eq-kpi-val" id="eq-kpi-bruta">R$ 0</div><div class="eq-kpi-sub">Soma dos salários base</div></div>
+                <div class="eq-kpi r"><div class="eq-kpi-label">Encargos Totais</div><div class="eq-kpi-val" id="eq-kpi-encargos">R$ 0</div><div class="eq-kpi-sub">Custo patronal estimado</div></div>
+                <div class="eq-kpi v"><div class="eq-kpi-label">Custo Total / Mês</div><div class="eq-kpi-val" id="eq-kpi-custo">R$ 0</div><div class="eq-kpi-sub">Bruto + encargos</div></div>
+            </div>
+
+            <!-- Sub-abas -->
+            <div class="eq-tabs">
+                <button class="eq-tab active" id="eq-tab-equipe"   onclick="eqSwitchTab('equipe')">Equipe</button>
+                <button class="eq-tab"         id="eq-tab-folha"   onclick="eqSwitchTab('folha')">Folha de Pagamento</button>
+                <button class="eq-tab"         id="eq-tab-impostos" onclick="eqSwitchTab('impostos')">Encargos & Impostos</button>
+            </div>
+
+            <!-- ── ABA: EQUIPE ── -->
+            <div id="eq-panel-equipe" class="eq-panel active">
+                <div class="eq-filter-bar">
+                    <button class="eq-filter-pill active" onclick="eqFilterEmp('todos',this)">Todos</button>
+                    <button class="eq-filter-pill" onclick="eqFilterEmp('ativo',this)">Ativos</button>
+                    <button class="eq-filter-pill" onclick="eqFilterEmp('ferias',this)">Férias</button>
+                    <button class="eq-filter-pill" onclick="eqFilterEmp('horista',this)">Horista</button>
+                    <div class="eq-search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" placeholder="Buscar funcionário..." oninput="eqSearchEmp(this.value)">
+                    </div>
+                </div>
+                <div class="eq-emp-grid" id="eqEmpGrid"></div>
+            </div>
+
+            <!-- ── ABA: FOLHA ── -->
+            <div id="eq-panel-folha" class="eq-panel">
+                <div class="eq-payroll-header">
+                    <div class="eq-month-nav">
+                        <button onclick="eqChangeMonth(-1)">‹</button>
+                        <div class="eq-month-label" id="eqMonthLabel">—</div>
+                        <button onclick="eqChangeMonth(1)">›</button>
+                    </div>
+                    <div style="display:flex;gap:10px">
+                        <button class="btn-fin btn-fin-ghost" onclick="eqExportPayroll()">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Exportar CSV
+                        </button>
+                        <button class="btn-fin btn-fin-primary" style="background:#f59e0b;box-shadow:0 2px 10px rgba(245,158,11,.25)">Fechar Folha</button>
+                    </div>
+                </div>
+                <div class="eq-payroll-totals">
+                    <div class="eq-ptotal"><div class="eq-ptotal-label">Total Bruto</div><div class="eq-ptotal-val" style="color:#f59e0b" id="eq-pt-bruto">R$ 0</div></div>
+                    <div class="eq-ptotal"><div class="eq-ptotal-label">Total Descontos</div><div class="eq-ptotal-val" style="color:#ff385c" id="eq-pt-descontos">R$ 0</div></div>
+                    <div class="eq-ptotal"><div class="eq-ptotal-label">Total Líquido</div><div class="eq-ptotal-val" style="color:#0ca678" id="eq-pt-liquido">R$ 0</div></div>
+                </div>
+                <div class="eq-table-wrap">
+                    <table class="eq-table">
+                        <thead><tr>
+                            <th>Funcionário</th><th>Cargo</th><th>Salário Base</th>
+                            <th>Adicionais</th><th>Descontos</th><th>Líquido</th><th>Status</th><th></th>
+                        </tr></thead>
+                        <tbody id="eqPayrollBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ── ABA: IMPOSTOS ── -->
+            <div id="eq-panel-impostos" class="eq-panel">
+                <div style="max-width:900px">
+                    <div class="eq-tax-notice">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                        <div>
+                            <strong>⚠️ Peça ajuda ao seu contador para preencher esta seção.</strong>
+                            <span>Os percentuais variam conforme regime tributário, categoria e legislação vigente.</span>
+                        </div>
+                    </div>
+                    <div class="eq-tax-grid">
+                        <!-- Encargos Patronais -->
+                        <div class="eq-tax-section">
+                            <div class="eq-tax-section-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="2"/></svg> Encargos Patronais</div>
+                            <div class="eq-tax-section-desc">Pago pela empresa sobre a folha de pagamento</div>
+                            <div class="eq-tax-field"><label><span>INSS Patronal</span><em id="eq-v-inss-pat">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-inss-pat" value="20" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>FGTS</span><em id="eq-v-fgts">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-fgts" value="8" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>RAT / SAT</span><em id="eq-v-rat">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-rat" value="2" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Sistema S</span><em id="eq-v-sis-s">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-sis-s" value="3.1" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Outros patronais</span><em id="eq-v-outros-pat">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-outros-pat" value="0" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-total-row"><span class="eq-tax-total-label">Total patronal</span><span class="eq-tax-total-val" id="eq-total-patronal">0%</span></div>
+                        </div>
+                        <!-- Descontos do funcionário -->
+                        <div class="eq-tax-section">
+                            <div class="eq-tax-section-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff385c" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Descontos do Funcionário</div>
+                            <div class="eq-tax-section-desc">Descontados do salário bruto do trabalhador</div>
+                            <div class="eq-tax-field"><label><span>INSS Empregado</span><em id="eq-v-inss-emp">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-inss-emp" value="9" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>IRRF</span><em id="eq-v-irrf">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-irrf" value="7.5" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Vale Transporte (desc.)</span><em id="eq-v-vt">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-vt" value="6" min="0" max="6" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Plano Saúde (R$ fixo)</span><em id="eq-v-ps">R$ 0</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-ps" value="0" min="0" step="10" oninput="eqUpdateTax()"><span class="eq-tax-suffix">R$</span></div></div>
+                            <div class="eq-tax-field"><label><span>Outros descontos</span><em id="eq-v-outros-desc">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-outros-desc" value="0" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-total-row"><span class="eq-tax-total-label">Total descontos</span><span class="eq-tax-total-val" id="eq-total-desconto">0%</span></div>
+                        </div>
+                        <!-- Benefícios -->
+                        <div class="eq-tax-section">
+                            <div class="eq-tax-section-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0ca678" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> Benefícios (R$/mês)</div>
+                            <div class="eq-tax-section-desc">Valores fixos pagos pela empresa por funcionário</div>
+                            <div class="eq-tax-field"><label><span>Vale Refeição/Alimentação</span><em id="eq-v-vr">R$ 0</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-vr" value="550" min="0" step="10" oninput="eqUpdateTax()"><span class="eq-tax-suffix">R$</span></div></div>
+                            <div class="eq-tax-field"><label><span>Vale Transporte (empresa)</span><em id="eq-v-vt-emp">R$ 0</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-vt-emp" value="220" min="0" step="10" oninput="eqUpdateTax()"><span class="eq-tax-suffix">R$</span></div></div>
+                            <div class="eq-tax-field"><label><span>Plano Saúde (empresa)</span><em id="eq-v-ps-emp">R$ 0</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-ps-emp" value="0" min="0" step="50" oninput="eqUpdateTax()"><span class="eq-tax-suffix">R$</span></div></div>
+                            <div class="eq-tax-field"><label><span>Outros benefícios</span><em id="eq-v-outros-ben">R$ 0</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-outros-ben" value="0" min="0" step="10" oninput="eqUpdateTax()"><span class="eq-tax-suffix">R$</span></div></div>
+                            <div class="eq-tax-total-row"><span class="eq-tax-total-label">Total benefícios / func.</span><span class="eq-tax-total-val" id="eq-total-beneficios">R$ 0</span></div>
+                        </div>
+                        <!-- Provisões -->
+                        <div class="eq-tax-section">
+                            <div class="eq-tax-section-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Provisões</div>
+                            <div class="eq-tax-section-desc">Reservas mensais para direitos trabalhistas futuros</div>
+                            <div class="eq-tax-field"><label><span>13º Salário (1/12)</span><em id="eq-v-dec">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-dec" value="8.33" min="0" max="100" step="0.01" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Férias + 1/3</span><em id="eq-v-fer">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-fer" value="11.11" min="0" max="100" step="0.01" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Multa FGTS rescisão</span><em id="eq-v-multa">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-multa" value="3.2" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-field"><label><span>Outras provisões</span><em id="eq-v-outros-prov">0%</em></label><div class="eq-tax-input-row"><input class="eq-tax-input" type="number" id="eq-t-outros-prov" value="0" min="0" max="100" step="0.1" oninput="eqUpdateTax()"><span class="eq-tax-suffix">%</span></div></div>
+                            <div class="eq-tax-total-row"><span class="eq-tax-total-label">Total provisões</span><span class="eq-tax-total-val" id="eq-total-provisoes">0%</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Simulador -->
+                    <div class="eq-sim-panel">
+                        <div class="eq-sim-title">🧮 Simulador de Custo Real</div>
+                        <div class="eq-sim-desc">Digite o salário base e veja o custo total para a empresa e o líquido do funcionário.</div>
+                        <div class="eq-sim-body">
+                            <div style="display:flex;flex-direction:column;gap:14px">
+                                <div><div class="eq-sim-label">Salário Base (R$)</div><input class="eq-sim-input" type="number" id="eq-sim-salario" value="2500" min="0" step="100" oninput="eqRunSimulator()"></div>
+                                <div><div class="eq-sim-label">Tipo de Contrato</div>
+                                    <select class="eq-sim-select" id="eq-sim-tipo" onchange="eqRunSimulator()">
+                                        <option value="clt">CLT — Integral</option>
+                                        <option value="horista">CLT — Horista</option>
+                                        <option value="mei">MEI / Autônomo</option>
+                                    </select>
+                                </div>
+                                <div><div class="eq-sim-label">Horas extras (quantidade)</div><input class="eq-sim-input" type="number" id="eq-sim-he" value="0" min="0" max="80" step="1" oninput="eqRunSimulator()" style="font-size:.9rem"></div>
+                                <div><div class="eq-sim-label">Adicional / Bônus (R$)</div><input class="eq-sim-input" type="number" id="eq-sim-bonus" value="0" min="0" step="50" oninput="eqRunSimulator()" style="font-size:.9rem"></div>
+                            </div>
+                            <div>
+                                <div class="eq-sim-result" id="eqSimResult"></div>
+                                <div class="eq-sim-disclaimer">⚠️ Simulação estimada com base nos encargos configurados.<br>Consulte seu contador para valores oficiais.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /pagina-equipe -->
+
+    </section>
+</main>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast">
+    <span>✅</span>
+    <span id="toast-msg">Mensagem</span>
+</div>
+
+<!-- MODAL FINANCEIRO -->
+<div class="fin-modal-overlay" id="finModal">
+    <div class="fin-modal">
+        <div class="fin-modal-head">
+            <div>
+                <h2 id="fin-modal-title">Novo Lançamento</h2>
+                <p id="fin-modal-desc">Registre a movimentação financeira abaixo.</p>
+            </div>
+            <button class="fin-modal-close" onclick="finCloseModal()">✕</button>
+        </div>
+        <div class="fin-form-grid">
+            <div class="fin-form-group">
+                <label>Tipo</label>
+                <select id="fin-f-tipo">
+                    <option value="receita">Receita</option>
+                    <option value="despesa">Despesa</option>
+                </select>
+            </div>
+            <div class="fin-form-group">
+                <label>Data</label>
+                <input type="date" id="fin-f-data">
+            </div>
+            <div class="fin-form-group">
+                <label>Valor (R$)</label>
+                <input type="number" id="fin-f-valor" placeholder="0,00" step="0.01" min="0">
+            </div>
+            <div class="fin-form-group">
+                <label>Categoria</label>
+                <select id="fin-f-cat">
+                    <option>Aluguel de Espaço</option>
+                    <option>Buffet / Catering</option>
+                    <option>Decoração</option>
+                    <option>Som / Iluminação</option>
+                    <option>Limpeza</option>
+                    <option>Manutenção</option>
+                    <option>Marketing</option>
+                    <option>Outros</option>
+                </select>
+            </div>
+            <div class="fin-form-group">
+                <label>Status</label>
+                <select id="fin-f-status">
+                    <option value="pago">Pago</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="atrasado">Atrasado</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+            </div>
+            <div class="fin-form-group full">
+                <label>Descrição</label>
+                <input type="text" id="fin-f-desc" placeholder="Ex: Casamento Silva — Salão Principal">
+            </div>
+        </div>
+        <div class="fin-modal-actions">
+            <button class="btn-fin btn-fin-ghost" onclick="finCloseModal()">Cancelar</button>
+            <button class="btn-fin btn-fin-primary" onclick="finSaveTransaction()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ADD/EDIT DOCUMENTOS -->
+<div class="docs-modal-overlay" id="docsAddModal">
+  <div class="docs-modal">
+    <div class="docs-modal-header">
+      <div>
+        <h2 id="docsFormTitle">Novo Documento</h2>
+        <p>Preencha os dados e anexe o arquivo do documento.</p>
+      </div>
+      <button class="docs-modal-close" onclick="docsCloseAddModal()">✕</button>
+    </div>
+    <div class="docs-modal-body">
+      <div class="docs-form-grid">
+        <div class="docs-form-group full">
+          <label>Nome do Documento</label>
+          <input type="text" id="docs-f-nome" placeholder="Ex: Licença do Corpo de Bombeiros">
+        </div>
+        <div class="docs-form-group">
+          <label>Categoria</label>
+          <select id="docs-f-cat">
+            <option value="licencas">Licenças</option>
+            <option value="alvara">Alvarás</option>
+            <option value="juridico">Jurídico</option>
+            <option value="fiscal">Fiscal</option>
+            <option value="seguros">Seguros</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div class="docs-form-group">
+          <label>Órgão Emissor</label>
+          <input type="text" id="docs-f-orgao" placeholder="Ex: Corpo de Bombeiros">
+        </div>
+        <div class="docs-form-group">
+          <label>Número / Protocolo</label>
+          <input type="text" id="docs-f-numero" placeholder="Ex: 00123456/2024">
+        </div>
+        <div class="docs-form-group">
+          <label>Data de Emissão</label>
+          <input type="date" id="docs-f-emissao">
+        </div>
+        <div class="docs-form-group">
+          <label>Data de Vencimento</label>
+          <input type="date" id="docs-f-vencimento" placeholder="Deixe vazio se não vence">
+        </div>
+        <div class="docs-form-group full">
+          <label>Observações</label>
+          <textarea id="docs-f-obs" placeholder="Informações adicionais, contatos, instruções de renovação..."></textarea>
+        </div>
+        <div class="docs-form-group full">
+          <label>Arquivo</label>
+          <div class="docs-upload-zone" id="docsUploadZone" onclick="document.getElementById('docsFileInput').click()" ondragover="docsDragOver(event)" ondragleave="docsDragLeave()" ondrop="docsDropFile(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p>Arraste aqui ou <strong>clique para selecionar</strong></p>
+            <p class="ftype">PDF, JPG, PNG — até 20 MB</p>
+          </div>
+          <div class="docs-file-preview" id="docsFilePreview" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            <span id="docsFilePreviewName">arquivo.pdf</span>
+          </div>
+          <input type="file" id="docsFileInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="docsFileSelected(this)">
+        </div>
+      </div>
+    </div>
+    <div class="docs-modal-footer">
+      <button class="btn-fin btn-fin-ghost" onclick="docsCloseAddModal()">Cancelar</button>
+      <button class="btn-fin btn-fin-primary" onclick="docsSaveDoc()">Salvar Documento</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VIEW DOCUMENTOS -->
+<div class="docs-modal-overlay" id="docsViewModal">
+  <div class="docs-modal" style="width:600px">
+    <div class="docs-modal-header">
+      <div>
+        <div style="font-size:0.68rem;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;font-weight:700" id="docs-view-cat">—</div>
+        <h2 id="docs-view-nome">—</h2>
+      </div>
+      <button class="docs-modal-close" onclick="docsCloseViewModal()">✕</button>
+    </div>
+    <div class="docs-view-content">
+      <div class="docs-view-grid" id="docsViewGrid"></div>
+      <div class="docs-file-placeholder" id="docsViewFile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <p>Pré-visualização não disponível nesta demo</p>
+        <p style="font-size:0.72rem;margin-top:3px;color:#ccc" id="docsViewFileName">—</p>
+      </div>
+      <div id="docsViewObsWrap" style="margin-top:16px;display:none">
+        <div style="font-size:0.68rem;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;font-weight:700">Observações</div>
+        <div class="docs-notes-box" id="docsViewObs"></div>
+      </div>
+    </div>
+    <div class="docs-modal-footer">
+      <button class="btn-fin btn-fin-ghost" onclick="docsEditDoc()">Editar</button>
+      <button class="btn-fin btn-fin-primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar Arquivo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FUNCIONÁRIO -->
+<div class="eq-modal-overlay" id="eqEmpModal">
+  <div class="eq-modal">
+    <div class="eq-modal-head">
+      <div><h2 id="eqEmpModalTitle">Novo Funcionário</h2><p>Preencha os dados do colaborador.</p></div>
+      <button class="eq-modal-close" onclick="eqCloseEmpModal()">✕</button>
+    </div>
+    <div class="eq-modal-body">
+      <div class="eq-fg"><label>Nome Completo</label><input type="text" id="eq-ef-nome" placeholder="Ex: Maria da Silva"></div>
+      <div class="eq-fg-row">
+        <div class="eq-fg"><label>Cargo / Função</label><input type="text" id="eq-ef-cargo" placeholder="Ex: Garçom"></div>
+        <div class="eq-fg"><label>Departamento</label>
+          <select id="eq-ef-dept">
+            <option>Operações</option><option>Limpeza</option><option>Segurança</option>
+            <option>Cozinha/Buffet</option><option>Decoração</option><option>Administração</option><option>Tecnologia</option>
+          </select>
+        </div>
+      </div>
+      <div class="eq-fg-row">
+        <div class="eq-fg"><label>Salário Base (R$)</label><input type="number" id="eq-ef-salario" value="1800" min="0" step="100"></div>
+        <div class="eq-fg"><label>Tipo de Contrato</label>
+          <select id="eq-ef-contrato">
+            <option value="clt">CLT — Integral</option>
+            <option value="horista">CLT — Horista</option>
+            <option value="mei">MEI / Autônomo</option>
+            <option value="estagio">Estágio</option>
+          </select>
+        </div>
+      </div>
+      <div class="eq-fg-row">
+        <div class="eq-fg"><label>Data de Admissão</label><input type="date" id="eq-ef-admissao"></div>
+        <div class="eq-fg"><label>Status</label>
+          <select id="eq-ef-status">
+            <option value="ativo">Ativo</option>
+            <option value="ferias">Férias</option>
+            <option value="afas">Afastado</option>
+            <option value="horista">Horista/Freelancer</option>
+          </select>
+        </div>
+      </div>
+      <div class="eq-fg"><label>Telefone / WhatsApp</label><input type="text" id="eq-ef-tel" placeholder="(31) 9 9999-9999"></div>
+      <div class="eq-fg"><label>Observações</label><textarea id="eq-ef-obs" placeholder="Informações adicionais..."></textarea></div>
+    </div>
+    <div class="eq-modal-foot">
+      <button class="btn-fin btn-fin-ghost" onclick="eqCloseEmpModal()">Cancelar</button>
+      <button class="btn-fin btn-fin-primary" onclick="eqSaveEmployee()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTRACHEQUE -->
+<div class="eq-modal-overlay" id="eqPayModal">
+  <div class="eq-modal" style="width:460px">
+    <div class="eq-modal-head">
+      <div><h2 id="eq-pay-emp-name">—</h2><p id="eq-pay-emp-role">Contracheque</p></div>
+      <button class="eq-modal-close" onclick="document.getElementById('eqPayModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="eq-modal-body">
+      <div id="eqPayBreakdown"></div>
+      <div class="eq-pb-total">
+        <span class="eq-pb-total-label">Salário Líquido</span>
+        <span class="eq-pb-total-val" id="eq-pb-liquido">R$ 0</span>
+      </div>
+      <div class="eq-cost-info">
+        Custo total para a empresa: <strong id="eq-pb-custo-empresa" style="color:#f59e0b">R$ 0</strong><br>
+        Inclui encargos patronais, benefícios e provisões.
+      </div>
+    </div>
+    <div class="eq-modal-foot">
+      <button class="btn-fin btn-fin-ghost" onclick="document.getElementById('eqPayModal').classList.remove('open')">Fechar</button>
+      <button class="btn-fin btn-fin-primary">Imprimir Contracheque</button>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────── FOOTER ──────────── -->
+<footer class="main-footer">
+    <div class="footer-container">
+        <div class="footer-column">
+            <h3>Atendimento</h3>
+            <ul>
+                <li><a href="fale-conosco.html">Fale Conosco</a></li>
+                <li><a href="privacidade.html">Política de Privacidade</a></li>
+                <li><a href="termos.html">Termos de Uso</a></li>
+                <li><a href="como-funciona.html">Como Funciona</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h3>Anunciar</h3>
+            <ul>
+                <li><a href="cadastro.html">Cadastre sua propriedade</a></li>
+                <li><a href="planos.html">Planos Disponíveis</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 VENTSY. Todos os direitos reservados.</p></div>
+</footer>
+
+
+</body>
+</html>
