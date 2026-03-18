@@ -21,11 +21,13 @@ import { registrarModulo, navegar, rotaInicial } from './router.js';
 import { init as initFinanceiro } from '../modules/financeiro.js';
 import { init as initDocumentos } from '../modules/documentos.js';
 import { init as initEquipe     } from '../modules/equipe.js';
+import { init as initCalendario } from '../modules/calendario.js';
 
 // ── Registra inicializadores no router ────────────────
 registrarModulo('financeiro', initFinanceiro);
 registrarModulo('documentos', initDocumentos);
 registrarModulo('equipe',     initEquipe);
+registrarModulo('calendario', initCalendario);
 
 // ── Expor globais para HTML inline ────────────────────
 // (funções chamadas por onclick= no HTML)
