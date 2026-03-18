@@ -1053,7 +1053,16 @@ const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
 // Instância do SDK do Mercado Pago (tokenização de cartão)
-const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+// MP inicializado após o SDK carregar completamente
+let mp = null;
+window.addEventListener('load', () => {
+    try {
+        mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+        console.log('✅ SDK Mercado Pago pronto');
+    } catch(e) {
+        console.warn('⚠️ SDK Mercado Pago não carregou:', e);
+    }
+});
 let _cardForm = null; // instância do cardForm MP
 
 /* ─────────────────────────────────────────
@@ -1267,40 +1276,55 @@ async function sincronizarComAdmin() {
    INIT
 ───────────────────────────────────────── */
 async function init() {
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) { window.location.href = '../login.html'; return; }
+    try {
+        const { data: { session }, error: sessErr } = await sb.auth.getSession();
+        if (sessErr) throw sessErr;
+        if (!session) { window.location.href = '../login.html'; return; }
 
-    const user = session.user;
-    _userId = user.id;
+        const user = session.user;
+        _userId = user.id;
 
-    const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
-    const nome    = perfil?.nome    || user.email;
-    const usuario = perfil?.usuario || '';
-    const ini     = (nome.split(' ')[0][0] || '?').toUpperCase();
+        // Perfil — falha silenciosa, usa email como fallback
+        let nome = user.email;
+        let usuario = '';
+        try {
+            const { data: perfil } = await sb.from('usuarios').select('nome, usuario').eq('id', user.id).single();
+            nome    = perfil?.nome    || user.email;
+            usuario = perfil?.usuario || '';
+        } catch(e) { /* silencioso */ }
 
-    document.getElementById('avatar-inicial').textContent  = ini;
-    document.getElementById('drop-nome').textContent       = nome;
-    document.getElementById('drop-email').textContent      = user.email;
-    document.getElementById('sidebar-avatar').textContent  = ini;
-    document.getElementById('sidebar-nome').textContent    = nome;
-    document.getElementById('sidebar-handle').textContent  = usuario ? '@' + usuario : '';
+        const ini = ((nome || 'U').trim()[0] || 'U').toUpperCase();
 
-    await carregarAssinatura(user.id);
-    await sincronizarComAdmin();
-    await carregarCupons();
+        document.getElementById('avatar-inicial').textContent  = ini;
+        document.getElementById('drop-nome').textContent       = nome;
+        document.getElementById('drop-email').textContent      = user.email;
+        document.getElementById('sidebar-avatar').textContent  = ini;
+        document.getElementById('sidebar-nome').textContent    = nome;
+        document.getElementById('sidebar-handle').textContent  = usuario ? '@' + usuario : '';
 
-    renderizarBanner();
-    renderizarCards();
+        // Cada etapa com proteção individual
+        try { await carregarAssinatura(user.id); } catch(e) { console.warn('carregarAssinatura:', e); }
+        try { await sincronizarComAdmin(); }       catch(e) { console.warn('sincronizarComAdmin:', e); }
+        try { await carregarCupons(); }            catch(e) { console.warn('carregarCupons:', e); }
 
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('main-content').style.display   = 'flex';
+        renderizarBanner();
+        renderizarCards();
+
+    } catch(e) {
+        console.error('Erro no init():', e);
+    } finally {
+        // Garante que o loading SEMPRE some, mesmo com erro
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('main-content').style.display   = 'flex';
+    }
 }
 
 /* ─────────────────────────────────────────
    BANNER
 ───────────────────────────────────────── */
 function renderizarBanner() {
-    const plano = PLANOS.find(p => p.id === ESTADO.planoAtivo);
+    const plano = PLANOS.find(p => p.id === ESTADO.planoAtivo) || PLANOS[0];
+    if (!plano) return; // nenhum plano disponível
     document.getElementById('banner-icone').textContent    = plano.icone;
     document.getElementById('banner-titulo').textContent   = 'Plano ' + plano.nome + ' — Ativo';
     document.getElementById('banner-validade').textContent = 'Válido até ' + ESTADO.validadeAte;
