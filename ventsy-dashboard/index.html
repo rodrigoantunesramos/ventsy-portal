@@ -745,6 +745,180 @@
 
         </div><!-- /pagina-equipe -->
 
+       <div class="page-section" id="pagina-calendario">
+
+    <div class="dash-header-fixo">
+        <div>
+            <h2>📅 Calendário de Disponibilidade</h2>
+            <p style="font-size:0.82rem;color:#999;margin-top:4px;">Clique nos dias para bloquear ou liberar datas do seu anúncio.</p>
+        </div>
+        <div class="cal-legenda">
+            <span class="cal-legenda-item"><span class="cal-cor livre"></span> Disponível</span>
+            <span class="cal-legenda-item"><span class="cal-cor bloqueado"></span> Bloqueado</span>
+            <span class="cal-legenda-item"><span class="cal-cor hoje-leg"></span> Hoje</span>
+        </div>
+    </div>
+
+    <div class="cal-layout">
+
+        <!-- CALENDÁRIO -->
+        <div class="cal-container">
+            <div class="cal-mes-controle" id="cal-mes-controle">
+                <button class="cal-btn-mes" onclick="calMudarMes(-1)">❮</button>
+                <h3>
+                    <span class="cal-sel-mes-label" id="cal-titulo-mes" onclick="calAbrirSeletorMes()">—</span>
+                    <span class="cal-sel-ano-label" id="cal-titulo-ano" onclick="calAbrirSeletorAno()">—</span>
+                </h3>
+                <button class="cal-btn-mes" onclick="calMudarMes(1)">❯</button>
+
+                <!-- Picker mês -->
+                <div class="cal-picker-overlay" id="cal-picker-mes">
+                    <div class="cal-meses-grid" id="cal-meses-grid"></div>
+                </div>
+                <!-- Picker ano -->
+                <div class="cal-picker-overlay" id="cal-picker-ano">
+                    <div class="cal-anos-lista" id="cal-anos-lista"></div>
+                </div>
+            </div>
+
+            <div class="cal-grid" id="cal-grid">
+                <!-- gerado via JS -->
+            </div>
+        </div>
+
+        <!-- PAINEL LATERAL -->
+        <div class="cal-painel">
+
+            <!-- Resumo do mês -->
+            <div class="cal-card-painel">
+                <h4>📊 Resumo do mês</h4>
+                <div class="cal-resumo">
+                    <div class="cal-resumo-item">
+                        <span>Dias no mês</span>
+                        <strong id="cal-res-total">—</strong>
+                    </div>
+                    <div class="cal-resumo-item">
+                        <span>Disponíveis</span>
+                        <span class="cal-badge-livre" id="cal-res-livres">—</span>
+                    </div>
+                    <div class="cal-resumo-item">
+                        <span>Bloqueados</span>
+                        <span class="cal-badge-ocup" id="cal-res-bloqueados">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações rápidas -->
+            <div class="cal-card-painel">
+                <h4>⚡ Ações rápidas</h4>
+                <div class="cal-acoes">
+                    <button class="cal-btn-acao primario" onclick="calSalvarDisponibilidade()">
+                        💾 Salvar disponibilidade
+                    </button>
+                    <button class="cal-btn-acao" onclick="calBloquearFimsDeSemana()">
+                        🗓️ Bloquear fins de semana
+                    </button>
+                    <button class="cal-btn-acao" onclick="calLiberarTodoMes()">
+                        ✅ Liberar todos os dias
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bloqueios do mês -->
+            <div class="cal-card-painel">
+                <h4>🔒 Bloqueios este mês</h4>
+                <div class="cal-lista-bloqueios" id="cal-lista-bloqueios">
+                    <div class="cal-sem-bloqueios">Nenhum dia bloqueado</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- /pagina-calendario -->
+
+
+<!-- MODAL: Bloquear dia -->
+<div class="cal-modal-overlay" id="cal-modal-bloqueio">
+    <div class="cal-modal-box">
+        <button class="cal-btn-fechar" onclick="calFecharModal()">✕</button>
+        <h3 id="cal-modal-titulo">Bloquear dia</h3>
+        <p class="cal-modal-data" id="cal-modal-data">—</p>
+
+        <label class="cal-label-campo">Motivo do bloqueio</label>
+        <div class="cal-chips">
+            <div class="cal-chip" onclick="calSelecionarChip(this)">Evento</div>
+            <div class="cal-chip" onclick="calSelecionarChip(this)">Casamento</div>
+            <div class="cal-chip" onclick="calSelecionarChip(this)">Aniversário</div>
+            <div class="cal-chip" onclick="calSelecionarChip(this)">Manutenção</div>
+            <div class="cal-chip" onclick="calSelecionarChip(this)">Reservado</div>
+            <div class="cal-chip" onclick="calSelecionarChip(this)">Indisponível</div>
+        </div>
+
+        <label class="cal-label-campo">Ou escreva um motivo personalizado</label>
+        <input type="text" class="cal-input" id="cal-input-motivo"
+               placeholder="Ex: Festa de aniversário do João..." maxlength="40">
+
+        <div class="cal-modal-acoes">
+            <button class="cal-btn-cancel" onclick="calFecharModal()">Cancelar</button>
+            <button class="cal-btn-confirm" onclick="calConfirmarBloqueio()">🔒 Bloquear dia</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Liberar dia (confirmação simples) -->
+<div class="cal-modal-overlay" id="cal-modal-liberar-dia">
+    <div class="cal-modal-box">
+        <button class="cal-btn-fechar" onclick="calFecharModalLiberarDia()">✕</button>
+        <div style="font-size:2.4rem;text-align:center;margin-bottom:12px;">🔓</div>
+        <h3 style="text-align:center;">Liberar este dia?</h3>
+        <p class="cal-modal-data" style="text-align:center;margin-bottom:20px;">
+            Dia <strong id="cal-liberar-dia-num">—</strong> de <span id="cal-liberar-dia-mes">—</span>
+        </p>
+        <div style="background:#fff0f2;border-radius:12px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:1.4rem;">🔒</span>
+            <div>
+                <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#ff385c;margin-bottom:2px;">Motivo do bloqueio</div>
+                <div style="font-size:0.9rem;font-weight:600;color:#0d0d0d;" id="cal-liberar-dia-motivo">—</div>
+            </div>
+        </div>
+        <p style="font-size:0.82rem;color:#888;margin-bottom:22px;text-align:center;line-height:1.5;">
+            Confirma que quer remover este bloqueio e deixar o dia disponível no seu anúncio?
+        </p>
+        <div class="cal-modal-acoes">
+            <button class="cal-btn-cancel" onclick="calFecharModalLiberarDia()">Cancelar</button>
+            <button class="cal-btn-confirm" style="background:#1ebc54;box-shadow:0 4px 12px rgba(30,188,84,0.25);"
+                    onclick="calConfirmarLiberarDia()">✅ Sim, liberar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Liberar todos (exige digitar LIBERAR) -->
+<div class="cal-modal-overlay" id="cal-modal-liberar-todos">
+    <div class="cal-modal-box">
+        <button class="cal-btn-fechar" onclick="calFecharModalLiberarTodos()">✕</button>
+        <div style="font-size:2.4rem;text-align:center;margin-bottom:12px;">⚠️</div>
+        <h3 id="cal-modal-liberar-titulo" style="text-align:center;font-size:1rem;margin-bottom:10px;">Liberar todos os dias</h3>
+        <p id="cal-modal-liberar-subtitulo"
+           style="font-size:0.82rem;color:#888;text-align:center;line-height:1.5;margin-bottom:22px;"></p>
+        <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:12px;padding:14px 16px;margin-bottom:22px;font-size:0.82rem;color:#7a5900;line-height:1.5;">
+            ⚠️ <strong>Atenção:</strong> todos os bloqueios deste mês serão apagados permanentemente.
+        </div>
+        <label class="cal-label-campo">Digite <strong>LIBERAR</strong> para confirmar</label>
+        <input type="text" class="cal-input" id="cal-input-confirmar"
+               placeholder="LIBERAR" oninput="calValidarTextoLiberarTodos()"
+               autocomplete="off" spellcheck="false">
+        <div class="cal-modal-acoes">
+            <button class="cal-btn-cancel" onclick="calFecharModalLiberarTodos()">Cancelar</button>
+            <button class="cal-btn-confirm" id="cal-btn-confirmar-liberar"
+                    style="opacity:0.4;cursor:not-allowed;"
+                    onclick="calExecutarLiberarTodos()" disabled>
+                🗑️ Liberar todos
+            </button>
+        </div>
+    </div>
+</div> 
+
     </section>
 </main>
 
