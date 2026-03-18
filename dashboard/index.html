@@ -59,7 +59,6 @@
         }
         .logo { height: 56px; width: auto; cursor: pointer; }
 
-        /* Avatar com inicial */
         .avatar-container { position: relative; }
 
         .avatar-btn {
@@ -124,7 +123,6 @@
 
         .perfil-resumo { text-align: center; margin-bottom: 36px; }
 
-        /* Avatar grande na sidebar */
         .sidebar-avatar {
             width: 72px; height: 72px; border-radius: 50%;
             background: #ff385c; color: #fff;
@@ -156,6 +154,7 @@
             padding: 12px 14px; color: #666; text-decoration: none;
             border-radius: 8px; margin-bottom: 4px;
             font-size: 0.9rem; transition: all 0.2s ease;
+            cursor: pointer;
         }
         .dash-menu a:hover { background: #f7f7f7; color: #0d0d0d; }
         .dash-menu a.active { background: rgba(255,56,92,0.08); color: #ff385c; font-weight: 600; }
@@ -168,6 +167,10 @@
             padding: 0 40px 60px 40px;
             width: 100%;
         }
+
+        /* Seções de página (dashboard / financeiro) */
+        .page-section { display: none; }
+        .page-section.ativa { display: block; }
 
         .dash-header-fixo {
             position: sticky; top: 0; z-index: 100;
@@ -239,28 +242,21 @@
         .card-metrica h3 { font-size: 1.5rem; font-weight: 700; margin: 5px 0 0; color: #222; }
 
         /* ─────────────────────────────────────────
-           GRÁFICO (largura total)
+           GRÁFICO
         ───────────────────────────────────────── */
-        .container-duas-colunas {
-            display: block;
-            width: 100%;
-            margin-bottom: 26px;
-        }
+        .container-duas-colunas { display: block; width: 100%; margin-bottom: 26px; }
         .secao-dash {
             background: #fff; padding: 25px; border-radius: 16px;
             border: 1px solid #eee; margin-bottom: 20px;
         }
         .secao-dash h3 { margin-top: 0; font-size: 1.05rem; font-weight: 700; margin-bottom: 20px; color: #222; }
 
-
-
         /* ─────────────────────────────────────────
            PASSO A PASSO
         ───────────────────────────────────────── */
         .passos-titulo {
             font-size: 1.15rem; font-weight: 700; color: #222;
-            margin-bottom: 14px;
-            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
         }
         .passos-progresso {
             font-size: 0.78rem; font-weight: 600; color: #999;
@@ -268,7 +264,6 @@
         }
         .passos-progresso.completo-total { background: rgba(12,166,120,0.12); color: #0ca678; }
         .passo-lista { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
-
         .passo-item {
             background: #fff; border-radius: 12px;
             border: 1px solid #eee; padding: 18px 22px;
@@ -277,21 +272,16 @@
         }
         .passo-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); transform: translateY(-1px); }
         .passo-item.completo { border-color: #bbf7d0; background: #f0fdf4; }
-
         .passo-num {
             width: 40px; height: 40px; border-radius: 10px;
             background: #f5f5f5; display: flex; align-items: center;
             justify-content: center; flex-shrink: 0;
             font-size: 1rem; font-weight: 700; color: #999;
         }
-        .passo-item.completo .passo-num {
-            background: rgba(12,166,120,0.12); color: #0ca678;
-        }
-
+        .passo-item.completo .passo-num { background: rgba(12,166,120,0.12); color: #0ca678; }
         .passo-info { flex: 1; }
         .passo-info h4 { font-size: 0.9rem; font-weight: 700; color: #0d0d0d; margin-bottom: 3px; }
         .passo-info p  { font-size: 0.8rem; color: #717171; line-height: 1.5; }
-
         .passo-acao {
             padding: 8px 16px; border-radius: 8px; font-family: inherit;
             font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none;
@@ -301,13 +291,7 @@
         .passo-acao.vermelho { background: #ff385c; color: #fff; }
         .passo-acao.vermelho:hover { background: #e0304f; }
         .passo-acao.verde { background: rgba(12,166,120,0.12); color: #0ca678; cursor: default; }
-
-        /* Grupo de ações do passo */
-        .passo-acoes-grupo {
-            display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;
-        }
-
-        /* Aviso de passos incompletos */
+        .passo-acoes-grupo { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
         .solicitar-aviso {
             background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px;
             padding: 12px 18px; font-size: 0.82rem; color: #7a6200;
@@ -329,7 +313,6 @@
         }
         .card-solicitar h3 { font-size: 1.2rem; font-weight: 700; color: #0d0d0d; margin-bottom: 8px; }
         .card-solicitar p { font-size: 0.85rem; color: #717171; line-height: 1.65; margin-bottom: 28px; }
-
         .btn-solicitar {
             width: 100%; padding: 17px;
             background: #ff385c; color: #fff; border: none;
@@ -342,11 +325,7 @@
         .btn-solicitar:hover:not(:disabled) { background: #e0304f; transform: scale(1.01); }
         .btn-solicitar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .btn-solicitar.enviado { background: #0ca678; box-shadow: 0 4px 18px rgba(12,166,120,0.25); }
-
-        .solicitar-hint {
-            font-size: 0.76rem; color: #717171;
-            margin-top: 12px; line-height: 1.6;
-        }
+        .solicitar-hint { font-size: 0.76rem; color: #717171; margin-top: 12px; line-height: 1.6; }
 
         /* ─────────────────────────────────────────
            TOAST
@@ -393,45 +372,33 @@
         }
 
         /* ─────────────────────────────────────────
-           RESPONSIVO
+           MOBILE
         ───────────────────────────────────────── */
-        /* ── MOBILE SIDEBAR TOGGLE ── */
         .btn-sidebar-toggle {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
+            display: none; flex-direction: column; justify-content: center;
+            align-items: center; gap: 5px;
             width: 40px; height: 40px;
             background: none; border: 1px solid #eee;
             border-radius: 8px; cursor: pointer; padding: 8px;
         }
         .btn-sidebar-toggle span {
             display: block; width: 18px; height: 2px;
-            background: #444; border-radius: 2px;
-            transition: all 0.2s;
+            background: #444; border-radius: 2px; transition: all 0.2s;
         }
-
-        /* ── OVERLAY ── */
         .sidebar-overlay {
-            display: none;
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 9998;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45); z-index: 9998;
         }
         .sidebar-overlay.ativo { display: block; }
 
-        @media (max-width: 1100px) {
-            .grid-metricas { grid-template-columns: repeat(2, 1fr); }
-        }
+        @media (max-width: 1100px) { .grid-metricas { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) {
             .btn-sidebar-toggle { display: flex; }
             .dash-sidebar {
                 display: flex !important;
                 position: fixed; top: 80px; left: 0;
                 width: 280px; height: calc(100vh - 80px);
-                z-index: 9999;
-                transform: translateX(-100%);
+                z-index: 9999; transform: translateX(-100%);
                 transition: transform 0.3s ease;
                 box-shadow: 4px 0 20px rgba(0,0,0,0.15);
             }
@@ -452,17 +419,14 @@
             .card-metrica h3 { font-size: 1.2rem; }
             .card-metrica p { font-size: 0.8rem; }
         }
-        @media (max-width: 360px) {
-            .grid-metricas { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 360px) { .grid-metricas { grid-template-columns: 1fr; } }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* ── ANALYTICS TABS ── */
         .analytics-header {
             display: flex; align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+            justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
         }
         .analytics-header h3 { margin: 0; }
         .analytics-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -480,18 +444,251 @@
         .tab-btn[data-tipo="whatsapp"]:not(.ativo):hover   { border-color: #25D366; color: #25D366; }
         .tab-btn[data-tipo="formulario"]:not(.ativo):hover { border-color: #1a73e8; color: #1a73e8; }
         .tab-btn[data-tipo="nota"]:not(.ativo):hover       { border-color: #f59e0b; color: #f59e0b; }
-        .grafico-vazio {
-            display: none; text-align: center; padding: 16px 0 4px;
-            color: #bbb; font-size: 0.85rem;
-        }
-        /* Skeleton loader para métricas */
+        .grafico-vazio { display: none; text-align: center; padding: 16px 0 4px; color: #bbb; font-size: 0.85rem; }
         .card-metrica h3.loading {
             color: transparent; background: #f0f0f0;
             border-radius: 6px; animation: shimmer 1.4s ease infinite;
         }
-        @keyframes shimmer {
-            0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+        @keyframes shimmer { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* ===========================================
+           FINANCEIRO — estilos no visual VENTSY
+        =========================================== */
+
+        /* Header da seção financeiro */
+        .fin-header {
+            position: sticky; top: 0; z-index: 100;
+            background: #f0f2f5;
+            display: flex; padding: 24px 0 20px;
+            justify-content: space-between; align-items: center;
+            margin-bottom: 10px; flex-wrap: wrap; gap: 12px;
         }
+        .fin-header h2 { font-size: 1.8rem; font-weight: 700; color: #222; margin: 0; }
+        .fin-header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+        /* Sub-abas do financeiro */
+        .fin-tabs {
+            display: flex; gap: 4px; background: #fff;
+            border-radius: 10px; padding: 4px;
+            border: 1px solid #eee; margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .fin-tab-btn {
+            padding: 8px 18px; border-radius: 7px;
+            border: none; background: none; font-family: inherit;
+            font-size: 0.85rem; font-weight: 600; color: #888;
+            cursor: pointer; transition: all 0.18s; white-space: nowrap;
+        }
+        .fin-tab-btn.ativo { background: #ff385c; color: #fff; box-shadow: 0 2px 8px rgba(255,56,92,0.25); }
+        .fin-tab-btn:not(.ativo):hover { background: #f7f7f7; color: #0d0d0d; }
+
+        /* Sub-conteúdos das abas financeiras */
+        .fin-tab-content { display: none; }
+        .fin-tab-content.ativo { display: block; }
+
+        /* Selects e botões financeiros no estilo VENTSY */
+        .fin-select {
+            background: #fff; border: 1px solid #eee;
+            color: #444; font-family: inherit; font-size: 0.85rem;
+            padding: 9px 14px; border-radius: 8px; cursor: pointer; outline: none;
+            transition: border-color .2s;
+        }
+        .fin-select:hover, .fin-select:focus { border-color: #ff385c; }
+
+        .btn-fin {
+            padding: 9px 20px; border-radius: 8px;
+            font-family: inherit; font-size: 0.85rem; font-weight: 700;
+            cursor: pointer; border: none; transition: all .2s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-fin-primary { background: #ff385c; color: #fff; box-shadow: 0 2px 10px rgba(255,56,92,0.25); }
+        .btn-fin-primary:hover { background: #e0304f; transform: translateY(-1px); }
+        .btn-fin-ghost { background: #fff; border: 1px solid #eee; color: #444; }
+        .btn-fin-ghost:hover { border-color: #ff385c; color: #ff385c; }
+
+        /* KPI grid financeiro — reutiliza estilo dos cards existentes */
+        .fin-kpi-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 20px; margin-bottom: 26px;
+        }
+        .fin-kpi-card {
+            background: #fff; border-radius: 16px;
+            border: 1px solid #eee; padding: 24px;
+            position: relative; overflow: hidden;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .fin-kpi-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+        .fin-kpi-card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 3px; border-radius: 16px 16px 0 0;
+        }
+        .fin-kpi-card.verde::before  { background: linear-gradient(90deg, #0ca678, #2dd4a0); }
+        .fin-kpi-card.vermelho::before { background: linear-gradient(90deg, #ff385c, #ff7a95); }
+        .fin-kpi-card.gold::before   { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .fin-kpi-card.azul::before   { background: linear-gradient(90deg, #1a73e8, #60a5fa); }
+
+        .fin-kpi-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #999; margin-bottom: 10px; }
+        .fin-kpi-value { font-size: 1.7rem; font-weight: 700; color: #0d0d0d; line-height: 1; }
+        .fin-kpi-value.verde   { color: #0ca678; }
+        .fin-kpi-value.vermelho { color: #ff385c; }
+        .fin-kpi-value.gold    { color: #f59e0b; }
+        .fin-kpi-value.azul    { color: #1a73e8; }
+
+        .fin-delta {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 0.75rem; font-weight: 600;
+            margin-top: 8px; padding: 3px 10px; border-radius: 20px;
+        }
+        .fin-delta.up   { background: rgba(12,166,120,0.10); color: #0ca678; }
+        .fin-delta.down { background: rgba(255,56,92,0.10);  color: #ff385c; }
+
+        /* Grid 2 colunas financeiro */
+        .fin-mid-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .fin-wide { grid-column: 1 / -1; }
+
+        /* Seção card financeiro */
+        .fin-section {
+            background: #fff; padding: 24px; border-radius: 16px;
+            border: 1px solid #eee; margin-bottom: 20px;
+        }
+        .fin-section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+        }
+        .fin-section-title { font-size: 1rem; font-weight: 700; color: #222; }
+        .fin-section-sub   { font-size: 0.78rem; color: #999; margin-top: 2px; }
+        .fin-badge {
+            font-size: 0.72rem; font-weight: 700; padding: 4px 12px;
+            border-radius: 20px; background: rgba(255,56,92,0.08); color: #ff385c;
+        }
+
+        /* Barras do gráfico de barras */
+        .fin-bar-chart { display: flex; align-items: flex-end; gap: 10px; height: 160px; }
+        .fin-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .fin-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; gap: 3px; }
+        .fin-bar {
+            flex: 1; border-radius: 5px 5px 0 0;
+            cursor: pointer; transition: opacity .2s;
+        }
+        .fin-bar:hover { opacity: .75; }
+        .fin-bar-label { font-size: 0.7rem; color: #999; }
+
+        /* Donut */
+        .fin-donut-wrap { display: flex; align-items: center; gap: 24px; }
+        .fin-donut-legend { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+        .fin-legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; }
+        .fin-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .fin-legend-name { color: #717171; flex: 1; }
+        .fin-legend-val { font-weight: 700; color: #222; font-size: 0.82rem; }
+        .fin-legend-pct { font-size: 0.72rem; color: #aaa; min-width: 30px; text-align: right; }
+
+        /* Tabela */
+        .fin-table-wrap { overflow-x: auto; }
+        .fin-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+        .fin-table th {
+            text-align: left; padding: 0 14px 12px;
+            font-size: 0.68rem; color: #999;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            border-bottom: 1px solid #eee; font-weight: 700;
+        }
+        .fin-table td { padding: 12px 14px; border-bottom: 1px solid #f5f5f5; color: #444; }
+        .fin-table tr:last-child td { border-bottom: none; }
+        .fin-table tr:hover td { background: #fafafa; }
+
+        .fin-status {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+        }
+        .fin-status.pago      { background: rgba(12,166,120,0.10); color: #0ca678; }
+        .fin-status.pendente  { background: rgba(245,158,11,0.10);  color: #f59e0b; }
+        .fin-status.atrasado  { background: rgba(255,56,92,0.10);   color: #ff385c; }
+        .fin-status.cancelado { background: #f5f5f5; color: #999; }
+        .fin-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .fin-amount-in  { color: #0ca678; font-weight: 700; }
+        .fin-amount-out { color: #ff385c; font-weight: 700; }
+
+        /* Metas (progress bars) */
+        .fin-goal-list { display: flex; flex-direction: column; gap: 18px; }
+        .fin-goal-top { display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 7px; }
+        .fin-goal-name { color: #222; font-weight: 600; }
+        .fin-goal-nums { font-size: 0.76rem; color: #999; }
+        .fin-progress-track { height: 7px; background: #f0f0f0; border-radius: 99px; overflow: hidden; }
+        .fin-progress-fill { height: 100%; border-radius: 99px; transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+
+        /* Cashflow mini boxes */
+        .fin-cf-row { display: flex; gap: 12px; margin-bottom: 18px; }
+        .fin-cf-box {
+            flex: 1; background: #f7f7f7; border: 1px solid #eee;
+            border-radius: 10px; padding: 14px; text-align: center;
+        }
+        .fin-cf-label { font-size: 0.68rem; color: #999; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; font-weight: 700; }
+        .fin-cf-val   { font-size: 1.1rem; font-weight: 700; color: #222; }
+
+        /* Próximos eventos */
+        .fin-event-list { display: flex; flex-direction: column; gap: 10px; }
+        .fin-event-item {
+            display: flex; align-items: center; gap: 14px;
+            background: #f7f7f7; border: 1px solid #eee;
+            border-radius: 10px; padding: 12px 14px;
+            transition: border-color .2s;
+        }
+        .fin-event-item:hover { border-color: #ff385c; }
+        .fin-event-date {
+            min-width: 42px; text-align: center;
+            background: rgba(255,56,92,0.07); border-radius: 8px; padding: 6px;
+        }
+        .fin-event-day { font-size: 1.3rem; font-weight: 700; color: #ff385c; line-height: 1; }
+        .fin-event-mon { font-size: 0.62rem; color: #999; text-transform: uppercase; letter-spacing: 0.06em; }
+        .fin-event-info { flex: 1; }
+        .fin-event-name { font-size: 0.88rem; font-weight: 600; color: #222; }
+        .fin-event-type { font-size: 0.76rem; color: #999; margin-top: 2px; }
+        .fin-event-val  { font-weight: 700; font-size: 0.88rem; color: #0ca678; }
+
+        /* Modal financeiro */
+        .fin-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+            z-index: 10000; align-items: center; justify-content: center;
+        }
+        .fin-modal-overlay.open { display: flex; }
+        .fin-modal {
+            background: #fff; border-radius: 18px;
+            padding: 36px; width: 520px; max-width: 95vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+            animation: scaleIn .22s ease;
+        }
+        .fin-modal-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+        .fin-modal-head h2 { font-size: 1.2rem; font-weight: 700; color: #0d0d0d; }
+        .fin-modal-head p  { font-size: 0.82rem; color: #999; margin-top: 4px; }
+        .fin-modal-close { background: none; border: none; font-size: 1.4rem; color: #bbb; cursor: pointer; padding: 0; line-height: 1; }
+        .fin-modal-close:hover { color: #ff385c; }
+        .fin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .fin-form-group { display: flex; flex-direction: column; gap: 6px; }
+        .fin-form-group.full { grid-column: 1 / -1; }
+        .fin-form-group label { font-size: 0.72rem; color: #999; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+        .fin-form-group input,
+        .fin-form-group select,
+        .fin-form-group textarea {
+            background: #f7f7f7; border: 1px solid #eee;
+            color: #222; font-family: inherit; font-size: 0.88rem;
+            padding: 10px 14px; border-radius: 8px; outline: none; transition: border-color .2s;
+        }
+        .fin-form-group input:focus,
+        .fin-form-group select:focus,
+        .fin-form-group textarea:focus { border-color: #ff385c; background: #fff; }
+        .fin-form-group textarea { resize: vertical; min-height: 70px; }
+        .fin-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(.96); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 1100px) { .fin-kpi-grid { grid-template-columns: repeat(2,1fr); } .fin-mid-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 600px)  { .fin-kpi-grid { grid-template-columns: 1fr 1fr; } }
 
     </style>
 </head>
@@ -511,11 +708,9 @@
         </a>
     </div>
     <div class="header-right">
-        <!-- Botão hamburguer mobile -->
         <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" onclick="toggleSidebar()" aria-label="Menu">
             <span></span><span></span><span></span>
         </button>
-        <!-- Avatar com dropmenu -->
         <div class="avatar-container">
             <button class="avatar-btn" id="avatar-btn" onclick="toggleAvatar()">
                 <span id="avatar-inicial">?</span>
@@ -552,7 +747,7 @@
             <div class="plano-validade" id="sidebar-validade"></div>
         </div>
         <nav class="dash-menu">
-            <a href="index.html" class="active">🏠 Dashboard</a>
+            <a onclick="mostrarPagina('dashboard', this)" class="active">🏠 Dashboard</a>
             <span class="menu-section-label">Minha Propriedade</span>
             <a href="minhapropriedade.html">🏡 Dados do Espaço</a>
             <a href="fotos.html">📸 Fotos</a>
@@ -560,6 +755,7 @@
             <a href="leads.html">💬 Contatos / Leads</a>
             <a href="calendario.html">📅 Disponibilidade</a>
             <a href="relatorio.html">📊 Relatório</a>
+            <a onclick="mostrarPagina('financeiro', this)">💰 Financeiro</a>
             <span class="menu-section-label">Conta</span>
             <a href="indique.html">🎁 Programa de Indicação</a>
             <a href="planos2.html">💳 Planos Ventsy</a>
@@ -570,165 +766,410 @@
     <!-- CONTEÚDO -->
     <section class="dash-content">
 
-       
-        <!-- ── BOAS-VINDAS ── -->
-        <div class="boas-vindas">
-            <div class="bv-inner">
-                <p class="bv-tag">Área do proprietário(a)</p>
-                <h3>Bem-vindo(a), <em id="hero-nome">...</em>!</h3>
-                <p>Aqui você acompanha o desempenho da sua propriedade e gerencia tudo na VENTSY.</p>
-            </div>
-            <div class="bv-acao">
-                <a id="btn-ver-prop" href="minhapropriedade.html" class="btn-ver-prop" target="_blank">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <span id="btn-ver-prop-txt">Ver minha propriedade</span>
-                </a>
-                <a href="../index.html" class="btn-outras-prop">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    Analisar outras propriedades
-                </a>
-            </div>
-        </div>
+        <!-- ════════════════════════════════════
+             PÁGINA: DASHBOARD (original)
+        ════════════════════════════════════ -->
+        <div class="page-section ativa" id="pagina-dashboard">
 
-        <!-- ── MÉTRICAS ── -->
-        <div class="grid-metricas">
-            <div class="card-metrica">
-                <span class="icon">👁</span>
-                <div><p>Visualizações (30d)</p><h3 id="m-views" class="loading">—</h3></div>
+            <div class="boas-vindas">
+                <div class="bv-inner">
+                    <p class="bv-tag">Área do proprietário(a)</p>
+                    <h3>Bem-vindo(a), <em id="hero-nome">...</em>!</h3>
+                    <p>Aqui você acompanha o desempenho da sua propriedade e gerencia tudo na VENTSY.</p>
+                </div>
+                <div class="bv-acao">
+                    <a id="btn-ver-prop" href="minhapropriedade.html" class="btn-ver-prop" target="_blank">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span id="btn-ver-prop-txt">Ver minha propriedade</span>
+                    </a>
+                    <a href="../index.html" class="btn-outras-prop">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        Analisar outras propriedades
+                    </a>
+                </div>
             </div>
-            <div class="card-metrica">
-                <span class="icon">📱</span>
-                <div><p>Cliques WhatsApp (30d)</p><h3 id="m-whatsapp" class="loading">—</h3></div>
-            </div>
-            <div class="card-metrica">
-                <span class="icon">💬</span>
-                <div><p>Cliques Formulário (30d)</p><h3 id="m-formulario" class="loading">—</h3></div>
-            </div>
-            <div class="card-metrica">
-                <span class="icon">⭐</span>
-                <div><p>Avaliação Média</p><h3 id="m-nota" class="loading">—</h3></div>
-            </div>
-        </div>
 
-        <!-- ── GRÁFICO + LATERAL ── -->
-        <div class="container-duas-colunas">
-            <div class="secao-dash">
-                <div class="analytics-header">
-                    <h3>Desempenho — últimos 30 dias</h3>
-                    <div class="analytics-tabs">
-                        <button class="tab-btn ativo" data-tipo="view"       onclick="mudarTab(this)">👁 Visualizações</button>
-                        <button class="tab-btn"        data-tipo="whatsapp"   onclick="mudarTab(this)">📱 WhatsApp</button>
-                        <button class="tab-btn"        data-tipo="formulario" onclick="mudarTab(this)">💬 Formulário</button>
-                        <button class="tab-btn"        data-tipo="nota"       onclick="mudarTab(this)">⭐ Avaliações</button>
+            <div class="grid-metricas">
+                <div class="card-metrica">
+                    <span class="icon">👁</span>
+                    <div><p>Visualizações (30d)</p><h3 id="m-views" class="loading">—</h3></div>
+                </div>
+                <div class="card-metrica">
+                    <span class="icon">📱</span>
+                    <div><p>Cliques WhatsApp (30d)</p><h3 id="m-whatsapp" class="loading">—</h3></div>
+                </div>
+                <div class="card-metrica">
+                    <span class="icon">💬</span>
+                    <div><p>Cliques Formulário (30d)</p><h3 id="m-formulario" class="loading">—</h3></div>
+                </div>
+                <div class="card-metrica">
+                    <span class="icon">⭐</span>
+                    <div><p>Avaliação Média</p><h3 id="m-nota" class="loading">—</h3></div>
+                </div>
+            </div>
+
+            <div class="container-duas-colunas">
+                <div class="secao-dash">
+                    <div class="analytics-header">
+                        <h3>Desempenho — últimos 30 dias</h3>
+                        <div class="analytics-tabs">
+                            <button class="tab-btn ativo" data-tipo="view"       onclick="mudarTab(this)">👁 Visualizações</button>
+                            <button class="tab-btn"        data-tipo="whatsapp"   onclick="mudarTab(this)">📱 WhatsApp</button>
+                            <button class="tab-btn"        data-tipo="formulario" onclick="mudarTab(this)">💬 Formulário</button>
+                            <button class="tab-btn"        data-tipo="nota"       onclick="mudarTab(this)">⭐ Avaliações</button>
+                        </div>
+                    </div>
+                    <div style="position:relative; height:300px; width:100%">
+                        <canvas id="graficoAnalytics"></canvas>
+                    </div>
+                    <p class="grafico-vazio" id="grafico-vazio">Ainda não há dados para este período.</p>
+                </div>
+            </div>
+
+            <p class="passos-titulo">📋 Complete seu perfil <span class="passos-progresso" id="passos-progresso">0 de 6 concluídos</span></p>
+            <div class="passo-lista">
+
+                <div class="passo-item completo" id="passo-1">
+                    <div class="passo-num">✓</div>
+                    <div class="passo-info">
+                        <h4>Conta criada com sucesso</h4>
+                        <p>Seu cadastro foi concluído. Bem-vindo à VENTSY!</p>
+                    </div>
+                    <span class="passo-acao verde">✓ Concluído</span>
+                </div>
+
+                <div class="passo-item" id="passo-2">
+                    <div class="passo-num">2</div>
+                    <div class="passo-info">
+                        <h4>Adicione as fotos da sua propriedade</h4>
+                        <p>Obrigatório: 5 fotos em destaque na galeria principal.</p>
+                    </div>
+                    <a href="fotos.html" class="passo-acao vermelho">Adicionar fotos</a>
+                </div>
+
+                <div class="passo-item" id="passo-3">
+                    <div class="passo-num">3</div>
+                    <div class="passo-info">
+                        <h4>Descreva seu espaço</h4>
+                        <p>Preencha a aba "Sobre" com uma descrição do seu espaço.</p>
+                    </div>
+                    <a href="minhapropriedade.html#sobre" class="passo-acao vermelho">Preencher descrição</a>
+                </div>
+
+                <div class="passo-item" id="passo-4">
+                    <div class="passo-num">4</div>
+                    <div class="passo-info">
+                        <h4>Informe o endereço completo</h4>
+                        <p>Obrigatório: CEP, rua, número, bairro, cidade e estado.</p>
+                    </div>
+                    <a href="minhapropriedade.html#endereco" class="passo-acao vermelho">Adicionar endereço</a>
+                </div>
+
+                <div class="passo-item" id="passo-5">
+                    <div class="passo-num">5</div>
+                    <div class="passo-info">
+                        <h4>Adicione as informações de contato</h4>
+                        <p>Obrigatório: nome, tipo, capacidade, WhatsApp, e-mail, responsável e foto.</p>
+                    </div>
+                    <a href="minhapropriedade.html#contato" class="passo-acao vermelho">Preencher contato</a>
+                </div>
+
+                <div class="passo-item" id="passo-6">
+                    <div class="passo-num">6</div>
+                    <div class="passo-info">
+                        <h4>Adicione os valores dos eventos</h4>
+                        <p>Obrigatório: pelo menos o valor por hora ou o valor de diária.</p>
+                    </div>
+                    <a href="minhapropriedade.html#valores" class="passo-acao vermelho">Adicionar valores</a>
+                </div>
+
+                <div class="passo-item" id="passo-7">
+                    <div class="passo-num">7</div>
+                    <div class="passo-info">
+                        <h4>Selecione os tipos de eventos</h4>
+                        <p>Obrigatório: pelo menos 1 tipo de evento que a propriedade oferece.</p>
+                    </div>
+                    <a href="minhapropriedade.html#eventos" class="passo-acao vermelho">Selecionar eventos</a>
+                </div>
+
+            </div>
+
+            <div class="card-solicitar">
+                <p class="tag">Último passo</p>
+                <h3>Pronto para ir ao ar? 🚀</h3>
+                <p>
+                    Após preencher todos os dados acima, clique no botão abaixo para solicitar
+                    a publicação da sua propriedade na plataforma. Nossa equipe fará a revisão
+                    em até <strong>48 horas úteis</strong> e você receberá um e-mail com o resultado.
+                </p>
+                <div class="solicitar-aviso" id="solicitar-aviso">
+                    ⚠️ Complete todos os <strong>4 passos</strong> acima para liberar o botão.
+                </div>
+                <button class="btn-solicitar" id="btn-solicitar" onclick="solicitarLiberacao()" disabled>
+                    🚀 Solicitar liberação de propriedade na plataforma VENTSY
+                </button>
+                <p class="solicitar-hint" id="solicitar-hint">
+                    Após a solicitação, nossa equipe entrará em contato para confirmar os dados.
+                </p>
+            </div>
+
+        </div><!-- /pagina-dashboard -->
+
+
+        <!-- ════════════════════════════════════
+             PÁGINA: FINANCEIRO
+        ════════════════════════════════════ -->
+        <div class="page-section" id="pagina-financeiro">
+
+            <!-- Header fixo da seção -->
+            <div class="fin-header">
+                <div>
+                    <h2>💰 Financeiro</h2>
+                    <div class="nome-propriedade" id="fin-data-atual"></div>
+                </div>
+                <div class="fin-header-right">
+                    <select class="fin-select" onchange="finUpdatePeriod(this.value)">
+                        <option value="mes">Este Mês</option>
+                        <option value="trimestre">Trimestre</option>
+                        <option value="ano">Este Ano</option>
+                    </select>
+                    <button class="btn-fin btn-fin-ghost" onclick="finOpenModal('despesa')">+ Despesa</button>
+                    <button class="btn-fin btn-fin-primary" onclick="finOpenModal('receita')">+ Receita</button>
+                </div>
+            </div>
+
+            <!-- Sub-abas internas -->
+            <div class="fin-tabs">
+                <button class="fin-tab-btn ativo" onclick="finMudarAba('painel', this)">📊 Painel</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('receitas', this)">💚 Receitas</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('despesas', this)">🔴 Despesas</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('eventos', this)">📅 Eventos</button>
+                <button class="fin-tab-btn" onclick="finMudarAba('relatorios', this)">📋 Relatórios</button>
+            </div>
+
+            <!-- ── ABA: PAINEL ── -->
+            <div class="fin-tab-content ativo" id="fin-painel">
+
+                <!-- KPIs -->
+                <div class="fin-kpi-grid">
+                    <div class="fin-kpi-card verde" style="animation: fadeUp .3s ease both">
+                        <div class="fin-kpi-label">Receita Total</div>
+                        <div class="fin-kpi-value verde" id="fin-kpi-receita">R$ 48.700</div>
+                        <div class="fin-delta up">↑ 12% vs mês anterior</div>
+                    </div>
+                    <div class="fin-kpi-card vermelho" style="animation: fadeUp .35s ease both">
+                        <div class="fin-kpi-label">Despesas Totais</div>
+                        <div class="fin-kpi-value vermelho" id="fin-kpi-despesa">R$ 19.350</div>
+                        <div class="fin-delta down">↑ 4% vs mês anterior</div>
+                    </div>
+                    <div class="fin-kpi-card gold" style="animation: fadeUp .4s ease both">
+                        <div class="fin-kpi-label">Lucro Líquido</div>
+                        <div class="fin-kpi-value gold" id="fin-kpi-lucro">R$ 29.350</div>
+                        <div class="fin-delta up">↑ 18% vs mês anterior</div>
+                    </div>
+                    <div class="fin-kpi-card azul" style="animation: fadeUp .45s ease both">
+                        <div class="fin-kpi-label">Eventos no Mês</div>
+                        <div class="fin-kpi-value azul" id="fin-kpi-eventos">14</div>
+                        <div class="fin-delta up">↑ 2 vs mês anterior</div>
                     </div>
                 </div>
-                <div style="position:relative; height:300px; width:100%">
-                    <canvas id="graficoAnalytics"></canvas>
+
+                <!-- Grid meio -->
+                <div class="fin-mid-grid">
+
+                    <!-- Gráfico de barras -->
+                    <div class="fin-section" style="animation: fadeUp .4s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Receitas × Despesas</div>
+                                <div class="fin-section-sub">Últimos 6 meses</div>
+                            </div>
+                            <span class="fin-badge">2025</span>
+                        </div>
+                        <canvas id="finBarChart" height="160"></canvas>
+                    </div>
+
+                    <!-- Donut -->
+                    <div class="fin-section" style="animation: fadeUp .45s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Fontes de Receita</div>
+                                <div class="fin-section-sub">Distribuição por categoria</div>
+                            </div>
+                        </div>
+                        <div class="fin-donut-wrap">
+                            <canvas id="finDonutChart" width="140" height="140"></canvas>
+                            <div class="fin-donut-legend" id="finDonutLegend"></div>
+                        </div>
+                    </div>
+
+                    <!-- Metas -->
+                    <div class="fin-section" style="animation: fadeUp .5s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Metas Mensais</div>
+                                <div class="fin-section-sub">Progresso até agora</div>
+                            </div>
+                            <button class="btn-fin btn-fin-ghost" style="font-size:0.78rem;padding:6px 14px" onclick="finOpenModal('meta')">Editar</button>
+                        </div>
+                        <div class="fin-goal-list" id="finGoalList"></div>
+                    </div>
+
+                    <!-- Próximos Eventos -->
+                    <div class="fin-section" style="animation: fadeUp .55s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Próximos Eventos</div>
+                                <div class="fin-section-sub">Previsão de entrada</div>
+                            </div>
+                        </div>
+                        <div class="fin-cf-row">
+                            <div class="fin-cf-box">
+                                <div class="fin-cf-label">Confirmados</div>
+                                <div class="fin-cf-val" style="color:#0ca678">R$ 22.400</div>
+                            </div>
+                            <div class="fin-cf-box">
+                                <div class="fin-cf-label">Em Negociação</div>
+                                <div class="fin-cf-val" style="color:#f59e0b">R$ 8.900</div>
+                            </div>
+                            <div class="fin-cf-box">
+                                <div class="fin-cf-label">Pendente Pag.</div>
+                                <div class="fin-cf-val" style="color:#ff385c">R$ 5.200</div>
+                            </div>
+                        </div>
+                        <div class="fin-event-list" id="finEventList"></div>
+                    </div>
+
+                    <!-- Lançamentos -->
+                    <div class="fin-section fin-wide" style="animation: fadeUp .6s ease both">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">Lançamentos Recentes</div>
+                                <div class="fin-section-sub">Todas as movimentações do mês</div>
+                            </div>
+                            <div style="display:flex;gap:8px">
+                                <select class="fin-select" style="font-size:0.78rem;padding:6px 12px" onchange="finFilterTable(this.value)">
+                                    <option value="todos">Todos</option>
+                                    <option value="receita">Receitas</option>
+                                    <option value="despesa">Despesas</option>
+                                    <option value="pendente">Pendentes</option>
+                                </select>
+                                <button class="btn-fin btn-fin-ghost" style="font-size:0.78rem;padding:6px 14px">Exportar</button>
+                            </div>
+                        </div>
+                        <div class="fin-table-wrap">
+                            <table class="fin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Descrição</th>
+                                        <th>Categoria</th>
+                                        <th>Tipo de Evento</th>
+                                        <th>Status</th>
+                                        <th style="text-align:right">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="finTransTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
-                <p class="grafico-vazio" id="grafico-vazio">Ainda não há dados para este período.</p>
-            </div>
+            </div><!-- /fin-painel -->
 
-
-        </div>
-
-        <!-- ── PASSO A PASSO ── -->
-        <p class="passos-titulo">📋 Complete seu perfil <span class="passos-progresso" id="passos-progresso">0 de 6 concluídos</span></p>
-        <div class="passo-lista">
-
-            <!-- Passo 1: sempre completo (conta criada) -->
-            <div class="passo-item completo" id="passo-1">
-                <div class="passo-num">✓</div>
-                <div class="passo-info">
-                    <h4>Conta criada com sucesso</h4>
-                    <p>Seu cadastro foi concluído. Bem-vindo à VENTSY!</p>
+            <!-- ── ABA: RECEITAS ── -->
+            <div class="fin-tab-content" id="fin-receitas">
+                <div class="fin-section">
+                    <div class="fin-section-header">
+                        <div>
+                            <div class="fin-section-title">💚 Receitas do Período</div>
+                            <div class="fin-section-sub">Todas as entradas registradas</div>
+                        </div>
+                        <button class="btn-fin btn-fin-primary" onclick="finOpenModal('receita')">+ Nova Receita</button>
+                    </div>
+                    <div class="fin-table-wrap">
+                        <table class="fin-table">
+                            <thead>
+                                <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Evento</th><th>Status</th><th style="text-align:right">Valor</th></tr>
+                            </thead>
+                            <tbody id="finReceitasTable"></tbody>
+                        </table>
+                    </div>
                 </div>
-                <span class="passo-acao verde">✓ Concluído</span>
             </div>
 
-            <!-- Passo 2: Fotos -->
-            <div class="passo-item" id="passo-2">
-                <div class="passo-num">2</div>
-                <div class="passo-info">
-                    <h4>Adicione as fotos da sua propriedade</h4>
-                    <p>Obrigatório: 5 fotos em destaque na galeria principal.</p>
+            <!-- ── ABA: DESPESAS ── -->
+            <div class="fin-tab-content" id="fin-despesas">
+                <div class="fin-section">
+                    <div class="fin-section-header">
+                        <div>
+                            <div class="fin-section-title">🔴 Despesas do Período</div>
+                            <div class="fin-section-sub">Todas as saídas registradas</div>
+                        </div>
+                        <button class="btn-fin btn-fin-ghost" onclick="finOpenModal('despesa')">+ Nova Despesa</button>
+                    </div>
+                    <div class="fin-table-wrap">
+                        <table class="fin-table">
+                            <thead>
+                                <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Evento</th><th>Status</th><th style="text-align:right">Valor</th></tr>
+                            </thead>
+                            <tbody id="finDespesasTable"></tbody>
+                        </table>
+                    </div>
                 </div>
-                <a href="fotos.html" class="passo-acao vermelho">Adicionar fotos</a>
             </div>
 
-            <!-- Passo 3: Sobre -->
-            <div class="passo-item" id="passo-3">
-                <div class="passo-num">3</div>
-                <div class="passo-info">
-                    <h4>Descreva seu espaço</h4>
-                    <p>Preencha a aba "Sobre" com uma descrição do seu espaço.</p>
+            <!-- ── ABA: EVENTOS ── -->
+            <div class="fin-tab-content" id="fin-eventos">
+                <div class="fin-section">
+                    <div class="fin-section-header">
+                        <div>
+                            <div class="fin-section-title">📅 Eventos com Movimentação</div>
+                            <div class="fin-section-sub">Receitas vinculadas a eventos</div>
+                        </div>
+                    </div>
+                    <div class="fin-event-list" id="finEventListFull" style="max-height:500px;overflow-y:auto;"></div>
                 </div>
-                <a href="minhapropriedade.html#sobre" class="passo-acao vermelho">Preencher descrição</a>
             </div>
 
-            <!-- Passo 4: Endereço -->
-            <div class="passo-item" id="passo-4">
-                <div class="passo-num">4</div>
-                <div class="passo-info">
-                    <h4>Informe o endereço completo</h4>
-                    <p>Obrigatório: CEP, rua, número, bairro, cidade e estado.</p>
+            <!-- ── ABA: RELATÓRIOS ── -->
+            <div class="fin-tab-content" id="fin-relatorios">
+                <div class="fin-mid-grid">
+                    <div class="fin-section">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">📋 Resumo do Mês</div>
+                                <div class="fin-section-sub">Visão consolidada</div>
+                            </div>
+                        </div>
+                        <div class="fin-cf-row" style="flex-direction:column;gap:14px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:#f7f7f7;border-radius:10px;border:1px solid #eee;">
+                                <span style="font-size:0.88rem;color:#444;font-weight:600;">Total Receitas</span>
+                                <span style="font-weight:700;color:#0ca678;font-size:1rem;" id="rel-receita">R$ 48.700</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:#f7f7f7;border-radius:10px;border:1px solid #eee;">
+                                <span style="font-size:0.88rem;color:#444;font-weight:600;">Total Despesas</span>
+                                <span style="font-weight:700;color:#ff385c;font-size:1rem;" id="rel-despesa">R$ 19.350</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:rgba(255,56,92,0.04);border-radius:10px;border:1px solid rgba(255,56,92,0.15);">
+                                <span style="font-size:0.88rem;color:#444;font-weight:700;">Lucro Líquido</span>
+                                <span style="font-weight:700;color:#f59e0b;font-size:1.1rem;" id="rel-lucro">R$ 29.350</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fin-section">
+                        <div class="fin-section-header">
+                            <div>
+                                <div class="fin-section-title">🎯 Metas vs Realizado</div>
+                                <div class="fin-section-sub">Performance do mês</div>
+                            </div>
+                        </div>
+                        <div class="fin-goal-list" id="finGoalListRel"></div>
+                    </div>
                 </div>
-                <a href="minhapropriedade.html#endereco" class="passo-acao vermelho">Adicionar endereço</a>
             </div>
 
-            <!-- Passo 5: Contato -->
-            <div class="passo-item" id="passo-5">
-                <div class="passo-num">5</div>
-                <div class="passo-info">
-                    <h4>Adicione as informações de contato</h4>
-                    <p>Obrigatório: nome, tipo, capacidade, WhatsApp, e-mail, responsável e foto.</p>
-                </div>
-                <a href="minhapropriedade.html#contato" class="passo-acao vermelho">Preencher contato</a>
-            </div>
-
-            <!-- Passo 6: Valores -->
-            <div class="passo-item" id="passo-6">
-                <div class="passo-num">6</div>
-                <div class="passo-info">
-                    <h4>Adicione os valores dos eventos</h4>
-                    <p>Obrigatório: pelo menos o valor por hora ou o valor de diária.</p>
-                </div>
-                <a href="minhapropriedade.html#valores" class="passo-acao vermelho">Adicionar valores</a>
-            </div>
-
-            <!-- Passo 7: Eventos -->
-            <div class="passo-item" id="passo-7">
-                <div class="passo-num">7</div>
-                <div class="passo-info">
-                    <h4>Selecione os tipos de eventos</h4>
-                    <p>Obrigatório: pelo menos 1 tipo de evento que a propriedade oferece.</p>
-                </div>
-                <a href="minhapropriedade.html#eventos" class="passo-acao vermelho">Selecionar eventos</a>
-            </div>
-
-        </div>
-
-        <!-- ── CARD SOLICITAÇÃO ── -->
-        <div class="card-solicitar">
-            <p class="tag">Último passo</p>
-            <h3>Pronto para ir ao ar? 🚀</h3>
-            <p>
-                Após preencher todos os dados acima, clique no botão abaixo para solicitar
-                a publicação da sua propriedade na plataforma. Nossa equipe fará a revisão
-                em até <strong>48 horas úteis</strong> e você receberá um e-mail com o resultado.
-            </p>
-
-            <!-- Aviso quando incompleto -->
-            <div class="solicitar-aviso" id="solicitar-aviso">
-                ⚠️ Complete todos os <strong>4 passos</strong> acima para liberar o botão.
-            </div>
-
-            <button class="btn-solicitar" id="btn-solicitar" onclick="solicitarLiberacao()" disabled>
-                🚀 Solicitar liberação de propriedade na plataforma VENTSY
-            </button>
-            <p class="solicitar-hint" id="solicitar-hint">
-                Após a solicitação, nossa equipe entrará em contato para confirmar os dados.
-            </p>
-        </div>
+        </div><!-- /pagina-financeiro -->
 
     </section>
 </main>
@@ -737,6 +1178,66 @@
 <div class="toast" id="toast">
     <span>✅</span>
     <span id="toast-msg">Mensagem</span>
+</div>
+
+<!-- MODAL FINANCEIRO -->
+<div class="fin-modal-overlay" id="finModal">
+    <div class="fin-modal">
+        <div class="fin-modal-head">
+            <div>
+                <h2 id="fin-modal-title">Novo Lançamento</h2>
+                <p id="fin-modal-desc">Registre a movimentação financeira abaixo.</p>
+            </div>
+            <button class="fin-modal-close" onclick="finCloseModal()">✕</button>
+        </div>
+        <div class="fin-form-grid">
+            <div class="fin-form-group">
+                <label>Tipo</label>
+                <select id="fin-f-tipo">
+                    <option value="receita">Receita</option>
+                    <option value="despesa">Despesa</option>
+                </select>
+            </div>
+            <div class="fin-form-group">
+                <label>Data</label>
+                <input type="date" id="fin-f-data">
+            </div>
+            <div class="fin-form-group">
+                <label>Valor (R$)</label>
+                <input type="number" id="fin-f-valor" placeholder="0,00" step="0.01" min="0">
+            </div>
+            <div class="fin-form-group">
+                <label>Categoria</label>
+                <select id="fin-f-cat">
+                    <option>Aluguel de Espaço</option>
+                    <option>Buffet / Catering</option>
+                    <option>Decoração</option>
+                    <option>Som / Iluminação</option>
+                    <option>Limpeza</option>
+                    <option>Manutenção</option>
+                    <option>Marketing</option>
+                    <option>Outros</option>
+                </select>
+            </div>
+            <div class="fin-form-group">
+                <label>Status</label>
+                <select id="fin-f-status">
+                    <option value="pago">Pago</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="atrasado">Atrasado</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+            </div>
+            <div class="fin-form-group full">
+                <label>Descrição</label>
+                <input type="text" id="fin-f-desc" placeholder="Ex: Casamento Silva — Salão Principal">
+            </div>
+        </div>
+        <div class="fin-modal-actions">
+            <button class="btn-fin btn-fin-ghost" onclick="finCloseModal()">Cancelar</button>
+            <button class="btn-fin btn-fin-primary" onclick="finSaveTransaction()">Salvar</button>
+        </div>
+    </div>
 </div>
 
 <!-- ──────────── FOOTER ──────────── -->
@@ -770,7 +1271,39 @@
     const { createClient } = supabase;
     const sb = createClient(SUPA_URL, SUPA_KEY);
 
-    /* ── Init ── */
+    /* ═══════════════════════════════════
+       NAVEGAÇÃO ENTRE PÁGINAS
+    ═══════════════════════════════════ */
+    function mostrarPagina(id, linkEl) {
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('ativa'));
+        document.getElementById('pagina-' + id).classList.add('ativa');
+
+        document.querySelectorAll('.dash-menu a').forEach(a => a.classList.remove('active'));
+        if (linkEl) linkEl.classList.add('active');
+
+        // Fechar sidebar mobile ao navegar
+        const sb = document.querySelector('.dash-sidebar');
+        sb.classList.remove('aberta');
+        document.getElementById('sidebar-overlay').classList.remove('ativo');
+
+        // Inicializar financeiro na primeira vez
+        if (id === 'financeiro' && !window._finIniciado) {
+            window._finIniciado = true;
+            setTimeout(() => {
+                finDrawBarChart();
+                finDrawDonut();
+                finRenderGoals();
+                finRenderEvents();
+                finRenderTable();
+                // data atual
+                document.getElementById('fin-data-atual').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+            }, 50);
+        }
+    }
+
+    /* ═══════════════════════════════════
+       INIT DASHBOARD
+    ═══════════════════════════════════ */
     async function init() {
         try {
             const { data: { session } } = await sb.auth.getSession();
@@ -781,236 +1314,125 @@
 
             try {
                 const { data: perfil } = await sb.from('usuarios').select('*').eq('id', user.id).single();
-                if (perfil) {
-                    nome    = perfil.nome    || user.email;
-                    usuario = perfil.usuario || '';
-                }
+                if (perfil) { nome = perfil.nome || user.email; usuario = perfil.usuario || ''; }
             } catch (_) {}
 
             const primeiroNome = nome.split(' ')[0];
             const inicial      = primeiroNome[0]?.toUpperCase() || '?';
 
-            // Header
             document.getElementById('avatar-inicial').textContent = inicial;
             document.getElementById('drop-nome').textContent      = nome;
             document.getElementById('drop-email').textContent     = user.email;
-
-            // Sidebar
             document.getElementById('sidebar-nome').textContent   = nome;
             document.getElementById('sidebar-handle').textContent = usuario ? '@' + usuario : '';
+            document.getElementById('hero-nome').textContent      = primeiroNome;
 
-            // Foto do responsável no avatar
-            try {
-                const { data: prop } = await sb.from('propriedades').select('foto_responsavel').eq('usuario_id', user.id).single();
-                const avatarEl = document.getElementById('sidebar-avatar');
-                if (prop?.foto_responsavel) {
-                    avatarEl.innerHTML = `<img src="${prop.foto_responsavel}" alt="Foto">`;
-                } else {
-                    avatarEl.textContent = inicial;
-                }
-            } catch (_) {
-                document.getElementById('sidebar-avatar').textContent = inicial;
-            }
-
-            // Boas-vindas
-            document.getElementById('hero-nome').textContent = primeiroNome;
+            // Sidebar avatar
+            const avatarEl = document.getElementById('sidebar-avatar');
+            avatarEl.textContent = inicial;
 
             // Plano
             try {
-                const { data: ass } = await sb.from('assinaturas')
-                    .select('plano_ativo, status, fim_periodo')
-                    .eq('usuario_id', user.id).single();
-                const pl = { basico: '🏷️ Básico', pro: '⭐ Pro', ultra: '🚀 Ultra' };
-                const plNome = { basico: 'Básico', pro: 'Pro', ultra: 'Ultra' };
-                document.getElementById('sidebar-plano-chip').textContent = pl[ass?.plano_ativo] || '🏷️ Básico';
-
-                if (ass?.fim_periodo) {
-                    const d = new Date(ass.fim_periodo);
-                    const dataFormatada = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    document.getElementById('sidebar-validade').textContent = `Válido até ${dataFormatada}`;
-                }
+                const { data: assin } = await sb.from('assinaturas').select('plano,validade').eq('user_id', user.id).maybeSingle();
+                const plano = assin?.plano || 'Free';
+                const emoji = plano === 'Pro' ? '🌟' : plano === 'Premium' ? '💎' : '⭐';
+                document.getElementById('sidebar-plano-chip').textContent = emoji + ' ' + plano;
+                if (assin?.validade) document.getElementById('sidebar-validade').textContent = 'Válido até ' + new Date(assin.validade).toLocaleDateString('pt-BR');
             } catch (_) {
-                document.getElementById('sidebar-plano-chip').textContent = '🏷️ Básico';
-
+                document.getElementById('sidebar-plano-chip').textContent = '⭐ Free';
             }
 
-            /* Busca ID da propriedade do usuário */
+            // Propriedade
             try {
-                const { data: prop } = await sb
-                    .from('propriedades').select('id')
-                    .eq('usuario_id', user.id).limit(1).maybeSingle();
-                propIdDash = prop?.id || null;
+                const { data: props } = await sb.from('propriedades').select('id,nome,slug').eq('user_id', user.id).order('created_at', { ascending: true }).limit(1);
+                if (props?.length) {
+                    const prop = props[0];
+                    propIdDash = prop.id;
+                    const slug = prop.slug || prop.id;
+                    document.getElementById('btn-ver-prop').href = '../propriedade/' + slug + '.html';
+                    document.getElementById('btn-ver-prop-txt').textContent = 'Ver: ' + prop.nome;
+                    await carregarMetricas(prop.id);
+                    await _verificarPassos(prop);
+                    const dados = await buscarDados30Dias('view');
+                    montarGrafico('view', dados);
+                } else {
+                    ['m-views','m-whatsapp','m-formulario','m-nota'].forEach(id => {
+                        const el = document.getElementById(id); el.textContent = '—'; el.classList.remove('loading');
+                    });
+                }
             } catch (_) {}
 
-            /* Botão "Ver minha propriedade" */
-            const btnVer = document.getElementById('btn-ver-prop');
-            if (btnVer) {
-                if (propIdDash) {
-                    btnVer.href = '../propriedade.html?id=' + propIdDash;
-                    btnVer.target = '_blank';
-                } else {
-                    btnVer.href = 'minhapropriedade.html';
-                    btnVer.target = '_self';
-                    const txt = document.getElementById('btn-ver-prop-txt');
-                    if (txt) txt.textContent = 'Cadastrar propriedade';
-                }
-            }
-
-            /* Verifica passos de perfil */
-            verificarPassos(user.id);
-
-            /* Carrega métricas e gráfico inicial */
-            if (propIdDash) {
-                carregarMetricas(propIdDash);
-            } else {
-                ['m-views','m-whatsapp','m-formulario','m-nota'].forEach(id => {
-                    const el = document.getElementById(id);
-                    el.textContent = '—'; el.classList.remove('loading');
-                });
-            }
-            buscarDados30Dias('view').then(dados => montarGrafico('view', dados));
-
-        } catch (err) {
-            console.error('Erro no init:', err);
+        } catch (e) {
+            console.error(e);
         } finally {
             document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('main-content').style.display   = 'flex';
+            document.getElementById('main-content').style.display = 'flex';
         }
     }
 
-    /* ── Toggle sidebar mobile ── */
-    function toggleSidebar() {
-        const sidebar  = document.querySelector('.dash-sidebar');
-        const overlay  = document.getElementById('sidebar-overlay');
-        sidebar.classList.toggle('aberta');
-        overlay.classList.toggle('ativo');
-    }
-
-    /* ── Toggle dropmenu ── */
+    /* ── UI helpers ── */
     function toggleAvatar() {
         const m = document.getElementById('avatar-menu');
         m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
     }
     document.addEventListener('click', e => {
-        const c = document.querySelector('.avatar-container');
-        if (c && !c.contains(e.target))
-            document.getElementById('avatar-menu').style.display = 'none';
+        if (!e.target.closest('.avatar-container')) document.getElementById('avatar-menu').style.display = 'none';
     });
-
-    /* ── Sair ── */
     async function sair() {
         await sb.auth.signOut();
         window.location.href = '../login.html';
     }
+    function toggleSidebar() {
+        document.querySelector('.dash-sidebar').classList.toggle('aberta');
+        document.getElementById('sidebar-overlay').classList.toggle('ativo');
+    }
 
     /* ── Solicitar liberação ── */
-    function solicitarLiberacao() {
-        const btn  = document.getElementById('btn-solicitar');
-        if (btn.disabled) return;
-        const hint = document.getElementById('solicitar-hint');
-
-        btn.disabled = true;
-        btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite">⏳</span>&nbsp;Enviando solicitação...';
-
-        // Aqui você pode chamar um endpoint/webhook real no futuro
-        setTimeout(() => {
-            btn.innerHTML = '✅ Solicitação enviada com sucesso!';
-            btn.classList.add('enviado');
-            hint.innerHTML = 'Nossa equipe recebeu o pedido e revisará sua propriedade em até <strong>48 horas úteis</strong>. Você receberá um e-mail com o resultado.';
-            mostrarToast('Solicitação enviada! Aguarde a revisão da equipe VENTSY.');
-        }, 1800);
-    }
-
-    /* ── Verificação automática dos passos ── */
-    let _passosCount = 0;
-
-    function _marcarPasso(num) {
-        const item = document.getElementById('passo-' + num);
-        if (!item || item.classList.contains('completo')) return;
-        item.classList.add('completo');
-        item.querySelector('.passo-num').textContent = '✓';
-        const acao = item.querySelector('.passo-acao');
-        if (acao) acao.outerHTML = '<span class="passo-acao verde">✓ Concluído</span>';
-        _passosCount++;
-    }
-
-    function atualizarProgresso() {
-        const total = 6; // passos 2–7
-        const prog  = document.getElementById('passos-progresso');
-        prog.textContent = _passosCount + ' de ' + total + ' concluídos';
-        prog.classList.toggle('completo-total', _passosCount === total);
-        const btn   = document.getElementById('btn-solicitar');
-        const aviso = document.getElementById('solicitar-aviso');
-        btn.disabled = _passosCount < total;
-        aviso.classList.toggle('oculto', _passosCount >= total);
-    }
-
-    async function verificarPassos(userId) {
+    async function solicitarLiberacao() {
+        const btn = document.getElementById('btn-solicitar');
+        if (btn.disabled || btn.classList.contains('enviado')) return;
+        btn.disabled = true; btn.textContent = 'Enviando...';
         try {
-            /* ── 1. Busca dados da propriedade (query original, sem alteração) ── */
-            const { data: prop } = await sb.from('propriedades')
-                .select('id, descricao, cep, rua, numero, bairro, cidade, estado, nome, tipo_propriedade, capacidade, whatsapp, email_contato, nome_responsavel, foto_responsavel, valor_hora, valor_base, tipo_evento')
-                .eq('usuario_id', userId).maybeSingle();
+            const { data: { session } } = await sb.auth.getSession();
+            await sb.from('solicitacoes_publicacao').upsert({ user_id: session.user.id, status: 'pendente', criado_em: new Date().toISOString() }, { onConflict: 'user_id' });
+            btn.classList.add('enviado'); btn.textContent = '✅ Solicitação enviada com sucesso!';
+            document.getElementById('solicitar-hint').textContent = 'Solicitação registrada! Nossa equipe revisará em até 48 horas úteis.';
+            mostrarToast('Solicitação enviada! Aguarde o contato da equipe VENTSY.');
+        } catch (_) {
+            btn.disabled = false; btn.textContent = '🚀 Solicitar liberação de propriedade na plataforma VENTSY';
+            mostrarToast('Erro ao enviar. Tente novamente.');
+        }
+    }
 
-            /* ── 2. Verifica status de publicação em query separada (não quebra se coluna não existir) ── */
-            let statusAtual = '';
-            try {
-                const { data: statusProp } = await sb.from('propriedades')
-                    .select('status_publicacao')
-                    .eq('usuario_id', userId).maybeSingle();
-                statusAtual = (statusProp?.status_publicacao || '').toLowerCase();
-            } catch (_) {}
-
-            const statusAprovado   = ['aprovada', 'publicada', 'ativo', 'ativa', 'aprovado'].includes(statusAtual);
-            const statusAguardando = ['aguardando', 'pendente', 'em_revisao', 'em revisao', 'solicitado'].includes(statusAtual);
-
-            /* Se aprovada: oculta toda a seção de setup */
-            if (statusAprovado) {
-                const secaoPassos   = document.querySelector('.passo-lista');
-                const tituloPassos  = document.querySelector('.passos-titulo');
-                const cardSolicitar = document.querySelector('.card-solicitar');
-                if (secaoPassos)   secaoPassos.style.display   = 'none';
-                if (tituloPassos)  tituloPassos.style.display  = 'none';
-                if (cardSolicitar) cardSolicitar.style.display = 'none';
-                return;
-            }
-
-            /* Se aguardando revisão: mostra botão no estado "enviado" */
-            if (statusAguardando) {
-                const btn   = document.getElementById('btn-solicitar');
-                const hint  = document.getElementById('solicitar-hint');
-                const aviso = document.getElementById('solicitar-aviso');
-                if (btn) {
-                    btn.disabled  = true;
-                    btn.innerHTML = '⏳ Aguardando revisão da equipe VENTSY...';
-                    btn.style.background = '#888';
-                    btn.style.boxShadow  = 'none';
-                }
-                if (hint) hint.innerHTML = 'Sua solicitação foi recebida e está em análise. Nossa equipe revisará em até <strong>48 horas úteis</strong>.';
-                if (aviso) aviso.classList.add('oculto');
-            }
-
-            /* ── 3. Verifica passos de perfil (lógica original intacta) ── */
-            if (prop?.id) {
-                const { data: fotos } = await sb.from('fotos_imovel')
-                    .select('id').eq('propriedade_id', prop.id).eq('secao', '__destaque__');
-                if ((fotos || []).length >= 5) _marcarPasso(2);
-            }
-
-            const t = v => !!(v && String(v).trim());
-            if (t(prop?.descricao))  _marcarPasso(3);
-            if (t(prop?.cep) && t(prop?.rua) && t(prop?.numero) && t(prop?.bairro) && t(prop?.cidade) && t(prop?.estado)) _marcarPasso(4);
-            if (t(prop?.nome) && t(prop?.tipo_propriedade) && t(prop?.capacidade) && t(prop?.whatsapp) && t(prop?.email_contato) && t(prop?.nome_responsavel) && t(prop?.foto_responsavel)) _marcarPasso(5);
-            if (prop?.valor_hora || prop?.valor_base)  _marcarPasso(6);
-            if (t(prop?.tipo_evento))                  _marcarPasso(7);
+    /* ── Verificar passos ── */
+    const _passosCompletos = new Set();
+    function _marcarPasso(n) { _passosCompletos.add(n); const el = document.getElementById('passo-'+n); if (el) { el.classList.add('completo'); const num = el.querySelector('.passo-num'); if (num) num.textContent = '✓'; const ac = el.querySelector('.passo-acao'); if (ac) { ac.className = 'passo-acao verde'; ac.textContent = '✓ Concluído'; } } }
+    function atualizarProgresso() {
+        const total = 7, conc = _passosCompletos.size;
+        const el = document.getElementById('passos-progresso');
+        el.textContent = conc + ' de ' + total + ' concluídos';
+        el.classList.toggle('completo-total', conc >= total);
+        const aviso = document.getElementById('solicitar-aviso');
+        const btn   = document.getElementById('btn-solicitar');
+        const obrig = [2,3,4,5,6,7];
+        const falta = obrig.filter(n => !_passosCompletos.has(n)).length;
+        if (falta === 0) { if (aviso) aviso.classList.add('oculto'); if (btn) btn.disabled = false; }
+        else { if (aviso) { aviso.classList.remove('oculto'); aviso.innerHTML = '⚠️ Complete mais <strong>' + falta + ' passo(s)</strong> para liberar o botão.'; } }
+    }
+    async function _verificarPassos(prop) {
+        const t = v => v !== null && v !== undefined && v !== '';
+        try {
+            _marcarPasso(1);
+            if (prop?.fotos_destaque?.length >= 5)              _marcarPasso(2);
+            if (t(prop?.sobre))                                  _marcarPasso(3);
+            if (t(prop?.cep) && t(prop?.rua))                   _marcarPasso(4);
+            if (t(prop?.whatsapp) && t(prop?.email_contato))    _marcarPasso(5);
+            if (t(prop?.valor_hora) || t(prop?.valor_diaria))   _marcarPasso(6);
+            if (t(prop?.tipo_evento))                           _marcarPasso(7);
         } catch (_) {}
         atualizarProgresso();
     }
-
-    // Inicializa botão como desabilitado
-    document.addEventListener('DOMContentLoaded', () => {
-        atualizarProgresso();
-    });
+    document.addEventListener('DOMContentLoaded', () => { atualizarProgresso(); });
 
     /* ── Toast ── */
     function mostrarToast(msg) {
@@ -1020,182 +1442,365 @@
         setTimeout(() => t.classList.remove('visivel'), 5000);
     }
 
-    /* ── Analytics: variáveis globais ── */
-    let graficoInst  = null;
-    let dadosCache   = {};
-    let propIdDash   = null;
-    let tabAtiva     = 'view';
+    /* ── Analytics ── */
+    let graficoInst  = null, dadosCache = {}, propIdDash = null, tabAtiva = 'view';
+    const COR_CHART = { view:'#ff385c', whatsapp:'#25D366', formulario:'#1a73e8', nota:'#f59e0b' };
+    const LABEL_CHART = { view:'Visualizações', whatsapp:'Cliques WhatsApp', formulario:'Cliques Formulário', nota:'Avaliação média' };
 
-    const COR_CHART = {
-        view:       '#ff385c',
-        whatsapp:   '#25D366',
-        formulario: '#1a73e8',
-        nota:       '#f59e0b'
-    };
-    const LABEL_CHART = {
-        view:       'Visualizações',
-        whatsapp:   'Cliques WhatsApp',
-        formulario: 'Cliques Formulário',
-        nota:       'Avaliação média'
-    };
-
-    /* Gera labels e chaves ISO dos últimos 30 dias */
     const { LABELS_30D, KEYS_30D } = (() => {
         const LABELS_30D = [], KEYS_30D = [], hoje = new Date();
         for (let i = 29; i >= 0; i--) {
-            const d = new Date(hoje);
-            d.setDate(hoje.getDate() - i);
-            LABELS_30D.push(`${d.getDate()}/${d.getMonth() + 1}`);
+            const d = new Date(hoje); d.setDate(hoje.getDate() - i);
+            LABELS_30D.push(d.getDate() + '/' + (d.getMonth()+1));
             KEYS_30D.push(d.toISOString().split('T')[0]);
         }
         return { LABELS_30D, KEYS_30D };
     })();
-
-    /* Array de zeros para quando não há dados reais */
     const ZEROS_30D = new Array(30).fill(0);
 
-    /* ── Carrega totais dos cards de métricas ── */
     async function carregarMetricas(propId) {
-        const inicio = new Date();
-        inicio.setDate(inicio.getDate() - 30);
+        const inicio = new Date(); inicio.setDate(inicio.getDate() - 30);
         try {
-            const { data } = await sb
-                .from('analytics_eventos')
-                .select('evento_tipo')
-                .eq('propriedade_id', propId)
-                .gte('created_at', inicio.toISOString());
-
+            const { data } = await sb.from('analytics_eventos').select('evento_tipo').eq('propriedade_id', propId).gte('created_at', inicio.toISOString());
             const c = { view: 0, whatsapp: 0, formulario: 0 };
             (data || []).forEach(e => { if (c[e.evento_tipo] !== undefined) c[e.evento_tipo]++; });
-
             ['views','whatsapp','formulario'].forEach(id => {
                 const el = document.getElementById('m-' + id);
-                el.textContent = c[id === 'views' ? 'view' : id];
-                el.classList.remove('loading');
+                el.textContent = c[id === 'views' ? 'view' : id]; el.classList.remove('loading');
             });
         } catch (_) {
-            ['m-views','m-whatsapp','m-formulario'].forEach(id => {
-                const el = document.getElementById(id);
-                el.textContent = '—'; el.classList.remove('loading');
-            });
+            ['m-views','m-whatsapp','m-formulario'].forEach(id => { const el = document.getElementById(id); el.textContent = '—'; el.classList.remove('loading'); });
         }
-
-        /* Avaliação média — tenta coluna 'avaliacao' em propriedades */
         try {
-            const { data: prop } = await sb
-                .from('propriedades').select('avaliacao').eq('id', propId).single();
-            const nota = prop?.avaliacao;
+            const { data: prop } = await sb.from('propriedades').select('avaliacao').eq('id', propId).single();
             const el = document.getElementById('m-nota');
-            el.textContent = nota ? Number(nota).toFixed(1) : '—';
-            el.classList.remove('loading');
-        } catch (_) {
-            const el = document.getElementById('m-nota');
-            el.textContent = '—'; el.classList.remove('loading');
-        }
+            el.textContent = prop?.avaliacao ? Number(prop.avaliacao).toFixed(1) : '—'; el.classList.remove('loading');
+        } catch (_) { const el = document.getElementById('m-nota'); el.textContent = '—'; el.classList.remove('loading'); }
     }
 
-    /* ── Busca 30 dias de um tipo de evento (com cache) ── */
     async function buscarDados30Dias(tipo) {
         if (dadosCache[tipo]) return dadosCache[tipo];
         if (!propIdDash) { dadosCache[tipo] = ZEROS_30D; return ZEROS_30D; }
-
-        const inicio = new Date();
-        inicio.setDate(inicio.getDate() - 30);
+        const inicio = new Date(); inicio.setDate(inicio.getDate() - 30);
         let valores = new Array(30).fill(0);
-
         try {
             if (tipo === 'nota') {
-                const { data } = await sb
-                    .from('avaliacoes')
-                    .select('nota, criado_em')
-                    .eq('propriedade_id', propIdDash)
-                    .gte('criado_em', inicio.toISOString());
-
+                const { data } = await sb.from('avaliacoes').select('nota, criado_em').eq('propriedade_id', propIdDash).gte('criado_em', inicio.toISOString());
                 const cnt = {}, soma = {};
                 KEYS_30D.forEach(k => { cnt[k] = 0; soma[k] = 0; });
-                (data || []).forEach(a => {
-                    const k = a.criado_em?.split('T')[0];
-                    if (cnt[k] !== undefined) { cnt[k]++; soma[k] += Number(a.nota) || 0; }
-                });
-                valores = KEYS_30D.map(k => cnt[k] > 0 ? +(soma[k] / cnt[k]).toFixed(2) : null);
+                (data || []).forEach(a => { const k = a.criado_em?.split('T')[0]; if (cnt[k] !== undefined) { cnt[k]++; soma[k] += Number(a.nota) || 0; } });
+                valores = KEYS_30D.map(k => cnt[k] > 0 ? +(soma[k]/cnt[k]).toFixed(2) : null);
             } else {
-                const { data } = await sb
-                    .from('analytics_eventos')
-                    .select('created_at')
-                    .eq('propriedade_id', propIdDash)
-                    .eq('evento_tipo', tipo)
-                    .gte('created_at', inicio.toISOString());
-
-                const cnt = {};
-                KEYS_30D.forEach(k => { cnt[k] = 0; });
-                (data || []).forEach(e => {
-                    const k = e.created_at?.split('T')[0];
-                    if (cnt[k] !== undefined) cnt[k]++;
-                });
+                const { data } = await sb.from('analytics_eventos').select('created_at').eq('propriedade_id', propIdDash).eq('evento_tipo', tipo).gte('created_at', inicio.toISOString());
+                const cnt = {}; KEYS_30D.forEach(k => { cnt[k] = 0; });
+                (data || []).forEach(e => { const k = e.created_at?.split('T')[0]; if (cnt[k] !== undefined) cnt[k]++; });
                 valores = KEYS_30D.map(k => cnt[k]);
             }
         } catch (_) {}
-
-        dadosCache[tipo] = valores;
-        return valores;
+        dadosCache[tipo] = valores; return valores;
     }
 
-    /* ── Troca aba e atualiza gráfico ── */
     async function mudarTab(btn) {
         const tipo = btn.dataset.tipo;
         if (tipo === tabAtiva) return;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativo'));
-        btn.classList.add('ativo');
-        tabAtiva = tipo;
+        btn.classList.add('ativo'); tabAtiva = tipo;
         const dados = await buscarDados30Dias(tipo);
         montarGrafico(tipo, dados);
     }
 
-    /* ── Renderiza / atualiza o gráfico ── */
     function montarGrafico(tipo, dados) {
         const ctx = document.getElementById('graficoAnalytics').getContext('2d');
         const cor = COR_CHART[tipo];
-
         const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, cor + '33');
-        gradient.addColorStop(1, cor + '00');
-
+        gradient.addColorStop(0, cor + '33'); gradient.addColorStop(1, cor + '00');
         const temDados = dados.some(v => v !== null && v > 0);
         document.getElementById('grafico-vazio').style.display = temDados ? 'none' : 'block';
-
         if (graficoInst) { graficoInst.destroy(); graficoInst = null; }
-
         graficoInst = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: LABELS_30D,
-                datasets: [{
-                    label: LABEL_CHART[tipo],
-                    data: dados,
-                    borderColor: cor, borderWidth: 2.5,
-                    fill: true, backgroundColor: gradient,
-                    tension: 0.4,
-                    pointRadius: temDados ? 3 : 0,
-                    pointBackgroundColor: cor,
-                    spanGaps: tipo === 'nota'
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: {
-                        beginAtZero: tipo !== 'nota',
-                        min: tipo === 'nota' ? 0 : undefined,
-                        max: tipo === 'nota' ? 5 : undefined,
-                        grid: { color: '#f0f0f0' },
-                        ticks: { color: '#999', stepSize: tipo === 'nota' ? 1 : undefined }
-                    },
-                    x: { grid: { display: false }, ticks: { color: '#999', maxTicksLimit: 10 } }
-                }
-            }
+            data: { labels: LABELS_30D, datasets: [{ label: LABEL_CHART[tipo], data: dados, borderColor: cor, borderWidth: 2.5, fill: true, backgroundColor: gradient, tension: 0.4, pointRadius: temDados ? 3 : 0, pointBackgroundColor: cor, spanGaps: tipo === 'nota' }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: tipo !== 'nota', min: tipo === 'nota' ? 0 : undefined, max: tipo === 'nota' ? 5 : undefined, grid: { color: '#f0f0f0' }, ticks: { color: '#999', stepSize: tipo === 'nota' ? 1 : undefined } }, x: { grid: { display: false }, ticks: { color: '#999', maxTicksLimit: 10 } } } }
         });
     }
+
+    /* ═══════════════════════════════════
+       FINANCEIRO — DADOS MOCK
+    ═══════════════════════════════════ */
+    const finTransactions = [
+        { data:'15/06', desc:'Casamento Silva — Salão Principal', cat:'Aluguel de Espaço', tipo_evt:'Casamento', status:'pago',     valor: 12000, tipo:'receita' },
+        { data:'14/06', desc:'Decoração Festa 15 Anos',          cat:'Decoração',         tipo_evt:'Aniversário', status:'pago',     valor:  2800, tipo:'receita' },
+        { data:'13/06', desc:'Manutenção Ar-condicionado',       cat:'Manutenção',         tipo_evt:'—',           status:'pago',     valor: -850,  tipo:'despesa' },
+        { data:'12/06', desc:'Formatura Engenharia UFRJ',        cat:'Aluguel de Espaço', tipo_evt:'Formatura',   status:'pendente', valor:  8500, tipo:'receita' },
+        { data:'11/06', desc:'Buffet Corporativo TechConf',      cat:'Buffet / Catering', tipo_evt:'Corporativo', status:'pago',     valor:  5200, tipo:'receita' },
+        { data:'10/06', desc:'Serviço de Limpeza Semanal',       cat:'Limpeza',           tipo_evt:'—',           status:'pago',     valor: -600,  tipo:'despesa' },
+        { data:'09/06', desc:'Aniversário Martins — Jardim',     cat:'Aluguel de Espaço', tipo_evt:'Aniversário', status:'pago',     valor:  6800, tipo:'receita' },
+        { data:'08/06', desc:'Material de Manutenção',           cat:'Manutenção',         tipo_evt:'—',           status:'pendente', valor: -1200, tipo:'despesa' },
+        { data:'07/06', desc:'Workshop de Culinária',            cat:'Aluguel de Espaço', tipo_evt:'Corporativo', status:'pago',     valor:  3400, tipo:'receita' },
+        { data:'06/06', desc:'Conta de Energia Elétrica',        cat:'Outros',            tipo_evt:'—',           status:'atrasado', valor: -2100, tipo:'despesa' },
+    ];
+
+    const finDonutData = [
+        { label:'Aluguel de Espaço', value: 30500, color:'#ff385c' },
+        { label:'Buffet / Catering', value: 9200,  color:'#0ca678' },
+        { label:'Decoração',         value: 4800,  color:'#f59e0b' },
+        { label:'Som / Iluminação',  value: 3200,  color:'#1a73e8' },
+        { label:'Outros',            value: 1000,  color:'#bbb'    },
+    ];
+
+    const finGoals = [
+        { name:'Meta de Receita',   current: 48700, target: 60000, color:'#0ca678', fmt:'R$' },
+        { name:'Nº de Eventos',     current: 14,    target: 20,    color:'#1a73e8', fmt:'n'  },
+        { name:'Reduzir Despesas',  current: 8650,  target: 8000,  color:'#ff385c', fmt:'R$' },
+        { name:'Taxa de Ocupação',  current: 72,    target: 85,    color:'#f59e0b', fmt:'%'  },
+    ];
+
+    const finUpcomingEvents = [
+        { day:'22', mon:'Jun', name:'Casamento Ferreira', type:'Salão Principal — 200 pax', val:'R$ 15.000' },
+        { day:'25', mon:'Jun', name:'Formatura Medicina',  type:'Jardim + Salão — 300 pax',  val:'R$ 9.500' },
+        { day:'28', mon:'Jun', name:'Aniversário 50 Anos', type:'Salão Íntimo — 80 pax',     val:'R$ 5.800' },
+    ];
+
+    /* ── Aba financeiro ── */
+    function finMudarAba(id, btn) {
+        document.querySelectorAll('.fin-tab-btn').forEach(b => b.classList.remove('ativo'));
+        document.querySelectorAll('.fin-tab-content').forEach(c => c.classList.remove('ativo'));
+        btn.classList.add('ativo');
+        document.getElementById('fin-' + id).classList.add('ativo');
+
+        // Preencher tabelas filtradas quando mudar
+        if (id === 'receitas') finRenderFilteredTable('finReceitasTable', 'receita');
+        if (id === 'despesas') finRenderFilteredTable('finDespesasTable', 'despesa');
+        if (id === 'eventos')  finRenderEventListFull();
+        if (id === 'relatorios') {
+            finRenderGoalsById('finGoalListRel');
+        }
+    }
+
+    /* ── Gráfico de barras (canvas) ── */
+    function finDrawBarChart() {
+        const canvas = document.getElementById('finBarChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const W   = canvas.offsetWidth || 400;
+        const H   = 160;
+        canvas.width  = W * dpr; canvas.height = H * dpr;
+        ctx.scale(dpr, dpr);
+
+        const months  = ['Jan','Fev','Mar','Abr','Mai','Jun'];
+        const receitas= [32000,41000,37500,44000,52000,48700];
+        const despesas= [14000,16000,15500,17000,21000,19350];
+        const maxVal  = Math.max(...receitas, ...despesas);
+        const barW    = (W / months.length) * 0.38;
+        const gutter  = (W / months.length) - barW * 2 - 4;
+
+        months.forEach((m, i) => {
+            const x = (W / months.length) * i + gutter/2 + 4;
+            const hR = ((receitas[i] / maxVal) * (H - 28));
+            const hD = ((despesas[i] / maxVal) * (H - 28));
+
+            // receita bar
+            ctx.fillStyle = '#0ca678';
+            ctx.beginPath();
+            finRoundRect(ctx, x, H - 20 - hR, barW, hR, 4);
+            ctx.fill();
+
+            // despesa bar
+            ctx.fillStyle = '#ff385c';
+            ctx.beginPath();
+            finRoundRect(ctx, x + barW + 4, H - 20 - hD, barW, hD, 4);
+            ctx.fill();
+
+            // label
+            ctx.fillStyle = '#999';
+            ctx.font = `11px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText(m, x + barW + 2, H - 4);
+        });
+
+        ctx.font = `10px Arial`; ctx.textAlign = 'left';
+        ctx.fillStyle = '#0ca678'; ctx.fillRect(0, 2, 10, 10);
+        ctx.fillStyle = '#999'; ctx.fillText('Receita', 14, 11);
+        ctx.fillStyle = '#ff385c'; ctx.fillRect(75, 2, 10, 10);
+        ctx.fillStyle = '#999'; ctx.fillText('Despesa', 89, 11);
+    }
+
+    function finRoundRect(ctx, x, y, w, h, r) {
+        if (h <= 0) return;
+        ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
+        ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+        ctx.lineTo(x+w, y+h); ctx.lineTo(x, y+h);
+        ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+        ctx.closePath();
+    }
+
+    /* ── Donut ── */
+    function finDrawDonut() {
+        const canvas = document.getElementById('finDonutChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const size = 140, dpr = window.devicePixelRatio || 1;
+        canvas.width = size*dpr; canvas.height = size*dpr;
+        ctx.scale(dpr, dpr);
+        const cx=size/2, cy=size/2, r=54, inner=32;
+        const total = finDonutData.reduce((s,d)=>s+d.value,0);
+        let angle = -Math.PI/2;
+
+        finDonutData.forEach(d => {
+            const sweep = (d.value/total)*Math.PI*2;
+            ctx.beginPath(); ctx.moveTo(cx,cy);
+            ctx.arc(cx,cy,r,angle,angle+sweep);
+            ctx.closePath(); ctx.fillStyle = d.color; ctx.globalAlpha=.9; ctx.fill();
+            angle += sweep;
+        });
+        ctx.beginPath(); ctx.arc(cx,cy,inner,0,Math.PI*2);
+        ctx.fillStyle='#fff'; ctx.globalAlpha=1; ctx.fill();
+        ctx.fillStyle='#0d0d0d'; ctx.font=`bold 11px Arial`;
+        ctx.textAlign='center'; ctx.fillText('R$ 48,7k',cx,cy+4);
+
+        const legend = document.getElementById('finDonutLegend');
+        legend.innerHTML = '';
+        finDonutData.forEach(d => {
+            const pct = ((d.value/total)*100).toFixed(0);
+            legend.innerHTML += `
+              <div class="fin-legend-item">
+                <div class="fin-legend-dot" style="background:${d.color}"></div>
+                <span class="fin-legend-name">${d.label}</span>
+                <span class="fin-legend-val" style="color:${d.color}">R$ ${d.value.toLocaleString('pt-BR')}</span>
+                <span class="fin-legend-pct">${pct}%</span>
+              </div>`;
+        });
+    }
+
+    /* ── Metas ── */
+    function finRenderGoals() { finRenderGoalsById('finGoalList'); }
+    function finRenderGoalsById(elId) {
+        const list = document.getElementById(elId);
+        if (!list) return;
+        list.innerHTML = '';
+        finGoals.forEach(g => {
+            const pct = Math.min(100, Math.round((g.current/g.target)*100));
+            const fmt  = g.fmt==='n' ? g.current : g.fmt==='%' ? g.current+'%' : 'R$ '+g.current.toLocaleString('pt-BR');
+            const fmtT = g.fmt==='n' ? g.target  : g.fmt==='%' ? g.target+'%'  : 'R$ '+g.target.toLocaleString('pt-BR');
+            list.innerHTML += `
+              <div class="fin-goal-item">
+                <div class="fin-goal-top"><span class="fin-goal-name">${g.name}</span><span class="fin-goal-nums">${fmt} / ${fmtT} (${pct}%)</span></div>
+                <div class="fin-progress-track"><div class="fin-progress-fill" style="width:0%;background:${g.color}" data-width="${pct}%"></div></div>
+              </div>`;
+        });
+        setTimeout(() => {
+            list.querySelectorAll('.fin-progress-fill').forEach(el => { el.style.width = el.dataset.width; });
+        }, 300);
+    }
+
+    /* ── Eventos ── */
+    function finRenderEvents() {
+        const list = document.getElementById('finEventList');
+        if (!list) return;
+        list.innerHTML = finUpcomingEvents.map(e => `
+          <div class="fin-event-item">
+            <div class="fin-event-date"><div class="fin-event-day">${e.day}</div><div class="fin-event-mon">${e.mon}</div></div>
+            <div class="fin-event-info"><div class="fin-event-name">${e.name}</div><div class="fin-event-type">${e.type}</div></div>
+            <div class="fin-event-val">${e.val}</div>
+          </div>`).join('');
+    }
+    function finRenderEventListFull() {
+        const list = document.getElementById('finEventListFull');
+        if (!list) return;
+        list.innerHTML = finUpcomingEvents.map(e => `
+          <div class="fin-event-item">
+            <div class="fin-event-date"><div class="fin-event-day">${e.day}</div><div class="fin-event-mon">${e.mon}</div></div>
+            <div class="fin-event-info"><div class="fin-event-name">${e.name}</div><div class="fin-event-type">${e.type}</div></div>
+            <div class="fin-event-val">${e.val}</div>
+          </div>`).join('');
+    }
+
+    /* ── Tabela ── */
+    function finRenderTable(filter='todos') {
+        const tbody = document.getElementById('finTransTable');
+        if (!tbody) return;
+        finFillTable(tbody, filter);
+    }
+    function finRenderFilteredTable(tbodyId, tipo) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        const rows = finTransactions.filter(t => t.tipo === tipo);
+        finFillRows(tbody, rows);
+    }
+    function finFillTable(tbody, filter) {
+        const filtered = filter==='todos' ? finTransactions
+            : filter==='receita'  ? finTransactions.filter(t=>t.tipo==='receita')
+            : filter==='despesa'  ? finTransactions.filter(t=>t.tipo==='despesa')
+            : finTransactions.filter(t=>t.status==='pendente');
+        finFillRows(tbody, filtered);
+    }
+    function finFillRows(tbody, rows) {
+        tbody.innerHTML = rows.map(t => {
+            const cls = t.valor > 0 ? 'fin-amount-in' : 'fin-amount-out';
+            const str = (t.valor > 0 ? '+' : '') + 'R$ ' + Math.abs(t.valor).toLocaleString('pt-BR');
+            return `<tr>
+              <td style="color:#999;font-size:0.78rem">${t.data}</td>
+              <td style="font-weight:600;color:#222">${t.desc}</td>
+              <td style="color:#999;font-size:0.78rem">${t.cat}</td>
+              <td style="color:#999;font-size:0.78rem">${t.tipo_evt}</td>
+              <td><span class="fin-status ${t.status}"><span class="fin-dot"></span>${t.status.charAt(0).toUpperCase()+t.status.slice(1)}</span></td>
+              <td style="text-align:right"><span class="${cls}">${str}</span></td>
+            </tr>`;
+        }).join('');
+    }
+    function finFilterTable(v) { finRenderTable(v); }
+
+    /* ── Modal ── */
+    function finOpenModal(type) {
+        const titles = { receita:'Nova Receita', despesa:'Nova Despesa', meta:'Editar Metas' };
+        document.getElementById('fin-modal-title').textContent = titles[type] || 'Novo Lançamento';
+        document.getElementById('fin-modal-desc').textContent  = 'Registre a movimentação financeira abaixo.';
+        if (type==='receita') document.getElementById('fin-f-tipo').value = 'receita';
+        if (type==='despesa') document.getElementById('fin-f-tipo').value = 'despesa';
+        document.getElementById('fin-f-data').value = new Date().toISOString().split('T')[0];
+        document.getElementById('finModal').classList.add('open');
+    }
+    function finCloseModal() { document.getElementById('finModal').classList.remove('open'); }
+    document.getElementById('finModal').addEventListener('click', function(e) { if(e.target===this) finCloseModal(); });
+
+    function finSaveTransaction() {
+        const tipo   = document.getElementById('fin-f-tipo').value;
+        const data   = document.getElementById('fin-f-data').value;
+        const valor  = parseFloat(document.getElementById('fin-f-valor').value) || 0;
+        const desc   = document.getElementById('fin-f-desc').value || 'Sem descrição';
+        const cat    = document.getElementById('fin-f-cat').value;
+        const status = document.getElementById('fin-f-status').value;
+
+        const d = new Date(data);
+        const dd = String(d.getDate()+1).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
+
+        finTransactions.unshift({ data:dd, desc, cat, tipo_evt:'—', status, valor: tipo==='receita' ? valor : -valor, tipo });
+
+        // Atualiza KPIs
+        const recTotal  = finTransactions.filter(t=>t.tipo==='receita').reduce((s,t)=>s+t.valor,0);
+        const despTotal = finTransactions.filter(t=>t.tipo==='despesa').reduce((s,t)=>s+Math.abs(t.valor),0);
+        document.getElementById('fin-kpi-receita').textContent = 'R$ '+recTotal.toLocaleString('pt-BR');
+        document.getElementById('fin-kpi-despesa').textContent = 'R$ '+despTotal.toLocaleString('pt-BR');
+        document.getElementById('fin-kpi-lucro').textContent   = 'R$ '+(recTotal-despTotal).toLocaleString('pt-BR');
+
+        finRenderTable();
+        finCloseModal();
+        mostrarToast('Lançamento registrado com sucesso!');
+    }
+
+    /* ── Período financeiro ── */
+    function finUpdatePeriod(v) {
+        const mult = v==='trimestre' ? 3 : v==='ano' ? 12 : 1;
+        document.getElementById('fin-kpi-receita').textContent = 'R$ '+(48700*mult).toLocaleString('pt-BR');
+        document.getElementById('fin-kpi-despesa').textContent = 'R$ '+(19350*mult).toLocaleString('pt-BR');
+        document.getElementById('fin-kpi-lucro').textContent   = 'R$ '+(29350*mult).toLocaleString('pt-BR');
+        document.getElementById('fin-kpi-eventos').textContent = (14*mult).toString();
+    }
+
+    window.addEventListener('resize', () => {
+        if (window._finIniciado) { finDrawBarChart(); finDrawDonut(); }
+    });
 
     /* Arranca tudo */
     init();
