@@ -21,6 +21,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+     <script src="https://sdk.mercadopago.com/js/v2"></script>
+
 
 </head>
 <body>
@@ -91,7 +93,7 @@
             <a data-rota="equipe" onclick="navegar('equipe')">👥 Equipe & Folha</a>
             <span class="menu-section-label">Conta</span>
             <a href="indique.html">🎁 Programa de Indicação</a>
-            <a href="planos2.html">💳 Planos Ventsy</a>
+            <a data-rota="planos" onclick="navegar('planos')">💳 Planos Ventsy</a>
             <a href="configuracoes.html">⚙️ Configurações</a>
         </nav>
     </aside>
@@ -1427,6 +1429,256 @@
         </div>
     </div>
 </div>
+
+
+
+    <!-- ════════════════════════════════════
+     PLANOS
+     ════════════════════════════════════ -->
+
+
+     <div class="page-section" id="pagina-planos">
+
+    <div class="dash-header-fixo">
+        <h2>💳 Assinaturas e Planos</h2>
+        <p>Selecione o plano ideal, escolha a duração e finalize com segurança.</p>
+    </div>
+
+    <!-- BANNER PLANO ATIVO -->
+    <div class="banner-plano-ativo" id="planos-banner-ativo">
+        <div class="banner-plano-esq">
+            <span class="banner-plano-icone" id="planos-banner-icone">⭐</span>
+            <div class="banner-plano-info">
+                <h4 id="planos-banner-titulo">Seu plano atual</h4>
+                <p id="planos-banner-desc">Carregando informações...</p>
+            </div>
+        </div>
+        <div class="banner-badges">
+            <span class="badge-ativo">● Ativo</span>
+            <span class="badge-validade" id="planos-banner-validade">Válido até —</span>
+            <span class="badge-downgrade-pendente" id="planos-badge-downgrade" style="display:none;">⏳ Downgrade agendado</span>
+        </div>
+    </div>
+
+    <!-- GRID DE PLANOS -->
+    <div class="container-planos" id="planos-container">
+        <!-- Gerado via JS -->
+    </div>
+
+    <!-- CHECKOUT INLINE -->
+    <div class="checkout-inline" id="planos-checkout-inline" style="display:none;">
+        <div class="checkout-inline-header">
+            <h3 id="planos-checkout-titulo">🛒 Finalizar Assinatura</h3>
+            <button class="btn-fechar-checkout" onclick="planosFecharCheckout()">✕</button>
+        </div>
+        <div class="checkout-body">
+
+            <!-- COLUNA ESQUERDA: RESUMO + DURAÇÃO + CUPOM -->
+            <div class="col-resumo">
+                <h4>Resumo do Pedido</h4>
+
+                <div class="resumo-plano-box">
+                    <div class="resumo-plano-nome" id="planos-resumo-nome">—</div>
+                    <div class="resumo-plano-preco" id="planos-resumo-preco">R$ —</div>
+                    <div class="resumo-plano-desc" id="planos-resumo-desc">—</div>
+                </div>
+
+                <!-- Duração -->
+                <div class="duracao-label">⏱ Duração da assinatura:</div>
+                <div class="duracao-opcoes">
+                    <button class="planos-duracao-btn ativo" data-meses="1"  onclick="planosSelecionarDuracao(1)">1 mês</button>
+                    <button class="planos-duracao-btn"        data-meses="3"  onclick="planosSelecionarDuracao(3)">3 meses</button>
+                    <button class="planos-duracao-btn"        data-meses="6"  onclick="planosSelecionarDuracao(6)">6 meses</button>
+                    <button class="planos-duracao-btn"        data-meses="12" onclick="planosSelecionarDuracao(12)">
+                        12 meses <span class="duracao-badge-anual">−20%</span>
+                    </button>
+                </div>
+
+                <!-- Cupom -->
+                <div class="duracao-label">🎟 Cupom de desconto:</div>
+                <div class="cupom-row">
+                    <input type="text" class="input-cupom" id="planos-input-cupom" placeholder="CODIGO123" maxlength="30" oninput="this.value=this.value.toUpperCase()">
+                    <button class="btn-aplicar-cupom" id="planos-btn-aplicar-cupom" onclick="planosAplicarCupom()">Aplicar</button>
+                </div>
+                <div class="cupom-feedback" id="planos-cupom-feedback" style="display:none;"></div>
+
+                <!-- Valores -->
+                <div class="resumo-linha"><span>Subtotal</span><span id="planos-val-subtotal">—</span></div>
+                <div class="resumo-linha" id="planos-linha-desconto-anual" style="display:none;">
+                    <span>🎉 Desconto anual (20%)</span>
+                    <span class="desconto" style="color:#1ebc54;" id="planos-val-desconto-anual">—</span>
+                </div>
+                <div class="resumo-linha credito" id="planos-linha-credito" style="display:none;">
+                    <span>💚 Crédito do plano atual</span>
+                    <span id="planos-val-credito">—</span>
+                </div>
+                <div class="resumo-linha desconto" id="planos-linha-desconto-cupom" style="display:none;">
+                    <span id="planos-label-desconto-cupom">🎟 Desconto (cupom)</span>
+                    <span style="color:#1ebc54;" id="planos-val-desconto-cupom">—</span>
+                </div>
+                <div class="resumo-total">
+                    <span>Total a pagar:</span>
+                    <strong id="planos-resumo-total">R$ —</strong>
+                </div>
+
+                <ul class="check-lista-resumo">
+                    <li>✅ Acesso imediato após confirmação</li>
+                    <li>✅ Sem taxa de cancelamento antecipado</li>
+                    <li>✅ Suporte durante toda a assinatura</li>
+                    <li>✅ Nota fiscal emitida automaticamente</li>
+                </ul>
+            </div>
+
+            <!-- COLUNA DIREITA: PAGAMENTO + NF-E + TERMOS -->
+            <div class="col-pagamento">
+                <h4>Forma de Pagamento</h4>
+
+                <div class="metodos-pagamento">
+                    <label class="metodo-item">
+                        <input type="radio" name="planos-pagamento" value="pix" checked onchange="planosTrocarMetodo('pix')">
+                        <div class="metodo-box">⚡ Pix<br><small style="font-size:0.7rem;font-weight:400;">Aprovação imediata</small></div>
+                    </label>
+                    <label class="metodo-item">
+                        <input type="radio" name="planos-pagamento" value="cartao" onchange="planosTrocarMetodo('cartao')">
+                        <div class="metodo-box">💳 Cartão<br><small style="font-size:0.7rem;font-weight:400;">Crédito ou débito</small></div>
+                    </label>
+                    <label class="metodo-item">
+                        <input type="radio" name="planos-pagamento" value="boleto" onchange="planosTrocarMetodo('boleto')">
+                        <div class="metodo-box">📄 Boleto<br><small style="font-size:0.7rem;font-weight:400;">Vence em 3 dias</small></div>
+                    </label>
+                </div>
+
+                <!-- Área Pix -->
+                <div class="area-pagamento" id="planos-area-pix">
+                    <div class="pix-instrucao">
+                        <div class="pix-ico">⚡</div>
+                        <strong>Pagamento por Pix</strong>
+                        <p>Ao confirmar, um QR Code será gerado para você escanear.<br>Aprovação em até <strong>1 minuto</strong>.</p>
+                    </div>
+                </div>
+
+                <!-- Área Cartão -->
+                <div class="area-pagamento" id="planos-area-cartao" style="display:none;">
+                    <div id="planos-form-cartao-mp">
+                        <input type="text" class="input-checkout" id="planos-cartao-numero" placeholder="Número do Cartão" maxlength="19" oninput="planosMascaraCartao(this)">
+                        <div class="input-duplo">
+                            <input type="text" class="input-checkout" id="planos-cartao-validade" placeholder="Validade (MM/AA)" maxlength="5" oninput="planosMascaraValidade(this)">
+                            <input type="text" class="input-checkout" id="planos-cartao-cvv" placeholder="CVV" maxlength="4">
+                        </div>
+                        <input type="text" class="input-checkout" id="planos-cartao-nome" placeholder="Nome igual ao cartão">
+                        <select class="select-checkout" id="planos-cartao-parcelas">
+                            <option value="1">1x sem juros</option>
+                        </select>
+                        <input type="text" class="input-checkout" id="planos-cartao-cpf" placeholder="CPF ou CNPJ do titular" maxlength="18" oninput="planosMascaraCPFCNPJ(this)">
+                    </div>
+                    <p style="font-size:0.72rem;color:#aaa;margin-top:6px;text-align:center;">🔒 Dados criptografados pelo SDK do Mercado Pago</p>
+                </div>
+
+                <!-- Área Boleto -->
+                <div class="area-pagamento" id="planos-area-boleto" style="display:none;">
+                    <input type="text" class="input-checkout" id="planos-boleto-cpf" placeholder="CPF ou CNPJ do pagador" maxlength="18" oninput="planosMascaraCPFCNPJ(this)">
+                </div>
+
+                <!-- NF-e -->
+                <div class="nfe-toggle" onclick="planosToggleNFe()">
+                    <span id="planos-nfe-seta">▶</span> 📋 Inserir dados para Nota Fiscal (NF-e) — opcional
+                </div>
+                <div class="nfe-area" id="planos-nfe-area">
+                    <label class="form-label">CPF ou CNPJ</label>
+                    <input type="text" class="input-checkout" id="planos-nfe-cpfcnpj" placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18" oninput="planosMascaraCPFCNPJ(this)">
+                    <label class="form-label">Nome / Razão Social</label>
+                    <input type="text" class="input-checkout" id="planos-nfe-nome" placeholder="Nome completo ou razão social">
+                    <label class="form-label">E-mail para recebimento da NF</label>
+                    <input type="email" class="input-checkout" id="planos-nfe-email" placeholder="seu@email.com">
+                    <div class="nfe-row">
+                        <div style="flex:2;"><label class="form-label">Endereço</label><input type="text" class="input-checkout" id="planos-nfe-endereco" placeholder="Rua, número"></div>
+                        <div style="flex:1;"><label class="form-label">CEP</label><input type="text" class="input-checkout" id="planos-nfe-cep" placeholder="00000-000" maxlength="9" oninput="planosMascaraCEP(this)"></div>
+                    </div>
+                    <div class="nfe-row">
+                        <div style="flex:2;"><label class="form-label">Cidade</label><input type="text" class="input-checkout" id="planos-nfe-cidade" placeholder="Cidade"></div>
+                        <div style="flex:1;"><label class="form-label">Estado</label>
+                            <select class="select-checkout" id="planos-nfe-estado">
+                                <option value="">UF</option>
+                                <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+                                <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+                                <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+                                <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+                                <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                                <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+                                <option>SP</option><option>SE</option><option>TO</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Política -->
+                <div class="politica-cancelamento">
+                    ⚠️ <strong>Política de Cancelamento:</strong> Você pode cancelar sua assinatura a qualquer momento. Não há reembolso proporcional do período já pago. Planos anuais não permitem cancelamento parcial com estorno.
+                </div>
+
+                <!-- Termos -->
+                <div class="termos-box">
+                    <label class="termos-check-row">
+                        <input type="checkbox" id="planos-check-termos" onchange="planosValidarBtnFinalizar()">
+                        <span>Li e aceito os <a href="../termos.html" target="_blank">Termos de Uso</a> e a <a href="../privacidade.html" target="_blank">Política de Privacidade</a> da VENTSY.</span>
+                    </label>
+                </div>
+
+                <!-- Selos -->
+                <div class="selos-seguranca">
+                    <div class="selo">🔒 SSL Criptografado</div>
+                    <div class="selo">💳 Mercado Pago</div>
+                    <div class="selo">🛡️ Ambiente Seguro</div>
+                </div>
+
+                <button class="btn-finalizar" id="planos-btn-finalizar" disabled onclick="planosFinalizarCompra()">
+                    ✅ Confirmar e Finalizar Pagamento
+                </button>
+                <p class="seguranca-aviso">🔒 Pagamento processado com segurança pelo Mercado Pago</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="faq-assinatura">
+        <p>Precisa de um plano personalizado para redes de espaços? <a href="../fale-conosco.html">Fale com nosso consultor.</a></p>
+    </div>
+
+</div><!-- /pagina-planos -->
+
+
+<!-- MODAL: Downgrade -->
+<div class="modal-overlay" id="planos-modal-downgrade">
+    <div class="downgrade-box">
+        <button class="btn-fechar-modal" onclick="planosFecharModal('planos-modal-downgrade')">✕</button>
+        <h3>⬇️ Confirmar Downgrade</h3>
+        <p>Você está prestes a fazer o downgrade para o plano <strong id="planos-downgrade-nome-destino">—</strong>.</p>
+        <div class="aviso-downgrade">
+            <strong>⚠️ Leia com atenção antes de confirmar:</strong>
+            Seu plano atual (<span id="planos-downgrade-nome-atual">—</span>) continuará <strong>ativo até o fim do período já pago</strong> em <strong id="planos-downgrade-data-fim">—</strong>. Após essa data, o plano será alterado automaticamente.
+            <br><br><strong>Não há reembolso</strong> do valor já pago no plano atual.
+        </div>
+        <div class="confirma-digitacao">
+            <label>Para confirmar, digite <strong>CONFIRMAR</strong> abaixo:</label>
+            <input type="text" id="planos-input-confirma-downgrade" placeholder="Digite CONFIRMAR"
+                   oninput="planosValidarDowngrade(this.value)">
+        </div>
+        <div class="modal-acoes">
+            <button class="btn-cancelar-modal" onclick="planosFecharModal('planos-modal-downgrade')">Cancelar</button>
+            <button class="btn-confirmar-downgrade" id="planos-btn-ok-downgrade" disabled onclick="planosExecutarDowngrade()">Confirmar downgrade</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Resultado do pagamento -->
+<div class="modal-pagamento-overlay" id="planos-modal-pagamento">
+    <div class="modal-pagamento-box" id="planos-modal-pagamento-conteudo">
+        <!-- preenchido via JS -->
+    </div>
+</div>
+
+
+
+
 
 
 
