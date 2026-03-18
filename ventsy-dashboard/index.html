@@ -87,7 +87,7 @@
             <span class="menu-section-label">Gestão</span>
             <a data-rota="leads" onclick="navegar('leads')">🎉 Clientes & Eventos</a>
             <a data-rota="calendario" onclick="navegar('calendario')">📅 Disponibilidade</a>
-            <a href="relatorio.html">📊 Relatório</a>
+            <a data-rota="relatorio" onclick="navegar('relatorio')">📊 Relatório</a>
             <a data-rota="financeiro" onclick="navegar('financeiro')">💰 Financeiro</a>
             <a data-rota="documentos" onclick="navegar('documentos')">📄 Documentos</a>
             <a data-rota="equipe" onclick="navegar('equipe')">👥 Equipe & Folha</a>
@@ -1675,6 +1675,88 @@
         <!-- preenchido via JS -->
     </div>
 </div>
+
+
+
+
+    <!-- ════════════════════════════════════
+     RELATORIO
+     ════════════════════════════════════ -->
+
+
+    <div class="page-section" id="pagina-relatorio">
+
+    <!-- HEADER + PERÍODO -->
+    <div class="dash-header-fixo">
+        <div>
+            <h2>📊 Relatório de Desempenho</h2>
+            <p id="rel-sub-periodo">Análise detalhada do seu espaço na plataforma VENTSY.</p>
+        </div>
+        <div class="controles-periodo">
+            <div class="filtro-periodo">
+                <button class="rel-btn-periodo btn-periodo"        onclick="relSetPeriodo('semana', this)">Semana</button>
+                <button class="rel-btn-periodo btn-periodo ativo"  id="rel-btn-mes" onclick="relSetPeriodo('mes', this)">Mês</button>
+                <button class="rel-btn-periodo btn-periodo"        onclick="relSetPeriodo('ano', this)">Ano</button>
+                <button class="rel-btn-periodo btn-periodo"        onclick="relSetPeriodo('personalizado', this)">📅 Período</button>
+            </div>
+            <div class="range-personalizado" id="rel-range-personalizado" style="display:none;">
+                <input type="date" id="rel-data-inicio" onchange="relAplicarPersonalizado()">
+                <span>até</span>
+                <input type="date" id="rel-data-fim" onchange="relAplicarPersonalizado()">
+            </div>
+        </div>
+    </div>
+
+    <!-- SELETOR DE MÉTRICA -->
+    <div class="seletor-metricas" id="rel-seletor-metricas"></div>
+
+    <!-- GRÁFICO FULL WIDTH -->
+    <div class="card-grafico-full">
+        <div class="card-header">
+            <h3 id="rel-titulo-grafico">Visualizações</h3>
+            <span id="rel-label-periodo-grafico">Últimos 30 dias</span>
+        </div>
+        <div class="grafico-wrapper-full">
+            <canvas id="rel-grafico"></canvas>
+        </div>
+    </div>
+
+    <!-- TABELA DE MÉTRICAS -->
+    <div class="card-tabela">
+        <h3>📋 Todas as Métricas do Período</h3>
+        <table class="tabela-metricas">
+            <thead>
+                <tr>
+                    <th>Métrica</th>
+                    <th style="text-align:right">Total</th>
+                    <th style="text-align:right">Média/dia</th>
+                    <th style="min-width:120px"></th>
+                </tr>
+            </thead>
+            <tbody id="rel-tbody-metricas"></tbody>
+        </table>
+    </div>
+
+    <!-- RANKING + BUSCAS POPULARES -->
+    <div class="linha-inferior">
+        <div class="card-ranking">
+            <h3>🏆 Seu Ranking</h3>
+            <div id="rel-ranking-content">
+                <div class="ranking-sem-dados">
+                    <p style="color:#666;">Carregando...</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-tendencias">
+            <h3>🔥 Buscas populares na VENTSY</h3>
+            <div id="rel-tendencias-content">
+                <p style="color:#bbb;font-size:0.85rem;">Carregando...</p>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /pagina-relatorio -->
+
 
 
 
