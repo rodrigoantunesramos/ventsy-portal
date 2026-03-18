@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planos VENTSY</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- SDK Mercado Pago — tokenização segura de cartão no frontend -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
     <style>
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -518,6 +520,83 @@
         .btn-confirmar-downgrade:disabled { background: #ddd; color: #bbb; cursor: not-allowed; }
         .btn-confirmar-downgrade:not(:disabled):hover { background: #e0304f; }
 
+        /* ── MODAL PAGAMENTO — resultado ── */
+        .modal-pagamento-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none; align-items: center; justify-content: center;
+            z-index: 10000; backdrop-filter: blur(6px);
+        }
+        .modal-pagamento-overlay.aberto { display: flex; }
+        .modal-pagamento-box {
+            background: #fff; width: 90%; max-width: 480px;
+            border-radius: 24px; padding: 40px 36px;
+            text-align: center; position: relative;
+            animation: slideUp 0.3s ease;
+        }
+        .modal-pagamento-box .ico { font-size: 3rem; margin-bottom: 12px; }
+        .modal-pagamento-box h3 { font-size: 1.2rem; font-weight: 800; color: #0d0d0d; margin-bottom: 8px; }
+        .modal-pagamento-box p { font-size: 0.88rem; color: #666; line-height: 1.6; margin-bottom: 20px; }
+
+        /* QR Code */
+        .qr-wrapper { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 20px; }
+        .qr-wrapper img { width: 200px; height: 200px; border-radius: 12px; border: 2px solid #eee; }
+        .qr-copia-cola {
+            background: #f4f4f4; border-radius: 10px; padding: 12px 14px;
+            font-size: 0.78rem; color: #555; word-break: break-all;
+            text-align: left; width: 100%; position: relative;
+        }
+        .btn-copiar-pix {
+            margin-top: 8px; width: 100%;
+            background: #0d0d0d; color: #fff; border: none;
+            padding: 11px; border-radius: 10px; font-family: inherit;
+            font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-copiar-pix:hover { background: #333; }
+
+        /* Boleto */
+        .boleto-codigo {
+            background: #f4f4f4; border-radius: 10px; padding: 12px 14px;
+            font-size: 0.78rem; color: #555; word-break: break-all;
+            text-align: left; width: 100%; margin-bottom: 12px;
+        }
+        .btn-abrir-boleto {
+            width: 100%; background: #0d0d0d; color: #fff; border: none;
+            padding: 14px; border-radius: 12px; font-family: inherit;
+            font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
+            margin-bottom: 10px;
+        }
+        .btn-abrir-boleto:hover { background: #333; }
+
+        /* Polling spinner */
+        .polling-status {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 0.8rem; color: #888; margin-top: 14px;
+        }
+        .spinner {
+            width: 16px; height: 16px; border: 2px solid #eee;
+            border-top-color: #ff385c; border-radius: 50%;
+            animation: spin 0.8s linear infinite; flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Sucesso */
+        .sucesso-box { background: #f0fff6; border: 2px solid #b7f5d5; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+        .sucesso-box h4 { font-size: 1rem; font-weight: 800; color: #1a7a47; margin-bottom: 4px; }
+        .sucesso-box p { font-size: 0.83rem; color: #2d6a4f; margin: 0; }
+
+        /* Rejeitado */
+        .rejeitado-box { background: #fff5f5; border: 2px solid #ffc9c9; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+        .rejeitado-box h4 { font-size: 1rem; font-weight: 800; color: #c92a2a; margin-bottom: 4px; }
+        .rejeitado-box p { font-size: 0.83rem; color: #862e2e; margin: 0; }
+
+        .btn-fechar-resultado {
+            width: 100%; background: #f4f4f4; color: #555; border: none;
+            padding: 12px; border-radius: 10px; font-family: inherit;
+            font-size: 0.88rem; font-weight: 600; cursor: pointer; margin-top: 8px;
+        }
+        .btn-fechar-resultado:hover { background: #eee; }
+
         /* ── TOAST ── */
         .toast {
             position: fixed; bottom: 30px; left: 50%;
@@ -788,22 +867,29 @@
                         </div>
                     </div>
 
-                    <!-- Área Cartão -->
+                    <!-- Área Cartão — form-cartao-mp é o ID usado pelo SDK do MP -->
                     <div class="area-pagamento" id="area-cartao" style="display:none;">
-                        <input type="text" class="input-checkout" id="cartao-numero" placeholder="Número do Cartão" maxlength="19" oninput="mascaraCartao(this)">
-                        <div class="input-duplo">
-                            <input type="text" class="input-checkout" id="cartao-validade" placeholder="Validade (MM/AA)" maxlength="5" oninput="mascaraValidade(this)">
-                            <input type="text" class="input-checkout" id="cartao-cvv" placeholder="CVV" maxlength="4">
-                        </div>
-                        <input type="text" class="input-checkout" id="cartao-nome" placeholder="Nome igual ao cartão">
-                        <div class="input-duplo">
+                        <div id="form-cartao-mp">
+                            <input type="text" class="input-checkout" id="cartao-numero" placeholder="Número do Cartão" maxlength="19">
+                            <div class="input-duplo">
+                                <input type="text" class="input-checkout" id="cartao-validade" placeholder="Validade (MM/AA)" maxlength="5">
+                                <input type="text" class="input-checkout" id="cartao-cvv" placeholder="CVV" maxlength="4">
+                            </div>
+                            <input type="text" class="input-checkout" id="cartao-nome" placeholder="Nome igual ao cartão">
+                            <div class="input-duplo">
+                                <select class="select-checkout" id="doc-tipo">
+                                    <option value="CPF">CPF</option>
+                                    <option value="CNPJ">CNPJ</option>
+                                </select>
+                                <input type="text" class="input-checkout" id="doc-numero" placeholder="Nº do documento" maxlength="18" oninput="mascaraCPFCNPJ(this)">
+                            </div>
                             <select class="select-checkout" id="cartao-parcelas">
                                 <option value="1">1x sem juros</option>
-                                <option value="2">2x sem juros</option>
-                                <option value="3">3x sem juros</option>
-                                <option value="6">6x sem juros</option>
                             </select>
                         </div>
+                        <p style="font-size:0.72rem;color:#aaa;margin-top:6px;text-align:center;">
+                            🔒 Dados criptografados pelo SDK do Mercado Pago
+                        </p>
                     </div>
 
                     <!-- Área Boleto -->
@@ -915,6 +1001,13 @@
     </div>
 </div>
 
+<!-- MODAL RESULTADO DO PAGAMENTO -->
+<div class="modal-pagamento-overlay" id="modal-pagamento">
+    <div class="modal-pagamento-box" id="modal-pagamento-conteudo">
+        <!-- preenchido via JS conforme método -->
+    </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast">
     <span id="toast-icone">✅</span>
@@ -946,10 +1039,70 @@
 
 <script>
 /* ─────────────────────────────────────────
-   SUPABASE
+   CONFIGURAÇÃO — substitua com suas chaves
 ───────────────────────────────────────── */
-const SUPA_URL = 'https://hxvlfalgrduitevbhqvq.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+const SUPA_URL  = 'https://hxvlfalgrduitevbhqvq.supabase.co';
+const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dmxmYWxncmR1aXRldmJocXZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMDA2MDYsImV4cCI6MjA4ODc3NjYwNn0.AUUY8k1dM3rzanf6qdiqk9kcFztDFFm-SuEv2aoBbQQ';
+
+// ⚠️ SUBSTITUA pela sua PUBLIC KEY do Mercado Pago
+// Painel MP → Seu negócio → Configurações → Credenciais
+const MP_PUBLIC_KEY = 'TEST-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+
+// URL base das Edge Functions (não mude)
+const EDGE_URL = `${SUPA_URL}/functions/v1`;
+
+/* ─────────────────────────────────────────
+   CLIENTES
+───────────────────────────────────────── */
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+// Instância do SDK do Mercado Pago (tokenização de cartão)
+const mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+let _cardForm = null; // instância do cardForm MP
+
+/* ─────────────────────────────────────────
+   POLLING — aguarda confirmação de Pix/boleto
+───────────────────────────────────────── */
+let _pollingInterval = null;
+let _pollingPagamentoId = null;
+
+function iniciarPolling(pagamentoId) {
+    _pollingPagamentoId = pagamentoId;
+    _pollingInterval = setInterval(async () => {
+        try {
+            const { data } = await sb
+                .from('pagamentos')
+                .select('status, mp_status_detail')
+                .eq('id', pagamentoId)
+                .single();
+
+            if (!data) return;
+
+            if (data.status === 'approved') {
+                pararPolling();
+                await recarregarAssinatura();
+                mostrarModalSucesso();
+            } else if (data.status === 'rejected' || data.status === 'cancelled') {
+                pararPolling();
+                mostrarModalRejeitado(data.mp_status_detail);
+            }
+        } catch(e) { /* silencioso */ }
+    }, 5000); // verifica a cada 5 segundos
+}
+
+function pararPolling() {
+    if (_pollingInterval) {
+        clearInterval(_pollingInterval);
+        _pollingInterval = null;
+    }
+}
+
+async function recarregarAssinatura() {
+    await carregarAssinatura(_userId);
+    renderizarBanner();
+    renderizarCards();
+}
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
@@ -1288,6 +1441,12 @@ function abrirCheckout(planoId) {
 
 function fecharCheckout() {
     _planoCheckout = null;
+    pararPolling();
+    // Destrói o cardForm do MP para que seja reinicializado na próxima abertura
+    if (_cardForm) {
+        try { _cardForm.unmount(); } catch(e) {}
+        _cardForm = null;
+    }
     document.getElementById('checkout-inline').style.display = 'none';
     renderizarCards();
 }
@@ -1472,6 +1631,11 @@ function trocarMetodo(metodo) {
     document.getElementById('area-pix').style.display    = metodo === 'pix'    ? 'block' : 'none';
     document.getElementById('area-cartao').style.display = metodo === 'cartao' ? 'block' : 'none';
     document.getElementById('area-boleto').style.display = metodo === 'boleto' ? 'block' : 'none';
+
+    // Inicializa o CardForm do MP na primeira vez que o usuário seleciona cartão
+    if (metodo === 'cartao') {
+        setTimeout(() => inicializarCardForm(), 100);
+    }
 }
 
 /* ─────────────────────────────────────────
@@ -1493,7 +1657,63 @@ function validarBtnFinalizar() {
 }
 
 /* ─────────────────────────────────────────
-   FINALIZAR COMPRA
+   INICIALIZAR CARD FORM MP (quando cartão é selecionado)
+───────────────────────────────────────── */
+function inicializarCardForm() {
+    if (_cardForm) return; // já inicializado
+
+    const plano = PLANOS.find(p => p.id === _planoCheckout);
+    const total = calcularTotal();
+
+    _cardForm = mp.cardForm({
+        amount: String(total.toFixed(2)),
+        iframe: false,
+        form: {
+            id: 'form-cartao-mp',
+            cardNumber:         { id: 'cartao-numero',   placeholder: 'Número do Cartão' },
+            expirationDate:     { id: 'cartao-validade', placeholder: 'MM/AA' },
+            securityCode:       { id: 'cartao-cvv',      placeholder: 'CVV' },
+            cardholderName:     { id: 'cartao-nome',     placeholder: 'Nome igual ao cartão' },
+            installments:       { id: 'cartao-parcelas' },
+            identificationType: { id: 'doc-tipo' },
+            identificationNumber:{ id: 'doc-numero' },
+        },
+        callbacks: {
+            onFormMounted: error => {
+                if (error) console.warn('MP cardForm mount error:', error);
+            },
+            onInstallmentsReceived: (error, data) => {
+                if (error) return;
+                // MP preenche as parcelas automaticamente
+            },
+            onError: errors => {
+                console.warn('MP cardForm errors:', errors);
+            }
+        },
+    });
+}
+
+function calcularTotal() {
+    if (!_planoCheckout) return 0;
+    const plano      = PLANOS.find(p => p.id === _planoCheckout);
+    const atualPlano = PLANOS.find(p => p.id === ESTADO.planoAtivo);
+    const eUpgrade   = plano.id !== ESTADO.planoAtivo && plano.preco > atualPlano.preco && atualPlano.preco > 0;
+    const eAnual     = _mesesSelecionados === 12;
+    const subtotal   = plano.preco * _mesesSelecionados;
+    const dsAnual    = eAnual ? subtotal * 0.2 : 0;
+    const credito    = eUpgrade ? atualPlano.preco : 0;
+    let dsCupom = 0;
+    if (_cupomAtivo) {
+        const base = subtotal - dsAnual - credito;
+        dsCupom = _cupomAtivo.tipo === 'percent'
+            ? base * (_cupomAtivo.valor / 100)
+            : Math.min(_cupomAtivo.valor, base);
+    }
+    return Math.max(0, subtotal - dsAnual - credito - dsCupom);
+}
+
+/* ─────────────────────────────────────────
+   FINALIZAR COMPRA — integrado com MP
 ───────────────────────────────────────── */
 async function finalizarCompra() {
     if (!_planoCheckout) return;
@@ -1504,28 +1724,16 @@ async function finalizarCompra() {
 
     const btnFinalizar = document.getElementById('btn-finalizar');
     btnFinalizar.disabled    = true;
-    btnFinalizar.textContent = '⏳ Processando...';
+    btnFinalizar.innerHTML   = '<span class="spinner" style="display:inline-block;margin-right:8px;"></span>Processando...';
 
-    const metodo        = document.querySelector('input[name="pagamento"]:checked')?.value || 'pix';
-    const planoAnterior = ESTADO.planoAtivo;
-    const planoNovo     = _planoCheckout;
-    const planoObj      = PLANOS.find(p => p.id === planoNovo);
-    const planoAtualObj = PLANOS.find(p => p.id === planoAnterior);
+    const metodo     = document.querySelector('input[name="pagamento"]:checked')?.value || 'pix';
+    const planoNovo  = _planoCheckout;
+    const planoObj   = PLANOS.find(p => p.id === planoNovo);
+    const valorTotal = calcularTotal();
 
-    const eAnual = _mesesSelecionados === 12;
-    const subtotal = planoObj.preco * _mesesSelecionados;
-    const dsAnual  = eAnual ? subtotal * 0.2 : 0;
-    const credito  = (planoAtualObj.preco > 0 && planoNovo !== planoAnterior) ? planoAtualObj.preco : 0;
-
-    let dsCupom = 0;
-    if (_cupomAtivo) {
-        const base = subtotal - dsAnual - credito;
-        dsCupom = _cupomAtivo.tipo === 'percent'
-            ? base * (_cupomAtivo.valor / 100)
-            : Math.min(_cupomAtivo.valor, base);
-    }
-
-    const valorTotal = Math.max(0, subtotal - dsAnual - credito - dsCupom);
+    // Dados do pagador
+    const { data: { session } } = await sb.auth.getSession();
+    const { data: perfil } = await sb.from('usuarios').select('nome, cpf_cnpj').eq('id', _userId).single();
 
     // Dados NF-e
     const nfeData = {
@@ -1537,72 +1745,207 @@ async function finalizarCompra() {
         cidade:   document.getElementById('nfe-cidade').value.trim()    || null,
         estado:   document.getElementById('nfe-estado').value           || null,
     };
-    const temNFe = Object.values(nfeData).some(v => v);
 
-    const novoInicio = hoje();
-    const novoFim    = addDias(novoInicio, 30 * _mesesSelecionados);
-    const tipoEvento = planoAnterior === 'basico' ? 'novo'
-                     : planoNovo === planoAnterior ? 'renovacao'
-                     : planoObj.preco > planoAtualObj.preco ? 'upgrade' : 'upgrade';
+    // Monta payload base
+    const payload = {
+        metodo,
+        plano_id:      planoNovo,
+        plano_nome:    planoObj.nome,
+        meses:         _mesesSelecionados,
+        valor_total:   valorTotal,
+        cupom_id:      _cupomAtivo?.id      || null,
+        cupom_codigo:  _cupomAtivo?.codigo  || null,
+        email:         session.user.email,
+        nome_completo: perfil?.nome         || session.user.email,
+        cpf_cnpj:      document.getElementById('boleto-cpf').value.trim() ||
+                       nfeData.cpfcnpj      || perfil?.cpf_cnpj || '',
+        nfe:           Object.values(nfeData).some(v => v) ? nfeData : null,
+    };
+
+    // Campos extras por método
+    if (metodo === 'cartao') {
+        if (!_cardForm) {
+            mostrarToast('⚠️', 'Inicializando formulário do cartão. Tente novamente.');
+            btnFinalizar.disabled = false;
+            btnFinalizar.innerHTML = '✅ Confirmar e Finalizar Pagamento';
+            return;
+        }
+        try {
+            const cardData = _cardForm.getCardFormData();
+            if (!cardData.token) {
+                mostrarToast('❌', 'Erro ao processar cartão. Verifique os dados.');
+                btnFinalizar.disabled = false;
+                btnFinalizar.innerHTML = '✅ Confirmar e Finalizar Pagamento';
+                return;
+            }
+            payload.card_token        = cardData.token;
+            payload.installments      = parseInt(document.getElementById('cartao-parcelas').value) || 1;
+            payload.payment_method_id = cardData.paymentMethodId;
+            payload.issuer_id         = cardData.issuerId;
+        } catch(e) {
+            mostrarToast('❌', 'Erro ao tokenizar cartão. Verifique os dados e tente novamente.');
+            btnFinalizar.disabled = false;
+            btnFinalizar.innerHTML = '✅ Confirmar e Finalizar Pagamento';
+            return;
+        }
+    }
+
+    if (metodo === 'boleto' || metodo === 'pix') {
+        payload.endereco_rua    = nfeData.endereco?.split(',')[0]?.trim() || 'Não informado';
+        payload.endereco_numero = nfeData.endereco?.split(',')[1]?.trim() || 'S/N';
+        payload.endereco_bairro = 'Não informado';
+        payload.endereco_cep    = nfeData.cep    || '01310100';
+        payload.endereco_cidade = nfeData.cidade || 'São Paulo';
+        payload.endereco_estado = nfeData.estado || 'SP';
+    }
 
     try {
-        // 1. Atualiza assinatura
-        const { error: errUpdate } = await sb
-            .from('assinaturas')
-            .update({
-                plano_ativo:      planoNovo,
-                status:           'ativa',
-                inicio_periodo:   novoInicio,
-                fim_periodo:      novoFim,
-                downgrade_para:   null,
-                valor_pago:       valorTotal,
-                metodo_pagamento: metodo,
-            })
-            .eq('usuario_id', _userId);
-
-        if (errUpdate) throw errUpdate;
-
-        // 2. Histórico
-        await sb.from('historico_assinaturas').insert({
-            usuario_id:       _userId,
-            tipo_evento:      tipoEvento,
-            plano_anterior:   planoAnterior,
-            plano_novo:       planoNovo,
-            valor_cobrado:    valorTotal,
-            metodo_pagamento: metodo,
-            observacao:       `${tipoEvento} → ${planoNovo} | ${_mesesSelecionados}m | ${metodo}${_cupomAtivo ? ' | cupom: ' + _cupomAtivo.codigo : ''}`,
-            ...(temNFe ? { nfe: nfeData } : {}),
+        // Chama a Edge Function criar-pagamento
+        const res = await fetch(`${EDGE_URL}/criar-pagamento`, {
+            method: 'POST',
+            headers: {
+                'Content-Type':  'application/json',
+                'Authorization': `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify(payload),
         });
 
-        // 3. Incrementar uso do cupom
-        if (_cupomAtivo) {
-            await sb.from('cupons')
-                .update({ usos_atual: (sb.rpc ? undefined : undefined) })
-                .eq('id', _cupomAtivo.id);
-            // usa RPC incremento se disponível, senão faz manual
-            const { data: cupAtual } = await sb.from('cupons').select('usos_atual').eq('id', _cupomAtivo.id).single();
-            if (cupAtual) {
-                await sb.from('cupons').update({ usos_atual: (cupAtual.usos_atual || 0) + 1 }).eq('id', _cupomAtivo.id);
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.detalhe || data.error || 'Erro no servidor');
+        }
+
+        // Fecha o checkout e abre o modal de resultado
+        fecharCheckout();
+
+        if (metodo === 'pix') {
+            mostrarModalPix(data, planoObj.nome);
+            iniciarPolling(data.pagamento_id);
+
+        } else if (metodo === 'boleto') {
+            mostrarModalBoleto(data, planoObj.nome);
+            iniciarPolling(data.pagamento_id);
+
+        } else if (metodo === 'cartao') {
+            if (data.aprovado) {
+                await recarregarAssinatura();
+                mostrarModalSucesso();
+            } else {
+                mostrarModalRejeitado(data.detalhe);
             }
         }
 
-        // 4. Atualiza estado
-        ESTADO.planoAtivo        = planoNovo;
-        ESTADO.validadeAte       = formatarData(novoFim);
-        ESTADO.downgradeAgendado = null;
-
-        fecharCheckout();
-        renderizarBanner();
-        renderizarCards();
-        mostrarToast('🎉', 'Plano ' + planoObj.nome + ' ativado! Válido até ' + formatarData(novoFim));
-
     } catch (err) {
-        console.error('Erro ao ativar plano:', err);
-        mostrarToast('❌', 'Erro ao processar. Tente novamente.');
+        console.error('Erro ao finalizar compra:', err);
+        mostrarToast('❌', err.message || 'Erro ao processar. Tente novamente.');
     } finally {
-        btnFinalizar.disabled    = false;
-        btnFinalizar.innerHTML   = '✅ Confirmar e Finalizar Pagamento';
+        btnFinalizar.disabled  = false;
+        btnFinalizar.innerHTML = '✅ Confirmar e Finalizar Pagamento';
     }
+}
+
+/* ─────────────────────────────────────────
+   MODAIS DE RESULTADO DO PAGAMENTO
+───────────────────────────────────────── */
+function mostrarModalPix(data, planoNome) {
+    const box = document.getElementById('modal-pagamento-conteudo');
+    box.innerHTML = `
+        <div class="ico">⚡</div>
+        <h3>QR Code Pix gerado!</h3>
+        <p>Escaneie o QR Code abaixo ou copie o código para pagar.<br>
+        O plano <strong>${planoNome}</strong> será ativado em até 1 minuto após o pagamento.</p>
+        <div class="qr-wrapper">
+            ${data.qr_code_base64
+                ? `<img src="data:image/png;base64,${data.qr_code_base64}" alt="QR Code Pix">`
+                : '<p style="color:#888;">QR Code não disponível. Use o código abaixo.</p>'}
+        </div>
+        <div class="qr-copia-cola" id="pix-codigo">${data.qr_code || '—'}</div>
+        <button class="btn-copiar-pix" onclick="copiarPix()">📋 Copiar código Pix</button>
+        <div class="polling-status">
+            <div class="spinner"></div>
+            <span>Aguardando confirmação do pagamento...</span>
+        </div>
+        <button class="btn-fechar-resultado" onclick="fecharModalPagamento()">Fechar e aguardar depois</button>
+    `;
+    document.getElementById('modal-pagamento').classList.add('aberto');
+}
+
+function mostrarModalBoleto(data, planoNome) {
+    const venc = data.vencimento ? new Date(data.vencimento).toLocaleDateString('pt-BR') : '3 dias';
+    const box = document.getElementById('modal-pagamento-conteudo');
+    box.innerHTML = `
+        <div class="ico">📄</div>
+        <h3>Boleto gerado!</h3>
+        <p>Pague o boleto até <strong>${venc}</strong>.<br>
+        O plano <strong>${planoNome}</strong> será ativado em até 3 dias úteis após o pagamento.</p>
+        ${data.codigo_barras
+            ? `<div class="boleto-codigo">${data.codigo_barras}</div>`
+            : ''}
+        ${data.boleto_url
+            ? `<a class="btn-abrir-boleto" href="${data.boleto_url}" target="_blank">📥 Abrir / Imprimir Boleto</a>`
+            : ''}
+        <div class="polling-status">
+            <div class="spinner"></div>
+            <span>Aguardando confirmação do pagamento...</span>
+        </div>
+        <button class="btn-fechar-resultado" onclick="fecharModalPagamento()">Fechar e aguardar depois</button>
+    `;
+    document.getElementById('modal-pagamento').classList.add('aberto');
+}
+
+function mostrarModalSucesso() {
+    pararPolling();
+    const box = document.getElementById('modal-pagamento-conteudo');
+    box.innerHTML = `
+        <div class="ico">🎉</div>
+        <div class="sucesso-box">
+            <h4>Pagamento confirmado!</h4>
+            <p>Seu plano foi ativado com sucesso. Aproveite todos os recursos!</p>
+        </div>
+        <button class="btn-abrir-boleto" onclick="fecharModalPagamento()">✅ Ir para o Dashboard</button>
+    `;
+    document.getElementById('modal-pagamento').classList.add('aberto');
+    renderizarBanner();
+    renderizarCards();
+}
+
+function mostrarModalRejeitado(detalhe) {
+    pararPolling();
+    const msgs = {
+        'cc_rejected_insufficient_amount': 'Saldo insuficiente no cartão.',
+        'cc_rejected_bad_filled_card_number': 'Número do cartão incorreto.',
+        'cc_rejected_bad_filled_date': 'Data de validade incorreta.',
+        'cc_rejected_bad_filled_other': 'Dados do cartão incorretos.',
+        'cc_rejected_call_for_authorize': 'Ligue para o banco para autorizar.',
+        'cc_rejected_card_disabled': 'Cartão desabilitado. Contate seu banco.',
+    };
+    const motivo = msgs[detalhe] || 'Pagamento não aprovado. Verifique os dados e tente novamente.';
+    const box = document.getElementById('modal-pagamento-conteudo');
+    box.innerHTML = `
+        <div class="ico">❌</div>
+        <div class="rejeitado-box">
+            <h4>Pagamento não aprovado</h4>
+            <p>${motivo}</p>
+        </div>
+        <button class="btn-abrir-boleto" style="background:#ff385c;" onclick="fecharModalPagamento()">Tentar novamente</button>
+    `;
+    document.getElementById('modal-pagamento').classList.add('aberto');
+}
+
+function fecharModalPagamento() {
+    document.getElementById('modal-pagamento').classList.remove('aberto');
+    // Não para o polling — continua verificando em background
+}
+
+function copiarPix() {
+    const codigo = document.getElementById('pix-codigo')?.textContent;
+    if (!codigo) return;
+    navigator.clipboard.writeText(codigo).then(() => {
+        mostrarToast('📋', 'Código Pix copiado!');
+    }).catch(() => {
+        mostrarToast('⚠️', 'Não foi possível copiar. Copie manualmente.');
+    });
 }
 
 /* ─────────────────────────────────────────
