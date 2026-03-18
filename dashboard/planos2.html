@@ -876,16 +876,11 @@
                                 <input type="text" class="input-checkout" id="cartao-cvv" placeholder="CVV" maxlength="4">
                             </div>
                             <input type="text" class="input-checkout" id="cartao-nome" placeholder="Nome igual ao cartão">
-                            <div class="input-duplo">
-                                <select class="select-checkout" id="doc-tipo">
-                                    <option value="CPF">CPF</option>
-                                    <option value="CNPJ">CNPJ</option>
-                                </select>
-                                <input type="text" class="input-checkout" id="doc-numero" placeholder="Nº do documento" maxlength="18" oninput="mascaraCPFCNPJ(this)">
-                            </div>
                             <select class="select-checkout" id="cartao-parcelas">
                                 <option value="1">1x sem juros</option>
                             </select>
+                            <!-- CPF/CNPJ do titular — enviado manualmente, não pelo SDK -->
+                            <input type="text" class="input-checkout" id="cartao-cpf" placeholder="CPF ou CNPJ do titular" maxlength="18" oninput="mascaraCPFCNPJ(this)">
                         </div>
                         <p style="font-size:0.72rem;color:#aaa;margin-top:6px;text-align:center;">
                             🔒 Dados criptografados pelo SDK do Mercado Pago
@@ -1046,7 +1041,7 @@ const SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIs
 
 // ⚠️ SUBSTITUA pela sua PUBLIC KEY do Mercado Pago
 // Painel MP → Seu negócio → Configurações → Credenciais
-const MP_PUBLIC_KEY = 'TEST-979ac9c0-4f5b-47de-a63c-83f587865274';
+const MP_PUBLIC_KEY = 'TEST-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
 
 // URL base das Edge Functions (não mude)
 const EDGE_URL = `${SUPA_URL}/functions/v1`;
@@ -1103,7 +1098,8 @@ async function recarregarAssinatura() {
     renderizarBanner();
     renderizarCards();
 }
-
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
 
 /* ─────────────────────────────────────────
    DADOS DOS PLANOS
@@ -1627,13 +1623,18 @@ function mostrarFeedbackCupom(msg, tipo) {
    TROCAR MÉTODO DE PAGAMENTO
 ───────────────────────────────────────── */
 function trocarMetodo(metodo) {
-    document.getElementById('area-pix').style.display    = metodo === 'pix'    ? 'block' : 'none';
-    document.getElementById('area-cartao').style.display = metodo === 'cartao' ? 'block' : 'none';
-    document.getElementById('area-boleto').style.display = metodo === 'boleto' ? 'block' : 'none';
+    // Esconde todos primeiro
+    document.getElementById('area-pix').style.display    = 'none';
+    document.getElementById('area-cartao').style.display = 'none';
+    document.getElementById('area-boleto').style.display = 'none';
 
-    // Inicializa o CardForm do MP na primeira vez que o usuário seleciona cartão
+    // Mostra o selecionado
+    if (metodo === 'pix')    document.getElementById('area-pix').style.display    = 'block';
+    if (metodo === 'boleto') document.getElementById('area-boleto').style.display = 'block';
+
     if (metodo === 'cartao') {
-        setTimeout(() => inicializarCardForm(), 100);
+        // inicializarCardForm já mostra #area-cartao internamente
+        setTimeout(() => inicializarCardForm(), 150);
     }
 }
 
@@ -1659,37 +1660,48 @@ function validarBtnFinalizar() {
    INICIALIZAR CARD FORM MP (quando cartão é selecionado)
 ───────────────────────────────────────── */
 function inicializarCardForm() {
-    if (_cardForm) return; // já inicializado
+    // Se já existe, destrói antes de recriar
+    if (_cardForm) {
+        try { _cardForm.unmount(); } catch(e) {}
+        _cardForm = null;
+    }
 
-    const plano = PLANOS.find(p => p.id === _planoCheckout);
+    if (!mp) { console.warn('SDK MP ainda não carregou'); return; }
+    if (!_planoCheckout) return;
+
+    // Garante que a área do cartão está visível antes de montar
+    document.getElementById('area-cartao').style.display = 'block';
+
     const total = calcularTotal();
 
-    _cardForm = mp.cardForm({
-        amount: String(total.toFixed(2)),
-        iframe: false,
-        form: {
-            id: 'form-cartao-mp',
-            cardNumber:         { id: 'cartao-numero',   placeholder: 'Número do Cartão' },
-            expirationDate:     { id: 'cartao-validade', placeholder: 'MM/AA' },
-            securityCode:       { id: 'cartao-cvv',      placeholder: 'CVV' },
-            cardholderName:     { id: 'cartao-nome',     placeholder: 'Nome igual ao cartão' },
-            installments:       { id: 'cartao-parcelas' },
-            identificationType: { id: 'doc-tipo' },
-            identificationNumber:{ id: 'doc-numero' },
-        },
-        callbacks: {
-            onFormMounted: error => {
-                if (error) console.warn('MP cardForm mount error:', error);
+    try {
+        _cardForm = mp.cardForm({
+            amount: String(total.toFixed(2)),
+            iframe: false,
+            form: {
+                id: 'form-cartao-mp',
+                // Apenas os campos obrigatórios — sem doc-tipo/doc-numero
+                // para evitar erro de contexto quando campos estão ocultos
+                cardNumber:    { id: 'cartao-numero',  placeholder: 'Número do Cartão' },
+                expirationDate:{ id: 'cartao-validade', placeholder: 'MM/AA' },
+                securityCode:  { id: 'cartao-cvv',     placeholder: 'CVV' },
+                cardholderName:{ id: 'cartao-nome',    placeholder: 'Nome igual ao cartão' },
+                installments:  { id: 'cartao-parcelas' },
             },
-            onInstallmentsReceived: (error, data) => {
-                if (error) return;
-                // MP preenche as parcelas automaticamente
+            callbacks: {
+                onFormMounted: error => {
+                    if (error) console.warn('MP cardForm mount error:', error);
+                    else console.log('✅ MP cardForm montado');
+                },
+                onError: errors => {
+                    console.warn('MP cardForm errors:', errors);
+                },
             },
-            onError: errors => {
-                console.warn('MP cardForm errors:', errors);
-            }
-        },
-    });
+        });
+    } catch(e) {
+        console.warn('Erro ao inicializar cardForm:', e);
+        _cardForm = null;
+    }
 }
 
 function calcularTotal() {
@@ -1732,7 +1744,8 @@ async function finalizarCompra() {
 
     // Dados do pagador
     const { data: { session } } = await sb.auth.getSession();
-    const { data: perfil } = await sb.from('usuarios').select('nome, cpf_cnpj').eq('id', _userId).single();
+    // Busca apenas 'nome' — cpf_cnpj pode não existir na tabela usuarios
+    const { data: perfil } = await sb.from('usuarios').select('nome').eq('id', _userId).single();
 
     // Dados NF-e
     const nfeData = {
@@ -1757,7 +1770,8 @@ async function finalizarCompra() {
         email:         session.user.email,
         nome_completo: perfil?.nome         || session.user.email,
         cpf_cnpj:      document.getElementById('boleto-cpf').value.trim() ||
-                       nfeData.cpfcnpj      || perfil?.cpf_cnpj || '',
+                       document.getElementById('cartao-cpf')?.value.trim() ||
+                       nfeData.cpfcnpj || '',
         nfe:           Object.values(nfeData).some(v => v) ? nfeData : null,
     };
 
