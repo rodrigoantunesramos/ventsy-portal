@@ -94,7 +94,7 @@
             <span class="menu-section-label">Conta</span>
             <a data-rota="indique" onclick="navegar('indique')">🎁 Programa de Indicação</a>
             <a data-rota="planos" onclick="navegar('planos')">💳 Planos Ventsy</a>
-            <a href="configuracoes.html">⚙️ Configurações</a>
+            <a data-rota="configuracoes" onclick="navegar('configuracoes')">⚙️ Configurações</a>
         </nav>
     </aside>
 
@@ -1874,6 +1874,295 @@
 
 </div><!-- /pagina-indique -->
 
+
+
+
+<!-- ════════════════════════════════════
+     PÁGINA: CONFIGURAÇÕES
+════════════════════════════════════ -->
+
+<div class="page-section" id="pagina-configuracoes">
+
+    <div class="dash-header-fixo">
+        <h2>⚙️ Configurações</h2>
+        <p>Gerencie os dados da sua conta, segurança e preferências.</p>
+    </div>
+
+    <!-- ── PERFIL PESSOAL ── -->
+    <div class="cfg-secao">
+        <div class="cfg-secao-header">
+            <div class="cfg-secao-icone">👤</div>
+            <div class="cfg-titulo-grupo">
+                <h3>Perfil Pessoal</h3>
+                <p>Suas informações de conta na plataforma VENTSY</p>
+            </div>
+        </div>
+
+        <div class="cfg-perfil-topo-box">
+            <div class="cfg-avatar-grande-wrap">
+                <div class="cfg-avatar-grande" id="cfg-avatar-grande">?</div>
+                <button class="cfg-btn-trocar-avatar" onclick="document.getElementById('cfg-input-foto-perfil').click()" title="Trocar foto">📷</button>
+                <input type="file" id="cfg-input-foto-perfil" accept="image/*" hidden onchange="cfgPreviewAvatar(this)">
+            </div>
+            <div class="cfg-perfil-info-texto">
+                <h4 id="cfg-perfil-nome-display">—</h4>
+                <span id="cfg-perfil-email-display">—</span>
+            </div>
+        </div>
+
+        <div class="cfg-grid-2">
+            <div class="campo">
+                <label>Nome Completo</label>
+                <input type="text" id="cfg-campo-nome" placeholder="Seu nome completo">
+            </div>
+            <div class="campo">
+                <label>Usuário (@handle)</label>
+                <input type="text" id="cfg-campo-usuario" placeholder="@seuusuario">
+                <span class="dica">Identificador único público na plataforma</span>
+            </div>
+            <div class="campo">
+                <label>E-mail de Login</label>
+                <input type="email" id="cfg-campo-email" disabled>
+                <span class="dica">Para alterar o e-mail entre em contato com o suporte</span>
+            </div>
+            <div class="campo">
+                <label>Telefone Pessoal</label>
+                <input type="tel" id="cfg-campo-telefone" placeholder="(21) 99999-0000">
+            </div>
+            <div class="campo">
+                <label>CPF / CNPJ</label>
+                <input type="text" id="cfg-campo-documento" placeholder="000.000.000-00">
+            </div>
+            <div class="campo">
+                <label>Data de Nascimento</label>
+                <input type="date" id="cfg-campo-nascimento">
+            </div>
+        </div>
+
+        <div class="cfg-acoes-linha">
+            <button class="cfg-btn-primario" onclick="cfgSalvarPerfil()">💾 Salvar Alterações</button>
+        </div>
+    </div>
+
+    <!-- ── SEGURANÇA / SENHA ── -->
+    <div class="cfg-secao">
+        <div class="cfg-secao-header">
+            <div class="cfg-secao-icone">🔒</div>
+            <div class="cfg-titulo-grupo">
+                <h3>Segurança — Alterar Senha</h3>
+                <p>Use uma senha forte com letras, números e símbolos</p>
+            </div>
+        </div>
+
+        <div class="cfg-grid-2">
+            <div class="campo span-2">
+                <label>Nova Senha</label>
+                <div class="cfg-input-senha-wrap">
+                    <input type="password" id="cfg-nova-senha" placeholder="Mínimo 8 caracteres" oninput="cfgCalcularForcaSenha(this.value)">
+                    <button class="cfg-btn-olho" type="button" onclick="cfgToggleSenha('cfg-nova-senha', this)">👁</button>
+                </div>
+                <div style="margin-top:8px;display:flex;gap:4px;">
+                    <div id="cfg-forca-1" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                    <div id="cfg-forca-2" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                    <div id="cfg-forca-3" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                    <div id="cfg-forca-4" style="height:4px;flex:1;border-radius:4px;background:#eee;transition:background .3s;"></div>
+                </div>
+                <span class="dica" id="cfg-forca-label">Digite a nova senha</span>
+            </div>
+            <div class="campo span-2">
+                <label>Confirmar Nova Senha</label>
+                <div class="cfg-input-senha-wrap">
+                    <input type="password" id="cfg-confirmar-senha" placeholder="Repita a nova senha">
+                    <button class="cfg-btn-olho" type="button" onclick="cfgToggleSenha('cfg-confirmar-senha', this)">👁</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="cfg-acoes-linha">
+            <button class="cfg-btn-secundario" onclick="cfgAlterarSenha()">🔑 Atualizar Senha</button>
+            <button class="cfg-btn-secundario" onclick="cfgEnviarLinkRedefinicao()">📧 Receber link por e-mail</button>
+        </div>
+    </div>
+
+    <!-- ── NOTIFICAÇÕES ── -->
+    <div class="cfg-secao">
+        <div class="cfg-secao-header">
+            <div class="cfg-secao-icone">🔔</div>
+            <div class="cfg-titulo-grupo">
+                <h3>Notificações e Alertas</h3>
+                <p>Escolha como deseja ser avisado sobre interações</p>
+            </div>
+        </div>
+
+        <div class="cfg-lista-notif">
+            <div class="cfg-item-notif">
+                <div class="cfg-notif-texto">
+                    <strong>Novo Lead por E-mail</strong>
+                    <p>Receba um e-mail quando alguém clicar no botão de contato do seu anúncio.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="cfg-notif-lead-email" checked><span class="switch-slider"></span></label>
+            </div>
+            <div class="cfg-item-notif">
+                <div class="cfg-notif-texto">
+                    <strong>Novo Lead por WhatsApp</strong>
+                    <p>Receba uma mensagem no WhatsApp a cada novo contato gerado.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="cfg-notif-lead-whatsapp"><span class="switch-slider"></span></label>
+            </div>
+            <div class="cfg-item-notif">
+                <div class="cfg-notif-texto">
+                    <strong>Alerta de Visitas</strong>
+                    <p>Ser notificado quando seu anúncio receber um novo acesso.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="cfg-notif-visitas"><span class="switch-slider"></span></label>
+            </div>
+            <div class="cfg-item-notif">
+                <div class="cfg-notif-texto">
+                    <strong>E-mails Promocionais</strong>
+                    <p>Novidades, dicas de marketing e atualizações da plataforma VENTSY.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="cfg-notif-promo" checked><span class="switch-slider"></span></label>
+            </div>
+            <div class="cfg-item-notif">
+                <div class="cfg-notif-texto">
+                    <strong>Relatório Semanal</strong>
+                    <p>Resumo semanal de visitas, leads e desempenho do seu anúncio por e-mail.</p>
+                </div>
+                <label class="switch"><input type="checkbox" id="cfg-notif-relatorio" checked><span class="switch-slider"></span></label>
+            </div>
+        </div>
+
+        <div class="cfg-acoes-linha">
+            <button class="cfg-btn-primario" onclick="cfgSalvarNotificacoes()">💾 Salvar Preferências</button>
+        </div>
+    </div>
+
+    <!-- ── SEGURANÇA AVANÇADA ── -->
+    <div class="cfg-secao">
+        <div class="cfg-secao-header">
+            <div class="cfg-secao-icone">🛡️</div>
+            <div class="cfg-titulo-grupo">
+                <h3>Segurança Avançada</h3>
+                <p>Proteja sua conta com camadas extras de verificação</p>
+            </div>
+        </div>
+
+        <div class="cfg-item-seguranca">
+            <div class="cfg-seg-texto">
+                <strong>Autenticação de Dois Fatores (2FA)</strong>
+                <p>Adicione um código enviado ao seu celular ou e-mail a cada login.</p>
+                <span class="cfg-badge-status cfg-badge-inativo" id="cfg-badge-2fa">○ Não configurado</span>
+            </div>
+            <button class="cfg-btn-secundario" onclick="cfgAbrirModal2FA()">Configurar</button>
+        </div>
+
+        <div class="cfg-item-seguranca">
+            <div class="cfg-seg-texto">
+                <strong>Sessões Ativas</strong>
+                <p>Encerre o acesso de todos os dispositivos conectados à sua conta.</p>
+            </div>
+            <button class="cfg-btn-secundario" onclick="cfgEncerrarSessoes()">Encerrar todas</button>
+        </div>
+
+        <div class="cfg-item-seguranca">
+            <div class="cfg-seg-texto">
+                <strong>Histórico de Acessos</strong>
+                <p>Veja os últimos logins realizados na sua conta.</p>
+            </div>
+            <button class="cfg-btn-secundario" onclick="mostrarToast('📋 Funcionalidade em breve!')">Ver histórico</button>
+        </div>
+    </div>
+
+    <!-- ── ZONA DE PERIGO ── -->
+    <div class="cfg-secao-perigo">
+        <div class="cfg-secao-header" style="border-bottom-color:#ffe0e0;">
+            <div class="cfg-secao-icone" style="background:#fff0f0;">⚠️</div>
+            <div class="cfg-titulo-grupo">
+                <h3 style="color:#ff385c;">Zona de Perigo</h3>
+                <p>Ações irreversíveis — leia com atenção antes de continuar</p>
+            </div>
+        </div>
+
+        <div class="cfg-perigo-item">
+            <div class="cfg-perigo-texto">
+                <strong>Despublicar meu anúncio</strong>
+                <p>Oculta temporariamente seu espaço da busca pública. Pode reativar quando quiser.</p>
+            </div>
+            <button class="cfg-btn-secundario" onclick="mostrarToast('👁‍🗨 Anúncio despublicado temporariamente.')">Despublicar</button>
+        </div>
+
+        <div class="cfg-perigo-item">
+            <div class="cfg-perigo-texto">
+                <strong>Cancelar assinatura</strong>
+                <p>Encerra sua assinatura atual ao fim do período vigente. Dados são mantidos.</p>
+            </div>
+            <button class="cfg-btn-secundario" onclick="mostrarToast('💳 Solicitação enviada. Em breve entraremos em contato.')">Cancelar plano</button>
+        </div>
+
+        <div class="cfg-perigo-item">
+            <div class="cfg-perigo-texto">
+                <strong>Excluir minha conta permanentemente</strong>
+                <p>Remove todos os dados, anúncio e histórico. Esta ação <strong>não pode ser desfeita</strong>.</p>
+            </div>
+            <button class="cfg-btn-perigo" onclick="cfgAbrirModalExcluir()">🗑️ Excluir conta</button>
+        </div>
+    </div>
+
+</div><!-- /pagina-configuracoes -->
+
+
+<!-- MODAL: 2FA -->
+<div class="cfg-modal-overlay" id="cfg-modal-2fa">
+    <div class="cfg-modal-box">
+        <button class="cfg-modal-fechar" onclick="cfgFecharModal('cfg-modal-2fa')">✕</button>
+        <h3>🛡️ Autenticação de Dois Fatores</h3>
+        <p>Escolha como deseja receber o código de verificação a cada login.</p>
+        <div class="cfg-modal-opcoes">
+            <div class="cfg-opcao-2fa" onclick="cfgAtivar2FA('sms')">
+                <span class="cfg-opcao-2fa-icon">📱</span>
+                <div class="cfg-opcao-2fa-texto">
+                    <strong>SMS para o celular</strong>
+                    <span>Código enviado por mensagem de texto</span>
+                </div>
+            </div>
+            <div class="cfg-opcao-2fa" onclick="cfgAtivar2FA('email')">
+                <span class="cfg-opcao-2fa-icon">📧</span>
+                <div class="cfg-opcao-2fa-texto">
+                    <strong>Código por E-mail</strong>
+                    <span>Código enviado para o e-mail cadastrado</span>
+                </div>
+            </div>
+            <div class="cfg-opcao-2fa" onclick="cfgAtivar2FA('app')">
+                <span class="cfg-opcao-2fa-icon">🔐</span>
+                <div class="cfg-opcao-2fa-texto">
+                    <strong>App autenticador</strong>
+                    <span>Google Authenticator, Authy, etc.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Excluir Conta -->
+<div class="cfg-modal-overlay cfg-modal-confirmacao" id="cfg-modal-excluir">
+    <div class="cfg-modal-box">
+        <button class="cfg-modal-fechar" onclick="cfgFecharModal('cfg-modal-excluir')">✕</button>
+        <h3 style="color:#ff385c;">🗑️ Excluir Conta</h3>
+        <p>Esta ação é <strong>permanente e irreversível</strong>. Todos os seus dados, anúncio, fotos e histórico de leads serão apagados.</p>
+        <p style="margin-top:-10px;">Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo:</p>
+        <div class="cfg-campo-confirma">
+            <input type="text" id="cfg-input-confirma-excluir" placeholder="Digite EXCLUIR para confirmar"
+                   oninput="cfgValidarExclusao(this.value)">
+        </div>
+        <div class="cfg-acoes-linha">
+            <button class="cfg-btn-secundario" onclick="cfgFecharModal('cfg-modal-excluir')">Cancelar</button>
+            <button class="cfg-btn-perigo" id="cfg-btn-confirma-excluir" disabled
+                    onclick="cfgConfirmarExclusao()" style="opacity:.4;cursor:not-allowed;">
+                Excluir permanentemente
+            </button>
+        </div>
+    </div>
+</div>
 
 
 
