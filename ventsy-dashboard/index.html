@@ -14,6 +14,11 @@
 
     <!-- App (ES modules) -->
     <script type="module" src="js/app.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
 </head>
 <body>
 
@@ -873,6 +878,359 @@
     </div>
 
 </div><!-- /pagina-fotos -->
+
+
+<!-- ════════════════════════════════════
+     PÁGINA: MINHA PROPRIEDADE
+════════════════════════════════════ -->
+
+<div class="page-section" id="pagina-minhapropriedade">
+
+    <header class="dash-header-fixo">
+        <h2>🏡 Minha Propriedade</h2>
+        <button class="prop-btn-visualizar" id="prop-btn-visualizar" onclick="propVerAnuncio()" style="opacity:0.5">
+            👁 Ver Anúncio Público
+        </button>
+    </header>
+
+    <!-- ABAS DE NAVEGAÇÃO -->
+    <nav class="prop-sub-menu">
+        <button class="prop-tab-link active" data-tab="contato"  onclick="propOpenTab(event,'contato')">1. Contato</button>
+        <button class="prop-tab-link"        data-tab="sobre"    onclick="propOpenTab(event,'sobre')">2. Sobre</button>
+        <button class="prop-tab-link"        data-tab="valores"  onclick="propOpenTab(event,'valores')">3. Valores</button>
+        <button class="prop-tab-link"        data-tab="endereco" onclick="propOpenTab(event,'endereco')">4. Endereço</button>
+        <button class="prop-tab-link"        data-tab="eventos"  onclick="propOpenTab(event,'eventos')">5. Eventos</button>
+        <button class="prop-tab-link"        data-tab="faq"      onclick="propOpenTab(event,'faq')">6. FAQ</button>
+        <button class="prop-tab-link"        data-tab="servicos" onclick="propOpenTab(event,'servicos')">7. Serviços</button>
+        <button class="prop-tab-link"        data-tab="forca"    onclick="propOpenTab(event,'forca')">⚡ Força do Anúncio</button>
+    </nav>
+
+    <div class="prop-container-abas">
+
+        <!-- ══ ABA 1: CONTATO ══ -->
+        <div id="prop-aba-contato" class="prop-tab-content active">
+            <div class="prop-sessao-edit">
+                <h3>Dados da Propriedade</h3>
+                <p class="aviso-form">Essas informações serão exibidas no seu anúncio público.</p>
+                <div class="grid-form">
+                    <div class="campo span-2">
+                        <label>Nome do Espaço</label>
+                        <input type="text" id="prop-nome-espaco" placeholder="Ex: Mansão das Palmeiras">
+                    </div>
+                    <div class="campo span-2">
+                        <label>Tipo de Propriedade</label>
+                        <select id="prop-tipo-propriedade">
+                            <option value="">Selecione o tipo...</option>
+                            <option value="Sítio">🌿 Sítio</option>
+                            <option value="Chácara">🏡 Chácara</option>
+                            <option value="Salão de Festas">🎉 Salão de Festas</option>
+                            <option value="Fazenda">🐄 Fazenda</option>
+                            <option value="Casa de Campo">🏠 Casa de Campo</option>
+                            <option value="Mansão / Villa">🏛️ Mansão / Villa</option>
+                            <option value="Espaço Gourmet">🍷 Espaço Gourmet</option>
+                            <option value="Haras / Rancho">🐎 Haras / Rancho</option>
+                            <option value="Clube / Resort">🏊 Clube / Resort</option>
+                            <option value="Espaço Corporativo">💼 Espaço Corporativo</option>
+                            <option value="Espaço ao Ar Livre">🌳 Espaço ao Ar Livre</option>
+                            <option value="Outro">📍 Outro</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label>Capacidade Máxima (pessoas)</label>
+                        <input type="number" id="prop-capacidade" placeholder="Ex: 200" min="1">
+                    </div>
+                    <div class="campo">
+                        <label>E-mail de Contato</label>
+                        <input type="email" id="prop-email-contato" placeholder="contato@seuespaco.com.br">
+                    </div>
+                    <div class="campo">
+                        <label>WhatsApp</label>
+                        <input type="tel" id="prop-whatsapp" placeholder="(21) 99999-0000">
+                    </div>
+                    <div class="campo">
+                        <label>Telefone Fixo</label>
+                        <input type="tel" id="prop-telefone" placeholder="(21) 3333-0000">
+                    </div>
+                    <div class="campo">
+                        <label>Instagram</label>
+                        <input type="text" id="prop-instagram" placeholder="@seuespaco">
+                    </div>
+                    <div class="campo">
+                        <label>Facebook</label>
+                        <input type="text" id="prop-facebook" placeholder="facebook.com/seuespaco">
+                    </div>
+                    <div class="campo">
+                        <label>TikTok</label>
+                        <input type="text" id="prop-tiktok" placeholder="@seuespaco">
+                    </div>
+                    <div class="campo">
+                        <label>YouTube</label>
+                        <input type="text" id="prop-youtube" placeholder="youtube.com/@seuespaco">
+                    </div>
+                    <div class="campo">
+                        <label>LinkedIn</label>
+                        <input type="text" id="prop-linkedin" placeholder="linkedin.com/in/seuespaco">
+                    </div>
+                    <div class="campo">
+                        <label>Site Externo</label>
+                        <input type="text" id="prop-site" placeholder="www.seuespaco.com.br">
+                    </div>
+                </div>
+            </div>
+            <div class="prop-sessao-edit">
+                <h3>Responsável pelo Atendimento</h3>
+                <p class="aviso-form">Quem os clientes vão encontrar ao entrar em contato?</p>
+                <div class="prop-atendimento-box">
+                    <div class="prop-foto-anfitriao">
+                        <div class="avatar-preview" id="prop-avatar-preview">😊</div>
+                        <button class="btn-trocar-foto" onclick="document.getElementById('prop-input-foto-resp').click()">Trocar Foto</button>
+                        <input type="file" id="prop-input-foto-resp" accept="image/*" hidden onchange="propPreviewFoto(this)">
+                        <input type="hidden" id="prop-foto-resp-data">
+                    </div>
+                    <div class="prop-info-anfitriao">
+                        <div class="campo">
+                            <label>Nome do Responsável</label>
+                            <input type="text" id="prop-nome-resp" placeholder="Ex: Rodrigo Ramos">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ABA 2: SOBRE ══ -->
+        <div id="prop-aba-sobre" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <h3>Descrição do Espaço</h3>
+                <p class="aviso-form">⚠️ Não inclua dados de contato aqui. Use conteúdo exclusivo e original.</p>
+                <div class="campo">
+                    <label>Apresentação completa do espaço</label>
+                    <textarea id="prop-descricao" class="txt-descricao" placeholder="Apresente seu espaço, explique seus diferenciais..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ABA 3: VALORES ══ -->
+        <div id="prop-aba-valores" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <h3>Preços de Referência</h3>
+                <p class="aviso-form">Valores orientativos exibidos no anúncio. Negociações pelo WhatsApp.</p>
+                <div class="prop-preco-grid">
+                    <div class="campo">
+                        <label>Valor por Hora</label>
+                        <div class="prop-input-moeda"><span>R$</span><input type="number" id="prop-valor-hora" placeholder="0,00" min="0"></div>
+                    </div>
+                    <div class="campo">
+                        <label>Valor por Diária (dia completo)</label>
+                        <div class="prop-input-moeda"><span>R$</span><input type="number" id="prop-valor-diaria" placeholder="0,00" min="0"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="prop-sessao-edit">
+                <h3>Custos Extras (opcionais para o cliente)</h3>
+                <p class="aviso-form">Serviços que o cliente pode contratar à parte.</p>
+                <div id="prop-lista-custos-extras" class="prop-lista-custos-extras"></div>
+                <button type="button" class="prop-btn-add-faq" onclick="propAdicionarCusto()">+ Adicionar item</button>
+            </div>
+        </div>
+
+        <!-- ══ ABA 4: ENDEREÇO ══ -->
+        <div id="prop-aba-endereco" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <div class="prop-header-sessao">
+                    <h3>Localização do Espaço</h3>
+                    <p class="aviso-form">O endereço completo ajuda os clientes a traçarem a rota.</p>
+                </div>
+                <div class="prop-grid-endereco">
+                    <div class="campo-cep">
+                        <span class="campo-label">CEP</span>
+                        <input type="text" id="prop-cep" placeholder="00000-000" onblur="propBuscarCEP()">
+                    </div>
+                    <div class="campo-largo">
+                        <span class="campo-label">Logradouro (Rua / Avenida)</span>
+                        <input type="text" id="prop-rua" placeholder="Ex: Rua das Flores">
+                    </div>
+                    <div class="campo-curto">
+                        <span class="campo-label">Número</span>
+                        <input type="text" id="prop-numero" placeholder="123">
+                    </div>
+                    <div class="campo-medio">
+                        <span class="campo-label">Complemento</span>
+                        <input type="text" id="prop-complemento" placeholder="Sala, Bloco...">
+                    </div>
+                    <div class="campo-medio">
+                        <span class="campo-label">Bairro</span>
+                        <input type="text" id="prop-bairro" placeholder="Ex: Centro">
+                    </div>
+                    <div class="campo-medio">
+                        <span class="campo-label">Cidade</span>
+                        <input type="text" id="prop-cidade" placeholder="Ex: São Paulo">
+                    </div>
+                    <div style="grid-column: span 6;">
+                        <span class="campo-label">Estado</span>
+                        <input type="hidden" id="prop-uf">
+                        <div class="prop-uf-grid" id="prop-uf-grid">
+                            <button type="button" class="prop-uf-btn" data-uf="AC" onclick="propSelecionarUF(this,'AC')">AC</button>
+                            <button type="button" class="prop-uf-btn" data-uf="AL" onclick="propSelecionarUF(this,'AL')">AL</button>
+                            <button type="button" class="prop-uf-btn" data-uf="AP" onclick="propSelecionarUF(this,'AP')">AP</button>
+                            <button type="button" class="prop-uf-btn" data-uf="AM" onclick="propSelecionarUF(this,'AM')">AM</button>
+                            <button type="button" class="prop-uf-btn" data-uf="BA" onclick="propSelecionarUF(this,'BA')">BA</button>
+                            <button type="button" class="prop-uf-btn" data-uf="CE" onclick="propSelecionarUF(this,'CE')">CE</button>
+                            <button type="button" class="prop-uf-btn" data-uf="DF" onclick="propSelecionarUF(this,'DF')">DF</button>
+                            <button type="button" class="prop-uf-btn" data-uf="ES" onclick="propSelecionarUF(this,'ES')">ES</button>
+                            <button type="button" class="prop-uf-btn" data-uf="GO" onclick="propSelecionarUF(this,'GO')">GO</button>
+                            <button type="button" class="prop-uf-btn" data-uf="MA" onclick="propSelecionarUF(this,'MA')">MA</button>
+                            <button type="button" class="prop-uf-btn" data-uf="MT" onclick="propSelecionarUF(this,'MT')">MT</button>
+                            <button type="button" class="prop-uf-btn" data-uf="MS" onclick="propSelecionarUF(this,'MS')">MS</button>
+                            <button type="button" class="prop-uf-btn" data-uf="MG" onclick="propSelecionarUF(this,'MG')">MG</button>
+                            <button type="button" class="prop-uf-btn" data-uf="PA" onclick="propSelecionarUF(this,'PA')">PA</button>
+                            <button type="button" class="prop-uf-btn" data-uf="PB" onclick="propSelecionarUF(this,'PB')">PB</button>
+                            <button type="button" class="prop-uf-btn" data-uf="PR" onclick="propSelecionarUF(this,'PR')">PR</button>
+                            <button type="button" class="prop-uf-btn" data-uf="PE" onclick="propSelecionarUF(this,'PE')">PE</button>
+                            <button type="button" class="prop-uf-btn" data-uf="PI" onclick="propSelecionarUF(this,'PI')">PI</button>
+                            <button type="button" class="prop-uf-btn" data-uf="RJ" onclick="propSelecionarUF(this,'RJ')">RJ</button>
+                            <button type="button" class="prop-uf-btn" data-uf="RN" onclick="propSelecionarUF(this,'RN')">RN</button>
+                            <button type="button" class="prop-uf-btn" data-uf="RS" onclick="propSelecionarUF(this,'RS')">RS</button>
+                            <button type="button" class="prop-uf-btn" data-uf="RO" onclick="propSelecionarUF(this,'RO')">RO</button>
+                            <button type="button" class="prop-uf-btn" data-uf="RR" onclick="propSelecionarUF(this,'RR')">RR</button>
+                            <button type="button" class="prop-uf-btn" data-uf="SC" onclick="propSelecionarUF(this,'SC')">SC</button>
+                            <button type="button" class="prop-uf-btn" data-uf="SP" onclick="propSelecionarUF(this,'SP')">SP</button>
+                            <button type="button" class="prop-uf-btn" data-uf="SE" onclick="propSelecionarUF(this,'SE')">SE</button>
+                            <button type="button" class="prop-uf-btn" data-uf="TO" onclick="propSelecionarUF(this,'TO')">TO</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:20px;">
+                    <button type="button" class="prop-btn-visualizar" style="background:#0d0d0d;color:#fff;padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:0.88rem;" onclick="propAtualizarMapa()">
+                        📍 Atualizar Mapa
+                    </button>
+                    <div class="prop-mapa-container" style="margin-top:14px;">
+                        <div id="prop-mapa-msg" style="font-size:0.85rem;color:#aaa;padding:14px;text-align:center;">
+                            Preencha o endereço e clique em "Atualizar Mapa"
+                        </div>
+                        <div id="prop-mapa-leaflet" style="display:none;width:100%;height:280px;border-radius:14px;overflow:hidden;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ABA 5: EVENTOS ══ -->
+        <div id="prop-aba-eventos" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <div class="prop-header-sessao">
+                    <h3>Quais eventos seu espaço recebe?</h3>
+                    <p class="aviso-form">Selecione todos os tipos de celebrações permitidos no seu local.</p>
+                </div>
+                <div class="prop-grid-eventos">
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="casamento"><div class="prop-conteudo-check"><span class="prop-icon-evento">💍</span><span class="prop-nome-evento">Casamentos</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="infantil"><div class="prop-conteudo-check"><span class="prop-icon-evento">🎈</span><span class="prop-nome-evento">Festas Infantis</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="corporativo"><div class="prop-conteudo-check"><span class="prop-icon-evento">💼</span><span class="prop-nome-evento">Corporativos</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="aniversario"><div class="prop-conteudo-check"><span class="prop-icon-evento">🎂</span><span class="prop-nome-evento">Aniversários</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="confraternizacao"><div class="prop-conteudo-check"><span class="prop-icon-evento">🥂</span><span class="prop-nome-evento">Confraternizações</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="formatura"><div class="prop-conteudo-check"><span class="prop-icon-evento">🎓</span><span class="prop-nome-evento">Formaturas</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="workshop"><div class="prop-conteudo-check"><span class="prop-icon-evento">🎤</span><span class="prop-nome-evento">Workshops / Cursos</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="religioso"><div class="prop-conteudo-check"><span class="prop-icon-evento">🕊️</span><span class="prop-nome-evento">Retiros / Religiosos</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="show"><div class="prop-conteudo-check"><span class="prop-icon-evento">🎸</span><span class="prop-nome-evento">Shows / Festivais</span></div></label>
+                    <label class="prop-card-evento-check"><input type="checkbox" name="prop-tipo-evento" value="esportivo"><div class="prop-conteudo-check"><span class="prop-icon-evento">🏆</span><span class="prop-nome-evento">Esportivos</span></div></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ABA 6: FAQ ══ -->
+        <div id="prop-aba-faq" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <div class="prop-header-sessao">
+                    <h3>Perguntas Frequentes (FAQ)</h3>
+                    <p class="aviso-form">Ajude seus clientes respondendo às dúvidas mais comuns.</p>
+                </div>
+                <div id="prop-lista-faq" class="prop-lista-faq">
+                    <div class="prop-faq-item" data-fixo="true">
+                        <div class="prop-faq-inputs">
+                            <input type="text" value="Regras de Cobrança" readonly style="background:#f5f5f5;color:#555;cursor:default;font-weight:600">
+                            <textarea id="prop-regras-preco" placeholder="Ex: Valor inclui 6 horas de uso. Mínimo de 4h..." style="min-height:100px"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <button class="prop-btn-adicionar-faq" onclick="propAdicionarFAQ()">+ Adicionar Nova Pergunta</button>
+            </div>
+        </div>
+
+        <!-- ══ ABA 7: SERVIÇOS ══ -->
+        <div id="prop-aba-servicos" class="prop-tab-content">
+            <div class="prop-sessao-edit">
+                <h3>Serviços e Amenidades Disponíveis</h3>
+                <p class="aviso-form">Marque tudo que seu espaço oferece.</p>
+                <div class="prop-amenidades-grid">
+                    <label class="prop-amenidade-check"><input type="checkbox" value="climatizado"><span class="prop-amenidade-label">❄️ Climatizado</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="estacionamento"><span class="prop-amenidade-label">🅿️ Estacionamento</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="seguranca"><span class="prop-amenidade-label">🛡️ Segurança</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="espaco-aberto"><span class="prop-amenidade-label">🌿 Espaço Aberto</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="cozinha"><span class="prop-amenidade-label">🍽️ Cozinha Equipada</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="gerador"><span class="prop-amenidade-label">⚡ Gerador</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="piscina"><span class="prop-amenidade-label">🏊 Piscina</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="wifi"><span class="prop-amenidade-label">📶 Wi-Fi</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="acessibilidade"><span class="prop-amenidade-label">♿ Acessibilidade</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="hospedagem"><span class="prop-amenidade-label">🛏️ Hospedagem</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="palco"><span class="prop-amenidade-label">🎤 Palco / Som</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="decoracao"><span class="prop-amenidade-label">🎀 Decoração</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="bar"><span class="prop-amenidade-label">🍹 Bar / Chopeira</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="churrasqueira"><span class="prop-amenidade-label">🔥 Churrasqueira</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="playground"><span class="prop-amenidade-label">🛝 Playground</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="quadra"><span class="prop-amenidade-label">⚽ Quadra Esportiva</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="camarim"><span class="prop-amenidade-label">💄 Camarim</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="projetor"><span class="prop-amenidade-label">📽️ Projetor / Telão</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="sauna"><span class="prop-amenidade-label">🧖 Sauna</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" value="heliponto"><span class="prop-amenidade-label">🚁 Heliponto</span></label>
+                </div>
+            </div>
+            <div class="prop-sessao-edit">
+                <h3>Serviços Extras que Você Pode Oferecer</h3>
+                <p class="aviso-form">Serviços adicionais disponíveis (pode ter custo extra).</p>
+                <div class="prop-amenidades-grid">
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="buffet"><span class="prop-amenidade-label">🍽️ Buffet Completo</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="garcom"><span class="prop-amenidade-label">🤵 Garçons / Staff</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="seguranca-extra"><span class="prop-amenidade-label">🛡️ Equipe de Segurança</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="bar-open"><span class="prop-amenidade-label">🍹 Bar Open Bar</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="mesa-cadeira"><span class="prop-amenidade-label">🪑 Mesas/Cadeiras</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="decoracao-extra"><span class="prop-amenidade-label">🎀 Decoração Completa</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="floricultura"><span class="prop-amenidade-label">💐 Floricultura</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="dj"><span class="prop-amenidade-label">🎧 DJ / Sonorização</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="foto-video"><span class="prop-amenidade-label">📸 Foto e Vídeo</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="cerimonialista"><span class="prop-amenidade-label">📋 Cerimonialista</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="valet"><span class="prop-amenidade-label">🚗 Valet</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="limpeza"><span class="prop-amenidade-label">🧹 Limpeza Pós-Evento</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="iluminacao"><span class="prop-amenidade-label">💡 Iluminação Especial</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="locacao-tendas"><span class="prop-amenidade-label">⛺ Tendas</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="transporte"><span class="prop-amenidade-label">🚌 Transfer</span></label>
+                    <label class="prop-amenidade-check"><input type="checkbox" class="prop-svc-extra" value="hospedagem-extra"><span class="prop-amenidade-label">🛏️ Hospedagem de Convidados</span></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ ABA 8: FORÇA DO ANÚNCIO ══ -->
+        <div id="prop-aba-forca" class="prop-tab-content">
+            <div class="prop-termometro-card" id="prop-termometro-card">
+                <div class="prop-termometro-header">
+                    <div class="prop-termometro-titulo">🌡️ Força do seu anúncio</div>
+                    <div class="prop-termometro-pct" id="prop-termo-pct" style="color:#ff385c;">—</div>
+                </div>
+                <div class="prop-termometro-bar-wrap">
+                    <div class="prop-termometro-bar-fill" id="prop-termo-bar" style="width:0%;"></div>
+                </div>
+                <div class="prop-termometro-msg" id="prop-termo-msg">Calculando...</div>
+                <div class="prop-termometro-itens" id="prop-termo-itens"></div>
+            </div>
+        </div>
+
+    </div><!-- /prop-container-abas -->
+
+    <!-- FOOTER AÇÕES (sticky) -->
+    <div class="prop-footer-acoes">
+        <button class="prop-btn-cancelar" onclick="navegar('dashboard')">Cancelar</button>
+        <button class="prop-btn-salvar" onclick="propSalvar()">💾 Salvar Alterações</button>
+    </div>
+
+</div><!-- /pagina-minhapropriedade -->
+
 
         
     </section>
