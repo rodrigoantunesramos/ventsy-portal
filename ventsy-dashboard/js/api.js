@@ -25,7 +25,7 @@ export async function getPerfil(userId) {
 export async function getAssinatura(userId) {
     const { data } = await sb.from('assinaturas')
         .select('plano,validade')
-        .eq('user_id', userId)
+        .eq('usuario_id', userId)
         .maybeSingle();
     return data;
 }
@@ -34,7 +34,7 @@ export async function getAssinatura(userId) {
 export async function getPropriedade(userId) {
     const { data } = await sb.from('propriedades')
         .select('id,nome,slug')
-        .eq('user_id', userId)
+        .eq('usuario_id', userId)
         .order('created_at', { ascending: true })
         .limit(1);
     return data?.[0] || null;
@@ -125,7 +125,7 @@ export async function verificarPassos(prop) {
 // ── Solicitação de publicação ─────────────
 export async function solicitarPublicacao(userId) {
     await sb.from('solicitacoes_publicacao').upsert(
-        { user_id: userId, status: 'pendente', criado_em: new Date().toISOString() },
-        { onConflict: 'user_id' }
+        { usuario_id: userId, status: 'pendente', criado_em: new Date().toISOString() },
+        { onConflict: 'usuario_id' }
     );
 }
