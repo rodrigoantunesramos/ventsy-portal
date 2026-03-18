@@ -25,6 +25,7 @@ import { init as initCalendario } from '../modules/calendario.js';
 import { init as initFotos      } from '../modules/fotos.js';
 import { init as initMinhaPropriedade } from '../modules/minhapropriedade.js';
 import { init as initLeads      } from '../modules/leads.js';
+import { init as initPlanos } from '../modules/planos.js';
 
 // ── Registra inicializadores no router ────────────────
 registrarModulo('financeiro', initFinanceiro);
@@ -34,6 +35,8 @@ registrarModulo('calendario', initCalendario);
 registrarModulo('fotos', initFotos);
 registrarModulo('minhapropriedade', initMinhaPropriedade);
 registrarModulo('leads', initLeads);
+registrarModulo('planos', initPlanos);
+
 
 
 // ── Expor globais para HTML inline ────────────────────
