@@ -92,7 +92,7 @@
             <a data-rota="documentos" onclick="navegar('documentos')">📄 Documentos</a>
             <a data-rota="equipe" onclick="navegar('equipe')">👥 Equipe & Folha</a>
             <span class="menu-section-label">Conta</span>
-            <a href="indique.html">🎁 Programa de Indicação</a>
+            <a data-rota="indique" onclick="navegar('indique')">🎁 Programa de Indicação</a>
             <a data-rota="planos" onclick="navegar('planos')">💳 Planos Ventsy</a>
             <a href="configuracoes.html">⚙️ Configurações</a>
         </nav>
@@ -1757,6 +1757,122 @@
 
 </div><!-- /pagina-relatorio -->
 
+
+
+<!-- ════════════════════════════════════
+     PÁGINA: PROGRAMA DE INDICAÇÃO
+════════════════════════════════════ -->
+<div class="page-section" id="pagina-indique">
+
+    <div class="dash-header-fixo">
+        <h2>🎁 Programa de Indicação</h2>
+        <p>Indique espaços, ganhe benefícios exclusivos na sua assinatura.</p>
+    </div>
+
+    <!-- CARD SEU CÓDIGO -->
+    <div class="indique-card-codigo">
+        <div class="indique-card-codigo-esq">
+            <div class="indique-codigo-icone-wrap">🎟️</div>
+            <div class="indique-codigo-texto">
+                <label>Seu código de indicação</label>
+                <div class="indique-codigo-valor">
+                    <span id="indique-codigo-valor">——————</span>
+                    <button class="indique-btn-copiar-codigo" id="indique-btn-copiar-codigo" onclick="indiqueCopiarCodigo()">
+                        📋 Copiar
+                    </button>
+                </div>
+            </div>
+        </div>
+        <p class="indique-codigo-dica">
+            Passe este código para quem você quer indicar.<br>
+            <strong>Funciona tanto pelo link quanto digitando na hora do cadastro.</strong>
+        </p>
+    </div>
+
+    <!-- CARD HERO -->
+    <div class="indique-card-hero">
+        <div class="indique-badge-promo">PROGRAMA DE PARCEIROS</div>
+        <h3>Indique um espaço e ganhe<br><em>1 mês grátis</em></h3>
+        <p>Quando o indicado publicar uma propriedade e realizar a <strong>primeira compra de um plano</strong>, você recebe automaticamente <strong>1 mês gratuito</strong> na sua assinatura.</p>
+
+        <div class="indique-caixa-link">
+            <label>Seu link de convite único</label>
+            <div class="indique-input-copiar-grupo">
+                <input type="text" id="indique-link-ref" value="ventsy.com/anunciar?ref=..." readonly>
+                <button class="indique-btn-copiar" id="indique-btn-copiar" onclick="indiqueCopiarLink()">📋 Copiar</button>
+            </div>
+        </div>
+
+        <div class="indique-botoes-share">
+            <button class="indique-share-btn indique-share-whatsapp" onclick="indiqueEnviarWhats()">
+                📱 Enviar pelo WhatsApp
+            </button>
+            <button class="indique-share-btn indique-share-email" onclick="indiqueEnviarEmail()">
+                📧 Enviar por E-mail
+            </button>
+        </div>
+    </div>
+
+    <!-- PASSOS -->
+    <div class="indique-passos">
+        <div class="indique-passo">
+            <div class="numero">1</div>
+            <h4>Envie o link</h4>
+            <p>Mande seu link para donos de chácaras, salões, sítios ou qualquer espaço para eventos.</p>
+        </div>
+        <div class="indique-passo">
+            <div class="numero">2</div>
+            <h4>Eles publicam e testam</h4>
+            <p>O novo parceiro cria e publica um anúncio na VENTSY durante o período de teste gratuito.</p>
+        </div>
+        <div class="indique-passo">
+            <div class="numero">3</div>
+            <h4>Você ganha!</h4>
+            <p>Quando o indicado realizar a <strong>primeira compra de um plano</strong>, seu 1 mês grátis é creditado. Renovações futuras dele não geram novo bônus.</p>
+        </div>
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="indique-secao-resultados">
+        <div class="indique-header-resultados">
+            <div>
+                <h3>Acompanhe seus resultados</h3>
+                <p style="font-size:0.78rem;color:#aaa;margin-top:4px;">O bônus de 1 mês é creditado somente na <strong style="color:#888">primeira compra</strong> do indicado.</p>
+            </div>
+            <div class="indique-badges-resumo">
+                <div class="indique-badge-resumo-item">
+                    <span>Indicados</span>
+                    <strong id="indique-total-indicados">—</strong>
+                </div>
+                <div class="indique-badge-resumo-item">
+                    <span>Publicaram</span>
+                    <strong id="indique-total-publicaram">—</strong>
+                </div>
+                <div class="indique-badge-resumo-item premio">
+                    <span>Meses Ganhos</span>
+                    <strong id="indique-total-creditos">—</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="indique-tabela-container">
+            <table class="indique-tabela">
+                <thead>
+                    <tr>
+                        <th>Propriedade Indicada</th>
+                        <th>Data do Convite</th>
+                        <th>Status</th>
+                        <th>Sua Recompensa</th>
+                    </tr>
+                </thead>
+                <tbody id="indique-tbody">
+                    <!-- preenchido via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div><!-- /pagina-indique -->
 
 
 

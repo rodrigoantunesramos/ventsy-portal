@@ -3067,3 +3067,351 @@
             .footer-container { flex-direction: column; gap: 36px; }
         }
         @media (max-width: 480px) { .logo { height: 44px; } }
+
+
+
+
+         /* ═══════════════════════════════════════════════
+          PLANO DE INDICAÇÃO
+        ═══════════════════════════════════════════════ */
+
+
+                /* ── CARD SEU CÓDIGO ── */
+        .indique-card-codigo {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 20px;
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+        }
+        .indique-card-codigo-esquerda {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .indique-codigo-icone-wrap {
+            width: 52px; height: 52px;
+            background: rgba(255,56,92,0.08);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+        .indique-codigo-texto label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #aaa;
+            margin-bottom: 6px;
+        }
+        .indique-codigo-valor {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .indique-codigo-valor span {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #0d0d0d;
+            letter-spacing: 0.18em;
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+        }
+        .indique-btn-copiar-codigo {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,56,92,0.08);
+            color: #ff385c;
+            border: 1px solid rgba(255,56,92,0.2);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+        .indique-btn-copiar-codigo:hover { background: rgba(255,56,92,0.14); transform: scale(1.03); }
+        .indique-btn-copiar-codigo.copiado { background: #e8faf0; color: #1ebc54; border-color: rgba(30,188,84,0.25); }
+        .indique-codigo-dica {
+            font-size: 0.78rem;
+            color: #aaa;
+            line-height: 1.5;
+            max-width: 260px;
+        }
+        .indique-codigo-dica strong { color: #888; }
+
+        @media (max-width: 600px) {
+            .indique-card-codigo { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .indique-codigo-dica { max-width: 100%; }
+            .indique-codigo-valor span { font-size: 1.4rem; }
+        }
+
+        /* ── CARD HERO ── */
+        .indique-card-hero {
+            background: #0d0d0d;
+            border-radius: 24px;
+            padding: 48px 40px;
+            text-align: center;
+            margin-bottom: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Detalhe decorativo */
+        .indique-card-hero::before {
+            content: '';
+            position: absolute; top: -60px; right: -60px;
+            width: 240px; height: 240px;
+            background: radial-gradient(circle, rgba(255,56,92,0.18) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .indique-card-hero::after {
+            content: '';
+            position: absolute; bottom: -80px; left: -40px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(255,56,92,0.10) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .indique-badge-promo {
+            display: inline-block;
+            background: rgba(255,56,92,0.18); color: #ff385c;
+            border: 1px solid rgba(255,56,92,0.3);
+            padding: 5px 16px; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 800; letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+        .indique-card-hero h3 {
+            font-size: 2rem; font-weight: 800; color: #fff;
+            margin-bottom: 12px; line-height: 1.2;
+        }
+        .indique-card-hero h3 em { font-style: normal; color: #ff385c; }
+        .indique-card-hero p {
+            color: #aaa; font-size: 1rem;
+            max-width: 560px; margin: 0 auto 36px; line-height: 1.6;
+        }
+        .indique-card-hero p strong { color: #fff; }
+
+        /* Caixa do link */
+        .indique-caixa-link {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 24px 28px; border-radius: 16px;
+            max-width: 560px; margin: 0 auto 24px;
+        }
+        .indique-caixa-link label {
+            display: block; margin-bottom: 10px;
+            font-weight: 600; color: #ccc; font-size: 0.85rem;
+        }
+        .indique-input-copiar-grupo {
+            display: flex; background: #fff;
+            border-radius: 12px; padding: 5px;
+            overflow: hidden;
+        }
+        .indique-input-copiar-grupo input {
+            flex: 1; border: none; padding: 10px 14px;
+            font-size: 0.95rem; outline: none; color: #555;
+            background: transparent;
+        }
+        .indique-btn-copiar {
+            background: #ff385c; color: #fff; border: none;
+            padding: 10px 20px; border-radius: 8px;
+            cursor: pointer; font-weight: 700; font-size: 0.85rem;
+            font-family: inherit; transition: background 0.2s; white-space: nowrap;
+        }
+        .indique-btn-copiar:hover { background: #e0304f; }
+        .indique-btn-copiar.copiado { background: #1ebc54; }
+
+        /* Botões share */
+        .indique-botoes-share {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+        }
+        .indique-share-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 11px 24px; border-radius: 10px; border: none;
+            font-family: inherit; font-size: 0.88rem; font-weight: 700;
+            cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+        }
+        .indique-share-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+        .indique-share-whatsapp { background: #25D366; color: #fff; }
+        .indique-share-email    { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15); }
+
+        /* ── GRID PASSOS ── */
+        .indique-passos {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 20px; margin-bottom: 28px;
+        }
+        .indique-passo {
+            background: #fff; border-radius: 20px; padding: 28px 24px;
+            text-align: center; border: 1px solid #eee;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .indique-passo:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+        .indique-passo .numero {
+            width: 44px; height: 44px; background: #ff385c; color: #fff;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; font-weight: 800; font-size: 1.1rem;
+            box-shadow: 0 4px 14px rgba(255,56,92,0.3);
+        }
+        .indique-passo h4 { font-size: 1rem; font-weight: 700; color: #0d0d0d; margin-bottom: 8px; }
+        .indique-passo p  { font-size: 0.85rem; color: #888; line-height: 1.5; }
+
+        /* ── SEÇÃO DE RESULTADOS ── */
+        .indique-secao-resultados {
+            background: #fff; border-radius: 20px;
+            padding: 30px; border: 1px solid #eee;
+        }
+
+        .indique-header-resultados {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
+        }
+        .indique-header-resultados h3 { font-size: 1.1rem; font-weight: 700; color: #0d0d0d; }
+
+        /* Badges de resumo */
+        .indique-badges-resumo { display: flex; gap: 12px; flex-wrap: wrap; }
+        .indique-badge-resumo-item {
+            background: #f9f9f9; border: 1px solid #eee;
+            padding: 10px 18px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+        }
+        .indique-badge-resumo-item span {
+            font-size: 0.7rem; color: #aaa;
+            text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;
+        }
+        .indique-badge-resumo-item strong { font-size: 1.15rem; color: #0d0d0d; font-weight: 800; }
+        .indique-badge-resumo-item.premio {
+            background: #fffdf0; border-color: rgba(241,196,15,0.3);
+        }
+        .indique-badge-resumo-item.premio strong { color: #d4a017; }
+
+        /* Tabela */
+        .indique-tabela-container { overflow-x: auto; }
+        .indique-tabela {
+            width: 100%; border-collapse: collapse; font-size: 0.88rem;
+        }
+        .indique-tabela thead tr {
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .indique-tabela th {
+            text-align: left; padding: 12px 16px;
+            font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.06em; color: #aaa;
+        }
+        .indique-tabela td { padding: 14px 16px; color: #444; border-bottom: 1px solid #f7f7f7; }
+        .indique-tabela tbody tr:last-child td { border-bottom: none; }
+        .indique-tabela tbody tr:hover td { background: #fafafa; }
+        .indique-tabela strong { color: #0d0d0d; }
+
+        /* Pilulas de status */
+        .status-pilula {
+            display: inline-block; padding: 4px 12px;
+            border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+        }
+        .status-pilula.concluido { background: #e8faf0; color: #1ebc54; }
+        .status-pilula.pendente  { background: #f4f4f4; color: #999; }
+        .status-pilula.analise   { background: #e8f0ff; color: #3b82f6; }
+
+        .ganho     { color: #1ebc54; font-weight: 700; font-size: 0.85rem; }
+        .em-espera { color: #bbb; font-size: 0.85rem; }
+
+        /* Linha vazia */
+        .indique-tabela-vazia {
+            text-align: center; padding: 48px 20px; color: #bbb; font-size: 0.9rem;
+        }
+        .indique-tabela-vazia span { display: block; font-size: 2rem; margin-bottom: 10px; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #0d0d0d; color: #fff; padding: 14px 26px;
+            border-radius: 12px; font-size: 0.88rem; font-weight: 500;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.2); z-index: 99999;
+            display: flex; align-items: center; gap: 10px;
+            transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+            opacity: 0;
+        }
+        .toast.visivel { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* ── FOOTER ── */
+        .main-footer {
+            background: #f7f7f7; border-top: 1px solid #ddd;
+            padding: 60px 0 30px; margin-top: 40px;
+        }
+        .footer-container {
+            max-width: 1200px; margin: 0 auto;
+            display: flex; padding: 0 5%; gap: 120px;
+        }
+        .footer-column h3 {
+            font-size: 0.9rem; font-weight: 700;
+            text-transform: uppercase; color: #222; margin-bottom: 18px;
+        }
+        .footer-column ul { list-style: none; padding: 0; }
+        .footer-column ul li { margin-bottom: 10px; }
+        .footer-column ul li a { text-decoration: none; color: #666; font-size: 0.9rem; }
+        .footer-column ul li a:hover { text-decoration: underline; }
+        .footer-bottom {
+            max-width: 1200px; margin: 36px auto 0; padding: 22px 5% 0;
+            border-top: 1px solid #ebebeb; color: #aaa; font-size: 0.82rem;
+        }
+
+        /* ── RESPONSIVO ── */
+
+        /* ── MOBILE SIDEBAR TOGGLE ── */
+        .btn-sidebar-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            width: 40px; height: 40px;
+            background: none; border: 1px solid #eee;
+            border-radius: 8px; cursor: pointer; padding: 8px;
+        }
+        .btn-sidebar-toggle span {
+            display: block; width: 18px; height: 2px;
+            background: #444; border-radius: 2px;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 9998;
+        }
+        .sidebar-overlay.ativo { display: block; }
+
+        @media (max-width: 768px) {
+            .btn-sidebar-toggle { display: flex; }
+            .dash-sidebar {
+                display: flex !important;
+                position: fixed; top: 80px; left: 0;
+                width: 280px; height: calc(100vh - 80px);
+                z-index: 9999;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            }
+            .dash-sidebar.aberta { transform: translateX(0); }
+            .dash-content { padding: 0 16px 40px; }
+            .dash-header-fixo h2 { font-size: 1.4rem; }
+            .indique-passos { grid-template-columns: 1fr; }
+            .indique-card-hero { padding: 32px 20px; }
+            .indique-card-hero h3 { font-size: 1.4rem; }
+            .footer-container { flex-direction: column; gap: 36px; }
+        }
+        @media (max-width: 480px) {
+            .logo { height: 44px; }
+            header { padding: 0 4%; }
+        }
+
+
