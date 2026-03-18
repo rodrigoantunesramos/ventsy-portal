@@ -23,7 +23,8 @@ import { init as initDocumentos } from '../modules/documentos.js';
 import { init as initEquipe     } from '../modules/equipe.js';
 import { init as initCalendario } from '../modules/calendario.js';
 import { init as initFotos      } from '../modules/fotos.js';
-import { init as initMinhaPropriedade      } from '../modules/minhapropriedade.js';
+import { init as initMinhaPropriedade } from '../modules/minhapropriedade.js';
+import { init as initLeads      } from '../modules/leads.js';
 
 // ── Registra inicializadores no router ────────────────
 registrarModulo('financeiro', initFinanceiro);
@@ -32,6 +33,8 @@ registrarModulo('equipe',     initEquipe);
 registrarModulo('calendario', initCalendario);
 registrarModulo('fotos', initFotos);
 registrarModulo('minhapropriedade', initMinhaPropriedade);
+registrarModulo('leads', initLeads);
+
 
 // ── Expor globais para HTML inline ────────────────────
 // (funções chamadas por onclick= no HTML)
