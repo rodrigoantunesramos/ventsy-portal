@@ -27,6 +27,7 @@ import { init as initMinhaPropriedade } from '../modules/minhapropriedade.js';
 import { init as initLeads      } from '../modules/leads.js';
 import { init as initPlanos } from '../modules/planos.js';
 import { init as initRelatorio } from '../modules/relatorio.js';
+import { init as initIndique } from '../modules/indique.js';
 
 // ── Registra inicializadores no router ────────────────
 registrarModulo('financeiro', initFinanceiro);
@@ -38,6 +39,8 @@ registrarModulo('minhapropriedade', initMinhaPropriedade);
 registrarModulo('leads', initLeads);
 registrarModulo('planos', initPlanos);
 registrarModulo('relatorio', initRelatorio);
+registrarModulo('indique', initIndique);
+
 
 
 
