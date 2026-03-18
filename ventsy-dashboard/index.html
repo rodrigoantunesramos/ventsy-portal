@@ -18,6 +18,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 
 </head>
 <body>
@@ -49,7 +52,7 @@
                     <span id="drop-email"></span>
                 </div>
                 <a href="index.html">🏠 Dashboard</a>
-                <a href="minhapropriedade.html">🏡 Minha Propriedade</a>
+                <a href="../modules/minhapropriedade.js">🏡 Minha Propriedade</a>
                 <a href="configuracoes.html">⚙️ Configurações</a>
                 <a href="planos2.html">💳 Planos Ventsy</a>
                 <a href="../fale-conosco.html">❓ Ajuda</a>
@@ -80,7 +83,7 @@
             <a data-rota="minhapropriedade" onclick="navegar('minhapropriedade')">📍 Minha Propriedade</a>            
             <a data-rota="fotos" onclick="navegar('fotos')">📸 Fotos</a>
             <span class="menu-section-label">Gestão</span>
-            <a href="leads.html">💬 Contatos / Leads</a>
+            <a data-rota="leads" onclick="navegar('leads')">🎉 Clientes & Eventos</a>
             <a data-rota="calendario" onclick="navegar('calendario')">📅 Disponibilidade</a>
             <a href="relatorio.html">📊 Relatório</a>
             <a data-rota="financeiro" onclick="navegar('financeiro')">💰 Financeiro</a>
@@ -1230,6 +1233,201 @@
     </div>
 
 </div><!-- /pagina-minhapropriedade -->
+
+    <!-- ════════════════════════════════════
+     PÁGINA: CLIENTES & EVENTOS (LEADS)
+     ════════════════════════════════════ -->
+
+
+     <div class="page-section" id="pagina-leads">
+
+    <div class="dash-header-fixo">
+        <div>
+            <h2>🎉 Clientes & Eventos</h2>
+            <p>Gerencie todos os seus contatos, negociações e eventos em um só lugar.</p>
+        </div>
+        <div class="header-acoes">
+            <button class="btn-outline" onclick="leadsExportarExcel()">📊 Excel</button>
+            <button class="btn-outline" onclick="leadsExportarPDF()">📄 PDF</button>
+            <button class="btn-primary" onclick="leadsAbrirModalNovo()">＋ Novo Cliente</button>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid-kpis">
+        <div class="card-kpi">
+            <div class="kpi-icone verde">🎉</div>
+            <div class="kpi-label">Total</div>
+            <div class="kpi-valor" id="leads-kpi-total">—</div>
+            <div class="kpi-sub">clientes cadastrados</div>
+        </div>
+        <div class="card-kpi">
+            <div class="kpi-icone amarelo">🔥</div>
+            <div class="kpi-label">Em Negociação</div>
+            <div class="kpi-valor" id="leads-kpi-negociando">—</div>
+            <div class="kpi-sub">ativos no funil</div>
+        </div>
+        <div class="card-kpi">
+            <div class="kpi-icone azul">✅</div>
+            <div class="kpi-label">Contratados</div>
+            <div class="kpi-valor" id="leads-kpi-contratados">—</div>
+            <div class="kpi-sub">eventos confirmados</div>
+        </div>
+        <div class="card-kpi">
+            <div class="kpi-icone verde">🎊</div>
+            <div class="kpi-label">Finalizados</div>
+            <div class="kpi-valor" id="leads-kpi-finalizados">—</div>
+            <div class="kpi-sub">eventos realizados</div>
+        </div>
+        <div class="card-kpi">
+            <div class="kpi-icone rosa">❌</div>
+            <div class="kpi-label">Perdidos</div>
+            <div class="kpi-valor" id="leads-kpi-perdidos">—</div>
+            <div class="kpi-sub">negociações encerradas</div>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="tabela-wrapper">
+        <div class="tabela-toolbar">
+            <div class="tabela-toolbar-left">
+                <span class="tabela-titulo">Lista de Clientes e Eventos</span>
+                <span class="tabela-count" id="leads-tabela-count">0 clientes</span>
+                <select class="select-filtro" id="leads-filtro-status" onchange="leadsAplicarFiltros()">
+                    <option value="">Todos os status</option>
+                    <option value="lead">Lead / Novo Contato</option>
+                    <option value="consultada">Data Consultada</option>
+                    <option value="visita">Visita Agendada</option>
+                    <option value="negociacao">Em Negociação</option>
+                    <option value="reserva">Reserva Temporária</option>
+                    <option value="contratado">Contrato Assinado</option>
+                    <option value="briefing">Montando Briefing</option>
+                    <option value="pronto">Pronto para Execução</option>
+                    <option value="montagem">Em Montagem</option>
+                    <option value="finalizado">Evento Concluído</option>
+                    <option value="pos">Pós-Evento / Feedback</option>
+                    <option value="perdido">Perdido</option>
+                    <option value="recontactar">Recontactar</option>
+                </select>
+                <select class="select-filtro" id="leads-filtro-tipo" onchange="leadsAplicarFiltros()">
+                    <option value="">Todos os tipos</option>
+                    <option value="Casamento">Casamento</option>
+                    <option value="Aniversário">Aniversário</option>
+                    <option value="Corporativo">Corporativo</option>
+                    <option value="Formatura">Formatura</option>
+                    <option value="Batizado">Batizado</option>
+                    <option value="Outro">Outro</option>
+                </select>
+                <input type="text" class="input-busca" id="leads-input-busca"
+                       placeholder="Buscar por nome..." oninput="leadsAplicarFiltros()">
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <span style="font-size:0.78rem;color:#aaa;">Por página:</span>
+                <select class="select-filtro" id="leads-por-pagina" onchange="leadsMudarPorPagina()">
+                    <option value="10">10</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="tabela-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="td-seta"></th>
+                        <th class="leads-th" onclick="leadsOrdenarPor('nome_evento')">Nome do Evento <span class="leads-sort-icon" id="leads-sort-nome_evento">↕</span></th>
+                        <th class="leads-th" onclick="leadsOrdenarPor('quem_contratou')">Quem Contratou <span class="leads-sort-icon" id="leads-sort-quem_contratou">↕</span></th>
+                        <th class="leads-th" onclick="leadsOrdenarPor('data_inicio')">Data do Evento <span class="leads-sort-icon" id="leads-sort-data_inicio">↕</span></th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="leads-tabela-body"></tbody>
+            </table>
+        </div>
+
+        <div id="leads-estado-vazio" class="estado-vazio" style="display:none;">
+            <div class="icone-vazio">🎉</div>
+            <p>Nenhum cliente encontrado. Que tal adicionar o primeiro?</p>
+        </div>
+
+        <div class="paginacao" id="leads-paginacao" style="display:none;">
+            <span class="paginacao-info" id="leads-paginacao-info"></span>
+            <div class="paginacao-btns" id="leads-paginacao-btns"></div>
+        </div>
+    </div>
+
+</div><!-- /pagina-leads -->
+
+
+<!-- MODAL: Atualizar Status -->
+<div class="modal-overlay" id="leads-modal-status">
+    <div class="modal-box">
+        <button class="btn-fechar-modal" onclick="leadsFecharModalStatus()">✕</button>
+        <h3>Atualizar Status</h3>
+        <p class="modal-sub" id="leads-modal-status-nome">—</p>
+        <div class="lista-status">
+            <div class="status-grupo-label">🔍 Funil de Vendas</div>
+            <div class="opcao-status" data-status="lead"        onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#f59e0b"></div><div><div class="label-status">Lead / Novo Contato</div><div class="desc-status">Cliente acabou de chegar, ainda sem qualificação</div></div></div>
+            <div class="opcao-status" data-status="consultada"  onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#3b82f6"></div><div><div class="label-status">Data Consultada</div><div class="desc-status">Verificou disponibilidade, orçamento enviado</div></div></div>
+            <div class="opcao-status" data-status="visita"      onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#8b5cf6"></div><div><div class="label-status">Visita Agendada</div><div class="desc-status">Cliente vai conhecer o espaço pessoalmente</div></div></div>
+            <div class="opcao-status" data-status="negociacao"  onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#ec4899"></div><div><div class="label-status">Em Negociação</div><div class="desc-status">Ajustando valores, serviços ou pagamento</div></div></div>
+            <div class="opcao-status" data-status="reserva"     onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#f97316"></div><div><div class="label-status">Reserva Temporária</div><div class="desc-status">Data "segurada" por 24–48h</div></div></div>
+            <div class="status-grupo-label">📋 Gestão do Evento</div>
+            <div class="opcao-status" data-status="contratado"  onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#10b981"></div><div><div class="label-status">Contrato Assinado</div><div class="desc-status">Sinal pago, compromisso firmado</div></div></div>
+            <div class="opcao-status" data-status="briefing"    onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#0ea5e9"></div><div><div class="label-status">Montando Briefing</div><div class="desc-status">Coletando detalhes do evento</div></div></div>
+            <div class="opcao-status" data-status="pronto"      onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#14b8a6"></div><div><div class="label-status">Pronto para Execução</div><div class="desc-status">Briefing fechado, fornecedores alinhados</div></div></div>
+            <div class="opcao-status" data-status="montagem"    onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#f97316"></div><div><div class="label-status">Em Montagem</div><div class="desc-status">Equipe já está no local</div></div></div>
+            <div class="status-grupo-label">🏁 Finalização</div>
+            <div class="opcao-status" data-status="finalizado"  onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#1ebc54"></div><div><div class="label-status">Evento Concluído</div><div class="desc-status">A festa aconteceu com sucesso</div></div></div>
+            <div class="opcao-status" data-status="pos"         onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#22c55e"></div><div><div class="label-status">Pós-Evento / Feedback</div><div class="desc-status">Enviando pesquisa de satisfação</div></div></div>
+            <div class="opcao-status" data-status="perdido"     onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#ef4444"></div><div><div class="label-status">Perdido</div><div class="desc-status">Negociação encerrada sem conversão</div></div></div>
+            <div class="opcao-status" data-status="recontactar" onclick="leadsSelecionarStatus(this)"><div class="dot" style="background:#6b7280"></div><div><div class="label-status">Recontactar</div><div class="desc-status">Follow-up pendente ou evento recorrente</div></div></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Novo Cliente -->
+<div class="modal-overlay" id="leads-modal-novo">
+    <div class="modal-box modal-novo">
+        <button class="btn-fechar-modal" onclick="leadsFecharModalNovo()">✕</button>
+        <h3>➕ Novo Cliente / Evento</h3>
+        <p class="modal-sub">Preencha os dados básicos para começar</p>
+        <div class="campo-grupo">
+            <label class="campo-label">Nome do Evento *</label>
+            <input type="text" class="campo-input" id="leads-novo-nome-evento" placeholder="Ex: Casamento Ana & Pedro">
+        </div>
+        <div class="campo-grupo">
+            <label class="campo-label">Quem Contratou *</label>
+            <input type="text" class="campo-input" id="leads-novo-quem-contratou" placeholder="Nome completo do contratante">
+        </div>
+        <div class="campo-grupo">
+            <label class="campo-label">Tipo de Evento</label>
+            <select class="campo-input" id="leads-novo-tipo">
+                <option value="">Selecionar...</option>
+                <option value="Casamento">💒 Casamento</option>
+                <option value="Aniversário">🎂 Aniversário</option>
+                <option value="Corporativo">💼 Corporativo</option>
+                <option value="Formatura">🎓 Formatura</option>
+                <option value="Batizado">👶 Batizado</option>
+                <option value="Outro">📌 Outro</option>
+            </select>
+        </div>
+        <div class="campo-grupo">
+            <label class="campo-label">Status Inicial</label>
+            <select class="campo-input" id="leads-novo-status">
+                <option value="lead">Lead / Novo Contato</option>
+                <option value="consultada">Data Consultada</option>
+                <option value="negociacao">Em Negociação</option>
+            </select>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px;">
+            <button class="btn-outline" style="flex:1;" onclick="leadsFecharModalNovo()">Cancelar</button>
+            <button class="btn-primary" style="flex:1;justify-content:center;" onclick="leadsCriarCliente()">Criar Cliente</button>
+        </div>
+    </div>
+</div>
+
 
 
         
