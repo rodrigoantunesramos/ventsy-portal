@@ -80,7 +80,7 @@ export function preencherUI({ nome, email, usuario, plano, validade, inicial }) 
     const avatarEl = document.getElementById('sidebar-avatar');
     if (avatarEl) avatarEl.textContent = inicial;
 
-    const emoji = plano === 'Pro' ? '🌟' : plano === 'Premium' ? '💎' : '⭐';
+    const emoji = plano === 'ultra' ? '🚀' : plano === 'pro' ? '⭐' : '🏷️';
     set('sidebar-plano-chip', emoji + ' ' + plano);
 
     if (validade) {

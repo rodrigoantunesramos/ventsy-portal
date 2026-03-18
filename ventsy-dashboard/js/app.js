@@ -22,12 +22,14 @@ import { init as initFinanceiro } from '../modules/financeiro.js';
 import { init as initDocumentos } from '../modules/documentos.js';
 import { init as initEquipe     } from '../modules/equipe.js';
 import { init as initCalendario } from '../modules/calendario.js';
+import { init as initFotos      } from '../modules/fotos.js';
 
 // ── Registra inicializadores no router ────────────────
 registrarModulo('financeiro', initFinanceiro);
 registrarModulo('documentos', initDocumentos);
 registrarModulo('equipe',     initEquipe);
 registrarModulo('calendario', initCalendario);
+registrarModulo('fotos', initFotos);
 
 // ── Expor globais para HTML inline ────────────────────
 // (funções chamadas por onclick= no HTML)
@@ -203,10 +205,14 @@ async function init() {
         const inicial = nome.split(' ')[0][0]?.toUpperCase() || '?';
 
         // Assinatura
-        let plano = 'Free', validade = null;
+        let plano = 'basico', validade = null;
         try {
             const assin = await getAssinatura(user.id);
-            if (assin) { plano = assin.plano || 'Free'; validade = assin.validade; }
+            if (assin) {
+                plano    = (assin.plano_ativo || assin.plano || 'basico').toLowerCase();
+                validade = assin.fim_periodo  || assin.validade || null;
+                setState({ assinatura: assin });
+            }
         } catch (_) {}
 
         // Preencher UI
