@@ -745,6 +745,136 @@
 
         </div><!-- /pagina-equipe -->
 
+  <!-- ════════════════════════════════════
+             PÁGINA: FOTOS
+        ════════════════════════════════════ -->
+
+
+
+            <div class="page-section" id="pagina-fotos">
+
+    <div class="dash-header-fixo">
+        <div>
+            <h2>📸 Fotos do Espaço</h2>
+            <p style="font-size:0.82rem;color:#999;margin-top:3px;">Organize as fotos por ambiente e defina as 5 fotos em destaque.</p>
+        </div>
+        <div class="fotos-header-acoes">
+            <button class="fotos-btn-salvar-tudo" onclick="fotosSalvarTudo()">💾 Salvar</button>
+            <button class="fotos-btn-nova-secao" onclick="fotosCriarSecao()">+ Nova seção</button>
+        </div>
+    </div>
+
+    <!-- Aviso sem propriedade -->
+    <div class="fotos-aviso-sem-prop" id="fotos-aviso-sem-prop">
+        <span style="font-size:1.5rem">⚠️</span>
+        <p>Você precisa cadastrar sua propriedade antes de adicionar fotos. <a href="minhapropriedade.html">Cadastrar agora →</a></p>
+    </div>
+
+    <!-- Banner de plano -->
+    <div class="fotos-banner-plano" id="fotos-banner-plano"></div>
+
+    <!-- Tabs -->
+    <div class="fotos-tabs">
+        <button class="fotos-tab-btn active" id="fotos-tab-espaco" onclick="fotosMudarAba('espaco')">📷 Fotos do Espaço</button>
+        <button class="fotos-tab-btn" id="fotos-tab-evento" onclick="fotosMudarAba('evento')">🎉 Fotos de Eventos</button>
+    </div>
+
+    <!-- ═══ ABA: FOTOS DO ESPAÇO ═══ -->
+    <div class="fotos-aba ativa" id="fotos-aba-espaco">
+
+        <div class="fotos-aviso-intro">
+            <span class="fotos-aviso-intro-icon">💡</span>
+            <div class="fotos-aviso-intro-texto">
+                <h4>Fotos do espaço em si</h4>
+                <p>Crie uma seção para cada ambiente — ex: <strong>Área Externa</strong>, <strong>Salão Principal</strong>, <strong>Lareira</strong>. A primeira foto de cada seção será a capa daquele ambiente.</p>
+            </div>
+        </div>
+
+        <!-- PAINEL DESTAQUE -->
+        <div class="fotos-destaque-panel">
+            <div class="fotos-destaque-panel-top">
+                <div>
+                    <h3>⭐ 5 Fotos em Destaque — Galeria Principal</h3>
+                    <p>Clique em um slot para ativá-lo, depois clique na foto abaixo que deseja colocar nessa posição.<br>
+                    Pos. 1 = foto grande à esquerda &nbsp;|&nbsp; 2 = sup. esq. &nbsp;|&nbsp; 3 = sup. dir. &nbsp;|&nbsp; 4 = inf. esq. &nbsp;|&nbsp; 5 = inf. dir.</p>
+                </div>
+            </div>
+            <div class="fotos-destaque-slots-grid">
+                <div class="fotos-destaque-slot slot-main" id="fotos-dslot-1" onclick="fotosAtivarSlot(1)" title="Posição 1 — principal">
+                    <img id="fotos-dslot-img-1" src="" alt="Posição 1">
+                    <div class="fotos-dslot-empty" id="fotos-dslot-empty-1"><span>📷</span><span>Pos. 1<br><small>(principal)</small></span></div>
+                    <div class="fotos-dslot-num">1</div>
+                    <button class="fotos-btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); fotosLimparDestaquePos(1)">✕</button>
+                </div>
+                <div class="fotos-destaque-slot" id="fotos-dslot-2" onclick="fotosAtivarSlot(2)" title="Posição 2">
+                    <img id="fotos-dslot-img-2" src="" alt="Posição 2">
+                    <div class="fotos-dslot-empty" id="fotos-dslot-empty-2"><span>📷</span><span>Pos. 2</span></div>
+                    <div class="fotos-dslot-num">2</div>
+                    <button class="fotos-btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); fotosLimparDestaquePos(2)">✕</button>
+                </div>
+                <div class="fotos-destaque-slot" id="fotos-dslot-3" onclick="fotosAtivarSlot(3)" title="Posição 3">
+                    <img id="fotos-dslot-img-3" src="" alt="Posição 3">
+                    <div class="fotos-dslot-empty" id="fotos-dslot-empty-3"><span>📷</span><span>Pos. 3</span></div>
+                    <div class="fotos-dslot-num">3</div>
+                    <button class="fotos-btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); fotosLimparDestaquePos(3)">✕</button>
+                </div>
+                <div class="fotos-destaque-slot" id="fotos-dslot-4" onclick="fotosAtivarSlot(4)" title="Posição 4">
+                    <img id="fotos-dslot-img-4" src="" alt="Posição 4">
+                    <div class="fotos-dslot-empty" id="fotos-dslot-empty-4"><span>📷</span><span>Pos. 4</span></div>
+                    <div class="fotos-dslot-num">4</div>
+                    <button class="fotos-btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); fotosLimparDestaquePos(4)">✕</button>
+                </div>
+                <div class="fotos-destaque-slot" id="fotos-dslot-5" onclick="fotosAtivarSlot(5)" title="Posição 5">
+                    <img id="fotos-dslot-img-5" src="" alt="Posição 5">
+                    <div class="fotos-dslot-empty" id="fotos-dslot-empty-5"><span>📷</span><span>Pos. 5</span></div>
+                    <div class="fotos-dslot-num">5</div>
+                    <button class="fotos-btn-limpar-dslot" title="Remover" onclick="event.stopPropagation(); fotosLimparDestaquePos(5)">✕</button>
+                </div>
+            </div>
+            <div class="fotos-slot-hint" id="fotos-slot-hint"></div>
+        </div>
+
+        <!-- Seções do espaço -->
+        <div class="fotos-lista-secoes-wrap" id="fotos-lista-secoes">
+            <div class="fotos-placeholder-vazio" id="fotos-placeholder">
+                <span>🏗️</span>
+                <h3>Nenhuma seção criada ainda</h3>
+                <p>Clique em <strong>"+ Nova seção"</strong> para começar a organizar as fotos por ambiente.</p>
+            </div>
+        </div>
+
+    </div><!-- /fotos-aba-espaco -->
+
+    <!-- ═══ ABA: FOTOS DE EVENTOS ═══ -->
+    <div class="fotos-aba" id="fotos-aba-evento">
+
+        <div class="fotos-aviso-intro" style="background:#1b3a5c">
+            <span class="fotos-aviso-intro-icon">🎉</span>
+            <div class="fotos-aviso-intro-texto">
+                <h4>Como o espaço fica decorado nos eventos</h4>
+                <p>Mostre registros de eventos já realizados — casamentos, aniversários, corporativos. Isso inspira novos contratantes.</p>
+            </div>
+        </div>
+
+        <!-- Seções de evento -->
+        <div class="fotos-lista-secoes-wrap" id="fotos-lista-secoes-evento">
+            <div class="fotos-placeholder-vazio" id="fotos-placeholder-evento">
+                <span>🎉</span>
+                <h3>Nenhuma seção de evento ainda</h3>
+                <p>Clique em <strong>"+ Nova seção"</strong> para adicionar fotos de eventos realizados.</p>
+            </div>
+        </div>
+
+    </div><!-- /fotos-aba-evento -->
+
+    <!-- Rodapé sticky com botão salvar -->
+    <div class="fotos-footer-acoes">
+        <button class="fotos-btn-salvar fotos-btn-salvar" onclick="fotosSalvarTudo()">💾 Salvar alterações</button>
+    </div>
+
+</div><!-- /pagina-fotos -->
+
+        
     </section>
 </main>
 
@@ -990,6 +1120,10 @@
   </div>
 </div>
 
+       
+
+
+    
 <!-- ──────────── FOOTER ──────────── -->
 <footer class="main-footer">
     <div class="footer-container">
