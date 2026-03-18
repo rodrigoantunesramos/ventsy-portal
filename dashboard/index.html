@@ -690,6 +690,262 @@
         @media (max-width: 1100px) { .fin-kpi-grid { grid-template-columns: repeat(2,1fr); } .fin-mid-grid { grid-template-columns: 1fr; } }
         @media (max-width: 600px)  { .fin-kpi-grid { grid-template-columns: 1fr 1fr; } }
 
+        /* ===========================================
+           DOCUMENTOS — estilos no visual VENTSY
+        =========================================== */
+
+        /* Header da seção */
+        .docs-header {
+            position: sticky; top: 0; z-index: 100;
+            background: #f0f2f5;
+            display: flex; padding: 24px 0 20px;
+            justify-content: space-between; align-items: center;
+            margin-bottom: 10px; flex-wrap: wrap; gap: 12px;
+        }
+        .docs-header h2 { font-size: 1.8rem; font-weight: 700; color: #222; margin: 0; }
+        .docs-header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+        /* Botões estilo VENTSY para docs (reutiliza btn-fin) */
+
+        /* Summary strip */
+        .docs-summary {
+            display: grid; grid-template-columns: repeat(4,1fr);
+            gap: 20px; margin-bottom: 26px;
+        }
+        .docs-sum-card {
+            background: #fff; border-radius: 12px;
+            border: 1px solid #eee; padding: 20px;
+            display: flex; align-items: center; gap: 14px;
+            transition: box-shadow 0.2s;
+        }
+        .docs-sum-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+        .docs-sum-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .docs-sum-icon svg { width: 20px; height: 20px; }
+        .docs-sum-val { font-size: 1.6rem; font-weight: 700; line-height: 1; color: #222; }
+        .docs-sum-label { font-size: 0.78rem; color: #999; margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        /* Alert banner */
+        .docs-alert {
+            display: flex; align-items: center; gap: 14px;
+            background: #fef2f2; border: 1px solid #fca5a5;
+            border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;
+            animation: fadeUp .3s ease;
+        }
+        .docs-alert svg { width: 20px; height: 20px; color: #dc2626; flex-shrink: 0; }
+        .docs-alert-text strong { font-size: 0.88rem; font-weight: 700; color: #dc2626; display: block; }
+        .docs-alert-text span   { font-size: 0.78rem; color: #b91c1c; }
+        .docs-alert-tag {
+            margin-left: auto; font-size: 0.72rem; font-weight: 700;
+            padding: 4px 12px; border-radius: 20px;
+            background: #dc2626; color: #fff; white-space: nowrap;
+        }
+
+        /* Filter bar */
+        .docs-filter-bar {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 22px; flex-wrap: wrap;
+        }
+        .docs-filter-pill {
+            padding: 7px 16px; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            border: 1.5px solid #eee; background: transparent;
+            color: #999; font-family: inherit; transition: all .18s;
+        }
+        .docs-filter-pill:hover { border-color: #ff385c; color: #ff385c; }
+        .docs-filter-pill.active { background: #0d0d0d; border-color: #0d0d0d; color: #fff; }
+        .docs-search-box {
+            margin-left: auto; display: flex; align-items: center;
+            background: #fff; border: 1.5px solid #eee;
+            border-radius: 8px; padding: 8px 14px; gap: 8px;
+            transition: border-color .2s;
+        }
+        .docs-search-box:focus-within { border-color: #ff385c; }
+        .docs-search-box svg { width: 14px; height: 14px; color: #bbb; }
+        .docs-search-box input {
+            border: none; outline: none; background: transparent;
+            font-family: inherit; font-size: 0.85rem; color: #222; width: 180px;
+        }
+
+        /* Section divider */
+        .docs-section-divider {
+            display: flex; align-items: center; gap: 14px;
+            margin: 28px 0 16px;
+        }
+        .docs-section-divider h3 { font-size: 0.92rem; font-weight: 700; color: #444; white-space: nowrap; }
+        .docs-divider-line { flex: 1; height: 1px; background: #eee; }
+        .docs-section-count {
+            font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
+            border-radius: 20px; background: #f0f0f0; color: #999;
+        }
+
+        /* Doc grid */
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 16px;
+        }
+
+        /* Doc card */
+        .doc-card-v {
+            background: #fff; border: 1.5px solid #eee;
+            border-radius: 14px; overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
+            animation: fadeUp .35s ease both;
+            display: flex; flex-direction: column;
+        }
+        .doc-card-v:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.09); }
+        .doc-card-v.dc-expired   { border-color: #fca5a5; }
+        .doc-card-v.dc-warning   { border-color: #fcd34d; }
+        .doc-card-v.dc-ok        { border-color: #86efac; }
+        .doc-card-v.dc-no-expiry { border-color: #93c5fd; }
+
+        .doc-card-stripe { height: 3px; }
+        .doc-card-stripe.dc-expired   { background: linear-gradient(90deg, #dc2626, #ef4444); }
+        .doc-card-stripe.dc-warning   { background: linear-gradient(90deg, #d97706, #f59e0b); }
+        .doc-card-stripe.dc-ok        { background: linear-gradient(90deg, #16a34a, #22c55e); }
+        .doc-card-stripe.dc-no-expiry { background: linear-gradient(90deg, #1a73e8, #60a5fa); }
+
+        .doc-card-body { padding: 20px 20px 16px; flex: 1; }
+        .doc-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+        .doc-card-icon-wrap {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .doc-card-icon-wrap svg { width: 20px; height: 20px; }
+        .doc-status-badge-v {
+            font-size: 0.68rem; font-weight: 700; padding: 3px 10px;
+            border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .doc-status-badge-v.dc-expired   { background: #fef2f2; color: #dc2626; }
+        .doc-status-badge-v.dc-warning   { background: #fffbeb; color: #d97706; }
+        .doc-status-badge-v.dc-ok        { background: #f0fdf4; color: #16a34a; }
+        .doc-status-badge-v.dc-no-expiry { background: #eff6ff; color: #1a73e8; }
+        .doc-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+        .doc-card-name { font-size: 0.95rem; font-weight: 700; color: #0d0d0d; line-height: 1.3; margin-bottom: 3px; }
+        .doc-card-cat  { font-size: 0.68rem; color: #999; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+
+        .doc-card-meta { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+        .doc-meta-row-v { display: flex; justify-content: space-between; font-size: 0.78rem; }
+        .doc-meta-label-v { color: #999; }
+        .doc-meta-val-v { font-weight: 600; color: #444; font-size: 0.76rem; }
+
+        /* Expiry bar */
+        .doc-expiry-wrap { margin-top: 12px; }
+        .doc-expiry-top  { display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 4px; }
+        .doc-expiry-label-v { color: #999; }
+        .doc-expiry-days { font-weight: 700; }
+        .doc-expiry-track { height: 4px; background: #f0f0f0; border-radius: 99px; overflow: hidden; }
+        .doc-expiry-fill  { height: 100%; border-radius: 99px; transition: width 1s ease; }
+
+        /* Doc card footer */
+        .doc-card-footer {
+            border-top: 1px solid #f5f5f5; padding: 10px 20px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .doc-card-action {
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+            font-size: 0.72rem; font-weight: 700; color: #999;
+            padding: 7px 0; border-radius: 6px; cursor: pointer;
+            transition: all .18s; border: none; background: none; font-family: inherit;
+        }
+        .doc-card-action:hover { background: #f7f7f7; color: #ff385c; }
+        .doc-card-action.danger:hover { color: #dc2626; }
+        .doc-card-action svg { width: 12px; height: 12px; }
+        .doc-action-sep-v { width: 1px; height: 20px; background: #eee; }
+
+        /* Doc modals */
+        .docs-modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            z-index: 10000; align-items: center; justify-content: center;
+        }
+        .docs-modal-overlay.open { display: flex; }
+        .docs-modal {
+            background: #fff; border-radius: 18px;
+            width: 560px; max-width: 95vw;
+            max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+            animation: scaleIn .22s ease;
+        }
+        .docs-modal-header {
+            padding: 28px 28px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex; align-items: flex-start; justify-content: space-between;
+            position: sticky; top: 0; background: #fff; z-index: 1;
+        }
+        .docs-modal-header h2 { font-size: 1.2rem; font-weight: 700; color: #0d0d0d; }
+        .docs-modal-header p  { font-size: 0.8rem; color: #999; margin-top: 3px; }
+        .docs-modal-close { background: none; border: none; cursor: pointer; color: #bbb; font-size: 1.4rem; line-height: 1; padding: 0; }
+        .docs-modal-close:hover { color: #ff385c; }
+        .docs-modal-body   { padding: 24px 28px; }
+        .docs-modal-footer { padding: 16px 28px; border-top: 1px solid #f0f0f0; display: flex; gap: 10px; justify-content: flex-end; }
+
+        /* Form inside docs modal */
+        .docs-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .docs-form-group { display: flex; flex-direction: column; gap: 6px; }
+        .docs-form-group.full { grid-column: 1/-1; }
+        .docs-form-group label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #999; }
+        .docs-form-group input,
+        .docs-form-group select,
+        .docs-form-group textarea {
+            background: #f7f7f7; border: 1px solid #eee;
+            color: #222; font-family: inherit; font-size: 0.88rem;
+            padding: 10px 14px; border-radius: 8px; outline: none; transition: border-color .2s;
+        }
+        .docs-form-group input:focus,
+        .docs-form-group select:focus,
+        .docs-form-group textarea:focus { border-color: #ff385c; background: #fff; }
+        .docs-form-group textarea { min-height: 70px; resize: vertical; }
+
+        /* Upload zone */
+        .docs-upload-zone {
+            border: 2px dashed #ddd; border-radius: 10px;
+            padding: 24px; text-align: center; cursor: pointer;
+            transition: all .2s; background: #f7f7f7;
+        }
+        .docs-upload-zone:hover, .docs-upload-zone.drag { border-color: #ff385c; background: rgba(255,56,92,0.04); }
+        .docs-upload-zone svg { width: 28px; height: 28px; color: #bbb; margin-bottom: 7px; }
+        .docs-upload-zone p   { font-size: 0.82rem; color: #999; }
+        .docs-upload-zone strong { color: #ff385c; cursor: pointer; }
+        .docs-upload-zone .ftype { font-size: 0.72rem; color: #ccc; margin-top: 3px; }
+        .docs-file-preview {
+            display: flex; align-items: center; gap: 10px;
+            background: #f0fdf4; border: 1px solid #86efac;
+            border-radius: 8px; padding: 10px 14px; margin-top: 10px;
+            font-size: 0.78rem; color: #16a34a;
+        }
+        .docs-file-preview svg { width: 15px; height: 15px; }
+
+        /* View modal */
+        .docs-view-content { padding: 24px 28px; }
+        .docs-view-name  { font-size: 1.4rem; font-weight: 700; color: #0d0d0d; margin-bottom: 2px; }
+        .docs-view-cat   { font-size: 0.72rem; color: #999; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; font-weight: 700; }
+        .docs-view-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .docs-view-field { background: #f7f7f7; border-radius: 8px; padding: 12px 14px; }
+        .docs-view-field-label { font-size: 0.68rem; color: #999; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; font-weight: 700; }
+        .docs-view-field-val   { font-size: 0.9rem; font-weight: 700; color: #222; }
+        .docs-file-placeholder {
+            background: #f7f7f7; border: 1px solid #eee;
+            border-radius: 10px; padding: 32px; text-align: center;
+            color: #bbb; font-size: 0.82rem; margin-top: 16px;
+        }
+        .docs-file-placeholder svg { width: 40px; height: 40px; margin-bottom: 10px; color: #ddd; }
+        .docs-notes-box { background: #f7f7f7; border-radius: 8px; padding: 12px 14px; font-size: 0.84rem; color: #444; line-height: 1.6; }
+
+        /* Empty state */
+        .docs-empty { text-align: center; padding: 60px 0; }
+        .docs-empty svg { width: 52px; height: 52px; color: #ddd; margin-bottom: 14px; }
+        .docs-empty h3 { font-size: 1.1rem; font-weight: 700; color: #999; }
+        .docs-empty p  { font-size: 0.82rem; color: #bbb; margin-top: 5px; }
+
+        @media (max-width: 1100px) { .docs-summary { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 600px)  { .docs-summary { grid-template-columns: 1fr 1fr; } }
+
     </style>
 </head>
 <body>
@@ -756,6 +1012,7 @@
             <a href="calendario.html">📅 Disponibilidade</a>
             <a href="relatorio.html">📊 Relatório</a>
             <a onclick="mostrarPagina('financeiro', this)">💰 Financeiro</a>
+            <a onclick="mostrarPagina('documentos', this)">📄 Documentos</a>
             <span class="menu-section-label">Conta</span>
             <a href="indique.html">🎁 Programa de Indicação</a>
             <a href="planos2.html">💳 Planos Ventsy</a>
@@ -1171,6 +1428,87 @@
 
         </div><!-- /pagina-financeiro -->
 
+
+        <!-- ════════════════════════════════════
+             PÁGINA: DOCUMENTOS
+        ════════════════════════════════════ -->
+        <div class="page-section" id="pagina-documentos">
+
+            <div class="docs-header">
+                <div>
+                    <h2>📄 Documentos</h2>
+                    <div class="nome-propriedade">Licenças, alvarás e documentos com controle de validade</div>
+                </div>
+                <div class="docs-header-right">
+                    <button class="btn-fin btn-fin-ghost" onclick="docsExport()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Exportar Lista
+                    </button>
+                    <button class="btn-fin btn-fin-primary" onclick="docsOpenAddModal()">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Novo Documento
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alert banner -->
+            <div class="docs-alert" id="docsAlertBanner" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div class="docs-alert-text">
+                    <strong id="docsAlertTitle">Atenção</strong>
+                    <span id="docsAlertDesc">Verifique os documentos abaixo.</span>
+                </div>
+                <span class="docs-alert-tag" id="docsAlertCount">0 itens</span>
+            </div>
+
+            <!-- Summary -->
+            <div class="docs-summary">
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#f0fdf4">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#16a34a" id="docsCntOk">0</div><div class="docs-sum-label">Em Dia</div></div>
+                </div>
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#fffbeb">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#d97706" id="docsCntWarn">0</div><div class="docs-sum-label">A Vencer (90d)</div></div>
+                </div>
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#fef2f2">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#dc2626" id="docsCntExp">0</div><div class="docs-sum-label">Vencidos</div></div>
+                </div>
+                <div class="docs-sum-card">
+                    <div class="docs-sum-icon" style="background:#eff6ff">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </div>
+                    <div><div class="docs-sum-val" style="color:#1a73e8" id="docsCntTotal">0</div><div class="docs-sum-label">Total de Docs</div></div>
+                </div>
+            </div>
+
+            <!-- Filter bar -->
+            <div class="docs-filter-bar">
+                <button class="docs-filter-pill active" onclick="docsSetFilter('todos',this)">Todos</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('juridico',this)">Jurídico</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('licencas',this)">Licenças</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('fiscal',this)">Fiscal</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('seguros',this)">Seguros</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('alvara',this)">Alvarás</button>
+                <button class="docs-filter-pill" onclick="docsSetFilter('outros',this)">Outros</button>
+                <div class="docs-search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" placeholder="Buscar documento..." oninput="docsSearch(this.value)">
+                </div>
+            </div>
+
+            <!-- Docs container -->
+            <div id="docsContainer"></div>
+
+        </div><!-- /pagina-documentos -->
+
     </section>
 </main>
 
@@ -1240,6 +1578,107 @@
     </div>
 </div>
 
+<!-- MODAL ADD/EDIT DOCUMENTOS -->
+<div class="docs-modal-overlay" id="docsAddModal">
+  <div class="docs-modal">
+    <div class="docs-modal-header">
+      <div>
+        <h2 id="docsFormTitle">Novo Documento</h2>
+        <p>Preencha os dados e anexe o arquivo do documento.</p>
+      </div>
+      <button class="docs-modal-close" onclick="docsCloseAddModal()">✕</button>
+    </div>
+    <div class="docs-modal-body">
+      <div class="docs-form-grid">
+        <div class="docs-form-group full">
+          <label>Nome do Documento</label>
+          <input type="text" id="docs-f-nome" placeholder="Ex: Licença do Corpo de Bombeiros">
+        </div>
+        <div class="docs-form-group">
+          <label>Categoria</label>
+          <select id="docs-f-cat">
+            <option value="licencas">Licenças</option>
+            <option value="alvara">Alvarás</option>
+            <option value="juridico">Jurídico</option>
+            <option value="fiscal">Fiscal</option>
+            <option value="seguros">Seguros</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div class="docs-form-group">
+          <label>Órgão Emissor</label>
+          <input type="text" id="docs-f-orgao" placeholder="Ex: Corpo de Bombeiros">
+        </div>
+        <div class="docs-form-group">
+          <label>Número / Protocolo</label>
+          <input type="text" id="docs-f-numero" placeholder="Ex: 00123456/2024">
+        </div>
+        <div class="docs-form-group">
+          <label>Data de Emissão</label>
+          <input type="date" id="docs-f-emissao">
+        </div>
+        <div class="docs-form-group">
+          <label>Data de Vencimento</label>
+          <input type="date" id="docs-f-vencimento" placeholder="Deixe vazio se não vence">
+        </div>
+        <div class="docs-form-group full">
+          <label>Observações</label>
+          <textarea id="docs-f-obs" placeholder="Informações adicionais, contatos, instruções de renovação..."></textarea>
+        </div>
+        <div class="docs-form-group full">
+          <label>Arquivo</label>
+          <div class="docs-upload-zone" id="docsUploadZone" onclick="document.getElementById('docsFileInput').click()" ondragover="docsDragOver(event)" ondragleave="docsDragLeave()" ondrop="docsDropFile(event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p>Arraste aqui ou <strong>clique para selecionar</strong></p>
+            <p class="ftype">PDF, JPG, PNG — até 20 MB</p>
+          </div>
+          <div class="docs-file-preview" id="docsFilePreview" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+            <span id="docsFilePreviewName">arquivo.pdf</span>
+          </div>
+          <input type="file" id="docsFileInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="docsFileSelected(this)">
+        </div>
+      </div>
+    </div>
+    <div class="docs-modal-footer">
+      <button class="btn-fin btn-fin-ghost" onclick="docsCloseAddModal()">Cancelar</button>
+      <button class="btn-fin btn-fin-primary" onclick="docsSaveDoc()">Salvar Documento</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VIEW DOCUMENTOS -->
+<div class="docs-modal-overlay" id="docsViewModal">
+  <div class="docs-modal" style="width:600px">
+    <div class="docs-modal-header">
+      <div>
+        <div style="font-size:0.68rem;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;font-weight:700" id="docs-view-cat">—</div>
+        <h2 id="docs-view-nome">—</h2>
+      </div>
+      <button class="docs-modal-close" onclick="docsCloseViewModal()">✕</button>
+    </div>
+    <div class="docs-view-content">
+      <div class="docs-view-grid" id="docsViewGrid"></div>
+      <div class="docs-file-placeholder" id="docsViewFile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <p>Pré-visualização não disponível nesta demo</p>
+        <p style="font-size:0.72rem;margin-top:3px;color:#ccc" id="docsViewFileName">—</p>
+      </div>
+      <div id="docsViewObsWrap" style="margin-top:16px;display:none">
+        <div style="font-size:0.68rem;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;font-weight:700">Observações</div>
+        <div class="docs-notes-box" id="docsViewObs"></div>
+      </div>
+    </div>
+    <div class="docs-modal-footer">
+      <button class="btn-fin btn-fin-ghost" onclick="docsEditDoc()">Editar</button>
+      <button class="btn-fin btn-fin-primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Baixar Arquivo
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ──────────── FOOTER ──────────── -->
 <footer class="main-footer">
     <div class="footer-container">
@@ -1297,6 +1736,15 @@
                 finRenderTable();
                 // data atual
                 document.getElementById('fin-data-atual').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+            }, 50);
+        }
+
+        // Inicializar documentos na primeira vez
+        if (id === 'documentos' && !window._docsIniciado) {
+            window._docsIniciado = true;
+            setTimeout(() => {
+                docsRender();
+                docsUpdateCounts();
             }, 50);
         }
     }
@@ -1800,6 +2248,353 @@
 
     window.addEventListener('resize', () => {
         if (window._finIniciado) { finDrawBarChart(); finDrawDonut(); }
+    });
+
+    /* ═══════════════════════════════════
+       DOCUMENTOS — LÓGICA
+    ═══════════════════════════════════ */
+
+    /* ── Ícones por categoria ── */
+    const docCatIcons = {
+        licencas: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>`,
+        alvara:   `<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>`,
+        juridico: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9,12 11,14 15,10"/>`,
+        fiscal:   `<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>`,
+        seguros:  `<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>`,
+        outros:   `<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/>`,
+    };
+    const docCatColors = {
+        licencas: { bg:'#fef2f2',  stroke:'#dc2626' },
+        alvara:   { bg:'#fffbeb',  stroke:'#d97706' },
+        juridico: { bg:'#eff6ff',  stroke:'#1a73e8' },
+        fiscal:   { bg:'rgba(255,56,92,0.07)', stroke:'#ff385c' },
+        seguros:  { bg:'#f0fdf4',  stroke:'#16a34a' },
+        outros:   { bg:'#f5f5f5',  stroke:'#999'    },
+    };
+    const docCatLabels = {
+        licencas:'Licenças', alvara:'Alvarás', juridico:'Jurídico',
+        fiscal:'Fiscal', seguros:'Seguros', outros:'Outros'
+    };
+    const docStatusLabels = { ok:'Em Dia', warning:'A Vencer', expired:'Vencido', 'no-expiry':'Permanente' };
+    const docBarColors     = { ok:'#16a34a', warning:'#d97706', expired:'#dc2626', 'no-expiry':'#1a73e8' };
+
+    let docs = [
+        { id:1,  nome:'Cartão CNPJ',                      cat:'fiscal',   orgao:'Receita Federal',         numero:'12.345.678/0001-90', emissao:'2020-03-10', vencimento:null,         obs:'CNPJ da pessoa jurídica. Nunca vence, mas deve ser mantido atualizado.',                       arquivo:'cartao_cnpj.pdf' },
+        { id:2,  nome:'RGI — Registro Geral Imóvel',      cat:'juridico', orgao:'Cartório de Registro',    numero:'RGI-2019-00812',    emissao:'2019-06-22', vencimento:null,         obs:'Matrícula do imóvel onde funciona o espaço.',                                                 arquivo:'rgi_imovel.pdf' },
+        { id:3,  nome:'Licença Corpo de Bombeiros',        cat:'licencas', orgao:'CBMMG',                   numero:'LCI-2024-4471',     emissao:'2024-03-01', vencimento:'2025-03-01', obs:'Renovar com 60 dias de antecedência. Contato: (31) 99000-0000',                               arquivo:'bombeiros_2024.pdf' },
+        { id:4,  nome:'Alvará de Funcionamento',           cat:'alvara',   orgao:'Prefeitura Municipal',    numero:'ALV-2024-00991',    emissao:'2024-01-15', vencimento:'2025-01-15', obs:'Renovar anualmente junto à Prefeitura.',                                                      arquivo:'alvara_funcionamento.pdf' },
+        { id:5,  nome:'Licença Sanitária (Anvisa)',        cat:'licencas', orgao:'Vigilância Sanitária',    numero:'VS-2023-7812',      emissao:'2023-07-20', vencimento:'2025-07-20', obs:'',                                                                                            arquivo:'licenca_sanitaria.pdf' },
+        { id:6,  nome:'Seguro Contra Incêndio',            cat:'seguros',  orgao:'Porto Seguro',            numero:'PSG-2024-112233',   emissao:'2024-06-01', vencimento:'2025-06-01', obs:'Apólice cobre o imóvel e equipamentos. Valor: R$ 1.200.000.',                                 arquivo:'seguro_incendio.pdf' },
+        { id:7,  nome:'Contrato Social',                   cat:'juridico', orgao:'Junta Comercial',         numero:'NIRE-31-00123456',  emissao:'2019-02-14', vencimento:null,         obs:'Última alteração contratual realizada em 2022.',                                              arquivo:'contrato_social.pdf' },
+        { id:8,  nome:'Certificado de Acessibilidade',     cat:'licencas', orgao:'Prefeitura / CREA',       numero:'CA-2024-0034',      emissao:'2024-04-10', vencimento:'2026-04-10', obs:'Laudo técnico de acessibilidade.',                                                            arquivo:'acessibilidade.pdf' },
+        { id:9,  nome:'Alvará de Publicidade',             cat:'alvara',   orgao:'Prefeitura Municipal',    numero:'PUB-2024-0078',     emissao:'2024-01-20', vencimento:'2025-01-20', obs:'Refere-se à placa externa e fachada.',                                                        arquivo:'alvara_publicidade.pdf' },
+        { id:10, nome:'Seguro de Responsabilidade Civil',  cat:'seguros',  orgao:'Bradesco Seguros',        numero:'BRD-2024-55901',    emissao:'2024-09-01', vencimento:'2025-09-01', obs:'Cobre danos a terceiros em eventos. Obrigatório para eventos com mais de 200 pessoas.',      arquivo:'seguro_rc.pdf' },
+        { id:11, nome:'Licença Ambiental',                 cat:'licencas', orgao:'SEMAD',                   numero:'LA-2023-0091',      emissao:'2023-11-01', vencimento:'2025-11-01', obs:'',                                                                                            arquivo:'licenca_ambiental.pdf' },
+        { id:12, nome:'Certificado de Brigada de Incêndio',cat:'licencas', orgao:'CBMMG',                   numero:'CBI-2024-2234',     emissao:'2024-08-15', vencimento:'2025-08-15', obs:'Equipe treinada: 8 colaboradores certificados.',                                              arquivo:'brigada_incendio.pdf' },
+    ];
+
+    let docsNextId = 13, docsActiveFilter = 'todos', docsSearchQuery = '', docsEditingId = null, docsSelectedFile = null;
+
+    /* ── Status helpers ── */
+    function docsGetStatus(venc) {
+        if (!venc) return 'no-expiry';
+        const diff = Math.ceil((new Date(venc) - new Date()) / 86400000);
+        if (diff < 0) return 'expired';
+        if (diff <= 90) return 'warning';
+        return 'ok';
+    }
+    function docsGetDaysLeft(venc) {
+        if (!venc) return null;
+        return Math.ceil((new Date(venc) - new Date()) / 86400000);
+    }
+    function docsGetBarPct(emissao, venc) {
+        if (!venc || !emissao) return 100;
+        const total = new Date(venc) - new Date(emissao);
+        const elapsed = Date.now() - new Date(emissao);
+        return Math.max(0, Math.min(100, 100 - (elapsed/total)*100));
+    }
+    function docsFmtDate(d) {
+        if (!d) return '—';
+        const [y,m,dd] = d.split('-');
+        return `${dd}/${m}/${y}`;
+    }
+
+    /* ── Counts & banner ── */
+    function docsUpdateCounts() {
+        let ok=0, warn=0, exp=0;
+        docs.forEach(d => {
+            const s = docsGetStatus(d.vencimento);
+            if (s==='ok') ok++;
+            else if (s==='warning') warn++;
+            else if (s==='expired') exp++;
+        });
+        document.getElementById('docsCntOk').textContent    = ok;
+        document.getElementById('docsCntWarn').textContent  = warn;
+        document.getElementById('docsCntExp').textContent   = exp;
+        document.getElementById('docsCntTotal').textContent = docs.length;
+
+        const issues = warn + exp;
+        const banner = document.getElementById('docsAlertBanner');
+        banner.style.display = issues === 0 ? 'none' : '';
+        if (issues > 0) {
+            document.getElementById('docsAlertCount').textContent = issues + ' item' + (issues>1?'s':'');
+            if (exp > 0) {
+                document.getElementById('docsAlertTitle').textContent = `${exp} documento${exp>1?'s':''} vencido${exp>1?'s':''}!`;
+                document.getElementById('docsAlertDesc').textContent  = `Regularize imediatamente para evitar problemas legais.`;
+            } else {
+                document.getElementById('docsAlertTitle').textContent = `${warn} documento${warn>1?'s':''} vencem em breve`;
+                document.getElementById('docsAlertDesc').textContent  = `Providencie a renovação com antecedência.`;
+            }
+        }
+    }
+
+    /* ── Render ── */
+    function docsRender() {
+        const list = docs.filter(d => {
+            const catMatch = docsActiveFilter === 'todos' || d.cat === docsActiveFilter;
+            const q = docsSearchQuery.toLowerCase();
+            const srch = !q || d.nome.toLowerCase().includes(q) || d.orgao.toLowerCase().includes(q);
+            return catMatch && srch;
+        });
+
+        const container = document.getElementById('docsContainer');
+        if (list.length === 0) {
+            container.innerHTML = `<div class="docs-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+              <h3>Nenhum documento encontrado</h3>
+              <p>Ajuste o filtro ou adicione um novo documento.</p>
+            </div>`;
+            return;
+        }
+
+        const groups = [
+            { key:'expired',   label:'Vencidos',             items: list.filter(d=>docsGetStatus(d.vencimento)==='expired') },
+            { key:'warning',   label:'A Vencer em 90 dias',  items: list.filter(d=>docsGetStatus(d.vencimento)==='warning') },
+            { key:'ok',        label:'Em Dia',               items: list.filter(d=>docsGetStatus(d.vencimento)==='ok') },
+            { key:'no-expiry', label:'Permanentes',          items: list.filter(d=>docsGetStatus(d.vencimento)==='no-expiry') },
+        ].filter(g => g.items.length > 0);
+
+        container.innerHTML = groups.map(g => `
+          <div class="docs-section-divider">
+            <h3>${g.label}</h3>
+            <div class="docs-divider-line"></div>
+            <span class="docs-section-count">${g.items.length}</span>
+          </div>
+          <div class="docs-grid">${g.items.map((d,i) => docsCardHTML(d,i)).join('')}</div>
+        `).join('');
+
+        setTimeout(() => {
+            document.querySelectorAll('.doc-expiry-fill').forEach(el => { el.style.width = el.dataset.w; });
+        }, 100);
+    }
+
+    function docsCardHTML(d, i) {
+        const status   = docsGetStatus(d.vencimento);
+        const daysLeft = docsGetDaysLeft(d.vencimento);
+        const barPct   = docsGetBarPct(d.emissao, d.vencimento);
+        const col      = docCatColors[d.cat] || docCatColors.outros;
+        const icon     = docCatIcons[d.cat]  || docCatIcons.outros;
+
+        let expiryHTML = '';
+        if (d.vencimento) {
+            const dLabel = daysLeft < 0 ? `Vencido há ${Math.abs(daysLeft)} dias`
+                : daysLeft === 0 ? 'Vence hoje!'
+                : `${daysLeft} dia${daysLeft!==1?'s':''} restante${daysLeft!==1?'s':''}`;
+            expiryHTML = `
+              <div class="doc-expiry-wrap">
+                <div class="doc-expiry-top">
+                  <span class="doc-expiry-label-v">Validade</span>
+                  <span class="doc-expiry-days" style="color:${docBarColors[status]}">${dLabel}</span>
+                </div>
+                <div class="doc-expiry-track">
+                  <div class="doc-expiry-fill" style="width:0%;background:${docBarColors[status]}" data-w="${barPct}%"></div>
+                </div>
+              </div>`;
+        }
+
+        return `
+          <div class="doc-card-v dc-${status}" style="animation-delay:${i*0.04}s">
+            <div class="doc-card-stripe dc-${status}"></div>
+            <div class="doc-card-body">
+              <div class="doc-card-top">
+                <div class="doc-card-icon-wrap" style="background:${col.bg}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="${col.stroke}" stroke-width="2">${icon}</svg>
+                </div>
+                <span class="doc-status-badge-v dc-${status}"><span class="doc-badge-dot"></span>${docStatusLabels[status]}</span>
+              </div>
+              <div class="doc-card-name">${d.nome}</div>
+              <div class="doc-card-cat">${docCatLabels[d.cat]}</div>
+              <div class="doc-card-meta">
+                <div class="doc-meta-row-v"><span class="doc-meta-label-v">Órgão Emissor</span><span class="doc-meta-val-v">${d.orgao}</span></div>
+                <div class="doc-meta-row-v"><span class="doc-meta-label-v">Número</span><span class="doc-meta-val-v">${d.numero||'—'}</span></div>
+                <div class="doc-meta-row-v"><span class="doc-meta-label-v">Emissão</span><span class="doc-meta-val-v">${docsFmtDate(d.emissao)}</span></div>
+                <div class="doc-meta-row-v"><span class="doc-meta-label-v">Vencimento</span><span class="doc-meta-val-v" style="color:${docBarColors[status]}">${d.vencimento ? docsFmtDate(d.vencimento) : 'Não vence'}</span></div>
+              </div>
+              ${expiryHTML}
+            </div>
+            <div class="doc-card-footer">
+              <button class="doc-card-action" onclick="docsViewDoc(${d.id})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Ver
+              </button>
+              <div class="doc-action-sep-v"></div>
+              <button class="doc-card-action" onclick="docsOpenEditModal(${d.id})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar
+              </button>
+              <div class="doc-action-sep-v"></div>
+              <button class="doc-card-action danger" onclick="docsDeleteDoc(${d.id})" style="color:#dc2626">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg> Excluir
+              </button>
+            </div>
+          </div>`;
+    }
+
+    /* ── Filters ── */
+    function docsSetFilter(f, el) {
+        docsActiveFilter = f;
+        document.querySelectorAll('.docs-filter-pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        docsRender();
+    }
+    function docsSearch(q) { docsSearchQuery = q; docsRender(); }
+
+    /* ── Add/Edit modal ── */
+    function docsOpenAddModal() {
+        docsEditingId = null; docsSelectedFile = null;
+        document.getElementById('docsFormTitle').textContent = 'Novo Documento';
+        document.getElementById('docs-f-nome').value = '';
+        document.getElementById('docs-f-cat').value  = 'licencas';
+        document.getElementById('docs-f-orgao').value = '';
+        document.getElementById('docs-f-numero').value = '';
+        document.getElementById('docs-f-emissao').value = new Date().toISOString().split('T')[0];
+        document.getElementById('docs-f-vencimento').value = '';
+        document.getElementById('docs-f-obs').value = '';
+        document.getElementById('docsFilePreview').style.display = 'none';
+        document.getElementById('docsAddModal').classList.add('open');
+    }
+    function docsOpenEditModal(id) {
+        const d = docs.find(x => x.id === id);
+        if (!d) return;
+        docsEditingId = id;
+        document.getElementById('docsFormTitle').textContent = 'Editar Documento';
+        document.getElementById('docs-f-nome').value     = d.nome;
+        document.getElementById('docs-f-cat').value      = d.cat;
+        document.getElementById('docs-f-orgao').value    = d.orgao;
+        document.getElementById('docs-f-numero').value   = d.numero;
+        document.getElementById('docs-f-emissao').value  = d.emissao;
+        document.getElementById('docs-f-vencimento').value = d.vencimento || '';
+        document.getElementById('docs-f-obs').value      = d.obs;
+        if (d.arquivo) {
+            document.getElementById('docsFilePreviewName').textContent = d.arquivo;
+            document.getElementById('docsFilePreview').style.display = 'flex';
+        } else {
+            document.getElementById('docsFilePreview').style.display = 'none';
+        }
+        docsCloseViewModal();
+        document.getElementById('docsAddModal').classList.add('open');
+    }
+    function docsCloseAddModal() { document.getElementById('docsAddModal').classList.remove('open'); }
+
+    function docsSaveDoc() {
+        const nome = document.getElementById('docs-f-nome').value.trim();
+        if (!nome) { document.getElementById('docs-f-nome').focus(); return; }
+        const data = {
+            nome,
+            cat:       document.getElementById('docs-f-cat').value,
+            orgao:     document.getElementById('docs-f-orgao').value.trim(),
+            numero:    document.getElementById('docs-f-numero').value.trim(),
+            emissao:   document.getElementById('docs-f-emissao').value,
+            vencimento:document.getElementById('docs-f-vencimento').value || null,
+            obs:       document.getElementById('docs-f-obs').value.trim(),
+            arquivo:   docsSelectedFile ? docsSelectedFile.name : (docsEditingId ? docs.find(d=>d.id===docsEditingId)?.arquivo : null),
+        };
+        if (docsEditingId) {
+            const idx = docs.findIndex(d => d.id === docsEditingId);
+            docs[idx] = { ...docs[idx], ...data };
+        } else {
+            docs.unshift({ id: docsNextId++, ...data });
+        }
+        docsCloseAddModal();
+        docsRender();
+        docsUpdateCounts();
+        mostrarToast('Documento salvo com sucesso!');
+    }
+
+    /* ── Delete ── */
+    function docsDeleteDoc(id) {
+        if (!confirm('Tem certeza que deseja excluir este documento?')) return;
+        docs = docs.filter(d => d.id !== id);
+        docsRender();
+        docsUpdateCounts();
+        mostrarToast('Documento excluído.');
+    }
+
+    /* ── View modal ── */
+    function docsViewDoc(id) {
+        const d = docs.find(x => x.id === id);
+        if (!d) return;
+        const status   = docsGetStatus(d.vencimento);
+        const daysLeft = docsGetDaysLeft(d.vencimento);
+        const daysStr  = d.vencimento
+            ? (daysLeft < 0 ? `Vencido há ${Math.abs(daysLeft)} dias` : `${daysLeft} dias restantes`)
+            : 'Não vence';
+
+        document.getElementById('docs-view-cat').textContent  = docCatLabels[d.cat];
+        document.getElementById('docs-view-nome').textContent = d.nome;
+        document.getElementById('docsViewFileName').textContent = d.arquivo || 'Nenhum arquivo';
+
+        document.getElementById('docsViewGrid').innerHTML = `
+          <div class="docs-view-field"><div class="docs-view-field-label">Órgão Emissor</div><div class="docs-view-field-val">${d.orgao||'—'}</div></div>
+          <div class="docs-view-field"><div class="docs-view-field-label">Número / Protocolo</div><div class="docs-view-field-val">${d.numero||'—'}</div></div>
+          <div class="docs-view-field"><div class="docs-view-field-label">Data de Emissão</div><div class="docs-view-field-val">${docsFmtDate(d.emissao)}</div></div>
+          <div class="docs-view-field"><div class="docs-view-field-label">Data de Vencimento</div><div class="docs-view-field-val" style="color:${docBarColors[status]}">${d.vencimento?docsFmtDate(d.vencimento):'Não vence'}</div></div>
+          <div class="docs-view-field" style="grid-column:1/-1"><div class="docs-view-field-label">Situação</div><div class="docs-view-field-val" style="color:${docBarColors[status]}">${docStatusLabels[status]} — ${daysStr}</div></div>
+        `;
+
+        const obsWrap = document.getElementById('docsViewObsWrap');
+        if (d.obs) {
+            obsWrap.style.display = 'block';
+            document.getElementById('docsViewObs').textContent = d.obs;
+        } else {
+            obsWrap.style.display = 'none';
+        }
+        document.getElementById('docsViewModal').classList.add('open');
+    }
+    function docsCloseViewModal() { document.getElementById('docsViewModal').classList.remove('open'); }
+    function docsEditDoc() {
+        const nome = document.getElementById('docs-view-nome').textContent;
+        const d = docs.find(x => x.nome === nome);
+        if (d) docsOpenEditModal(d.id);
+    }
+
+    /* ── Upload ── */
+    function docsFileSelected(input) { if (input.files[0]) docsSetFile(input.files[0]); }
+    function docsSetFile(file) {
+        docsSelectedFile = file;
+        document.getElementById('docsFilePreviewName').textContent = file.name;
+        document.getElementById('docsFilePreview').style.display = 'flex';
+    }
+    function docsDragOver(e)  { e.preventDefault(); document.getElementById('docsUploadZone').classList.add('drag'); }
+    function docsDragLeave()  { document.getElementById('docsUploadZone').classList.remove('drag'); }
+    function docsDropFile(e)  { e.preventDefault(); docsDragLeave(); if (e.dataTransfer.files[0]) docsSetFile(e.dataTransfer.files[0]); }
+
+    /* ── Export ── */
+    function docsExport() {
+        const rows = ['Nome,Categoria,Órgão,Número,Emissão,Vencimento,Status'];
+        docs.forEach(d => {
+            rows.push([d.nome, docCatLabels[d.cat], d.orgao, d.numero, docsFmtDate(d.emissao), d.vencimento ? docsFmtDate(d.vencimento) : 'Permanente', docStatusLabels[docsGetStatus(d.vencimento)]].join(','));
+        });
+        const blob = new Blob([rows.join('\n')], { type:'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'documentos_ventsy.csv';
+        a.click();
+    }
+
+    /* ── Close modals on backdrop ── */
+    ['docsAddModal','docsViewModal'].forEach(id => {
+        document.getElementById(id).addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('open');
+        });
     });
 
     /* Arranca tudo */
