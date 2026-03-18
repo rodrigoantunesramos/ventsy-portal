@@ -1273,3 +1273,229 @@
         @media (max-width: 1100px) { .eq-kpi-grid { grid-template-columns: repeat(2,1fr); } .eq-tax-grid { grid-template-columns: 1fr; } .eq-sim-body { grid-template-columns: 1fr; } }
         @media (max-width: 600px)  { .eq-kpi-grid { grid-template-columns: 1fr 1fr; } }
 
+        
+        /* ═══════════════════════════════════════════════
+           CALENDÁRIO DE DISPONIBILIDADE
+        ═══════════════════════════════════════════════ */
+
+        /* Legendas */
+        .cal-legenda {
+            display: flex; gap: 16px; align-items: center; flex-wrap: wrap; padding-top: 6px;
+        }
+        .cal-legenda-item { display: flex; align-items: center; gap: 7px; font-size: 0.8rem; color: #666; }
+        .cal-cor { width: 13px; height: 13px; border-radius: 4px; flex-shrink: 0; }
+        .cal-cor.livre     { background: #fff; border: 1.5px solid #ddd; }
+        .cal-cor.bloqueado { background: #fff0f2; border: 1.5px solid rgba(255,56,92,0.35); }
+        .cal-cor.hoje-leg  { background: #0d0d0d; }
+
+        /* Layout calendário + painel */
+        .cal-layout {
+            display: grid; grid-template-columns: 1fr 300px;
+            gap: 20px; align-items: start;
+        }
+
+        /* Card do calendário */
+        .cal-container {
+            background: #fff; border-radius: 20px;
+            border: 1px solid #eee; padding: 30px;
+        }
+        .cal-mes-controle {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 28px; position: relative;
+        }
+        .cal-mes-controle h3 {
+            font-size: 1.1rem; font-weight: 800; color: #0d0d0d; display: flex; gap: 8px;
+        }
+        .cal-btn-mes {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: #f4f4f4; border: none; cursor: pointer;
+            font-size: 0.9rem; transition: background 0.2s; color: #555;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cal-btn-mes:hover { background: #eee; }
+
+        /* Labels clicáveis de mês/ano */
+        .cal-sel-mes-label, .cal-sel-ano-label {
+            cursor: pointer; border-bottom: 2px dashed #ddd; padding-bottom: 1px;
+            transition: color .15s, border-color .15s;
+        }
+        .cal-sel-mes-label:hover, .cal-sel-ano-label:hover { color: #ff385c; border-color: #ff385c; }
+
+        /* Picker overlay */
+        .cal-picker-overlay {
+            position: absolute; top: 44px; left: 50%; transform: translateX(-50%);
+            background: #fff; border: 1px solid #e5e7eb; border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.14); z-index: 500;
+            padding: 16px; display: none;
+        }
+        .cal-picker-overlay.aberto { display: block; }
+        .cal-meses-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 260px;
+        }
+        .cal-mes-opcao {
+            padding: 9px 4px; text-align: center; border-radius: 10px;
+            cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #444;
+            background: #f7f7f7; transition: background .15s, color .15s;
+        }
+        .cal-mes-opcao:hover { background: #ffe4e8; color: #ff385c; }
+        .cal-mes-opcao.atual { background: #ff385c; color: #fff; }
+        .cal-anos-lista {
+            display: flex; flex-direction: column; gap: 2px;
+            max-height: 220px; overflow-y: auto; width: 110px;
+        }
+        .cal-ano-opcao {
+            padding: 8px 16px; border-radius: 8px; cursor: pointer;
+            font-size: 0.88rem; font-weight: 600; color: #444; text-align: center;
+            transition: background .15s, color .15s;
+        }
+        .cal-ano-opcao:hover { background: #ffe4e8; color: #ff385c; }
+        .cal-ano-opcao.atual { background: #ff385c; color: #fff; }
+
+        /* Grid do calendário */
+        .cal-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+        }
+        .cal-dia-semana {
+            text-align: center; font-weight: 700; color: #ccc;
+            font-size: 0.72rem; padding-bottom: 8px; text-transform: uppercase;
+        }
+        .cal-dia {
+            aspect-ratio: 1/1; border: 1.5px solid #f0f0f0;
+            border-radius: 10px; padding: 8px 6px;
+            font-size: 0.85rem; font-weight: 600; color: #333;
+            cursor: pointer; transition: all 0.15s;
+            display: flex; flex-direction: column;
+            justify-content: space-between; align-items: flex-start;
+            user-select: none; position: relative;
+        }
+        .cal-dia:hover:not(.cal-vazio):not(.cal-passado) {
+            border-color: #ff385c; background: rgba(255,56,92,0.04);
+        }
+        .cal-vazio   { border: none; cursor: default; background: transparent; }
+        .cal-passado { color: #ddd; cursor: default; border-color: #f8f8f8; }
+        .cal-hoje    { background: #0d0d0d; color: #fff; border-color: #0d0d0d; }
+        .cal-hoje:hover { background: #222; }
+        .cal-bloqueado {
+            background: #fff0f2; color: #ff385c; border-color: rgba(255,56,92,0.25);
+        }
+        .cal-bloqueado:hover { background: #ffe4e9; border-color: #ff385c; }
+        .cal-dia-motivo {
+            font-size: 0.58rem; font-weight: 500; line-height: 1.2; opacity: 0.85;
+            overflow: hidden; max-width: 100%; white-space: nowrap; text-overflow: ellipsis;
+        }
+        .cal-hoje .cal-dia-motivo { color: #ccc; }
+
+        /* Painel lateral */
+        .cal-painel { display: flex; flex-direction: column; gap: 16px; }
+        .cal-card-painel {
+            background: #fff; border: 1px solid #eee; border-radius: 20px; padding: 24px;
+        }
+        .cal-card-painel h4 { font-size: 0.9rem; font-weight: 700; color: #0d0d0d; margin-bottom: 16px; }
+        .cal-resumo { display: flex; flex-direction: column; gap: 10px; }
+        .cal-resumo-item {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.85rem; color: #666; padding: 9px 0;
+            border-bottom: 1px solid #f7f7f7;
+        }
+        .cal-resumo-item:last-child { border-bottom: none; }
+        .cal-resumo-item strong { font-weight: 800; color: #0d0d0d; font-size: 1rem; }
+        .cal-badge-ocup { background: #fff0f2; color: #ff385c; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
+        .cal-badge-livre { background: #e8faf0; color: #1ebc54; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
+        .cal-acoes { display: flex; flex-direction: column; gap: 8px; }
+        .cal-btn-acao {
+            width: 100%; padding: 11px 14px; border-radius: 10px;
+            border: 1.5px solid #eee; background: #fff; font-family: inherit;
+            font-size: 0.85rem; font-weight: 600; color: #444;
+            cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px;
+            transition: all 0.2s;
+        }
+        .cal-btn-acao:hover { border-color: #ff385c; color: #ff385c; background: rgba(255,56,92,0.03); }
+        .cal-btn-acao.primario {
+            background: #ff385c; color: #fff; border-color: #ff385c;
+            box-shadow: 0 4px 14px rgba(255,56,92,0.25);
+        }
+        .cal-btn-acao.primario:hover { background: #e0304f; border-color: #e0304f; }
+        .cal-lista-bloqueios { display: flex; flex-direction: column; gap: 8px; }
+        .cal-item-bloqueio {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 12px; background: #fff0f2; border-radius: 10px; font-size: 0.82rem;
+        }
+        .cal-data-blq   { font-weight: 700; color: #ff385c; }
+        .cal-motivo-blq { color: #888; font-size: 0.75rem; }
+        .cal-btn-desbloq {
+            background: none; border: none; cursor: pointer;
+            color: #ccc; font-size: 1rem; padding: 2px 4px; transition: color 0.2s; line-height: 1;
+        }
+        .cal-btn-desbloq:hover { color: #ff385c; }
+        .cal-sem-bloqueios { text-align: center; color: #ccc; font-size: 0.82rem; padding: 12px 0; }
+
+        /* Modais do calendário */
+        .cal-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: none; align-items: center; justify-content: center;
+            z-index: 9998; backdrop-filter: blur(4px);
+        }
+        .cal-modal-overlay.aberto { display: flex; }
+        .cal-modal-box {
+            background: #fff; width: 90%; max-width: 400px;
+            border-radius: 20px; padding: 32px;
+            animation: calSlideUp 0.28s ease; position: relative;
+        }
+        @keyframes calSlideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+        .cal-modal-box h3 { font-size: 1.1rem; font-weight: 800; color: #0d0d0d; margin-bottom: 6px; }
+        .cal-modal-data   { font-size: 0.82rem; color: #999; margin-bottom: 22px; }
+        .cal-btn-fechar {
+            position: absolute; top: 16px; right: 16px;
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #f4f4f4; border: none; cursor: pointer;
+            font-size: 1rem; color: #555; display: flex; align-items: center; justify-content: center;
+        }
+        .cal-btn-fechar:hover { background: #eee; }
+        .cal-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .cal-chip {
+            padding: 7px 14px; border-radius: 20px; border: 1.5px solid #eee;
+            background: #fff; font-size: 0.8rem; font-weight: 600; color: #555;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .cal-chip:hover  { border-color: #ff385c; color: #ff385c; }
+        .cal-chip.selecionado { background: #ff385c; border-color: #ff385c; color: #fff; }
+        .cal-label-campo { font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 7px; display: block; }
+        .cal-input {
+            width: 100%; padding: 11px 14px; border: 1.5px solid #eee;
+            border-radius: 10px; font-size: 0.9rem; font-family: inherit;
+            outline: none; transition: border-color 0.2s; margin-bottom: 20px;
+        }
+        .cal-input:focus { border-color: #ff385c; }
+        .cal-modal-acoes { display: flex; gap: 10px; }
+        .cal-btn-cancel {
+            flex: 1; padding: 12px; border-radius: 10px;
+            background: #f5f5f5; color: #555; border: 1px solid #eee;
+            font-family: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer;
+        }
+        .cal-btn-cancel:hover { background: #eee; }
+        .cal-btn-confirm {
+            flex: 1; padding: 12px; border-radius: 10px;
+            background: #ff385c; color: #fff; border: none;
+            font-family: inherit; font-size: 0.88rem; font-weight: 700;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(255,56,92,0.25);
+            transition: background 0.2s;
+        }
+        .cal-btn-confirm:hover { background: #e0304f; }
+
+        /* Responsivo calendário */
+        @media (max-width: 1000px) {
+            .cal-layout { grid-template-columns: 1fr; }
+            .cal-painel { display: grid; grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .cal-painel { display: flex; flex-direction: column; }
+        }
+        @media (max-width: 480px) {
+            .cal-container { padding: 18px 14px; }
+            .cal-dia { padding: 5px 4px; font-size: 0.75rem; border-radius: 8px; }
+            .cal-grid { gap: 5px; }
+        }
+
